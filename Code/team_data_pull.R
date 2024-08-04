@@ -1,15 +1,9 @@
+library(tidyverse)
+library(httr)
+library(data.table)
+library()
 
 
-#' Gets the url for the data
-#'
-#'
-#' @return Will get a URL using the base season type as regular season.
-#'        The use can pull data from the following season types - Regular Season,
-#'        Showcase, Preseason and Playoffs
-#' @export
-#' @examples
-#' url_pull("Boxscore")
-#' url_pull("Adv_Boxscore", "Regular+season)
 url_pull <- function(url_type, season_type = "Regular+season"){
   if (url_type == "Boxscore") {
     url <- paste('https://stats.gleague.nba.com/stats/leaguegamelog?Counter=1000&DateFrom=&DateTo=&Direction=DESC&LeagueID=20&PlayerOrTeam=T&Season=2022-23&SeasonType=',
@@ -47,14 +41,6 @@ url_pull <- function(url_type, season_type = "Regular+season"){
 }
 
 
-#' Formats URL to create a dataframe for
-#'
-#'
-#' @return This will use the url link from the url_pull fnuction to return a dataframe.
-#' @export
-#' @examples
-#' getDatafromWebsite(url_pull("Boxscore"))
-#' getDatafromWebsite(url_pull("Adv_Boxscore", "Regular+season))
 getDatafromWebsite <- function(url_link){
   res <- httr::GET(url = url_link)
   data <- httr::content(res) %>% .[['resultSets']] %>% .[[1]]

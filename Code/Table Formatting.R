@@ -1,3 +1,6 @@
+library(tidyverse)
+library(gt)
+library(gtExtras)
 
 # functions that will format the tables for the pdf
 designSidebySide <- function(table1, table2, overall_title, table1_label, table2_label, team_color){

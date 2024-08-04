@@ -1,3 +1,5 @@
+library(tidyverse)
+
 circle_points = function(center = c(0, 0), radius = 1, npoints = 360) {
   angles = seq(0, 2 * pi, length.out = npoints)
   return(data.frame(x = center[1] + radius * cos(angles),
