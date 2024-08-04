@@ -8,6 +8,7 @@ G-league Data aims to help our work use G-league NBA data to perform different b
 
 ## List of techniques
 - Gower Distance
+- Breksen’s Paradox
 - Dimensionality Reduction Techniques
      - Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP)
      - Factorial Analysis of Mixed Data (FAMD)
