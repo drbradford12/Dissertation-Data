@@ -6,8 +6,9 @@ test_data <- vehicles %>% #From the fueleconomy package
   filter(year > 2000) %>%
   mutate(trans = ifelse(is.na(trans), "None", trans),
          cyl = ifelse(is.na(cyl), 0, cyl),
-         displ = ifelse(is.na(displ), 0, displ)
-                        ) %>%
+         displ = ifelse(is.na(displ), 0, displ),
+        make = ifelse(make == "London Taxi", "London Taxi Co", make)
+        ) %>%
   mutate(make = factor(make),
          model = factor(model),
          year = factor(year),
@@ -30,13 +31,14 @@ test_data %>%
 
 
 #### Dimension Reduction Techniques #####
+# Remove duplicate rows
+test_data_unique <- unique( test_data[,-1] )
+dframe <- test_data_unique[complete.cases(test_data_unique),]
 
 #### t-SNE Dimension Reduction ####
 library(Rtsne)
 
-# Remove duplicate rows
-test_data_unique <- unique( test_data[,-1] )
-dframe <- test_data_unique[complete.cases(test_data_unique),]
+
 #fuel_matrix <- as.matrix(dframe)
 
 # Perform t-SNE
@@ -120,7 +122,7 @@ umap_data %>%
 library("FactoMineR")
 library("factoextra")
 
-res.famd <- FAMD(kprototype_df, graph = FALSE)
+res.famd <- FAMD(dframe, graph = FALSE)
 print(res.famd)
 
 eig.val <- get_eigenvalue(res.famd)
@@ -151,3 +153,15 @@ fviz_famd_var(res.famd, "quali.var", col.var = "contrib",
 fviz_famd_ind(res.famd, col.ind = "cos2",
               gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
               repel = TRUE)
+
+fviz_mfa_ind(res.famd,
+             habillage = "make", # color by groups
+             palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+             addEllipses = TRUE, ellipse.type = "confidence",
+             repel = TRUE # Avoid text overlapping
+)
+
+fviz_ellipses(res.famd, c("make", "model"), repel = TRUE)
+
+
+fviz_ellipses(res.famd, 1:2, geom = "point")
