@@ -17,9 +17,27 @@ test_data <- vehicles %>% #From the fueleconomy package
          drive = factor(drive),
          fuel = factor(fuel))
 
+# I need to split the dataset to get through the examples
+small_test_data <- vehicles %>% #From the fueleconomy package
+  filter(year >= 2010) %>%
+  mutate(trans = ifelse(is.na(trans), "None", trans),
+         cyl = ifelse(is.na(cyl), 0, cyl),
+         displ = ifelse(is.na(displ), 0, displ),
+         make = ifelse(make == "London Taxi", "London Taxi Co", make)
+  ) %>%
+  mutate(make = factor(make),
+         model = factor(model),
+         year = factor(year),
+         class = factor(class),
+         trans = factor(trans),
+         drive = factor(drive),
+         fuel = factor(fuel))
+
+
+#### GGPCP Visualizations ####
 library(ggpcp)
 
-test_data %>%
+small_test_data %>%
   pcp_select(2:12) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange() %>%
@@ -32,7 +50,7 @@ test_data %>%
 
 #### Dimension Reduction Techniques #####
 # Remove duplicate rows
-test_data_unique <- unique( test_data[,-1] )
+test_data_unique <- unique( small_test_data[,-1] )
 dframe <- test_data_unique[complete.cases(test_data_unique),]
 
 #### t-SNE Dimension Reduction ####
@@ -44,7 +62,8 @@ library(Rtsne)
 # Perform t-SNE
 #tsne_result <- Rtsne(fuel_matrix, pca=FALSE, perplexity=30, theta=0.0)
 #tsne_out <- Rtsne(dist(normalize_input(fuel_matrix)), theta=0.0)
-tsne_out <- Rtsne(dframe,pca=FALSE, theta=0.0)
+tsne_out <- Rtsne(dframe, pca=FALSE, theta=0.0)
+
 
 # Create a data frame with the t-SNE results and the species information
 tsne_data <- data.frame(tsne_out$Y, fuel = dframe$fuel)
@@ -178,13 +197,11 @@ summary(gower_dist)
 gower_mat <- as.matrix(gower_dist)
 
 # Output most similar pair
-dframe[
-  which(gower_mat == min(gower_mat[gower_mat != min(gower_mat)]),
+dframe[which(gower_mat == min(gower_mat[gower_mat != min(gower_mat)]),
         arr.ind = TRUE)[1, ], ]
 
 # Output most dissimilar pair
-dframe[
-  which(gower_mat == max(gower_mat[gower_mat != max(gower_mat)]),
+dframe[which(gower_mat == max(gower_mat[gower_mat != max(gower_mat)]),
         arr.ind = TRUE)[1, ], ]
 
 # Calculate silhouette width for many k using PAM
@@ -217,3 +234,20 @@ pam_results <- dframe %>%
 pam_results$the_summary
 
 dframe[pam_fit$medoids, ]
+
+#### PCA Mixed Data (PCAmixdata) #####
+library(PCAmixdata)
+
+# Split the datasets for analysis
+split <- splitmix(dframe)
+
+# Quantitative Dataset
+X1 <- split$X.quanti
+# Qualiative Dataset
+X2 <- split$X.quali
+
+obj <- PCAmix(X.quanti=X1,X.quali=X2,graph=FALSE,ndim=5)
+head(obj$quanti.cor)
+
+test<-1:5
+
