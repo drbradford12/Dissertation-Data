@@ -37,15 +37,14 @@ small_test_data <- vehicles %>% #From the fueleconomy package
 #### GGPCP Visualizations ####
 library(ggpcp)
 
-small_test_data %>%
-  pcp_select(2:12) %>%
+p1 <- small_test_data %>%
+  pcp_select(2:9, 11:12) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   #geom_pcp_boxes(boxwidth = 0.1, fill="grey70") +
   geom_pcp(aes(colour = fuel), overplot = "none")
-
 
 
 #### Dimension Reduction Techniques #####
@@ -73,9 +72,10 @@ ggplot(tsne_data, aes(x = X1, y = X2, color = fuel)) +
   geom_point() +
   ggtitle("t-SNE on Fuel Economy Dataset")
 
+
 tsne_data %>%
-  pcp_select(1:3) %>%
-  pcp_scale(method="uniminmax") %>%
+  pcp_select(1:2) %>%
+  #pcp_scale(method="uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
@@ -96,11 +96,11 @@ for (i in 1:ncol(kprototype_df)){
   colnames(kprototype_df)[i] <- paste0("X", i-1)
 }
 
-model.matrix(~0+., data = kprototype_df) %>%
-  cor(use = "pairwise.complete.obs") %>%
-  ggcorrplot(show.diag = FALSE, type = "full", tl.cex = 7, lab = TRUE,
-             lab_size = 1.5) +
-  labs(title = "Correlation Heat Map of Used Variables *high-correlation deleted")
+# model.matrix(~0+., data = kprototype_df) %>%
+#   cor(use = "pairwise.complete.obs") %>%
+#   ggcorrplot(show.diag = FALSE, type = "full", tl.cex = 7, lab = TRUE,
+#              lab_size = 1.5) +
+#   labs(title = "Correlation Heat Map of Used Variables *high-correlation deleted")
 
 fuel_clusters <- kproto(kprototype_df, 5)
 fuel_clusters
@@ -110,11 +110,38 @@ summary(fuel_clusters)
 
 fit_df <- factor(fuel_clusters$cluster, order =  TRUE,
                  levels = c(1:5))
-fit <- data.frame(kprototype_df, fit_df)
+fit <- data.frame(dframe, fit_df)
+
+fit %>%
+  #arrange(fit_df) %>%
+  pcp_select(1:8,10:11) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange(fit_df, method = "from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  #geom_pcp_boxes(boxwidth = 0.1, fill="grey70") +
+  geom_pcp(aes(colour = fuel), overplot = "none")
+
 result_df <- fuel_clusters$centers
 member <- fuel_clusters$size
 result <- data.frame(member, result_df)
 result
+
+require(gridExtra)
+
+p2 <- fit %>%
+  #arrange(fit_df) %>%
+  pcp_select(1:11) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  #geom_pcp_boxes(boxwidth = 0.1, fill="grey70") +
+  geom_pcp(aes(colour = fit_df), overplot = "none")
+
+
+grid.arrange(p1, p2, ncol=2)
+
 
 #### Uniform Manifold Approximation and Projection (UMAP) ####
 library(umap)
