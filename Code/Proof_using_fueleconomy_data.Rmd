@@ -187,6 +187,10 @@ grid.arrange(pam_plot3, pcp_graph3, nrow=2)
 
 ## Data Description:
 
+Fuel economy data for 1984-2015 from the [US EPA](https://www.fueleconomy.gov/feg/download.shtml), conveniently packaged for R users. 
+[FuelEconomy Github](https://github.com/hadley/fueleconomy) written by Dr. Hadley Wickham
+
+
 ## Detection of Outliers Within Clusters
 
 Finding outliers within groups is an integral part of data analysis, and scatter plots and parallel coordinate plots (PCPs) can be very different in how well they do this. 
@@ -205,14 +209,16 @@ This gives them a more thorough and detailed strategy for finding outliers in l
 ## References
 
 
-1. Holten, D., & Van Wijk, J. J. (2010). Evaluation of cluster identification performance for different PCP variants. Computer Graphics Forum. Link to paper
+1. Holten, D., & Van Wijk, J. J. (2010). Evaluation of cluster identification performance for different PCP variants. Computer Graphics Forum. 
+[Link to paper](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-8659.2009.01666.x)
 
 
-2.Feng, D., Kwock, L., Lee, Y., & Taylor, R. (2010). Matching visual saliency to confidence in plots of uncertain data. IEEE Transactions on Visualization and Computer Graphics
+2. Feng, D., Kwock, L., Lee, Y., & Taylor, R. (2010). Matching visual saliency to confidence in plots of uncertain data. IEEE Transactions on Visualization and Computer Graphics.
+[Link to paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3179257/)
 
 
 
-# Factorial Analysis of Mixed Data (FAMD) Clustering Method
+<!--# Factorial Analysis of Mixed Data (FAMD) Clustering Method -->
 
 ```{r famd_clustering, echo=FALSE, include=FALSE}
 res.famd <- FAMD(dframe, graph = FALSE)
@@ -238,7 +244,7 @@ fviz_famd_var(res.famd, "quanti.var", col.var = "contrib",
 
 ```
 
-# K-Prototype Dimension Reduction
+<!--# K-Prototype Dimension Reduction -->
 
 ```{r clustering, echo=FALSE, include=FALSE}
 kprototype_df <- dframe
