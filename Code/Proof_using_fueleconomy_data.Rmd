@@ -1,0 +1,269 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(fueleconomy)
+library(ggpcp)
+library(clustMixType)
+library(ggcorrplot)
+library(caret)
+library(corrplot)
+require(gridExtra)
+library("FactoMineR")
+library("factoextra")
+```
+
+
+```{r data_cleaning, include=FALSE}
+# Summarize the data by Make removing the model variable using the small data filter
+test_data <- vehicles %>% #From the fueleconomy package
+  #filter(year >= 2010) %>%
+  mutate(trans = ifelse(is.na(trans), "None", trans),
+         cyl = ifelse(is.na(cyl), 0, cyl),
+         displ = ifelse(is.na(displ), 0, displ),
+         make = ifelse(make == "London Taxi", "London Taxi Co", make),
+         fuel_cat = case_when(
+             fuel %in% c('Regular Gas and Electricity', 'Premium Gas or Electricity', 'Premium and Electricity') ~ "Hybrid: Electric",
+             fuel %in% c('Premium', 'Midgrade', 'Regular')  ~ "Gas Powered",
+             fuel %in% c('Diesel')  ~ "Diesel",
+             fuel %in% c('Premium or E85', 'Gasoline or E85')  ~ "Hybrid: Gas or E85",
+             fuel %in% c('CNG')  ~ "Natural Gas",
+             fuel %in% c('Electricity')  ~ "Electricity",
+             .default = "other"
+           )
+  ) %>%
+  mutate(make = factor(make),
+         year = factor(year),
+         class = factor(class),
+         trans = factor(trans),
+         drive = factor(drive),
+         fuel_cat = factor(fuel_cat),
+         cyl = factor(cyl)) %>%
+  group_by(make, year, class, drive, fuel_cat, trans, cyl) %>%
+  summarize(mean_displ = round(mean(displ, na.rm = TRUE), 2),
+            mean_hwy = round(mean(hwy, na.rm = TRUE), 2),
+            mean_cty = round(mean(cty,na.rm = TRUE ), 2))
+
+
+# Remove duplicate rows
+test_data_unique <- unique(test_data)
+dframe <- test_data_unique[complete.cases(test_data_unique),]
+# set seed 1
+set.seed(1112)
+dframe1 <- dframe[sample(nrow(dframe), 500), ]
+
+# set seed 2
+set.seed(404)
+dframe2 <- dframe[sample(nrow(dframe), 5000), ]
+
+# set seed 3
+set.seed(678)
+dframe3 <- dframe[sample(nrow(dframe), 5000), ]
+
+```
+
+# Without Clustering
+
+```{r ggpcp_plain, echo=FALSE}
+p1 <- dframe1 %>%
+  pcp_select(1:10) %>%
+  pcp_scale() %>%
+  pcp_arrange(method="from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes(boxwidth=0.1) +
+  #scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
+  geom_pcp() #aes(colour = fuel_cat), alpha = 0.3, overplot = "none"
+
+p2 <- dframe1 %>%
+  pcp_select(1:10) %>%
+  pcp_scale() %>%
+  pcp_arrange(method="from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes(boxwidth=0.1) +
+  scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple", "gold")) +
+  geom_pcp(aes(colour = fuel_cat), alpha = 0.3, overplot = "none") 
+  
+grid.arrange(p1, p2, nrow=2)
+```
+
+
+# PAM Clustering Method
+
+```{r pam_clustering_d1, echo=FALSE}
+res.km1 <- eclust(dframe1, "pam", k=6)
+#fviz_silhouette(res.km)
+pam_plot1 <- res.km1$clust_plot + theme_bw() 
+
+pcp_graph <- data.frame(res.km1$clust_plot$data) %>%
+  pcp_select(5,2:4,5) %>%
+  pcp_scale() %>%
+  pcp_arrange(method="from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes(fill="grey80") +
+  geom_pcp(aes(colour = cluster), alpha = 0.5) +
+  #scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
+  #geom_pcp(aes(colour = cluster), alpha = 0.3, overplot = "none") 
+  #scale_colour_brewer("cluster", palette="Dark2") +
+  theme_bw() +
+  guides(colour=guide_legend(override.aes = list(alpha=1)), reverse = TRUE) +
+    geom_pcp_labels() 
+
+grid.arrange(pam_plot1, pcp_graph, nrow=2)
+
+
+# data.frame(res.km$clust_plot$data) %>%
+#   #pcp_select(2:4) %>%
+#   pcp_select(3,2) %>%
+#   pcp_scale() %>%
+#   pcp_arrange(method="from-right") %>%
+#   ggplot(aes_pcp()) +
+#   geom_pcp_boxes(boxwidth=0.1) +
+#   geom_pcp(aes(colour = cluster), alpha = 0.1, axiswidth = c(0,0)) +
+#   #scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
+#   guides(colour=guide_legend(override.aes = list(alpha=1))) +
+#   geom_pcp_labels() +
+#   scale_x_discrete(expand = expansion(add=0.2)) +
+#   theme_bw() +
+#   facet_grid(coord > 4.7 ~., labeller = "label_both")
+
+```
+
+
+```{r pam_clustering_d2, echo=FALSE}
+res.km2 <- eclust(dframe2, "pam", k=6)
+#fviz_silhouette(res.km)
+pam_plot2 <- res.km2$clust_plot + theme_bw() 
+
+pcp_graph2 <- data.frame(res.km2$clust_plot$data) %>%
+  #pcp_select(2:4) %>%
+  pcp_select(5,2:4) %>%
+  pcp_scale() %>%
+  pcp_arrange(method="from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes(boxwidth=0.1) +
+  geom_pcp(aes(colour = cluster), alpha = 0.5) +
+  #scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
+  #geom_pcp(aes(colour = cluster), alpha = 0.3, overplot = "none") 
+  #scale_colour_brewer("cluster", palette="Dark2") +
+  theme_bw() +
+  guides(colour=guide_legend(override.aes = list(alpha=1)), reverse = TRUE) +
+    geom_pcp_labels() 
+
+
+grid.arrange(pam_plot2, pcp_graph2, nrow=2)
+```
+
+
+```{r pam_clustering_d3, echo=FALSE}
+res.km3 <- eclust(dframe3, "pam", k=6)
+#fviz_silhouette(res.km)
+pam_plot3 <- res.km3$clust_plot + theme_bw() 
+
+pcp_graph3 <- data.frame(res.km3$clust_plot$data) %>%
+  #pcp_select(2:4) %>%
+  pcp_select(5,2:4) %>%
+  pcp_scale() %>%
+  pcp_arrange(method="from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes(boxwidth=0.1) +
+  geom_pcp(aes(colour = cluster), alpha = 0.5) +
+  #scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
+  #geom_pcp(aes(colour = cluster), alpha = 0.3, overplot = "none") 
+  #scale_colour_brewer("cluster", palette="Dark2") +
+  theme_bw() +
+  guides(colour=guide_legend(override.aes = list(alpha=1)), reverse = TRUE) +
+    geom_pcp_labels() 
+
+
+grid.arrange(pam_plot3, pcp_graph3, nrow=2)
+```
+
+# Evidence of Comparisons
+
+## Data Description:
+
+## Detection of Outliers Within Clusters
+
+Finding outliers within groups is an integral part of data analysis, and scatter plots and parallel coordinate plots (PCPs) can be very different in how well they do this. 
+It can be hard to see outliers in scatter plots, especially if they are close to the edges of groups or if the data is very complex. 
+Scatter plots can only show two or three dimensions at a time, which means that outliers in higher dimensions might not be seen because they are not displayed simultaneously (Feng et al., 2010). 
+Also, when groups in a scatter plot overlap, outliers may blend in with the clusters, making them harder to find.
+
+PCPs, on the other hand, are a more reliable way to find outliers within groups. 
+A vertical scale shows every parameter in the data, and lines are drawn between the variables to show the data points. 
+Lines distinct from the general pattern that other lines in a cluster follow are usually called outliers in PCPs. 
+This difference can be seen, even in data with many dimensions, because each dimension is shown on its own plane, making any oddity in any dimension easy to spot (Holten & Van Wijk, 2010). 
+As a result, PCPs can better show outliers that may be part of the same cluster in some aspects but not in others. 
+This gives them a more thorough and detailed strategy for finding outliers in large datasets.
+
+
+## References
+
+
+1. Holten, D., & Van Wijk, J. J. (2010). Evaluation of cluster identification performance for different PCP variants. Computer Graphics Forum. Link to paper
+
+
+2.Feng, D., Kwock, L., Lee, Y., & Taylor, R. (2010). Matching visual saliency to confidence in plots of uncertain data. IEEE Transactions on Visualization and Computer Graphics
+
+
+
+# Factorial Analysis of Mixed Data (FAMD) Clustering Method
+
+```{r famd_clustering, echo=FALSE, include=FALSE}
+res.famd <- FAMD(dframe, graph = FALSE)
+#print(res.famd)
+
+eig.val <- get_eigenvalue(res.famd)
+head(eig.val)
+
+# Scree plot
+fviz_screeplot(res.famd)
+
+# Plot of variables
+fviz_famd_var(res.famd, repel = TRUE)
+# Contribution to the first dimension
+fviz_contrib(res.famd, "var", axes = 1)
+# Contribution to the second dimension
+fviz_contrib(res.famd, "var", axes = 2)
+
+fviz_famd_var(res.famd, "quanti.var", col.var = "contrib",
+              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+              repel = TRUE)
+
+
+```
+
+# K-Prototype Dimension Reduction
+
+```{r clustering, echo=FALSE, include=FALSE}
+kprototype_df <- dframe
+
+#correlation plot for mixture data type
+#change column names for more better labels visual
+for (i in 1:ncol(kprototype_df)){
+  colnames(kprototype_df)[i] <- paste0("X", i-1)
+}
+
+gower_fuel_clusters <- kproto(kprototype_df, type = "gower", 6)
+gower_fuel_clusters
+
+gower_fit_df <- factor(gower_fuel_clusters$cluster, order =  TRUE,
+                 levels = c(1:6))
+
+gower_fit <- data.frame(dframe, gower_fit_df) %>%
+  mutate(clusters = factor(gower_fit_df))
+
+gower_result_df <- gower_fuel_clusters$centers
+gower_member <- gower_fuel_clusters$size
+gower_result <- data.frame(gower_member, gower_result_df)
+gower_result
+
+#plot(gower_fuel_clusters, vars = c("X1","X3"))
+
+
+```
