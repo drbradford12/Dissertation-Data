@@ -16,7 +16,31 @@ library(corrplot)
 require(gridExtra)
 library("FactoMineR")
 library("factoextra")
+library(hrbrthemes)
+library(GGally)
 ```
+
+# Evidence of Comparisons
+
+## Data Description:
+
+Fuel economy data for 1984-2015 from the [US EPA](https://www.fueleconomy.gov/feg/download.shtml), conveniently packaged for R users. 
+[FuelEconomy Github](https://github.com/hadley/fueleconomy) written by Dr. Hadley Wickham. 
+
+
+## Detection of Outliers Within Clusters
+
+Finding outliers within groups is a part of data analysis, in which scatter plots and parallel coordinate plots (PCPs) can be very different in how well they do this. 
+It can be hard to see outliers in scatter plots, especially if they are close to the edges of groups or if the data is very complex. 
+Scatter plots can only show two or three dimensions at a time, which means that outliers in higher dimensions might not be seen because they are not displayed simultaneously (Feng et al., 2010). 
+Also, when groups in a scatter plot overlap, outliers may blend in with the clusters, making them harder to find.
+
+PCPs, on the other hand, are a more reliable way to find outliers within groups. 
+A vertical scale shows every parameter in the data, and lines are drawn between the variables to show the data points. 
+Lines distinct from the general pattern that other lines in a cluster follow are usually called outliers in PCPs. 
+This difference can be seen, even in data with many dimensions, because each dimension is shown on its own plane, making any oddity in any dimension easy to spot (Holten & Van Wijk, 2010). 
+As a result, PCPs can better show outliers that may be part of the same cluster in some aspects but not in others. 
+This gives them a more thorough and detailed strategy for finding outliers in large datasets.
 
 
 ```{r data_cleaning, include=FALSE}
@@ -31,7 +55,7 @@ test_data <- vehicles %>% #From the fueleconomy package
              fuel %in% c('Regular Gas and Electricity', 'Premium Gas or Electricity', 'Premium and Electricity') ~ "Hybrid: Electric",
              fuel %in% c('Premium', 'Midgrade', 'Regular')  ~ "Gas Powered",
              fuel %in% c('Diesel')  ~ "Diesel",
-             fuel %in% c('Premium or E85', 'Gasoline or E85')  ~ "Hybrid: Gas or E85",
+             fuel %in% c('Premium or E85', 'Gasoline or E85')  ~ "Flex Fuel",
              fuel %in% c('CNG')  ~ "Natural Gas",
              fuel %in% c('Electricity')  ~ "Electricity",
              .default = "other"
@@ -59,7 +83,7 @@ dframe1 <- dframe[sample(nrow(dframe), 500), ]
 
 # set seed 2
 set.seed(404)
-dframe2 <- dframe[sample(nrow(dframe), 5000), ]
+dframe2 <- dframe[sample(nrow(dframe), 3000), ]
 
 # set seed 3
 set.seed(678)
@@ -91,12 +115,23 @@ p2 <- dframe1 %>%
 grid.arrange(p1, p2, nrow=2)
 ```
 
+# Using GGally's `ggcoord` to recreate the curvature values from the "Visual Clustering in Parallel Coordinates" Paper a.k.a "The Red & Green Paper"
 
-# PAM Clustering Method
+```{r ggcoord, echo=FALSE}
+ggparcoord(dframe1, c(1:4,6:10), groupColumn = 5,  splineFactor = 3, scale =
+    "center", scaleSummary = "median")
+```
 
-```{r pam_clustering_d1, echo=FALSE}
+
+# PAM Clustering Method 1 -- Using Random Selection of 500 rows
+
+```{r pam_clustering_d1, echo=FALSE, include=FALSE}
 res.km1 <- eclust(dframe1, "pam", k=6)
 #fviz_silhouette(res.km)
+
+```
+
+```{r echo=FALSE}
 pam_plot1 <- res.km1$clust_plot + theme_bw() 
 
 pcp_graph <- data.frame(res.km1$clust_plot$data) %>%
@@ -114,34 +149,67 @@ pcp_graph <- data.frame(res.km1$clust_plot$data) %>%
     geom_pcp_labels() 
 
 grid.arrange(pam_plot1, pcp_graph, nrow=2)
+```
+
+```{r kprototype, echo=FALSE}
+kprototype_df <- dframe1
+
+#correlation plot for mixture data type
+#change column names for more better labels visual
+for (i in 1:ncol(kprototype_df)){
+  colnames(kprototype_df)[i] <- paste0("X", i-1)
+}
+fuel_clusters <- kproto(kprototype_df, 6)
+fuel_clusters
+
+fit_df <- factor(fuel_clusters$cluster, order =  TRUE,
+                 levels = c(1:6))
+fit <- data.frame(dframe1, fit_df) %>%
+  mutate(clusters = factor(fit_df))
 
 
-# data.frame(res.km$clust_plot$data) %>%
-#   #pcp_select(2:4) %>%
-#   pcp_select(3,2) %>%
-#   pcp_scale() %>%
-#   pcp_arrange(method="from-right") %>%
-#   ggplot(aes_pcp()) +
-#   geom_pcp_boxes(boxwidth=0.1) +
-#   geom_pcp(aes(colour = cluster), alpha = 0.1, axiswidth = c(0,0)) +
-#   #scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
-#   guides(colour=guide_legend(override.aes = list(alpha=1))) +
-#   geom_pcp_labels() +
-#   scale_x_discrete(expand = expansion(add=0.2)) +
-#   theme_bw() +
-#   facet_grid(coord > 4.7 ~., labeller = "label_both")
+result_df <- fuel_clusters$centers
+member <- fuel_clusters$size
+result <- data.frame(member, result_df)
+
+kpro_plot <- fit %>%
+  pcp_select(12,2:4,6:10) %>%
+  pcp_scale() %>%
+  pcp_arrange(method="from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes(fill="grey80") +
+  geom_pcp(aes(colour = fuel_cat), alpha = 0.5) +
+  scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple")) +
+  #geom_pcp(aes(colour = cluster), alpha = 0.3, overplot = "none") 
+  #scale_colour_brewer("cluster", palette="Dark2") +
+  theme_bw() +
+  guides(colour=guide_legend(override.aes = list(alpha=1)), reverse = TRUE) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1))
+
+curve_kpro_plot <- ggparcoord(fit, c(12, 2:4,6:10), groupColumn = 5, order = 12,  splineFactor = 3, scale =
+    "uniminmax", missing = "random") +
+  theme_bw() +
+  scale_colour_manual(values=c("darkgreen","darkred","darkorange","darkblue", "steelblue", "purple"))
+
+grid.arrange(kpro_plot, curve_kpro_plot, nrow=2)
+```
+
+\newpage
+
+# PAM Clustering Method 2  -- Using Random Selection of 3000 rows
+
+```{r pam_clustering_d2, echo=FALSE, include=FALSE}
+res.km2 <- eclust(dframe2, "pam", k=6)
+#fviz_silhouette(res.km)
 
 ```
 
-
-```{r pam_clustering_d2, echo=FALSE}
-res.km2 <- eclust(dframe2, "pam", k=6)
-#fviz_silhouette(res.km)
+```{r echo=FALSE}
 pam_plot2 <- res.km2$clust_plot + theme_bw() 
 
 pcp_graph2 <- data.frame(res.km2$clust_plot$data) %>%
   #pcp_select(2:4) %>%
-  pcp_select(5,2:4) %>%
+  pcp_select(5,2:4,5) %>%
   pcp_scale() %>%
   pcp_arrange(method="from-both") %>%
   ggplot(aes_pcp()) +
@@ -158,15 +226,22 @@ pcp_graph2 <- data.frame(res.km2$clust_plot$data) %>%
 grid.arrange(pam_plot2, pcp_graph2, nrow=2)
 ```
 
+\newpage
 
-```{r pam_clustering_d3, echo=FALSE}
+# PAM Clustering Method 3  -- Using Random Selection of 5000 rows
+
+```{r pam_clustering_d3, echo=FALSE, include=FALSE}
 res.km3 <- eclust(dframe3, "pam", k=6)
 #fviz_silhouette(res.km)
+
+```
+
+```{r echo=FALSE}
 pam_plot3 <- res.km3$clust_plot + theme_bw() 
 
 pcp_graph3 <- data.frame(res.km3$clust_plot$data) %>%
   #pcp_select(2:4) %>%
-  pcp_select(5,2:4) %>%
+  pcp_select(5,2:4,5) %>%
   pcp_scale() %>%
   pcp_arrange(method="from-both") %>%
   ggplot(aes_pcp()) +
@@ -183,31 +258,8 @@ pcp_graph3 <- data.frame(res.km3$clust_plot$data) %>%
 grid.arrange(pam_plot3, pcp_graph3, nrow=2)
 ```
 
-# Evidence of Comparisons
-
-## Data Description:
-
-Fuel economy data for 1984-2015 from the [US EPA](https://www.fueleconomy.gov/feg/download.shtml), conveniently packaged for R users. 
-[FuelEconomy Github](https://github.com/hadley/fueleconomy) written by Dr. Hadley Wickham
-
-
-## Detection of Outliers Within Clusters
-
-Finding outliers within groups is an integral part of data analysis, and scatter plots and parallel coordinate plots (PCPs) can be very different in how well they do this. 
-It can be hard to see outliers in scatter plots, especially if they are close to the edges of groups or if the data is very complex. 
-Scatter plots can only show two or three dimensions at a time, which means that outliers in higher dimensions might not be seen because they are not displayed simultaneously (Feng et al., 2010). 
-Also, when groups in a scatter plot overlap, outliers may blend in with the clusters, making them harder to find.
-
-PCPs, on the other hand, are a more reliable way to find outliers within groups. 
-A vertical scale shows every parameter in the data, and lines are drawn between the variables to show the data points. 
-Lines distinct from the general pattern that other lines in a cluster follow are usually called outliers in PCPs. 
-This difference can be seen, even in data with many dimensions, because each dimension is shown on its own plane, making any oddity in any dimension easy to spot (Holten & Van Wijk, 2010). 
-As a result, PCPs can better show outliers that may be part of the same cluster in some aspects but not in others. 
-This gives them a more thorough and detailed strategy for finding outliers in large datasets.
-
 
 ## References
-
 
 1. Holten, D., & Van Wijk, J. J. (2010). Evaluation of cluster identification performance for different PCP variants. Computer Graphics Forum. 
 [Link to paper](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-8659.2009.01666.x)

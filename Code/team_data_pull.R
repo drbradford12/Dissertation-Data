@@ -1,10 +1,10 @@
 library(tidyverse)
 library(httr)
 library(data.table)
-library()
 
 
-url_pull <- function(url_type, season_type = "Regular+season"){
+
+url_pull <- function(url_type, season_type = "Regular+Season"){
   if (url_type == "Boxscore") {
     url <- paste('https://stats.gleague.nba.com/stats/leaguegamelog?Counter=1000&DateFrom=&DateTo=&Direction=DESC&LeagueID=20&PlayerOrTeam=T&Season=2022-23&SeasonType=',
                  season_type,'&Sorter=DATE', sep ="")
