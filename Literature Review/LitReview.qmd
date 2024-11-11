@@ -48,7 +48,8 @@ Parallel coordinate plots (PCPs) leverage the projective space rather than the C
 
 suppressWarnings(ggpairs(penguins[,c(1, 3:6)], aes(colour = species),
   columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]", "flipper_length[mm]", "body_mas[g]" ) ) +
- theme(strip.text.y = element_text(size = 6, angle = 45))
+ theme(strip.text.y = element_text(size = 6),
+       strip.text.x = element_text(size = 6))
   
   )
 ```
@@ -230,7 +231,14 @@ Theus and Urbanek introduced color-coded parallel coordinates, which allow users
 
 Heavy reliance on color may lead to visual strain, especially in cases where multiple gradients overlap or in users with color vision deficiencies. Bertini et al. noted, "When too many colors are applied, the encoding becomes confusing, and can overwhelm rather than enhance the viewer's understanding."
 
-```{r, echo=FALSE, fig.cap='Enhanced Color Encoding and Shading in PCP',fig.show='asis', fig.align='center'}
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-encoding
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Enhanced Color Encoding and Shading in PCP"
+
 # Create a parallel coordinate plot with enhanced color encoding and shading
 ggparcoord(
   data = penguins_clean,
@@ -250,15 +258,37 @@ ggparcoord(
   theme(legend.position = "bottom")
 ```
 
+In @fig-encoding, the parallel coordinate plot uses enhanced color coding. It might have changed the line density, which makes the differences between species (Adelie is red, Chinstrap is green, and Gentoo is blue) more obvious across the variables (bill length, bill depth, flipper length, and body mass). The plot does a good job of showing general trends for each species. For example, the Gentoo tends to have higher flipper length and body mass values, while the Adelie tends to have lower values. Overplotting is still a problem, especially near the middle ranges of each axis, which hides small differences and makes it hard to find outliers directly. The plot doesn't show individual distribution shapes, but how the lines are grouped on each axis suggests that each species has central tendencies. The general trends of each species' lines suggest relationships between numerical factors, but it still needs to be easier to figure out individual correlations because they overlap. This graph gives a broad picture of trends across species, but it could be better at picking out specific data points or rare observations. 
+
 ### Reordering and Axis Flipping
 
 Adaptive reordering and axis flipping based on correlation measures or user-defined parameters can simplify the analysis of multidimensional relationships. Reordering and axis flipping align more relevant dimensions, minimizing intersections and making relationships more interpretable. "Reordering transforms PCPs from a cluttered tangle into a roadmap of relationships," [@inselberg1990parallel].
 
 Inselberg and Dimsdale proposed reordering to enhance interpretability, especially for highly interrelated variables. LeBlanc et al. introduced correlation-based reordering to position axes, reducing visual clutter by aligning more related dimensions [@leblanc1990]. Peng et al. (2004) enabled automatic reordering algorithms that flip axes according to user-defined weights, giving users more control over PCP readability.
 
+Changing the order of the axes in parallel coordinate plots can make them easier to read by putting variables that are strongly correlated or connected by theme next to each other. Moving the axes around reduces the amount of visual noise caused by crossings between variables that aren't strongly linked to each other. This makes patterns and clusters stand out more. The method of minimizing visual noise helps show hidden patterns in the data that would not be seen otherwise. Researchers @johansson2005 and @wegman1997 all found that reordering is an important way to find connections in PCPs. If you use well-thought-out reordering algorithms, you can see groups, trends, and outliers more clearly and avoid the feeling of overplotting. This method works incredibly well for grouping data with many dimensions, making it easier to see.
+
 Automatic reordering may reduce control over axis sequence, potentially misaligning dimensions relevant to a specific analytical question. LeBlanc et al. pointed out that "the gain in interpretability through automated ordering can sometimes sacrifice user intention, misaligning axes crucial to the analysis context."
 
-```{r, echo=FALSE, fig.cap='Reordering and Axis Flipping in PCP',fig.show='asis', fig.align='center'}
+Axis flipping is a way to eliminate unnecessary line crossings and bring out trends in data by flipping the scale of one or more axes. It works well when two PCP axes next to each other have negatively correlated factors. This change allows different patterns to show up without too many crossings, giving a clearer picture of how the data is related. Axis flipping is an important tool for dealing with negative correlations because it clarifies the connection between dimensions by reducing visual interference. It also shows patterns of correlation that regular PCPs might miss, especially when working with datasets that have many factors that are unrelated to each other or are related in the opposite way. Automated axis flipping methods can change plots on the fly based on data, which lowers the chance of mistakes when users interpret PCPs. Heinrich and Dasgupta's studies both agree that axis flipping makes PCPs easier to understand by turning bad relationships into a more familiar shape [@dasgupta2010, @review].
+
+Reordering and flipping axes based on correlation or user-defined parameters simplify the interpretation of complex relationships. "Dynamic reordering optimizes the alignment of correlated variables, making it easier to identify associations and trends across dimensions" [@yuan2009]. This adaptation increases flexibility, allowing the plot to respond to specific analytical needs and user preferences.
+
+Reordering and axis shifting work well together to fix the issue of overplotting in PCPs. Rearranging linked variables makes them easier to see while flipping the axes reduces the number of times lines cross for negatively correlated variables. Combining these two tools makes looking for patterns and exploring large datasets easier.
+
+By using these methods, users can better understand how multiple variables are connected, which helps them make better decisions based on visual information. Research shows that these methods make parallel coordinate plots easier to understand, more accurate, and better able to find groups and trends, all of which are very important for data analysts.
+
+Continuous reordering can create inconsistency, as users may find it challenging to track relationships when axes are frequently altered. "Constant reconfiguration of the axes can disrupt the analytical flow, making it difficult to build a stable mental model of the data structure" [@review]. Additionally, for datasets with minimal correlation, this method may offer limited value, as reordering may not result in clearer insights.
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-reordering
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Reordering and Axis Flipping in PCP"
+
 # Reorder columns for better interpretability
 penguins_reordered <- penguins_clean %>%
   select(species, flipper_length_mm, body_mass_g, bill_length_mm, bill_depth_mm)
@@ -282,6 +312,8 @@ ggparcoord(
   ggplot2::scale_y_reverse() # Flip the y-axis to observe the effect
 ```
 
+In @fig-reordering, the parallel coordinate map changes the variables by rearranging them and flipping the axes to show patterns and connections between the penguin species more clearly. By flipping some axes and putting related factors closer together (like body mass and flipper length), the plot makes species-based trends stand out more: The Gentoo (blue) tends to have a shallower bill but a bigger body and longer flippers, while the Adelie (red) tends to have the opposite pattern. Overplotting is still a problem, especially when values are close together in the middle ranges, making it hard to tell the difference between lines or peaks. You can't see the distributions' exact forms, but the lines' density and spread along each axis give you a good idea of the range of values for each species. The new order makes relationships between variables stand out more because the changes between the axes make species-based correlations in measurement trends more apparent. However, individual relationships are still hard to see because lines cross.
+
 ### Cluster-Based and Hierarchical PCPs
 
 Clustering techniques, such as spectral clustering, have been used in PCPs to group related data points and expose the underlying structure of high-dimensional datasets. Clustering data and viewing the clusters in parallel coordinate plots makes detecting links between data points and cluster features easier. This technique is beneficial for discovering patterns not immediately evident in raw data and providing insights into the natural grouping of data points [@zhao2012]. Several data reduction procedures, such as hierarchical clustering and principal component analysis, are used before plot generation to improve interpretability. These strategies help to limit the number of dimensions visualized by focusing on the most important components that explain the majority of the variance in the data.
@@ -296,7 +328,14 @@ Fua et al. introduced hierarchical PCPs, providing a zoomable interface to repre
 
 Although clusters simplify the data landscape, they can obscure individual data points. Geng et al. observed that "while useful for general patterns, clustering may bury unique or outlier data, potentially hiding significant findings in homogenous groups," [@geng2005].
 
-```{r, echo=FALSE, fig.cap='Cluster-Based in PCP',fig.show='asis', fig.align='center'}
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-cluster
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Cluster-Based PCP"
+
 # Select only numeric columns for clustering
 penguins_numeric <- penguins_clean %>%
   select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
@@ -337,7 +376,14 @@ Ankerst et al. proposed a layout algorithm that places axes to minimize line cro
 
 Layout optimizations sometimes follow heuristic approaches that may not always align with user-defined analysis needs, possibly overlooking preferred layouts. Johansson et al. state that "algorithmically optimized layouts prioritize minimal intersections over interpretability, occasionally misaligning with the user's focus.," [@johansson2005].
 
-```{r, echo=FALSE, fig.cap='Optimized Layout in PCP',fig.show='asis', fig.align='center'}
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-optimized
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Algorithm Optimized Layout in PCP"
+
 # Calculate the correlation matrix for optimized ordering
 cor_matrix <- cor(penguins_clean %>%
                     select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g))
@@ -375,7 +421,14 @@ The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the ori
 
 CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. Wegman et al. (1990) suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates. Holten and van Wijk (2009) introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets. LeBlanc et al. (1990) highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.
 
-```{r, echo=FALSE, fig.cap='Categorical and Hybrid in PCP',fig.show='asis', fig.align='center'}
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-hybrid
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Categorical and Hybrid in PCP"
+
 # Remove rows with missing data from the dataset
 penguins_clean_cat <- penguins %>%
   na.omit() %>%
