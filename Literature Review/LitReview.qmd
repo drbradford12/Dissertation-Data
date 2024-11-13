@@ -457,7 +457,32 @@ penguins_clean_cat %>%
   facet_wrap(~sex)
 ```
 
-## Handling Numerical Ties in PCPs
+## Handling Numerical Ties
+
+Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. Previously, statistical methods focused on rank-based approaches and binary data handling. They often needed help with tied observations, which threw off distributions or made them more complex. Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. There are now several ways to deal with ties, such as slowly increasing the space between values. This makes the visualization more accurate and easier to understand without changing the structure of the data itself. 
+
+### Random Jittering of Data Points
+
+Random jittering of data points is a standard method that adds a small random value to each tied observation. This is especially helpful in scatter plots and dot plots to keep them from being too dense. This approach, discussed in “Graphical Methods for Data Analysis” by Chambers et al., is easy to use and keeps the overall distribution, making things clearer without changing the data [@chambers1983]. One problem with random jittering is that it can hide exact numbers, making it hard to understand if the jittering distance is too big. Experiments show that jittering makes visualizations much clearer when there are small overlaps, especially when used rarely.
+
+### Rank Jittering
+
+Rank jittering is another useful method for non-parametric analyses. It changes the ranks of tied values instead of the real data values. This makes it easier to see the ranks in non-parametric tests like the Wilcoxon signed-rank test. Conover's “Practical Nonparametric Statistics” shows that rank jittering keeps the ordinal form of data while not changing the distribution much [@conover1999]. The best thing about rank jittering is that it keeps rank-based readings while making ties less noticeable. However, the method can be hard to run on computers when dealing with big datasets, and making too many rank changes can accidentally change the test significance levels. For these reasons, it is important to be careful when using rank jittering.
+
+### Deterministic Jittering
+
+When you need to be clear, deterministic jitter gives you a structured way to do it by adding a small fixed value (epsilon) to each tied observation instead of depending on chance. This method explained in more detail in Tukey's “Exploratory Data Analysis”, is useful when random noise is not wanted because it ensures that each observation is moved in a way that can be predicted and repeated [@david1977]. Deterministic jitter is easier to understand than random jitter, but it needs to be done carefully so that it doesn't introduce fake patterns, especially when scaling is involved. Deterministic jittering is a good choice for random noise that doesn't affect the integrity of the distribution when used carefully.
+
+### Mean or Median Splitting
+
+One more popular method is mean or median splitting, which gives values tied to their mean or median values. This method works especially well for symmetric distributions and is perfect for images that need to show things centrally, like box plots. Wilcox's “Modern Statistics for the Social and Behavioral Sciences” shows that splitting the mean or median gives a fair view, especially for boxplot data [@wilcox2017]. This method works best with datasets with few ties because it can hide the range and variability within tied numbers if used too much.
+
+### Kernel Density Estimation (KDE) with Bandwidth Adjustment
+
+Kernel density estimation (KDE) with bandwidth adjustment is a powerful method for density visualizations. It spreads out overlapping observations by giving each tied value a slightly different weight. This method works especially well in density plots because it evens data distributions without changing the original numbers. Silverman's work in “Density Estimation for Statistics and Data Analysis” shows how KDE with changed bandwidths correctly shows multimodal distributions, reducing errors caused by tied values. KDE works, but you must be careful when choosing the bandwidth because making the wrong choice can lead to misleading visual representations, especially when files are very concentrated [@silverman2018].
+
+
+## Handling Ties in PCPs
 
 The idea of adding distance to visual ties has changed over time as methods for visualizing data have improved to find a balance between detail and clarity in large datasets. In the early days of visualization, especially in network analysis and multidimensional scaling, closeness and alignment were the main ways to show patterns and ties between things. However, as data grew, visual clutter became a big problem. This was especially true in parallel coordinates plots (PCPs), where lines and intersections that overlapped made it hard to see the underlying data structure. To fix this problem, researchers started looking into ways to give representational parts of these graphs more "visual distance." They did this using methods like line bundling and changing the spacing between lines to avoid overplotting. This change is emphasized by Chang et al., who say that "perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns," [@chang2018]. This shows how separating visual elements can help with cognitive grouping without breaking up the continuity of the data. In PCPs, early studies showed that visual distance could make intersections clearer and improve the overall shape of individual paths. As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005]. This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
 
@@ -472,6 +497,8 @@ By putting similar lines into "bundles," line bundling cuts down on unnecessary 
 
 
 ### Quantization and Aggregation
+
+Quantization, also known as Quantized Generalized Parallel Coordinate Plots or QGPCP, groups close-together values into bins. This makes it easier to see patterns in tightly packed data. This method cuts down on the number of lines that cross each other, which makes it great for big datasets. Moustafa states, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." This shows that removing some details can make data easier to read. Quantization can keep important patterns while lowering noise, as tests on real-world data show. However, it may hide small but important differences in the data [@moustafa2009]. It makes the image easier to understand by removing small details. This is helpful for high-dimensional datasets with a lot of line overlap. However, detail can be lost during aggregation, making this method less useful for situations where exact data representation is needed.
 
 ```{r}
 #| echo: false
@@ -512,8 +539,7 @@ ggparcoord(
        y = "Quantized/Encoded Values") 
 ```
 
-
-Quantization, also known as Quantized Generalized Parallel Coordinate Plots or QGPCP, groups close-together values into bins. This makes it easier to see patterns in tightly packed data. This method cuts down on the number of lines that cross each other, which makes it great for big datasets. Moustafa states, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." This shows that removing some details can make data easier to read. Quantization can keep important patterns while lowering noise, as tests on real-world data show. However, it may hide small but important differences in the data [@moustafa2009]. It makes the image easier to understand by removing small details. This is helpful for high-dimensional datasets with a lot of line overlap. However, detail can be lost during aggregation, making this method less useful for situations where exact data representation is needed.
+In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals. Quantization makes the visualization even easier by putting numbers into groups. However, this needs to improve some of the accuracy of the original data. The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live. Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
 
 
 ### Color-Coding and Transparency 
