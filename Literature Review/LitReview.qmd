@@ -473,6 +473,46 @@ By putting similar lines into "bundles," line bundling cuts down on unnecessary 
 
 ### Quantization and Aggregation
 
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-qgpcp
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Quantized Generalized Parallel Coordinate Plots"
+#|   
+# Remove rows with NA values for simplicity
+penguins_clean <- penguins %>% 
+  na.omit()
+
+# Discretize/Quantize numerical columns and encode categorical variables
+penguins_encoded <- penguins_clean %>%
+  mutate(
+    species = as.factor(species),  # Encode species as numeric
+    island = as.numeric(as.factor(island)),    # Encode island as numeric
+    sex = as.numeric(as.factor(sex)),          # Encode sex as numeric
+    bill_length_mm = cut(bill_length_mm, breaks = 5, labels = FALSE),  # Quantize bill_length_mm
+    bill_depth_mm = cut(bill_depth_mm, breaks = 5, labels = FALSE),    # Quantize bill_depth_mm
+    flipper_length_mm = cut(flipper_length_mm, breaks = 5, labels = FALSE), # Quantize flipper_length_mm
+    body_mass_g = cut(body_mass_g, breaks = 5, labels = FALSE)         # Quantize body_mass_g
+  )
+
+# Create the parallel coordinate plot
+ggparcoord(
+  data = penguins_encoded,
+  columns = 2:8,    # Use all columns, including encoded categorical variables
+  groupColumn = 1,  # Grouping by species
+  scale = "uniminmax", # Scale columns to the same range
+  showPoints = TRUE,   # Show points on the lines
+  alphaLines = 0.6     # Transparency of lines
+) + 
+  theme_minimal() + 
+  labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset",
+       x = "Attributes",
+       y = "Quantized/Encoded Values") 
+```
+
+
 Quantization, also known as Quantized Generalized Parallel Coordinate Plots or QGPCP, groups close-together values into bins. This makes it easier to see patterns in tightly packed data. This method cuts down on the number of lines that cross each other, which makes it great for big datasets. Moustafa states, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." This shows that removing some details can make data easier to read. Quantization can keep important patterns while lowering noise, as tests on real-world data show. However, it may hide small but important differences in the data [@moustafa2009]. It makes the image easier to understand by removing small details. This is helpful for high-dimensional datasets with a lot of line overlap. However, detail can be lost during aggregation, making this method less useful for situations where exact data representation is needed.
 
 
@@ -483,12 +523,17 @@ By changing the color and transparency of lines, you can tell them apart based o
 
 ### Edge Bundling for Categorical Data
 
+Edge bundling, which comes from network visualization, groups paths for category values in PCPs. This method works best with categorical data because it lets you visually break up ties without changing other factors. Palmas et al. state that "bundling lines with similar orientations prevents overplotting, allowing clearer identification of dominant trends within complex data." This means bundling can help find trends even in spaces with many dimensions. Bundling made finding categorical clusters in complex PCPs easier and decreased users' work [@palmas2014]. Edge bundling is an excellent way to clear up clutter and make categorical groups easier to see. It lets users see categorical differences without messing up numerical relationships. On the other hand, each bundle may hide small details, making them less useful for datasets that need a lot of precision.
+
 
 ### Stacked Histograms and Density Plots
 
+This change adds histograms or density plots on top of PCPs to show how category data is distributed in terms of frequency. This lets users see how distributions change without adding extra line clutter. According to Bok et al., adding histogram overlays gives categorical context, making variable distributions easier to see without affecting line continuity. This means that frequency-based cues can help you understand categorical distributions without adding more visual clutter. Clear frequency-based differentiation in categorical data without too much line overlap improves the visual understanding of distributions when used with PCPs. Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant [@bok2020]. Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes
+
+
 ### Perceptual Cues (Line Thickness, Texture, etc.)
 
-### 
+By changing the lines' width, texture, or other visual properties, you can tell them apart from overlapping lines. This helps people see patterns and tell values apart without separating them physically. According to Chang et al., "Perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns." These cues help with cognitive grouping and pattern differentiation, even in complicated datasets. They work well in areas with a lot of visual information because they let users see trends without changing the structure or order of the data. They are helpful for both numerical and categorical ties. Studies with users showed that changes in how people saw things made finding patterns and trends in large, complex datasets easier. This made it easier for PCPs to look around [@chang2018]. In areas with many people, it could be useful because overlapped lines can make it harder to see.
 
 ## References
 
