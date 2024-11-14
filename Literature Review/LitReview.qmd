@@ -49,7 +49,8 @@ Parallel coordinate plots (PCPs) leverage the projective space rather than the C
 suppressWarnings(ggpairs(penguins[,c(1, 3:6)], aes(colour = species),
   columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]", "flipper_length[mm]", "body_mas[g]" ) ) +
  theme(strip.text.y = element_text(size = 6),
-       strip.text.x = element_text(size = 6))
+       strip.text.x = element_text(size = 6)) +
+  theme(axis.text.x = element_text(angle=45))
   
   )
 ```
@@ -73,7 +74,8 @@ penguins %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = species)) + 
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45))
 
 ```
 
@@ -139,7 +141,8 @@ ggparcoord(
      theme_minimal() +
      labs(title = "Parallel Coordinate Plot with Bundling and Curving",
                    x = "Variables",
-                   y = "Scaled Value")
+                   y = "Scaled Value") +
+  theme(axis.text.x = element_text(angle=45))
 
 ```
 
@@ -206,7 +209,8 @@ ggparcoord(
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
                 y = "Scaled PCA Values",
-                x = "Principal Components")
+                x = "Principal Components") +
+  theme(axis.text.x = element_text(angle=45))
 
 ```
 
@@ -255,7 +259,8 @@ ggparcoord(
   ggplot2::labs(title = "Parallel Coordinate Plot with Enhanced Color Encoding and Shading",
                 y = "Scaled Values",
                 x = "Variables") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle=45))
 ```
 
 In @fig-encoding, the parallel coordinate plot uses enhanced color coding. It might have changed the line density, which makes the differences between species (Adelie is red, Chinstrap is green, and Gentoo is blue) more obvious across the variables (bill length, bill depth, flipper length, and body mass). The plot does a good job of showing general trends for each species. For example, the Gentoo tends to have higher flipper length and body mass values, while the Adelie tends to have lower values. Overplotting is still a problem, especially near the middle ranges of each axis, which hides small differences and makes it hard to find outliers directly. The plot doesn't show individual distribution shapes, but how the lines are grouped on each axis suggests that each species has central tendencies. The general trends of each species' lines suggest relationships between numerical factors, but it still needs to be easier to figure out individual correlations because they overlap. This graph gives a broad picture of trends across species, but it could be better at picking out specific data points or rare observations. 
@@ -309,7 +314,8 @@ ggparcoord(
                 y = "Scaled Values",
                 x = "Variables") +
   theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() # Flip the y-axis to observe the effect
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
+  theme(axis.text.x = element_text(angle=45))
 ```
 
 In @fig-reordering, the parallel coordinate map changes the variables by rearranging them and flipping the axes to show patterns and connections between the penguin species more clearly. By flipping some axes and putting related factors closer together (like body mass and flipper length), the plot makes species-based trends stand out more: The Gentoo (blue) tends to have a shallower bill but a bigger body and longer flippers, while the Adelie (red) tends to have the opposite pattern. Overplotting is still a problem, especially when values are close together in the middle ranges, making it hard to tell the difference between lines or peaks. You can't see the distributions' exact forms, but the lines' density and spread along each axis give you a good idea of the range of values for each species. The new order makes relationships between variables stand out more because the changes between the axes make species-based correlations in measurement trends more apparent. However, individual relationships are still hard to see because lines cross.
@@ -365,7 +371,8 @@ ggparcoord(
   ggplot2::labs(title = "Parallel Coordinate Plot with Cluster-Based",
                 y = "Scaled Values",
                 x = "Variables") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle=45))
 ```
 
 ### Optimized Layout Algorithms
@@ -408,7 +415,8 @@ ggparcoord(
   ggplot2::labs(title = "Parallel Coordinate Plot with Optimized Layout",
                 y = "Scaled Values",
                 x = "Variables") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  theme(axis.text.x = element_text(angle=45))
 ```
 
 ### Categorical and Hybrid PCPs
@@ -454,7 +462,8 @@ penguins_clean_cat %>%
                 y = "Scaled Values",
                 x = "Variables") +
   theme(legend.position = "bottom") +
-  facet_wrap(~sex)
+  facet_wrap(~sex) +
+  theme(axis.text.x = element_text(angle=45))
 ```
 
 ## Handling Numerical Ties
@@ -487,6 +496,7 @@ Rank jittering is another useful method for non-parametric analyses. It changes 
 In rank jittering, we adjust the ranks of tied observations by adding a small random or systematic jitter to each tied rank. This is usually applied to data that will undergo rank-based testing.
 
 for tied ranks $R_1, R_2,...,R_n$:
+
 $$
 R'_i = R_ii + \delta_i
 $$
@@ -555,8 +565,7 @@ where:
 
 The choice of bandwidth $h$ controls the amount of smoothing, which helps visually differentiate tied values.
 
-Each of these ways is a useful way to see data with ties, as long as the type of show and how the data is distributed are carefully matched. How the data is structured and what kind of visualization is wanted to determine the best method. Random and deterministic jittering, for instance, work well in general scatterplots by spreading out overlapping points. On the other hand, kernel density estimation (KDE) and rank-based changes work better for showing density or ordinal relationships. Researchers can make visual representations more straightforward, making patterns easier for viewers to access and understand, without affecting the integrity of the data structure, by carefully choosing which of these methods to use. As data gets more complicated and display needs get more advanced, the flaws in current methods show that new ones are needed. These holes can be filled with new techniques that give researchers more control and flexibility over handling and displaying linked data. This lets them share complex insights even more correctly and clearly.
-
+Each way to show data with ties has unique benefits depending on the type of display and the type of data. Random and predictable jittering, for example, works well in scatterplots because they stop the plot from getting too big and show hidden patterns. KDE and rank-based methods, on the other hand, work well in density plots and ordinal visualizations. Researchers can improve visual clarity by using only some of these methods, ensuring the representation is correct and easy to understand. However, when parallel coordinate plots are used, where multiple directions are plotted simultaneously, the old ways of dealing with ties only sometimes work. In this case, adding the distance between values tied across multiple axes could show patterns and connections that are hard to see because the lines overlap. By creating a new method for parallel coordinate plots that adds space between ties in a planned way, we could see data trends and links across dimensions more clearly while keeping the dataset's integrity. This new idea would make it easier to understand complex, multidimensional data.
 
 
 ## Handling Ties in PCPs
@@ -566,6 +575,44 @@ The idea of adding distance to visual ties has changed over time as methods for 
 ### Axis Reordering
 
 As mentioned in the section on modifications, axis reordering changes the order of dimensions to reduce the number of times lines cross between variables in PCPs, a type of data display. This method makes clusters easier to see by lining up visually linked variables, cutting down on clutter, and making patterns stand out more without overlapping. One benefit is that it works well for datasets where certain factors are strongly related, making clusters and trends easier to read without changing the data. Changing the variable order for clarity rather than data continuity could make it hard to tell if the data is in order. Blumenschein et al. say that "reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge." This shows how important changing the arrangement can be for seeing clearly. Studies in this area have shown that changing the order of dimensions makes it much easier to find patterns in datasets where dimensions are linked. However, it only works well on datasets with dimensions tied together [@blumenschein2020].
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-axis
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "PCP Without Axis Reordering"
+#|   - "PCP With Skewness Axis Reordering"
+
+penguins <- na.omit(penguins)
+
+# Example of a parallel coordinate plot without handling ties explicitly
+p1 <- ggparcoord(
+  data = penguins,
+  columns = 3:6,  # Columns for numerical features (bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
+  groupColumn = 1,
+  scale = "uniminmax",  # Scaling to [0, 1] for better visualization
+) +
+  #ggtitle("Without Axis Reordering")  +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45))
+
+# Example of a parallel coordinate plot with axis reordering to minimize tie overlap
+p2 <- ggparcoord(
+  data = penguins,
+  columns = 3:6,  # Columns for numerical features
+  groupColumn = 1,
+  scale = "uniminmax",
+  order = "skewness") +   # skewness axis reordering to handle ties and improve interpretability
+  #ggtitle("With Skewness Axis Reordering") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45))
+
+grid.arrange(p1,p2, ncol=2)
+
+```
+
 
 
 ### Line Bundling
@@ -613,7 +660,8 @@ ggparcoord(
   theme_minimal() + 
   labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset",
        x = "Attributes",
-       y = "Quantized/Encoded Values") 
+       y = "Quantized/Encoded Values") +
+  theme(axis.text.x = element_text(angle=45))
 ```
 
 In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals. Quantization makes the visualization even easier by putting numbers into groups. However, this needs to improve some of the accuracy of the original data. The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live. Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
