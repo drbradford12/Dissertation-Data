@@ -145,6 +145,7 @@ ggparcoord(
      labs(title = "Parallel Coordinate Plot with Bundling and Curving",
                    x = "Variables",
                    y = "Scaled Value") +
+  theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45))
 
 ```
@@ -205,13 +206,14 @@ ggparcoord(
   groupColumn = 5,
   scale = "uniminmax", # Scale columns to range between [0, 1]
   alphaLines = 0.3, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
+  #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species) # Color lines by species
 ) +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
                 y = "Scaled PCA Values",
                 x = "Principal Components") +
+  theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45))
 
 ```
@@ -252,7 +254,7 @@ ggparcoord(
   groupColumn = 1,
   scale = "uniminmax", # Scale columns to range between [0, 1]
   alphaLines = 0.5, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
+  #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species), # Color lines by species
   shadeBox = NULL # Use to add shading to enhance visual distinction between variables
 ) +
@@ -307,7 +309,7 @@ ggparcoord(
   groupColumn = 1,
   scale = "uniminmax", # Scale columns to range between [0, 1]
   alphaLines = 0.5, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
+  #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
   #scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
@@ -409,7 +411,7 @@ ggparcoord(
   groupColumn = "species",
   scale = "uniminmax", # Scale columns to range between [0, 1]
   alphaLines = 0.5, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
+  #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
   scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
@@ -493,7 +495,8 @@ VanderPlas and her colleagues investigate more deeply how useful Hammock plots a
 data(mtcars)
 
 ggparallel(list("gear", "cyl"), data=mtcars, method="hammock", ratio=0.25) + 
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "bottom") 
 # Filter out NA values for easier plotting
 # penguins_clean <- penguins %>% 
 #   na.omit() %>%
@@ -664,6 +667,7 @@ p1 <- ggparcoord(
 ) +
   #ggtitle("Without Axis Reordering")  +
   theme_minimal() +
+  theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45))
 
 # Example of a parallel coordinate plot with axis reordering to minimize tie overlap
@@ -675,6 +679,7 @@ p2 <- ggparcoord(
   order = "skewness") +   # skewness axis reordering to handle ties and improve interpretability
   #ggtitle("With Skewness Axis Reordering") +
   theme_minimal() +
+  theme(legend.position = "bottom")  +
   theme(axis.text.x = element_text(angle=45))
 
 # Try using patchwork. Think about removing the legend and adding that in the section.
@@ -723,13 +728,14 @@ ggparcoord(
   columns = 2:8,    # Use all columns, including encoded categorical variables
   groupColumn = 1,  # Grouping by species
   scale = "uniminmax", # Scale columns to the same range
-  showPoints = TRUE,   # Show points on the lines
+  #showPoints = TRUE,   # Show points on the lines
   alphaLines = 0.6     # Transparency of lines
 ) + 
   theme_minimal() + 
   labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset",
        x = "Attributes",
        y = "Quantized/Encoded Values") +
+  theme(legend.position = "bottom")  +
   theme(axis.text.x = element_text(angle=45))
 ```
 

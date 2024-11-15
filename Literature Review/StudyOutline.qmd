@@ -1,0 +1,89 @@
+---
+title: "Empirical Study Outline"
+format: pdf
+bibliography: thesis.bib
+bibliographystyle: apa
+---
+
+# Study Objectives and Research Questions
+
+The main objective is to assess if adding distance between numerical ties in parallel coordinate plots enhances visual effectiveness, specifically regarding clarity, accuracy, and interpretation speed. We will address two conditions:
+
+   - **Condition A (No Tie Distancing)**: Standard parallel coordinate plots where tied values remain closely clustered.
+   - **Condition B (Tie Distancing)**: Modified parallel coordinate plots with added distance between tied values.
+
+*Research Questions*:
+
+   - Does artificial separation of ties improve viewers' ability to distinguish and interpret data accurately?
+   - Does tie distancing reduce cognitive load and interpretation time?
+
+# Theoretical Background
+
+According to perceptual theory, effective data visualization requires “a high degree of legibility and interpretability” to minimize cognitive strain [@ware2008]. Tied values in parallel coordinate plots can create visual congestion, potentially leading to overlapping lines that obscure relationships among variables. Cleveland and McGill argue that “the ability to make perceptual judgments about relative positions is foundational to interpreting data visualizations,” [@cleveland1984]. By this reasoning, adding distance between tied values may reduce visual noise and improve data legibility.
+
+# Hypothesis
+
+   - **H1**: Participants will exhibit higher accuracy in interpreting data in Condition B (with tie distancing) compared to Condition A.
+   - **H2**: Participants will have reduced cognitive load (e.g., faster interpretation times) in Condition B.
+   - **H3**: User-reported satisfaction with data clarity will be higher in Condition B.
+
+# Methodology
+
+## Participants
+Recruit 50-100 participants with a basic understanding of data interpretation and visualization (e.g., university students, data analysts).
+
+## Experimental Design
+   - **Independent Variable**: Visualization condition (no tie distancing vs. tie distancing).
+   - **Dependent Variables**:
+       - Interpretation accuracy (correctness of answers to questions about the data).
+       - Interpretation time (measured in seconds).
+       - Subjective clarity (self-reported on a Likert scale).
+
+## Data Design
+We will create two sets of synthetic data with and without ties, respectively, for comparability across visual conditions.
+
+   - **Dataset with Ties**: Each parallel coordinate plot will contain variables with deliberately tied values.
+   - **Dataset without Ties**: Each parallel coordinate plot will contain values without ties to isolate the effect of tie distancing.
+
+Each plot will be modified to represent both Condition A and Condition B, ensuring uniformity across datasets for accurate comparison.
+
+# Procedure
+
+1. **Training**: Participants are introduced to parallel coordinate plots and given practice interpreting data.
+2. **Data Visualization Testing**:
+   - Participants are presented with a randomized mix of parallel coordinate plots from both conditions.
+   - For each plot, participants answer interpretation questions such as:
+       - Identify the variable with the highest and lowest values.
+       - Identify clusters or trends within the plot.
+       - Assess relationships between variables.
+3. **Response Recording**:
+   - Record the accuracy of responses for each plot.
+   - Measure the time taken to answer each question.
+   - Collect subjective clarity ratings after each visualization.
+
+# Data Analysis
+
+1. **Accuracy Comparison**:
+   - Calculate the percentage of correct responses in Conditions A and B using a paired t-test to determine significant differences.
+   
+2. **Interpretation Time Comparison**:
+   - Conduct a paired t-test on interpretation times for each condition, hypothesizing that tie distancing reduces time.
+
+3. **Subjective Clarity Ratings**:
+   - Analyze Likert scale clarity ratings using a Wilcoxon signed-rank test.
+
+# Anticipated Results and Theoretical Implications
+
+   - **Hypothetical Outcome**: We anticipate that Condition B will yield higher interpretation accuracy and faster response times, supporting the hypothesis that tie distancing enhances visual clarity.
+   - **Theoretical Implications**: “Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships” [@tufte2001]. This approach is also aligned with Cleveland’s findings that “enhancing clarity in visualizations improves interpretability and decision-making,” a critical outcome for those using visualizations in high-stakes fields like finance and healthcare.
+
+# Potential Limitations
+
+   - **Learning Effects**: Familiarity with parallel coordinate plots could influence interpretation speed, requiring control for experience.
+   - **Visual Complexity**: Variations in data complexity may impact results; hence, datasets should be calibrated for uniform difficulty across conditions.
+
+# Conclusion
+
+This study aims to provide empirical evidence on the benefits of adding distance between tied values in parallel coordinate plots. Findings could inform best practices in data visualization, especially for datasets with common values, by enhancing visual clarity and interpretive efficiency.
+
+# Reference
