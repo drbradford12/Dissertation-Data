@@ -3,6 +3,7 @@ title: "Lit Review for handling numerical ties in PCPs"
 author: "Denise Bradford"
 format: pdf
 bibliography: thesis.bib
+bibliographystyle: apa
 ---
 
 ```{r include_packages, include = FALSE}
@@ -475,7 +476,7 @@ People think of Hammock plots as a type of parallel coordinate plot, and they wo
 
 Kavvadias et al. use a decomposition method called "Hammock-on-ears" to work on bigger graph-theoretic problems. This method makes it easy to find ties in large datasets and can "enhance visualization efficiency in large datasets with structural numerical ties." This shows that Hammock plots can handle large amounts of complex data. However, they warn that "the method may require significant computational resources," which means it might not work for simpler or smaller-scale tasks [@kavvadias1996].
 
-Pilhöfer et al.'s study also shows that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters. This is especially helpful in datasets that are hard to see because Hammock plots make it easier to separate the data. Still, Unwin points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." He suggests that Hammock plots work best for datasets with clear clusters [@pilhofer2012].
+Pilhöfer et al.'s study also shows that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters. This is especially helpful in datasets that are hard to see because Hammock plots make it easier to separate the data. Still, Pilhöfer et al. points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." They suggest that Hammock plots work best for datasets with clear clusters [@pilhofer2012].
 
 Ge and Hofmann improve the framework for visualizing data by adding Hammock plots to a grammar-based system. This makes them better suited for data that has both category and numerical relationships. They say this grammar-based adaptation "retains the established behaviors of parallel coordinates" while giving you more options for dealing with edge cases like categorical ties. This makes Hammock plots more flexible for use with large datasets. However, they warn that the system's complexity may "require additional understanding and expertise," which could turn off people unfamiliar with graphical grammar frameworks [@ge2020].
 
@@ -524,10 +525,15 @@ ggparallel(list("gear", "cyl"), data=mtcars, method="hammock", ratio=0.25) +
 
 ```
 
+@fig-hammock is a Hammock plot that shows the relationship between two categorical variables, gear and cylinders (cyl). Each color-coded band represents a different category within these variables. The plot provides frequency but lacks precise counts or numeric values. Overplotting is evident, making it difficult to trace individual pathways. The plot shows the general distribution and relationships between gear and cylinder categories, but lacks numeric relationships or exact proportions.
 
 # Handling Numerical Ties
 
 Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. Previously, statistical methods focused on rank-based approaches and binary data handling. They often needed help with tied observations, which threw off distributions or made them more complex. Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. There are now several ways to deal with ties, such as slowly increasing the space between values. This makes the visualization more accurate and easier to understand without changing the structure of the data itself. 
+
+Tufte’s work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise—any element that complicates or crowds the visual field—can impede the interpretation of data. He advocates for “graphical excellence,” a design philosophy that presents data most clearly and efficiently. According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. “Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships,” [@tufte2001].
+
+In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. Tufte calls this "chartjunk." He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. For instance, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard.
 
 
 ## Random Jittering of Data Points
@@ -630,6 +636,9 @@ Each way to show data with ties has unique benefits depending on the type of dis
 # Handling Ties in PCPs
 
 The idea of adding distance to visual ties has changed over time as methods for visualizing data have improved to find a balance between detail and clarity in large datasets. In the early days of visualization, especially in network analysis and multidimensional scaling, closeness and alignment were the main ways to show patterns and ties between things. However, as data grew, visual clutter became a big problem. This was especially true in parallel coordinates plots (PCPs), where lines and intersections that overlapped made it hard to see the underlying data structure. To fix this problem, researchers started looking into ways to give representational parts of these graphs more "visual distance." They did this using methods like line bundling and changing the spacing between lines to avoid overplotting. This change is emphasized by Chang et al., who say that "perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns," [@chang2018]. This shows how separating visual elements can help with cognitive grouping without breaking up the continuity of the data. In PCPs, early studies showed that visual distance could make intersections clearer and improve the overall shape of individual paths. As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005]. This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
+
+
+
 
 ## Axis Reordering
 
