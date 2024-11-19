@@ -114,7 +114,7 @@ The Gentoo (blue) tends to have higher body mass and flipper length values, whil
 <!-- For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension.  -->
 [The original]{.svp} PCPs can be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}. 
 [The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot .]{.svp}
-A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp}
+[A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp}
 [In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johannsen2012] may support identification of clusters and outliers in multidimensional space.]{.svp}
 
 ```{r}
