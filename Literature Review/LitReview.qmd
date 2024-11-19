@@ -1,9 +1,21 @@
 ---
 title: "Lit Review for handling numerical ties in PCPs"
 author: "Denise Bradford"
-format: pdf
+format: 
+  pdf:
+    include-in-header:
+      text: |
+        \usepackage[dvipsnames]{xcolor} % colors
+        \newcommand{\db}[1]{{\textcolor{blue}{#1}}}
+        \newcommand{\svp}[1]{{\textcolor{RedOrange}{#1}}}
+        \newcommand{\hh}[1]{{\textcolor{Green}{#1}}}
+  html:
+    css: edits.css
 bibliography: thesis.bib
 bibliographystyle: apa
+filters:
+   - latex-environment
+commands: [db,svp,hh]
 ---
 
 ```{r include_packages, include = FALSE}
@@ -20,48 +32,89 @@ library(ggparallel)
 ```
 
 # Introduction
+[I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}
 
-Our data-driven modern civilization now depends heavily on the ability to precisely evaluate and exploit huge and complex datasets. A common way to visually show high-dimensional data is with parallel coordinate plots (PCPs). These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
+Our data-driven modern civilization [A bit trite...]{.svp} now depends heavily on the ability to precisely evaluate and exploit [exploit?? Maybe a different word?]{.svp} huge and complex datasets. A common way [Not sure PCPs are actually all that common, but they are a good solution]{.svp} to visually show high-dimensional data is with parallel coordinate plots (PCPs). These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
 
-The accuracy of data interpretation is highest when dealing directly with numerical values or one-dimensional visual representations [@spence1990]. That is becoming more and more impractical as the size and dimension of datasets continue to increase. To make judgments based on data, it is necessary to find methods of simplifying and consolidating datasets without sacrificing significant information. Data visualization, such as graphs or tables, is often an essential and invaluable intermediate step between raw data and an observer's decision-making process. An effective data visualization communicates the gist of a data set in a way that is easy for an observer to understand and evaluate; ideally, data visualizations slightly sacrifice accuracy (relative to a table of values) in favor of a greater understanding of the relationship between observations or variables.
+The accuracy of data interpretation is highest when dealing directly with numerical values or one-dimensional visual representations [@spence1990]. That is becoming more and more impractical as the size and dimension of datasets continue to increase. To make judgments based on data, it is necessary to find methods of simplifying and consolidating datasets without sacrificing significant information. Data visualization, such as graphs or tables, is often an essential and invaluable intermediate step between raw data and an observer's decision-making process. An effective data visualization communicates the gist of a data set in a way that is easy for an observer to understand and evaluate; ideally, data visualizations slightly sacrifice accuracy (relative to a table of values) in favor of a greater understanding of the relationship between observations or variables. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp}
 
 Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the x and y axis. Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than p = 3 or 4 variables are shown (including the x and y coordinates). When it is necessary to understand the relationship between more than four variables, visualizations on a Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@inselberg1997]. Other approaches are necessary when it is necessary to understand $p > 4$ dimensions of data. Here, we examine parallel coordinate plots (PCPs) as a solution to $p > 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high N and/or high p dimensional data. We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N > 4$ dimensional data across different magnitudes of N (observations) and p (variables).
 
-Stimulus-responsive attention often arises when an observer recognizes that a particular graphical element in a stimulus signals valuable information, guiding further search to improve judgment accuracy. @spence1990 talked about the importance of visual psychophysics in figuring out how simple parts of graphs can be used to convey information. He stressed that how well we can understand graphs relies on our cognitive and visual abilities. Cleveland and McGill's study on graphical perception in 1984 found that people have different skill levels when decoding multidimensional data [@cleveland1984]. This shows that designs like generalized parallel coordinate plots must consider cognitive and perceptual variability. These plots show many dimensions within a single visual glyph, and the small changes between them make it much harder to understand complicated visual data. Additional studies, like @heer2010 and @simkin1987, built on these ideas by showing that mistakes happen at different points in information processing and that different graphs are better for different jobs depending on the user's accuracy. It was emphasized by @carswell1992 and @shah2011 that task difficulty and perceptual processes interact. These articles say differences in how people think and perceive things should be considered when making generalized parallel coordinate plots to show multidimensional data.
+Stimulus-responsive attention often arises when an observer recognizes that a particular graphical element in a stimulus signals valuable information, guiding further search to improve judgment accuracy. @spence1990 talked about the importance of visual psychophysics in figuring out how simple parts of graphs can be used to convey information. He stressed that how well we can understand graphs relies on our cognitive and visual abilities. Cleveland and McGill's study on graphical perception in 1984 found that people have different skill levels when decoding multidimensional data [@cleveland1984]. This shows that designs like generalized parallel coordinate plots must consider cognitive and perceptual variability. These plots show many dimensions within a single visual glyph, and the small changes between them make it much harder to understand complicated visual data. Additional studies, like @heer2010 and @simkin1987, built on these ideas by showing that mistakes happen at different points in information processing and that different graphs are better for different jobs depending on the user's accuracy. It was emphasized by @carswell1992 and @shah2011 that task difficulty and perceptual processes interact. These articles say differences in how people think and perceive things should be considered when making generalized parallel coordinate plots to show multidimensional data. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp}
 
 # Parallel Coordinate Plots (PCPs)
 
-## Why?
+Parallel coordinate plots (PCPs) leverage  a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg:1985]. 
+The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp} 
 
-Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. This means that complex relationships between different factors can be studied repeatedly. PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
-
-Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
-
-## What?
-
-Parallel coordinate plots (PCPs) leverage the Projective space rather than the Cartesian coordinate system: each line in Cartesian space is a set of points in Projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg:1985]. The result is that a single data point is For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension. Conventional PCPs can be difficult to interpret because of overplotting - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments. <!--It needs to improve its interpretability by having clutter and overlapping lines while handling big datasets. Generalized PCPs (GPCPs) introduced several different methods: By including axis reordering, bundling, and dimensionality reduction to solve these problems, generalized parallel coordinate plots (GPCPs) expand the conventional PCP.--> These improvements in clarity and usability of PCPs utilizing data pattern highlighting and visual clutter reduction help [@density-pcp], for example, present several approaches to bundle comparable trajectories in PCPs, so minimizing overlap and improving pattern identification; Johannsen et al. address the advantages of dynamic axis reordering to highlight different data characteristics [@johannsen2012].
 
 ```{r}
 #| echo: false
 #| warning: false
 #| label: fig-ggpairs
 #| layout-valign: bottom
-#| fig-subcap: 
-#|   - "A generalized pairs plot"
+#| fig-cap: "A generalized pairs plot"
+#| fig-width: 8
+#| fig-height: 8
 
-suppressWarnings(ggpairs(penguins[,c(1, 3:6)], aes(colour = species),
-  columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]", "flipper_length[mm]", "body_mas[g]" ) ) +
- theme(strip.text.y = element_text(size = 6),
-       strip.text.x = element_text(size = 6)) +
+suppressWarnings(
+  ggpairs(penguins[,c(1, 3:6)], 
+          aes(colour = species),
+          columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]",
+                           "flipper_length[mm]", "body_mas[g]" ), 
+          diag = list(continuous = wrap("densityDiag", alpha = 0.5),
+                      discrete = "barDiag"))+
   theme(axis.text.x = element_text(angle=45))
-  
   )
 ```
 
-@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatter plots, and correlation matrices. It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. Histograms and density plots make it easy to see how each variable (bill length, bill depth, flipper length, and body mass) is spread across the different species. The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data.
 
-The scatter plots, in @fig-ggpairs, show how two numerical variables are related to each other. There is a clear trend for overplotting in denser areas, especially for bill depth vs. bill length and flipper length vs. bill length. The correlation values show more information about these connections. They show strong positive and negative correlations, with some species having different patterns. For example, in Gentoo penguins, there is a strong positive correlation between the length of their flippers and their body mass. Other species have different association patterns, which means that the ways that traits are related can be different for each species. Overall, the matrix-style plot does an excellent job of showing the links within and between variables. However, it is hard to understand precisely what overlapping areas mean in scatter plots because individual points are hard to see.
+@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatter plots, and correlation matrices. 
+It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. 
+Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). 
+The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values.
+In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data.
+The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}.
+[While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} 
+Overall, the matrix-style plot does an excellent job of showing the links within and between variables. 
+[The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
 
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-pcp
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "A parallel coordinate plot"
+
+penguins %>%
+  pcp_select(3:6) %>%
+  pcp_scale(method="uniminmax") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = species)) + 
+  theme_pcp() 
+
+```
+
+In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. 
+The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. 
+[There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. Even in projection space, we can see Simpson's paradox at work; the middle plot in the fourth row of @fig-ggpairs shows the same basic information.]{.svp}
+[While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp}
+[At each vertical axis, the plot resembles a rug plot, which can provide some information about density, but is less direct than a continuous density plot, such as those shown on the diagonal of @fig-ggpairs.]{.svp} XXX citation for rug plots? XXX
+
+<!-- It's hard to directly find outliers in @fig-pcp because the merging lines make it hard to see individual differences.  -->
+<!-- The plot doesn't show specific distribution shapes like a histogram or density plot, but how the lines are grouped at specific value ranges shows how each species generally behaves.  -->
+<!-- The slope and intersection patterns of the lines suggest that the variables are related.  -->
+<!-- Note that the plot demonstrates that if the length of a bird's bill goes up, other variables may go up or down similarly, based on the species.  -->
+<!-- Overall, the plot works well for seeing broad patterns and trends across species, but it could be better at picking out specific data points or weak connections because it's too crowded on the screen. -->
+
+<!-- For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension.  -->
+[The original]{.svp} PCPs can be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}. 
+[The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot.]{.svp}
+[In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johannsen2012] may support identification of clusters and outliers in multidimensional space.]{.svp}
 
 ```{r}
 #| echo: false
@@ -77,15 +130,29 @@ penguins %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = species)) + 
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle=45)) 
-
-
+  theme_pcp() 
 ```
 
-In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. However, the large number of lines makes it hard to see smaller details, and it's hard to pick out individual spots or clear outliers in this visualization.
+<!-- - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments.  -->
+<!-- [PCP] -->
+<!--It needs to improve its interpretability by having clutter and overlapping lines while handling big datasets. Generalized PCPs (GPCPs) introduced several different methods: By including axis reordering, bundling, and dimensionality reduction to solve these problems, generalized parallel coordinate plots (GPCPs) expand the conventional PCP.--> 
+<!-- These improvements in clarity and usability of PCPs utilizing data pattern highlighting and visual clutter reduction help [@density-pcp], for example, present several approaches to bundle comparable trajectories in PCPs, so minimizing overlap and improving pattern identification; Johannsen et al. address the advantages of dynamic axis reordering to highlight different data characteristics [@johannsen2012]. -->
 
-It's hard to directly find outliers in @fig-pcp because the merging lines make it hard to see individual differences. The plot doesn't show specific distribution shapes like a histogram or density plot, but how the lines are grouped at specific value ranges shows how each species generally behaves. The slope and intersection patterns of the lines suggest that the variables are related. Note that the plot demonstrates that if the length of a bird's bill goes up, other variables may go up or down similarly, based on the species. Overall, the plot works well for seeing broad patterns and trends across species, but it could be better at picking out specific data points or weak connections because it's too crowded on the screen.
+
+
+## Why?
+
+Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
+This means that complex relationships between different factors can be studied repeatedly. 
+PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
+However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. 
+It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
+
+Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. 
+They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
+Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
+They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
+Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
 
 
 # Modifications to Parallel Coordinate Plots
