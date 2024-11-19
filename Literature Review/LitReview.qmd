@@ -121,16 +121,18 @@ The Gentoo (blue) tends to have higher body mass and flipper length values, whil
 #| warning: false
 #| label: fig-pcp
 #| layout-valign: bottom
-#| fig-subcap: 
-#|   - "A parallel coordinate plot"
+#| fig-cap: "A generalized parallel coordinate plot, with species on the left and right of the plot; observations are ordered on the right side based on the value of body_mass_g, and on the left side based on the value of bill_length_mm. Translucent lines reduce the impact of overplotting and allow perception of the Adelie lines (which are plotted first) even as the Gentoo and Chinstrap lines are plotted on top. With this treatment, we can see that the strong positive relationship between bill depth and flipper length in Gentoo penguins is much less pronounced in Adelie and Chinstrap penguins; there are many more line crossings in both species, which suggests a more moderate relationship."
 
 penguins %>%
   pcp_select(species, 3:6, species) %>%
   pcp_scale(method="uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
-  geom_pcp_axes() +
-  geom_pcp(aes(colour = species)) + 
-  theme_pcp() 
+  geom_pcp(aes(colour = species), alpha = 0.5) + 
+  geom_pcp_boxes() + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  scale_color_discrete(guide = "none")
 ```
 
 <!-- - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments.  -->
