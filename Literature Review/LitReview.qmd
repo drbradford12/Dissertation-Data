@@ -5,10 +5,11 @@ format:
   pdf:
     include-in-header:
       text: |
+        \usepackage{soul}
         \usepackage[dvipsnames]{xcolor} % colors
-        \newcommand{\db}[1]{{\textcolor{blue}{#1}}}
+        \newcommand{\db}[1]{{\textcolor{Green}{#1}}}
         \newcommand{\svp}[1]{{\textcolor{RedOrange}{#1}}}
-        \newcommand{\hh}[1]{{\textcolor{Green}{#1}}}
+        \newcommand{\hh}[1]{{\textcolor{blue}{#1}}}
   html:
     css: edits.css
 bibliography: thesis.bib
@@ -32,9 +33,16 @@ library(ggparallel)
 ```
 
 # Introduction
+
 [I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}
 
-Our data-driven modern civilization [A bit trite...]{.svp} now depends heavily on the ability to precisely evaluate and exploit [exploit?? Maybe a different word?]{.svp} huge and complex datasets. A common way [Not sure PCPs are actually all that common, but they are a good solution]{.svp} to visually show high-dimensional data is with parallel coordinate plots (PCPs). These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
+[In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
+
+[Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@alber2020]. Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.]{.db}
+
+[\st{ Our data-driven modern civilization [A bit trite...]{.svp} now depends heavily on the ability to precisely evaluate and exploit [exploit?? Maybe a different word?]{.svp} huge and complex datasets. A common way [Not sure PCPs are actually all that common, but they are a good solution]{.svp} to visually show high-dimensional data is with parallel coordinate plots (PCPs).}]{.db} 
+
+[Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg:1985]. By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.]{.db} These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
 
 The accuracy of data interpretation is highest when dealing directly with numerical values or one-dimensional visual representations [@spence1990]. That is becoming more and more impractical as the size and dimension of datasets continue to increase. To make judgments based on data, it is necessary to find methods of simplifying and consolidating datasets without sacrificing significant information. Data visualization, such as graphs or tables, is often an essential and invaluable intermediate step between raw data and an observer's decision-making process. An effective data visualization communicates the gist of a data set in a way that is easy for an observer to understand and evaluate; ideally, data visualizations slightly sacrifice accuracy (relative to a table of values) in favor of a greater understanding of the relationship between observations or variables. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp}
 
@@ -44,9 +52,7 @@ Stimulus-responsive attention often arises when an observer recognizes that a pa
 
 # Parallel Coordinate Plots (PCPs)
 
-Parallel coordinate plots (PCPs) leverage  a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg:1985]. 
-The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp} 
-
+Parallel coordinate plots (PCPs) leverage a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg:1985]. The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp}
 
 ```{r}
 #| echo: false
@@ -68,18 +74,7 @@ suppressWarnings(
   )
 ```
 
-
-@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatter plots, and correlation matrices. 
-It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. 
-Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). 
-The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values.
-In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data.
-The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}.
-[While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} 
-Overall, the matrix-style plot does an excellent job of showing the links within and between variables. 
-[The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
-
-
+@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatterplots, and correlation matrices. It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data. The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}. [While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} Overall, the matrix-style plot does an excellent job of showing the links within and between variables. [The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
 
 ```{r}
 #| echo: false
@@ -99,23 +94,21 @@ penguins %>%
 
 ```
 
-In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. 
-The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. 
-[There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. Even in projection space, we can see Simpson's paradox at work; the middle plot in the fourth row of @fig-ggpairs shows the same basic information.]{.svp}
-[While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp}
-[At each vertical axis, the plot resembles a rug plot, which can provide some information about density, but is less direct than a continuous density plot, such as those shown on the diagonal of @fig-ggpairs.]{.svp} XXX citation for rug plots? XXX
+In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. [There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. Even in projection space, we can see Simpson's paradox at work; the middle plot in the fourth row of @fig-ggpairs shows the same basic information.]{.svp} [While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp} [At each vertical axis, the plot resembles a rug plot, which can provide some information about density, but is less direct than a continuous density plot, such as those shown on the diagonal of @fig-ggpairs.]{.svp} [@cleveland1993]{.db}
 
 <!-- It's hard to directly find outliers in @fig-pcp because the merging lines make it hard to see individual differences.  -->
+
 <!-- The plot doesn't show specific distribution shapes like a histogram or density plot, but how the lines are grouped at specific value ranges shows how each species generally behaves.  -->
+
 <!-- The slope and intersection patterns of the lines suggest that the variables are related.  -->
+
 <!-- Note that the plot demonstrates that if the length of a bird's bill goes up, other variables may go up or down similarly, based on the species.  -->
+
 <!-- Overall, the plot works well for seeing broad patterns and trends across species, but it could be better at picking out specific data points or weak connections because it's too crowded on the screen. -->
 
 <!-- For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension.  -->
-[The original]{.svp} PCPs can be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}. 
-[The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot .]{.svp}
-[A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp}
-[In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johannsen2012] may support identification of clusters and outliers in multidimensional space.]{.svp}
+
+[The original]{.svp} PCPs can be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}. [The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot .]{.svp} [A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp} [In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johansson2015] may support identification of clusters and outliers in multidimensional space.]{.svp}
 
 ```{r}
 #| echo: false
@@ -137,26 +130,18 @@ penguins %>%
 ```
 
 <!-- - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments.  -->
+
 <!-- [PCP] -->
-<!--It needs to improve its interpretability by having clutter and overlapping lines while handling big datasets. Generalized PCPs (GPCPs) introduced several different methods: By including axis reordering, bundling, and dimensionality reduction to solve these problems, generalized parallel coordinate plots (GPCPs) expand the conventional PCP.--> 
+
+<!--It needs to improve its interpretability by having clutter and overlapping lines while handling big datasets. Generalized PCPs (GPCPs) introduced several different methods: By including axis reordering, bundling, and dimensionality reduction to solve these problems, generalized parallel coordinate plots (GPCPs) expand the conventional PCP.-->
+
 <!-- These improvements in clarity and usability of PCPs utilizing data pattern highlighting and visual clutter reduction help [@density-pcp], for example, present several approaches to bundle comparable trajectories in PCPs, so minimizing overlap and improving pattern identification; Johannsen et al. address the advantages of dynamic axis reordering to highlight different data characteristics [@johannsen2012]. -->
-
-
 
 ## Why?
 
-Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
-This means that complex relationships between different factors can be studied repeatedly. 
-PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
-However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. 
-It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
+Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. This means that complex relationships between different factors can be studied repeatedly. PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
 
-Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. 
-They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
-Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
-They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
-Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
-
+Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
 
 # Modifications to Parallel Coordinate Plots
 
@@ -180,9 +165,7 @@ The live parallel coordinates plot on Plotly's ggplot2 page has many dynamic fea
 
 Additionally, brush choices change the visualization in real-time, drawing more attention to relevant data paths and lessening the importance of others. This makes it easier to spot trends and outliers. These interactive parts work together to create an easy-to-use and adaptable way to see and analyze high-dimensional data in a parallel coordinates environment, [@plotly-pcp].
 
-
 [Interactive Parallel Coordinate Plot](https://plotly.com/ggplot2/parallel-coordinates-plot/)
-
 
 ## Bundling and Curving
 
@@ -233,7 +216,6 @@ The new approach uses density estimation methods to transform the PCP image base
 Moustafa's research indicates that to deal with even larger datasets more efficiently, future efforts should focus on enhancing density estimation methods. These methods can be used in biology and finance to demonstrate their usefulness and adaptability for examining real-world data [@moustafa2011].
 
 Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. "The clarity gained in bundle simplification comes at the cost of data precision," warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
-
 
 ## Dimension Reduction Techniques
 
@@ -292,8 +274,7 @@ ggparcoord(
 
 ```
 
-In @fig-pca, the parallel coordinate plot incorporates principal component analysis (PCA) components (PC1 to PC4) on the x-axis, with the scaled PCA values on the y-axis, color-coded by species (Adelie in red, Chinstrap in green, and Gentoo in blue). PCA reduces dimensionality, meaning that each PC represents a combination of the original variables, simplifying complex relationships. The lines between components show how each penguin transitions across these derived features, making it easier to observe general trends for each species in the reduced space. Due to the numerous overlapping lines, overplotting remains an issue, though species-level patterns are visible, with distinct separations in specific PCs. Outliers are challenging to detect due to the bundled nature of the lines. While distribution shapes aren’t explicitly visible, the clustered points at each PC axis indicate each species' general concentration of values. Though individual variability remains obscured, relationships between PCs and species are implied through color-coded clusters and trends, suggesting some separation between species along specific principal components.
-
+In @fig-pca, the parallel coordinate plot incorporates principal component analysis (PCA) components (PC1 to PC4) on the x-axis, with the scaled PCA values on the y-axis, color-coded by species (Adelie in red, Chinstrap in green, and Gentoo in blue). PCA reduces dimensionality, meaning that each PC represents a combination of the original variables, simplifying complex relationships. The lines between components show how each penguin transitions across these derived features, making it easier to observe general trends for each species in the reduced space. Due to the numerous overlapping lines, overplotting remains an issue, though species-level patterns are visible, with distinct separations in specific PCs. Outliers are challenging to detect due to the bundled nature of the lines. While distribution shapes aren't explicitly visible, the clustered points at each PC axis indicate each species' general concentration of values. Though individual variability remains obscured, relationships between PCs and species are implied through color-coded clusters and trends, suggesting some separation between species along specific principal components.
 
 ## Enhanced Color Encoding and Shading
 
@@ -341,7 +322,7 @@ ggparcoord(
   theme(axis.text.x = element_text(angle=45))
 ```
 
-In @fig-encoding, the parallel coordinate plot uses enhanced color coding. It might have changed the line density, which makes the differences between species (Adelie is red, Chinstrap is green, and Gentoo is blue) more obvious across the variables (bill length, bill depth, flipper length, and body mass). The plot does a good job of showing general trends for each species. For example, the Gentoo tends to have higher flipper length and body mass values, while the Adelie tends to have lower values. Overplotting is still a problem, especially near the middle ranges of each axis, which hides small differences and makes it hard to find outliers directly. The plot doesn't show individual distribution shapes, but how the lines are grouped on each axis suggests that each species has central tendencies. The general trends of each species' lines suggest relationships between numerical factors, but it still needs to be easier to figure out individual correlations because they overlap. This graph gives a broad picture of trends across species, but it could be better at picking out specific data points or rare observations. 
+In @fig-encoding, the parallel coordinate plot uses enhanced color coding. It might have changed the line density, which makes the differences between species (Adelie is red, Chinstrap is green, and Gentoo is blue) more obvious across the variables (bill length, bill depth, flipper length, and body mass). The plot does a good job of showing general trends for each species. For example, the Gentoo tends to have higher flipper length and body mass values, while the Adelie tends to have lower values. Overplotting is still a problem, especially near the middle ranges of each axis, which hides small differences and makes it hard to find outliers directly. The plot doesn't show individual distribution shapes, but how the lines are grouped on each axis suggests that each species has central tendencies. The general trends of each species' lines suggest relationships between numerical factors, but it still needs to be easier to figure out individual correlations because they overlap. This graph gives a broad picture of trends across species, but it could be better at picking out specific data points or rare observations.
 
 ## Reordering and Axis Flipping
 
@@ -362,7 +343,6 @@ Reordering and axis shifting work well together to fix the issue of overplotting
 By using these methods, users can better understand how multiple variables are connected, which helps them make better decisions based on visual information. Research shows that these methods make parallel coordinate plots easier to understand, more accurate, and better able to find groups and trends, all of which are very important for data analysts.
 
 Continuous reordering can create inconsistency, as users may find it challenging to track relationships when axes are frequently altered. "Constant reconfiguration of the axes can disrupt the analytical flow, making it difficult to build a stable mental model of the data structure" [@review]. Additionally, for datasets with minimal correlation, this method may offer limited value, as reordering may not result in clearer insights.
-
 
 ```{r}
 #| echo: false
@@ -457,7 +437,7 @@ ggparcoord(
 
 Layout algorithms for PCPs have been optimized to handle multi-dimensional data while minimizing line crossings, which enhances clarity and allows for smoother navigation. Optimized layouts minimize line crossings, making PCPs more straightforward, particularly with extensive, high-dimensional data. "Effective layout design in PCPs can be the difference between comprehensibility and chaos," Ankerst et al. claim, emphasizing that thoughtful placement enhances legibility [@ankerst1998].
 
-Ankerst et al. proposed a layout algorithm that places axes to minimize line crossings, increasing the legibility of high-dimensional PCPs. Johansson et al. optimized the axis positioning algorithm to maximize the space between overlapping lines, improving data distinction [@johansson2005]. Hao et al. (2007) implemented a randomized layout approach that provides an efficient layout for PCPs, beneficial for large, high-dimensional data.
+Ankerst et al. proposed a layout algorithm that places axes to minimize line crossings, increasing the legibility of high-dimensional PCPs. Johansson et al. optimized the axis positioning algorithm to maximize the space between overlapping lines, improving data distinction [@johansson2005]. <!--Hao et al. (2007) implemented a randomized layout approach that provides an efficient layout for PCPs, beneficial for large, high-dimensional data.-->
 
 Layout optimizations sometimes follow heuristic approaches that may not always align with user-defined analysis needs, possibly overlooking preferred layouts. Johansson et al. state that "algorithmically optimized layouts prioritize minimal intersections over interpretability, occasionally misaligning with the user's focus.," [@johansson2005].
 
@@ -556,7 +536,7 @@ Pilhöfer et al.'s study also shows that Hammock plots "manage clusters and reso
 
 Ge and Hofmann improve the framework for visualizing data by adding Hammock plots to a grammar-based system. This makes them better suited for data that has both category and numerical relationships. They say this grammar-based adaptation "retains the established behaviors of parallel coordinates" while giving you more options for dealing with edge cases like categorical ties. This makes Hammock plots more flexible for use with large datasets. However, they warn that the system's complexity may "require additional understanding and expertise," which could turn off people unfamiliar with graphical grammar frameworks [@ge2020].
 
-VanderPlas and her colleagues investigate more deeply how useful Hammock plots are for dealing with numerical ties in categorical datasets. They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. However, they also admit that these plots are “less effective for continuous data without ties or when categorical values are minimal,” suggesting that Hammock plots offer limited benefits in uniformly distributed datasets [@vanderplas2023].
+VanderPlas and her colleagues investigate more deeply how useful Hammock plots are for dealing with numerical ties in categorical datasets. They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. However, they also admit that these plots are "less effective for continuous data without ties or when categorical values are minimal," suggesting that Hammock plots offer limited benefits in uniformly distributed datasets [@vanderplas2023].
 
 ```{r}
 #| echo: false
@@ -606,16 +586,15 @@ ggparallel(list("gear", "cyl"), data=mtcars, method="hammock", ratio=0.25) +
 
 # Handling Numerical Ties
 
-Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. Previously, statistical methods focused on rank-based approaches and binary data handling. They often needed help with tied observations, which threw off distributions or made them more complex. Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. There are now several ways to deal with ties, such as slowly increasing the space between values. This makes the visualization more accurate and easier to understand without changing the structure of the data itself. 
+Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. Previously, statistical methods focused on rank-based approaches and binary data handling. They often needed help with tied observations, which threw off distributions or made them more complex. Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. There are now several ways to deal with ties, such as slowly increasing the space between values. This makes the visualization more accurate and easier to understand without changing the structure of the data itself.
 
-Tufte’s work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise—any element that complicates or crowds the visual field—can impede the interpretation of data. He advocates for “graphical excellence,” a design philosophy that presents data most clearly and efficiently. According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. “Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships,” [@tufte2001].
+Tufte's work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise---any element that complicates or crowds the visual field---can impede the interpretation of data. He advocates for "graphical excellence," a design philosophy that presents data most clearly and efficiently. According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. "Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships," [@tufte2001].
 
 In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. Tufte calls this "chartjunk." He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. For instance, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard.
 
-
 ## Random Jittering of Data Points
 
-Random jittering of data points is a standard method that adds a small random value to each tied observation. This is especially helpful in scatter plots and dot plots to keep them from being too dense. This approach, discussed in “Graphical Methods for Data Analysis” by Chambers et al., is easy to use and keeps the overall distribution, making things clearer without changing the data [@chambers1983]. One problem with random jittering is that it can hide exact numbers, making it hard to understand if the jittering distance is too big. Experiments show that jittering makes visualizations much clearer when there are small overlaps, especially when used rarely.
+Random jittering of data points is a standard method that adds a small random value to each tied observation. This is especially helpful in scatter plots and dot plots to keep them from being too dense. This approach, discussed in "Graphical Methods for Data Analysis" by Chambers et al., is easy to use and keeps the overall distribution, making things clearer without changing the data [@chambers1983]. One problem with random jittering is that it can hide exact numbers, making it hard to understand if the jittering distance is too big. Experiments show that jittering makes visualizations much clearer when there are small overlaps, especially when used rarely.
 
 In random jittering, we add a small random value (usually drawn from a uniform or normal distribution) to each tied observation to differentiate them.
 
@@ -627,13 +606,13 @@ $$
 
 where:
 
-- $x'_i$ is the jittered value of $x_i$,
-- $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$,
-- $\sigma$ is the standard deviation for the normal jitter. 
+-   $x'_i$ is the jittered value of $x_i$,
+-   $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$,
+-   $\sigma$ is the standard deviation for the normal jitter.
 
 ## Rank Jittering (Rank Adjustment)
 
-Rank jittering is another useful method for non-parametric analyses. It changes the ranks of tied values instead of the real data values. This makes it easier to see the ranks in non-parametric tests like the Wilcoxon signed-rank test. Conover's “Practical Nonparametric Statistics” shows that rank jittering keeps the ordinal form of data while not changing the distribution much [@conover1999]. The best thing about rank jittering is that it keeps rank-based readings while making ties less noticeable. However, the method can be hard to run on computers when dealing with big datasets, and making too many rank changes can accidentally change the test significance levels. For these reasons, it is important to be careful when using rank jittering.
+Rank jittering is another useful method for non-parametric analyses. It changes the ranks of tied values instead of the real data values. This makes it easier to see the ranks in non-parametric tests like the Wilcoxon signed-rank test. Conover's "Practical Nonparametric Statistics" shows that rank jittering keeps the ordinal form of data while not changing the distribution much [@conover1999]. The best thing about rank jittering is that it keeps rank-based readings while making ties less noticeable. However, the method can be hard to run on computers when dealing with big datasets, and making too many rank changes can accidentally change the test significance levels. For these reasons, it is important to be careful when using rank jittering.
 
 In rank jittering, we adjust the ranks of tied observations by adding a small random or systematic jitter to each tied rank. This is usually applied to data that will undergo rank-based testing.
 
@@ -645,13 +624,13 @@ $$
 
 where:
 
-- $R'_i$ is the jittered rank of $R_i$,
-- $\delta_i \sim \mathcal{N}(0,\sigma_{rank}^2)$
-- $\sigma_{rank}$ are small values ensuring that the adjustment is minor.
+-   $R'_i$ is the jittered rank of $R_i$,
+-   $\delta_i \sim \mathcal{N}(0,\sigma_{rank}^2)$
+-   $\sigma_{rank}$ are small values ensuring that the adjustment is minor.
 
 ## Deterministic Jittering (Fixed Perturbation)
 
-When you need to be clear, deterministic jitter gives you a structured way to do it by adding a small fixed value (epsilon) to each tied observation instead of depending on chance. This method explained in more detail in Tukey's “Exploratory Data Analysis”, is useful when random noise is not wanted because it ensures that each observation is moved in a way that can be predicted and repeated [@david1977]. Deterministic jitter is easier to understand than random jitter, but it needs to be done carefully so that it doesn't introduce fake patterns, especially when scaling is involved. Deterministic jittering is a good choice for random noise that doesn't affect the integrity of the distribution when used carefully.
+When you need to be clear, deterministic jitter gives you a structured way to do it by adding a small fixed value (epsilon) to each tied observation instead of depending on chance. This method explained in more detail in Tukey's "Exploratory Data Analysis", is useful when random noise is not wanted because it ensures that each observation is moved in a way that can be predicted and repeated [@david1977]. Deterministic jitter is easier to understand than random jitter, but it needs to be done carefully so that it doesn't introduce fake patterns, especially when scaling is involved. Deterministic jittering is a good choice for random noise that doesn't affect the integrity of the distribution when used carefully.
 
 In deterministic jittering, a small, fixed value $\epsilon$ is added to each tied value to systematically spread them apart without introducing randomness.
 
@@ -663,13 +642,13 @@ $$
 
 where:
 
-- $x'_i$ is the adjusted value of $x_i$,
-- $i$ is the indeex of the tied observation (e.g., $i = 1,2,...,n$),
-- $\epsilon$ is a small fixed distance chosen based on the data scale. 
+-   $x'_i$ is the adjusted value of $x_i$,
+-   $i$ is the indeex of the tied observation (e.g., $i = 1,2,...,n$),
+-   $\epsilon$ is a small fixed distance chosen based on the data scale.
 
 ## Mean or Median Splitting
 
-One more popular method is mean or median splitting, which gives values tied to their mean or median values. This method works especially well for symmetric distributions and is perfect for images that need to show things centrally, like box plots. Wilcox's “Modern Statistics for the Social and Behavioral Sciences” shows that splitting the mean or median gives a fair view, especially for boxplot data [@wilcox2017]. This method works best with datasets with few ties because it can hide the range and variability within tied numbers if used too much.
+One more popular method is mean or median splitting, which gives values tied to their mean or median values. This method works especially well for symmetric distributions and is perfect for images that need to show things centrally, like box plots. Wilcox's "Modern Statistics for the Social and Behavioral Sciences" shows that splitting the mean or median gives a fair view, especially for boxplot data [@wilcox2017]. This method works best with datasets with few ties because it can hide the range and variability within tied numbers if used too much.
 
 In mean or median splitting, we replace each tied value with the mean or median of the tied group. This technique centers tied observations on their central tendency.
 
@@ -689,7 +668,7 @@ This replaces each tied value $x_i$ with the computed mean or median, clustering
 
 ## Kernel Density Estimation (KDE) with Bandwidth Adjustment
 
-Kernel density estimation (KDE) with bandwidth adjustment is a powerful method for density visualizations. It spreads out overlapping observations by giving each tied value a slightly different weight. This method works especially well in density plots because it evens data distributions without changing the original numbers. Silverman's work in “Density Estimation for Statistics and Data Analysis” shows how KDE with changed bandwidths correctly shows multimodal distributions, reducing errors caused by tied values. KDE works, but you must be careful when choosing the bandwidth because making the wrong choice can lead to misleading visual representations, especially when files are very concentrated [@silverman2018].
+Kernel density estimation (KDE) with bandwidth adjustment is a powerful method for density visualizations. It spreads out overlapping observations by giving each tied value a slightly different weight. This method works especially well in density plots because it evens data distributions without changing the original numbers. Silverman's work in "Density Estimation for Statistics and Data Analysis" shows how KDE with changed bandwidths correctly shows multimodal distributions, reducing errors caused by tied values. KDE works, but you must be careful when choosing the bandwidth because making the wrong choice can lead to misleading visual representations, especially when files are very concentrated [@silverman2018].
 
 For KDE with bandwidth adjustment, each data point is used to estimate a probability density function (PDF) by smoothing over a specified bandwidth $h$, which can be adjusted to account for ties.
 
@@ -701,19 +680,17 @@ $$
 
 where:
 
-- $\hat{f}(x)$ is the estimiated density at $x$,
-- $K(\cdot)$ is a kernel function
-- $h$ is the bandwidth, chosen to spread tied values slightly by selecting a larger $h$ for clusters of tied observations.
+-   $\hat{f}(x)$ is the estimiated density at $x$,
+-   $K(\cdot)$ is a kernel function
+-   $h$ is the bandwidth, chosen to spread tied values slightly by selecting a larger $h$ for clusters of tied observations.
 
 The choice of bandwidth $h$ controls the amount of smoothing, which helps visually differentiate tied values.
 
 Each way to show data with ties has unique benefits depending on the type of display and the type of data. Random and predictable jittering, for example, works well in scatterplots because they stop the plot from getting too big and show hidden patterns. KDE and rank-based methods, on the other hand, work well in density plots and ordinal visualizations. Researchers can improve visual clarity by using only some of these methods, ensuring the representation is correct and easy to understand. However, when parallel coordinate plots are used, where multiple directions are plotted simultaneously, the old ways of dealing with ties only sometimes work. In this case, adding the distance between values tied across multiple axes could show patterns and connections that are hard to see because the lines overlap. By creating a new method for parallel coordinate plots that adds space between ties in a planned way, we could see data trends and links across dimensions more clearly while keeping the dataset's integrity. This new idea would make it easier to understand complex, multidimensional data.
 
-
 # Handling Ties in PCPs
 
 The idea of adding distance to visual ties has changed over time as methods for visualizing data have improved to find a balance between detail and clarity in large datasets. In the early days of visualization, especially in network analysis and multidimensional scaling, closeness and alignment were the main ways to show patterns and ties between things. However, as data grew, visual clutter became a big problem. This was especially true in parallel coordinates plots (PCPs), where lines and intersections that overlapped made it hard to see the underlying data structure. To fix this problem, researchers started looking into ways to give representational parts of these graphs more "visual distance." They did this using methods like line bundling and changing the spacing between lines to avoid overplotting. This change is emphasized by Chang et al., who say that "perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns," [@chang2018]. This shows how separating visual elements can help with cognitive grouping without breaking up the continuity of the data. In PCPs, early studies showed that visual distance could make intersections clearer and improve the overall shape of individual paths. As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005]. This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
-
 
 ## Axis Reordering
 
@@ -759,12 +736,9 @@ grid.arrange(p1,p2, ncol=2)
 
 ```
 
-
-
 ## Line Bundling
 
 By putting similar lines into "bundles," line bundling cuts down on unnecessary crossings and clutter. This method works well in dense PCPs, where many lines cross and make it hard to see individual patterns. Heinrich et al. say that "bundling lines based on value similarity reduces cognitive strain and enhances visual coherence in complex datasets." This shows how bundling can make complex data easier to understand without losing larger patterns. Experiments have shown that bundling makes large datasets easier to read, which makes it easier to find general trends even when the data is heavily packed [@heinrich2011]. It makes things easier to understand by collecting similar data lines; this works especially well for numerical ties where values are close but not exactly the same. Bundling, on the other hand, can hide individual lines within a group, making it hard to tell one data point from another.
-
 
 ## Quantization and Aggregation
 
@@ -813,25 +787,20 @@ ggparcoord(
 
 In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals. Quantization makes the visualization even easier by putting numbers into groups. However, this needs to improve some of the accuracy of the original data. The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live. Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
 
-
-## Color-Coding and Transparency 
+## Color-Coding and Transparency
 
 By changing the color and transparency of lines, you can tell them apart based on density, categories, or values. This makes it easier to tell the difference between PCP lines that meet. Firat et al. say, "Line brushing and transparency adjustments improve the gestalt of the data clusters." This means that changes in how we see things help us group data cognitively without changing the structure. Firat et al. say that user tests have shown that PCPs with color-coded and clear lines are easier to understand and recognize patterns, especially for differentiating categorical data [@firat2023]. This tool can be used to handle both numerical and categorical ties. The color and transparency options make it easy to visually separate clusters without changing where the lines are placed. However, this method might only work for plots with little information because even changes in color can't fully fix heavy overplotting.
-
 
 ## Edge Bundling for Categorical Data
 
 Edge bundling, which comes from network visualization, groups paths for category values in PCPs. This method works best with categorical data because it lets you visually break up ties without changing other factors. Palmas et al. state that "bundling lines with similar orientations prevents overplotting, allowing clearer identification of dominant trends within complex data." This means bundling can help find trends even in spaces with many dimensions. Bundling made finding categorical clusters in complex PCPs easier and decreased users' work [@palmas2014]. Edge bundling is an excellent way to clear up clutter and make categorical groups easier to see. It lets users see categorical differences without messing up numerical relationships. On the other hand, each bundle may hide small details, making them less useful for datasets that need a lot of precision.
 
-
 ## Stacked Histograms and Density Plots
 
 This change adds histograms or density plots on top of PCPs to show how category data is distributed in terms of frequency. This lets users see how distributions change without adding extra line clutter. According to Bok et al., adding histogram overlays gives categorical context, making variable distributions easier to see without affecting line continuity. This means that frequency-based cues can help you understand categorical distributions without adding more visual clutter. Clear frequency-based differentiation in categorical data without too much line overlap improves the visual understanding of distributions when used with PCPs. Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant [@bok2020]. Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes
-
 
 ## Perceptual Cues (Line Thickness, Texture, etc.)
 
 By changing the lines' width, texture, or other visual properties, you can tell them apart from overlapping lines. This helps people see patterns and tell values apart without separating them physically. According to Chang et al., "Perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns." These cues help with cognitive grouping and pattern differentiation, even in complicated datasets. They work well in areas with a lot of visual information because they let users see trends without changing the structure or order of the data. They are helpful for both numerical and categorical ties. Studies with users showed that changes in how people saw things made finding patterns and trends in large, complex datasets easier. This made it easier for PCPs to look around [@chang2018]. In areas with many people, it could be useful because overlapped lines can make it harder to see.
 
 # References
-
