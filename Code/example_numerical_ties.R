@@ -34,7 +34,6 @@ plot_parallel_with_jitter <- function(data, factor = 0.1) {
   num_cols <- sapply(data, is.numeric)
 
 
-
   og_ggp <- data %>%
     mutate(year = factor(year)) %>%
     pcp_select(3:6, year) %>%  # Adding year as a factor and selecting required variables
@@ -52,7 +51,7 @@ plot_parallel_with_jitter <- function(data, factor = 0.1) {
 
   # Apply horizontal jitter to numerical columns to separate ties
   data <- data %>%
-  group_by(species, year)
+  group_by(year, species)
 
   data[num_cols] <- mapply(function(col, jitter_amt) jitter(col, amount = jitter_amt),
                            data[num_cols], jitter_amounts)
@@ -60,9 +59,11 @@ plot_parallel_with_jitter <- function(data, factor = 0.1) {
 
   # Create the parallel coordinate plot
   ggp <- data %>%
-    pcp_select(as.vector(which(num_cols))) %>%  # Adding year as a factor and selecting required variables
+    group_by(species) %>%
+    arrange(desc(year)) %>%
+    pcp_select(3:6, year) %>%  # Adding year as a factor and selecting required variables
     pcp_scale(method="uniminmax") %>%
-    pcp_arrange(method="from-left") %>%
+    pcp_arrange(method="from-left", .by_group = TRUE) %>%
     ggplot(aes_pcp()) +
     geom_pcp_axes() +
     #geom_pcp_boxes(boxwidth = 0.1, fill="grey70") +
@@ -102,7 +103,7 @@ determine_delta_distance <- function(data) {
 
 # Load the penguins dataset and call the function
 data("penguins")
-plot_parallel_with_jitter(penguins, factor = 0.2)
+plot_parallel_with_jitter(penguins, factor = 0.07)
 determine_delta_distance(penguins)
 
 
