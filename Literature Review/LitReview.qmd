@@ -375,7 +375,7 @@ This creates plot areas with more observations that stand out and reduce visual 
 
 The new approach uses density estimation methods to transform the PCP image based on polylines into a continuous, smooth depiction of data density. 
 This change shows how to see groups and trends usually hidden in regular PCPs. 
-To make things even better, Moustafa has interactive parts that let users experience different data dimensions in real-time. 
+@moustafa2011 has interactive parts that let users experience different data dimensions in real-time. 
 This makes PCPs even better at analysis. With its interactive nature, people who aren't experts can use this method confidently and successfully.
 
 Moustafa's research indicates that to deal with even larger datasets more efficiently, future efforts should focus on enhancing density estimation methods. 
