@@ -860,6 +860,40 @@ where:
 -   $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$,
 -   $\sigma$ is the standard deviation for the normal jitter.
 
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-random_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Random Jittering of Data Points in PCP"
+
+# Add random jitter to numerical columns
+penguins_jittered <- penguins
+penguins_jittered$year <- jitter(penguins_jittered$year, amount = 2)
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_jittered,
+  columns = c(3:6,8), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center"
+) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Random Jittering",
+                y = "Scaled Values",
+                x = "Variables") +
+  theme(legend.position = "bottom") +
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
+  theme(axis.text.x = element_text(angle=45))
+
+
+```
+
+
 ## Rank Jittering (Rank Adjustment)
 
 Rank jittering is another useful method for non-parametric analyses.
@@ -885,6 +919,44 @@ where:
 -   $\delta_i \sim \mathcal{N}(0,\sigma_{rank}^2)$
 -   $\sigma_{rank}$ are small values ensuring that the adjustment is minor.
 
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-rank_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Rank Jittering of Data Points in PCP"
+
+penguins_ranked <- penguins
+penguins_ranked <- penguins_ranked[order(penguins_ranked$year, na.last = NA), ]
+penguins_ranked$year_rank <- rank(penguins_ranked$year, na.last = "keep")
+
+# Add rank-based jitter
+penguins_ranked$year <- penguins_ranked$year + 
+                                     penguins_ranked$year_rank * 0.5
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_ranked,
+  columns = c(3:6,8), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center"
+) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Rank Jittering",
+                y = "Scaled Values",
+                x = "Variables") +
+  theme(legend.position = "bottom") +
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
+  theme(axis.text.x = element_text(angle=45))
+
+
+```
+
 ## Deterministic Jittering (Fixed Perturbation)
 
 When you need to be clear, deterministic jitter gives you a structured way to do it by adding a small fixed value (epsilon) to each tied observation instead of depending on chance.
@@ -905,6 +977,42 @@ where:
 -   $x'_i$ is the adjusted value of $x_i$,
 -   $i$ is the indeex of the tied observation (e.g., $i = 1,2,...,n$),
 -   $\epsilon$ is a small fixed distance chosen based on the data scale.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-deterministic_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Deterministic Jittering of Data Points in PCP"
+
+# Add fixed perturbation
+penguins_fixed <- penguins
+penguins_fixed$year <- ifelse(duplicated(penguins_fixed$year),
+                                           penguins_fixed$year + 0.5,
+                                           penguins_fixed$year)
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_fixed,
+  columns = c(3:6, 8), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center"
+) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Deterministic Jittering",
+                y = "Scaled Values",
+                x = "Variables") +
+  theme(legend.position = "bottom") +
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
+  theme(axis.text.x = element_text(angle=45))
+
+
+```
 
 ## Mean or Median Splitting
 
@@ -930,6 +1038,45 @@ $x'_i = x_{mean}$ or $x'_i = x_{median}$
 
 This replaces each tied value $x_i$ with the computed mean or median, clustering them at a central point.
 
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-mean_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Mean or Median Splitting of Data Points in PCP"
+
+# Mean splitting for ties
+penguins_mean <- penguins
+mean_year <- mean(penguins_mean$year, na.rm = TRUE)
+penguins_mean$year <- ifelse(duplicated(penguins_mean$year),
+                                          penguins_mean$year + (penguins_mean$year - mean_year) * 0.1,
+                                          penguins_mean$year)
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_mean,
+  columns = c(3:6,8), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center"
+) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Mean or Median Splitting",
+                y = "Scaled Values",
+                x = "Variables") +
+  theme(legend.position = "bottom") +
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
+  theme(axis.text.x = element_text(angle=45))
+
+
+```
+
+
 ## Kernel Density Estimation (KDE) with Bandwidth Adjustment
 
 Kernel density estimation (KDE) with bandwidth adjustment is a powerful method for density visualizations.
@@ -954,6 +1101,43 @@ where:
 -   $h$ is the bandwidth, chosen to spread tied values slightly by selecting a larger $h$ for clusters of tied observations.
 
 The choice of bandwidth $h$ controls the amount of smoothing, which helps visually differentiate tied values.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-kde_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "KDE with Bandwidth Adjustment of Data Points in PCP"
+
+# KDE transformation
+penguins_kde <- penguins
+penguins_kde$year_density <- density(penguins_kde$year, na.rm = TRUE)$bw
+
+# Add KDE smoothed values
+penguins_kde$year <- penguins_kde$year + penguins_kde$year_density * 0.1
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_kde,
+  columns = c(3:6,8), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center"
+) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment",
+                y = "Scaled Values",
+                x = "Variables") +
+  theme(legend.position = "bottom") +
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
+  theme(axis.text.x = element_text(angle=45))
+
+
+```
 
 Each way to show data with ties has unique benefits depending on the type of display and the type of data.
 Random and predictable jittering, for example, works well in scatterplots because they stop the plot from getting too big and show hidden patterns.
