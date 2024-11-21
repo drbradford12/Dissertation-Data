@@ -65,12 +65,18 @@ Parallel coordinate plots (PCPs) leverage a projective coordinate [system, inste
 
 suppressWarnings(
   ggpairs(penguins[,c(1, 3:6)], 
-          aes(colour = species),
+          mapping = aes(colour = species),
           columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]",
-                           "flipper_length[mm]", "body_mas[g]" ), 
+                           "flipper_length[mm]", "body_mass[g]" ), 
           diag = list(continuous = wrap("densityDiag", alpha = 0.5),
                       discrete = "barDiag"))+
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45)) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  )  +
+  scale_fill_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) 
   )
 ```
 [I think it might be best to customize the ggpairs plot so that it's only a scatterplot matrix -- that makes for a simpler comparison than the multiplot hybrid beast that's the default ggpairs plot. Scatterplot matrices are the most direct comparison to PCPs because they show Cartesian pairs of variables]{.svp}
@@ -99,7 +105,10 @@ penguins %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = species)) + 
-  theme_pcp() 
+  theme_pcp() + 
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) 
 
 ```
 
@@ -144,7 +153,10 @@ penguins %>%
   geom_pcp_boxes() + 
   geom_pcp_labels() +
   theme_pcp() +
-  scale_color_discrete(guide = "none")
+  scale_color_discrete(guide = "none")+
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) 
 ```
 
 <!-- - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments.  -->
@@ -233,7 +245,10 @@ penguins_clean_cat %>%
                 x = "Variables") +
   theme(legend.position = "bottom") +
   facet_wrap(~sex) +
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45)) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) 
 ```
 
 The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces nonlinear changes to the axes for more complex data representation.
@@ -359,7 +374,10 @@ ggparcoord(
                    x = "Variables",
                    y = "Scaled Value") +
   theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45)) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) 
 
 ```
 
@@ -440,7 +458,9 @@ ggparcoord(
   mapping = ggplot2::aes(color = species), # Color lines by species
   shadeBox = NULL # Use to add shading to enhance visual distinction between variables
 ) +
-  scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  )  +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Enhanced Color Encoding and Shading",
                 y = "Scaled Values",
@@ -460,17 +480,34 @@ This graph gives a broad picture of trends across species, but it could be bette
 
 ## Dimension Reduction Techniques
 
-Dimensionality reduction techniques such as Principal Component Analysis (PCA) and Independent Component Analysis (ICA) are frequently used to improve the readability of PCPs before charting. These strategies help to reduce the number of dimensions while retaining the most informative parts of the data. PCPs can be used to visualize reduced dimensions, providing a better understanding of high-dimensional interactions. Axis ordering is another important feature that has been adjusted. The relationships between variables can be highlighted by sorting the axes according to measurements such as correlation or mutual information. Automatic axis arrangement techniques have been developed to reduce line crossings, making recognizing patterns easier.
+Dimensionality reduction techniques such as Principal Component Analysis (PCA) and Independent Component Analysis (ICA) are frequently used to improve the readability of PCPs before charting. 
+These strategies help to reduce the number of dimensions while retaining the most informative parts of the data. 
+PCPs can be used to visualize reduced dimensions, providing a better understanding of high-dimensional interactions. 
+Axis ordering is another important feature that has been adjusted. 
+The relationships between variables can be highlighted by sorting the axes according to measurements such as correlation or mutual information. 
+Automatic axis arrangement techniques have been developed to reduce line crossings, making recognizing patterns easier.
 
-The article "Orientation-Enhanced Parallel Coordinate Plots" by Raidou et al. describes a new way to make parallel coordinate plots (PCPs) more accessible to read and understand. The authors suggest a method that uses input about direction to solve the clutter and overlap problems with regular PCPs. This method changes the direction of the plot axes on the fly by applying both automatic orientation and user-interactive adjustments. This method reduces visual noise and makes data patterns and correlations more visible. This will make it easier for users to study and analyze large datasets, [@raidou2015].
+The article "Orientation-Enhanced Parallel Coordinate Plots" by Raidou et al. describes a new way to make parallel coordinate plots (PCPs) more accessible to read and understand. 
+The authors suggest a method that uses input about direction to solve the clutter and overlap problems with regular PCPs. 
+This method changes the direction of the plot axes on the fly by applying both automatic orientation and user-interactive adjustments. 
+This method reduces visual noise and makes data patterns and correlations more visible. 
+This will make it easier for users to study and analyze large datasets, [@raidou2015].
 
-The suggested orientation-enhanced PCPs are designed with the user's needs at the forefront, offering a more informative visual representation. Several preprocessing steps, including principal component analysis (PCA) and multi-dimensional scaling (MDS), were employed to determine the optimal axis orientation. This ensures that data clusters are maximally separated and data lines are minimally overlapped. The interactive features allow users to adjust the orientation according to their preferences and requirements, enhancing the usability and adaptability of the plots for research needs [@raidou2015].
+The suggested orientation-enhanced PCPs are designed with the user's needs at the forefront, offering a more informative visual representation. 
+Several preprocessing steps, including principal component analysis (PCA) and multi-dimensional scaling (MDS), were employed to determine the optimal axis orientation. 
+This ensures that data clusters are maximally separated and data lines are minimally overlapped. 
+The interactive features allow users to adjust the orientation according to their preferences and requirements, enhancing the usability and adaptability of the plots for research needs [@raidou2015].
 
-Dimension reduction has become critical for managing PCPs with high-dimensional data. Techniques such as principal component analysis (PCA) and clustering help to focus on the most significant data features. Reducing dimensions simplifies analysis, enabling analysts to focus on the most important features while avoiding overwhelming visual data. "Dimension reduction helps to retain essential information without drowning the user in less relevant details," [@wegman1997].
+Dimension reduction has become critical for managing PCPs with high-dimensional data. 
+Techniques such as principal component analysis (PCA) and clustering help to focus on the most significant data features. 
+Reducing dimensions simplifies analysis, enabling analysts to focus on the most important features while avoiding overwhelming visual data. "Dimension reduction helps to retain essential information without drowning the user in less relevant details," [@wegman1997].
 
-Wegman and Luo applied PCA within PCPs, enabling users to represent key data features while minimizing less relevant dimensions [@wegman1997]. Guo et al. utilized clustering and hierarchical dimension reduction techniques to streamline high-dimensional datasets, enhancing usability without sacrificing detail [@guo2012]. Yang et al. demonstrated the integration of non-linear dimension reduction methods within PCPs to capture complex relationships in data more effectively [@yang2017].
+Wegman and Luo applied PCA within PCPs, enabling users to represent key data features while minimizing less relevant dimensions [@wegman1997]. 
+Guo et al. utilized clustering and hierarchical dimension reduction techniques to streamline high-dimensional datasets, enhancing usability without sacrificing detail [@guo2012]. 
+Yang et al. demonstrated the integration of non-linear dimension reduction methods within PCPs to capture complex relationships in data more effectively [@yang2017].
 
-Dimension reduction techniques like PCA or clustering can inadvertently remove nuances or minor patterns that might be relevant in specific cases. Guo et al. caution that, "while beneficial, these methods might lead to information loss, potentially masking relationships only visible in higher dimensions," [@guo2012].
+Dimension reduction techniques like PCA or clustering can inadvertently remove nuances or minor patterns that might be relevant in specific cases. 
+Guo et al. caution that, "while beneficial, these methods might lead to information loss, potentially masking relationships only visible in higher dimensions," [@guo2012].
 
 ```{r}
 #| echo: false
@@ -506,6 +543,9 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species) # Color lines by species
 ) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
                 y = "Scaled PCA Values",
@@ -591,7 +631,10 @@ ggparcoord(
                 y = "Scaled Values",
                 x = "Variables") +
   theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45)) +
+  scale_color_manual(
+    values = c("1" = "#540D6E", "2" = "#EE4266", "3" = "#FFD23F")
+  ) 
 ```
 
 ## Optimized Layout Algorithms
@@ -634,7 +677,9 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
-  scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Optimized Layout",
                 y = "Scaled Values",
@@ -753,7 +798,9 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
-  #scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Reordering and Axis Flipping",
                 y = "Scaled Values",
@@ -772,11 +819,23 @@ However, individual relationships are still hard to see because lines cross.
 
 # Handling Numerical Ties
 
-Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. Previously, statistical methods focused on rank-based approaches and binary data handling. They often needed help with tied observations, which threw off distributions or made them more complex. Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. There are now several ways to deal with ties, such as slowly increasing the space between values. This makes the visualization more accurate and easier to understand without changing the structure of the data itself.
+Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. 
+Previously, statistical methods focused on rank-based approaches and binary data handling. 
+They often needed help with tied observations, which threw off distributions or made them more complex. 
+Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. 
+As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. 
+There are now several ways to deal with ties, such as slowly increasing the space between values. 
+This makes the visualization more accurate and easier to understand without changing the structure of the data itself.
 
-Tufte's work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise---any element that complicates or crowds the visual field---can impede the interpretation of data. He advocates for "graphical excellence," a design philosophy that presents data most clearly and efficiently. According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. "Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships," [@tufte2001].
+Tufte's work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise---any element that complicates or crowds the visual field---can impede the interpretation of data. 
+He advocates for "graphical excellence," a design philosophy that presents data most clearly and efficiently. 
+According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. 
+<!--"Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships," [@ware2009].-->
 
-In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. Tufte calls this "chartjunk." He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. For instance, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard.
+In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. 
+Tufte calls this "chartjunk." 
+He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. 
+For instance, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard [@tufte2001].
 
 ## Random Jittering of Data Points
 
@@ -912,10 +971,10 @@ In the early days of visualization, especially in network analysis and multidime
 However, as data grew, visual clutter became a big problem.
 This was especially true in parallel coordinates plots (PCPs), where lines and intersections that overlapped made it hard to see the underlying data structure.
 To fix this problem, researchers started looking into ways to give representational parts of these graphs more "visual distance." They did this using methods like line bundling and changing the spacing between lines to avoid overplotting.
-This change is emphasized by Chang et al., who say that "perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns," [@chang2018].
+<!--This change is emphasized by Chang et al., who say that "perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns," [@chang2018].-->
 This shows how separating visual elements can help with cognitive grouping without breaking up the continuity of the data.
 In PCPs, early studies showed that visual distance could make intersections clearer and improve the overall shape of individual paths.
-As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005].
+<!--As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005]. -->
 This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
 
 ## Axis Reordering
@@ -924,7 +983,7 @@ As mentioned in the section on modifications, axis reordering changes the order 
 This method makes clusters easier to see by lining up visually linked variables, cutting down on clutter, and making patterns stand out more without overlapping.
 One benefit is that it works well for datasets where certain factors are strongly related, making clusters and trends easier to read without changing the data.
 Changing the variable order for clarity rather than data continuity could make it hard to tell if the data is in order.
-Blumenschein et al. say that "reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge." This shows how important changing the arrangement can be for seeing clearly.
+Blumenschein et al. say that reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge. This shows how important changing the arrangement can be for seeing clearly.
 Studies in this area have shown that changing the order of dimensions makes it much easier to find patterns in datasets where dimensions are linked.
 However, it only works well on datasets with dimensions tied together [@blumenschein2020].
 
@@ -957,7 +1016,9 @@ p2 <- ggparcoord(
   columns = 3:6,  # Columns for numerical features
   groupColumn = 1,
   scale = "uniminmax",
-  order = "skewness") +   # skewness axis reordering to handle ties and improve interpretability
+  order = "skewness") + # skewness axis reordering to handle ties and improve interpretability
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")) +   
   #ggtitle("With Skewness Axis Reordering") +
   theme_minimal() +
   theme(legend.position = "bottom")  +
@@ -1029,7 +1090,10 @@ ggparcoord(
        x = "Attributes",
        y = "Quantized/Encoded Values") +
   theme(legend.position = "bottom")  +
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45)) +
+  scale_color_manual(
+    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+  ) 
 ```
 
 In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals.
