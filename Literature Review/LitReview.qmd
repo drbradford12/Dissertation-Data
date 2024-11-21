@@ -314,11 +314,22 @@ ggparallel(list("gear", "cyl"), data=mtcars, method="hammock", ratio=0.25) +
 
 ## Bundling and Curving
 
-Bundling and curving techniques have been introduced to handle visual clutter, especially with high-dimensional data. These techniques group similar paths, making patterns more visible and reducing overplotting. Bundling and curving significantly reduce clutter, making spotting overarching trends and common patterns easier. Holten and van Wijk noted that "bundling offers a compelling solution to mitigate the chaos often found in high-dimensional visualizations" [@holten2009].
+Bundling and curving techniques have been introduced to handle visual clutter, especially with high-dimensional data. 
+These techniques group similar paths, making patterns more visible and reducing overplotting. 
+Bundling and curving significantly reduce clutter, making spotting overarching trends and common patterns easier. 
+@holten2009 note that "bundling offers a compelling solution to mitigate the chaos often found in high-dimensional visualizations".
 
-Holten and van Wijk pioneered edge bundling for PCPs, which visually aggregates similar paths to reduce clutter. McDonnell and Mueller furthered this approach by introducing curvilinear PCPs, where curved lines help distinguish intersecting paths for clearer visual analysis [@mcdonnell2008]. Johansson and Forsell evaluated the effectiveness of bundling and curving in PCPs, establishing criteria for when these modifications enhance interpretability [@johansson2015].
+Holten and van Wijk pioneered edge bundling for PCPs, which visually aggregates similar paths to reduce clutter. 
+McDonnell and Mueller furthered this approach by introducing curvilinear PCPs, where curved lines help distinguish intersecting paths for clearer visual analysis [@mcdonnell2008]. 
+Johansson and Forsell evaluated the effectiveness of bundling and curving in PCPs, establishing criteria for when these modifications enhance interpretability [@johansson2015].
 
-Curved lines can be altered to vary in curvature dependent on data attributes, which improves visual separation and pattern recognition, particularly in scenarios with strongly correlated dimensions. Curving in PCPs visually separates overlapping lines, making data relationships more discernible. It improves line separation by reducing intersections, making it easier to differentiate between trajectories. Curved lines are more aesthetically pleasing and reduce cognitive load, enhancing readability. They simulate a more three-dimensional space within a two-dimensional PCP, making it easier to perceive data points' relative positioning. Research shows curving lines reduces visual clutter and improves data interpretation [@fua1999, @qu2007]. This strategy has improved PCPs' ability to visualize complicated datasets with overlapping points [@kachhway2013].
+Curved lines can be altered to vary in curvature dependent on data attributes, which improves visual separation and pattern recognition, particularly in scenarios with strongly correlated dimensions. 
+Curving in PCPs visually separates overlapping lines, making data relationships more discernible. 
+It improves line separation by reducing intersections, making it easier to differentiate between trajectories. 
+Curved lines are more aesthetically pleasing and reduce cognitive load, enhancing readability. 
+They simulate a more three-dimensional space within a two-dimensional PCP, making it easier to perceive data points' relative positioning.
+Research shows curving lines reduces visual clutter and improves data interpretation [@fua1999, @qu2007]. 
+This strategy has improved PCPs' ability to visualize complicated datasets with overlapping points [@kachhway2013].
 
 ```{r}
 #| echo: false
@@ -352,13 +363,23 @@ ggparcoord(
 
 ```
 
-In @fig-bundling, the PCP modification demonstrates adding bundling and curving, which makes the lines smoother, less distracting, and better able to tell the patterns between the species apart. It's easier to see general trends within each species when the data is bundled, but it still doesn't show specific distribution shapes like a histogram might. Bundling makes it harder to see outliers in this image because the extreme values are "pulled" into the main flow, making it harder to see individual deviations. The curved lines make the relationships between the variables stand out, indicating that specific measurements may go up or down together depending on the species. Still, they make it harder to see small changes between individual points.
+In @fig-bundling, the PCP modification demonstrates adding bundling and curving, which makes the lines smoother, less distracting, and better able to tell the patterns between the species apart. 
+It's easier to see general trends within each species when the data is bundled, but it still doesn't show specific distribution shapes like a histogram might. 
+Bundling makes it harder to see outliers in this image because the extreme values are "pulled" into the main flow, making it harder to see individual deviations. 
+The curved lines make the relationships between the variables stand out, indicating that specific measurements may go up or down together depending on the species. 
+Still, they make it harder to see small changes between individual points.
 
-Moustafa et al. combine parallel coordinate plots (PCPs) with parallel coordinate density plots (PCDPs) to reduce clutter when working with big datasets. As part of Moustafa's methodology, the standard PCP is mutated into a density plot. This creates plot areas with more observations that stand out and reduce visual clutter [@moustafa2011].
+@moustafa2011 combine parallel coordinate plots (PCPs) with parallel coordinate density plots (PCDPs) to reduce clutter when working with big datasets. 
+As part of Moustafa's methodology, the standard PCP is mutated into a density plot. 
+This creates plot areas with more observations that stand out and reduce visual clutter.
 
-The new approach uses density estimation methods to transform the PCP image based on polylines into a continuous, smooth depiction of data density. This change shows how to see groups and trends usually hidden in regular PCPs. To make things even better, Moustafa has interactive parts that let users experience different data dimensions in real-time. This makes PCPs even better at analysis. With its interactive nature, people who aren't experts can use this method confidently and successfully.
+The new approach uses density estimation methods to transform the PCP image based on polylines into a continuous, smooth depiction of data density. 
+This change shows how to see groups and trends usually hidden in regular PCPs. 
+To make things even better, Moustafa has interactive parts that let users experience different data dimensions in real-time. 
+This makes PCPs even better at analysis. With its interactive nature, people who aren't experts can use this method confidently and successfully.
 
-Moustafa's research indicates that to deal with even larger datasets more efficiently, future efforts should focus on enhancing density estimation methods. These methods can be used in biology and finance to demonstrate their usefulness and adaptability for examining real-world data [@moustafa2011].
+Moustafa's research indicates that to deal with even larger datasets more efficiently, future efforts should focus on enhancing density estimation methods. 
+These methods can be used in biology and finance to demonstrate their usefulness and adaptability for examining real-world data.
 
 Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. "The clarity gained in bundle simplification comes at the cost of data precision," warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
 
