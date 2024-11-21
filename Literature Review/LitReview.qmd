@@ -1,9 +1,22 @@
 ---
 title: "Lit Review for handling numerical ties in PCPs"
 author: "Denise Bradford"
-format: pdf
-editor: visual
+format: 
+  pdf:
+    include-in-header:
+      text: |
+        \usepackage{soul}
+        \usepackage[dvipsnames]{xcolor} % colors
+        \newcommand{\db}[1]{{\textcolor{Green}{#1}}}
+        \newcommand{\svp}[1]{{\textcolor{RedOrange}{#1}}}
+        \newcommand{\hh}[1]{{\textcolor{blue}{#1}}}
+  html:
+    css: edits.css
 bibliography: thesis.bib
+bibliographystyle: apa
+filters:
+   - latex-environment
+commands: [db,svp,hh]
 ---
 
 ```{r include_packages, include = FALSE}
@@ -14,51 +27,54 @@ library(ggpcp)
 library(stats)
 options(warn=-1)
 require(gridExtra)
+library(ggridges)
+library(patchwork)
+library(ggparallel)
 ```
 
-## Introduction
+# Introduction
 
-Our data-driven modern civilization now depends heavily on the ability to precisely evaluate and exploit huge and complex datasets. A common way to visually show high-dimensional data is with parallel coordinate plots (PCPs). These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
+[I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}
 
-The accuracy of data interpretation is highest when dealing directly with numerical values or one-dimensional visual representations [@spence1990]. That is becoming more and more impractical as the size and dimension of datasets continue to increase. To make judgments based on data, it is necessary to find methods of simplifying and consolidating datasets without sacrificing significant information. Data visualization, such as graphs or tables, is often an essential and invaluable intermediate step between raw data and an observer's decision-making process. An effective data visualization communicates the gist of a data set in a way that is easy for an observer to understand and evaluate; ideally, data visualizations slightly sacrifice accuracy (relative to a table of values) in favor of a greater understanding of the relationship between observations or variables.
+[In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
 
-Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the x and y axis. Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than p = 3 or 4 variables are shown (including the x and y coordinates). When it is necessary to understand the relationship between more than four variables, visualizations on a Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@reference]. Other approaches are necessary when it is necessary to understand $p > 4$ dimensions of data. Here, we examine parallel coordinate plots (PCPs) as a solution to $p > 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high N and/or high p dimensional data. We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N > 4$ dimensional data across different magnitudes of N (observations) and p (variables).
+[Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@alber2020]. Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.]{.db}
 
-Stimulus-responsive attention often arises when an observer recognizes that a particular graphical element in a stimulus signals valuable information, guiding further search to improve judgment accuracy. @spence1990 talked about the importance of visual psychophysics in figuring out how simple parts of graphs can be used to convey information. He stressed that how well we can understand graphs relies on our cognitive and visual abilities. Cleveland and McGill's study on graphical perception in 1985 found that people have different skill levels when decoding multidimensional data [@cleveland1984]. This shows that designs like generalized parallel coordinate plots must consider cognitive and perceptual variability. These plots show many dimensions within a single visual glyph, and the small changes between them make it much harder to understand complicated visual data. Additional studies, like @heer2010 and @simkin1987, built on these ideas by showing that mistakes happen at different points in information processing and that different graphs are better for different jobs depending on the user's accuracy. It was emphasized by Carswell (1992) and Shah & Freedman (2011) that task difficulty and perceptual processes interact. These articles say differences in how people think and perceive things should be considered when making generalized parallel coordinate plots to show multidimensional data.
+[\st{ Our data-driven modern civilization [A bit trite...]{.svp} now depends heavily on the ability to precisely evaluate and exploit [exploit?? Maybe a different word?]{.svp} huge and complex datasets. A common way [Not sure PCPs are actually all that common, but they are a good solution]{.svp} to visually show high-dimensional data is with parallel coordinate plots (PCPs).}]{.db} 
 
-## Parallel Coordinate Plots (PCPs)
+[Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg1985]. By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.]{.db} These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
 
-### Why?
+The accuracy of data interpretation is highest when dealing directly with numerical values or one-dimensional visual representations [@spence1990]. That is becoming more and more impractical as the size and dimension of datasets continue to increase. To make judgments based on data, it is necessary to find methods of simplifying and consolidating datasets without sacrificing significant information. Data visualization, such as graphs or tables, is often an essential and invaluable intermediate step between raw data and an observer's decision-making process. An effective data visualization communicates the gist of a data set in a way that is easy for an observer to understand and evaluate; ideally, data visualizations slightly sacrifice accuracy (relative to a table of values) in favor of a greater understanding of the relationship between observations or variables. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp}
 
-Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. This means that complex relationships between different factors can be studied repeatedly. PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
+Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the x and y axis. Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than p = 3 or 4 variables are shown (including the x and y coordinates). When it is necessary to understand the relationship between more than four variables, visualizations on a Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@inselberg1997]. Other approaches are necessary when it is necessary to understand $p > 4$ dimensions of data. Here, we examine parallel coordinate plots (PCPs) as a solution to $p > 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high N and/or high p dimensional data. We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N > 4$ dimensional data across different magnitudes of N (observations) and p (variables).
 
-Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
+Stimulus-responsive attention often arises when an observer recognizes that a particular graphical element in a stimulus signals valuable information, guiding further search to improve judgment accuracy. @spence1990 talked about the importance of visual psychophysics in figuring out how simple parts of graphs can be used to convey information. He stressed that how well we can understand graphs relies on our cognitive and visual abilities. Cleveland and McGill's study on graphical perception in 1984 found that people have different skill levels when decoding multidimensional data [@cleveland1984]. This shows that designs like generalized parallel coordinate plots must consider cognitive and perceptual variability. These plots show many dimensions within a single visual glyph, and the small changes between them make it much harder to understand complicated visual data. Additional studies, like @heer2010 and @simkin1987, built on these ideas by showing that mistakes happen at different points in information processing and that different graphs are better for different jobs depending on the user's accuracy. It was emphasized by @carswell1992 and @shah2011 that task difficulty and perceptual processes interact. These articles say differences in how people think and perceive things should be considered when making generalized parallel coordinate plots to show multidimensional data. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp}
 
-### What?
+# Parallel Coordinate Plots (PCPs)
 
-Parallel coordinate plots (PCPs) leverage the projective space rather than the Cartesian coordinate system: each line in cartesian space is a set of points in projective space, and each point in cartesian space can be represented as a line in projection space [@Inselberg:1985]. The result is that a single data point is For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension. Conventional PCPs can be difficult to interpret because of overplotting - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments. <!--It needs to improve its interpretability by having clutter and overlapping lines while handling big datasets. Generalized PCPs (GPCPs) introduced several different methods: By including axis reordering, bundling, and dimensionality reduction to solve these problems, generalized parallel coordinate plots (GPCPs) expand the conventional PCP.--> These improvements in clarity and usability of PCPs utilizing data pattern highlighting and visual clutter reduction help [@density-pcp], for example, present several approaches to bundle comparable trajectories in PCPs, so minimizing overlap and improving pattern identification; Johannsen et al. (2012) address the advantages of dynamic axis reordering to highlight different data characteristics.
+Parallel coordinate plots (PCPs) leverage a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg1985]. The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp}
 
 ```{r}
 #| echo: false
 #| warning: false
 #| label: fig-ggpairs
 #| layout-valign: bottom
-#| fig-subcap: 
-#|   - "A generalized pairs plot"
+#| fig-cap: "A generalized pairs plot"
+#| fig-width: 8
+#| fig-height: 8
 
-suppressWarnings(ggpairs(penguins[,c(1, 3:6)], aes(colour = species),
-  columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]", "flipper_length[mm]", "body_mas[g]" ) ) +
- theme(strip.text.y = element_text(size = 6),
-       strip.text.x = element_text(size = 6)) +
+suppressWarnings(
+  ggpairs(penguins[,c(1, 3:6)], 
+          aes(colour = species),
+          columnLabels = c("species", "bill_length[mm]", "bill_depth[mm]",
+                           "flipper_length[mm]", "body_mas[g]" ), 
+          diag = list(continuous = wrap("densityDiag", alpha = 0.5),
+                      discrete = "barDiag"))+
   theme(axis.text.x = element_text(angle=45))
-  
   )
 ```
 
-@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatter plots, and correlation matrices. It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. Histograms and density plots make it easy to see how each variable (bill length, bill depth, flipper length, and body mass) is spread across the different species. The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data.
-
-The scatter plots show how two variables are related to each other. There is a clear trend for overplotting in denser areas, especially for bill depth vs. bill length and flipper length vs. bill length. The correlation values show more information about these connections. They show strong positive and negative correlations, with some species having different patterns. For example, in Gentoo penguins, there is a strong positive correlation between the length of their flippers and their body mass. Other species have different association patterns, which means that the ways that traits are related can be different for each species. Overall, the matrix-style plot does an excellent job of showing the links within and between variables. However, it is hard to understand precisely what overlapping areas mean in scatter plots because individual points are hard to see.
-
+@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatterplots, and correlation matrices. It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data. The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}. [While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} Overall, the matrix-style plot does an excellent job of showing the links within and between variables. [The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
 
 ```{r}
 #| echo: false
@@ -69,45 +85,221 @@ The scatter plots show how two variables are related to each other. There is a c
 #|   - "A parallel coordinate plot"
 
 penguins %>%
-  pcp_select(species, 3:6, species) %>%
+  pcp_select(3:6) %>%
   pcp_scale(method="uniminmax") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = species)) + 
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle=45))
+  theme_pcp() 
 
 ```
 
-In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. However, the large number of lines makes it hard to see smaller details, and it's hard to pick out individual spots or clear outliers in this visualization.
+In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. 
+The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. 
+[There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. ]{.svp}
+[Even in projection space, we can see Simpson's paradox at work; the middle plot in the fourth row of @fig-ggpairs shows the same basic information.]{.svp} 
+[While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp} 
+[At each vertical axis, the plot resembles a rug plot, which can provide some information about density, but is less direct than a continuous density plot, such as those shown on the diagonal of @fig-ggpairs.]{.svp} 
+[@cleveland1993]{.db}
 
-It's hard to directly find outliers because the merging lines make it hard to see individual differences. The plot doesn't show specific distribution shapes like a histogram or density plot, but how the lines are grouped at specific value ranges shows how each species generally behaves. The slope and intersection patterns of the lines suggest that the variables are related. Note that the plot demonstrates that if the length of a bird's bill goes up, other variables may go up or down similarly, based on the species. Overall, the plot works well for seeing broad patterns and trends across species, but it could be better at picking out specific data points or weak connections because it's too crowded on the screen.
+<!-- It's hard to directly find outliers in @fig-pcp because the merging lines make it hard to see individual differences.  -->
 
+<!-- The plot doesn't show specific distribution shapes like a histogram or density plot, but how the lines are grouped at specific value ranges shows how each species generally behaves.  -->
 
-## Modifications to Parallel Coordinate Plots
+<!-- The slope and intersection patterns of the lines suggest that the variables are related.  -->
 
-Since Alfred Inselberg introduced parallel coordinate plots (PCPs) in 1985, considerable advances have been made to address the original method's framework and improve its capacity to depict high-dimensional data effectively. The enhancements include changes to visual representation, handling various kinds of interactive data elements, and incorporating advanced computational approaches to increase the clarity and interpretability of the visualizations. Here are some specific enhancements and modifications that have been made:
+<!-- Note that the plot demonstrates that if the length of a bird's bill goes up, other variables may go up or down similarly, based on the species.  -->
 
-### Interactive and Dynamic
+<!-- Overall, the plot works well for seeing broad patterns and trends across species, but it could be better at picking out specific data points or weak connections because it's too crowded on the screen. -->
 
-The addition of interactive features has substantially increased the usefulness of PCPs. Interactive PCPs enable users to dynamically change axes, reorder them, filter data based on specified criteria, and even invert axes to study data from various angles. These characteristics enable real-time data analysis, leading to a deeper understanding of patterns and correlations. Brushing and connecting allow users to highlight specific data points across many axes, whereas filtering hides lines that do not satisfy set criteria, decreasing clutter. The interactive characteristics of PCPs make them more amenable to exploratory data analysis, particularly in big and complicated datasets [@heinrich2013].
+<!-- For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension.  -->
 
-Heinrich and Weiskopf's 2013 paper "State of the Art of Parallel Coordinates" thoroughly reviews visualization methods for parallel coordinates. It includes a taxonomy that groups the different approaches into different categories. The writers discuss various ways to model, see, and work with parallel coordinates. They also show how these methods can be used for everyday tasks in knowledge discovery, like sorting, clustering, and regression. Some of the most important advances are discussing geometric models, interpolation methods, and the point-line duality that makes up the basis of parallel coordinate plots. The study discusses a better understanding of data using density-based visualizations, axis ordering, and improvements such as brushing and bundling.
+[As originally proposed,]{.svp} PCPs [could]{.svp} be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}. 
+[The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot .]{.svp} 
+[A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp} 
+[In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johansson2015] may support identification of clusters and outliers in multidimensional space.]{.svp}
 
-The study points out some problems with parallel coordinates, like overplotting and the need for good axis arrangement. It also suggests ways to get around these problems, such as clustering and density estimation. To make it easier to see patterns and understand data, researchers look into different ways to map it, such as curves, shapes, and density plots. The writers also talk about how parallel coordinates can be used in real life in engineering and the life sciences. This shows how useful and flexible they are for high-dimensional data visualization tasks.
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-ggpcp
+#| layout-valign: bottom
+#| fig-cap: "A generalized parallel coordinate plot, with species on the left and right of the plot; observations are ordered on the right side based on the value of body_mass_g, and on the left side based on the value of bill_length_mm. Translucent lines reduce the impact of overplotting and allow perception of the Adelie lines (which are plotted first) even as the Gentoo and Chinstrap lines are plotted on top. With this treatment, we can see that the strong positive relationship between bill depth and flipper length in Gentoo penguins is much less pronounced in Adelie and Chinstrap penguins; there are many more line crossings in both species, which suggests a more moderate relationship."
 
-Initially, modifications in parallel coordinate plots have dynamic features, which allow users to select, highlight, and filter data dimensions or specific data points in real-time. This has facilitated more precise and focused analysis within large datasets. Interaction allows users to engage with data intuitively, selectively focusing on areas of interest. "Interactive filtering and brushing make it easier to identify patterns within large datasets, aiding discovery and hypothesis generation" [@Wegman:1990].
+penguins %>%
+  pcp_select(species, 3:6, species) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp(aes(colour = species), alpha = 0.5) + 
+  geom_pcp_boxes() + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  scale_color_discrete(guide = "none")
+```
 
-In 1990, Wegman et al. introduced fundamental techniques for interaction with multidimensional data, laying the groundwork for modern interactive PCPs. Siirtola and Räihä developed interactive features like brushing and linking to assist in dimensional analysis, making comparing attributes within large datasets easier [@siirtola2006]. Inselberg expanded these features by enabling dynamic filtering and axis rearrangement to tailor the display to user needs [@inselberg2009].
+<!-- - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments.  -->
 
-Increased complexity can overwhelm novice users, requiring more computational power and potentially slowing down analysis in high-dimensional datasets. Inselberg noted, "While interactivity provides insight, it can lead to user fatigue in complex datasets due to the cognitive load required for multi-step filtering," [@inselberg2009].
+<!-- [PCP] -->
 
-The D3 Graph Gallery has a live parallel coordinates graph with dynamic features, making exploring and analyzing data easier. Users can move their mouse over lines to see specific data tracks. This interactivity feature makes finding and separating different data types or trends in the dataset easier. The graph also lets the user "brush" on any vertical axes, allowing users to choose and filter data points based on specific ranges or criteria. This interactivity feature changes the visualization on the fly to show the filtered group. Tooltips show up when you move their mouse over lines or axis names. They give the user more information about the data points, which helps the user understand them better. The user can change the order of the axes by dragging them horizontally. This interactivity feature lets the user change how dimensions are compared, which makes it easier to find patterns and correlations between different factors. The parallel coordinates plot is a powerful way to see and understand multidimensional data in a way that is easy to understand and use because it has these dynamic parts.
+<!--It needs to improve its interpretability by having clutter and overlapping lines while handling big datasets. Generalized PCPs (GPCPs) introduced several different methods: By including axis reordering, bundling, and dimensionality reduction to solve these problems, generalized parallel coordinate plots (GPCPs) expand the conventional PCP.-->
 
-[Interactive Parallel Coordinate Plot](https://d3-graph-gallery.com/graph/parallel_custom.html)
+<!-- These improvements in clarity and usability of PCPs utilizing data pattern highlighting and visual clutter reduction help [@density-pcp], for example, present several approaches to bundle comparable trajectories in PCPs, so minimizing overlap and improving pattern identification; Johannsen et al. address the advantages of dynamic axis reordering to highlight different data characteristics [@johannsen2012]. -->
 
+## Why?
 
-### Bundling and Curving
+Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
+This means that complex relationships between different factors can be studied repeatedly. 
+PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
+However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. 
+It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
+
+Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. 
+They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
+Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
+They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
+Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
+
+# Modifications to Parallel Coordinate Plots
+
+Since @Inselberg1985 introduced parallel coordinate plots (PCPs) in 1985, considerable advances have been made to address the original method's framework and improve its capacity to depict high-dimensional data effectively. 
+The enhancements include changes to visual representation, handling various kinds of interactive data elements, and incorporating advanced computational approaches to increase the clarity and interpretability of the visualizations. 
+[In this section, we examine some of the modifications proposed to enhance PCPs after their original introduction.]{.svp}
+
+## Categorical and Hybrid PCPs
+
+Traditional PCPs were primarily designed to collect continuous data.
+However, real-world datasets often contain a mix of continuous, ordinal, and categorical data.
+To solve this, changes have been made to display mixed-type data within the same PCP simultaneously.
+Categorical data, for example, can be visually differentiated using unique colors, symbols, or segmented lines, although continuous variables are still represented by standard lines linking the axes.
+Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation.
+Specific strategies, like adjustments to the ends of links, have been suggested to enhance how category and numerical values are connected visually.
+This strategy enhances the interpretability of mixed data by modifying the plotting criteria for axes representing category variables.
+
+CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
+@siirtola2006 introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs.
+@inselberg2009 enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power.
+@johansson2015 explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis.
+
+CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}
+Wegman et al. (1990) [Use the citation -- @XXX]{.svp} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
+Holten and van Wijk (2009) [Use the citation -- @XXX]{.svp} introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
+LeBlanc et al. (1990) [Use the citation -- @XXX]{.svp}  highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-hybrid
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Categorical and Hybrid in PCP"
+
+# Remove rows with missing data from the dataset
+penguins_clean_cat <- penguins %>%
+  na.omit() %>%
+  select(-year)
+
+# Convert categorical variables to factors
+penguins_clean_cat <- penguins_clean_cat %>%
+  mutate(island = as.factor(island),
+         sex = as.factor(sex),
+         species = as.factor(species))
+
+# Create a parallel coordinate plot using both numeric and categorical variables
+
+penguins_clean_cat %>%
+  pcp_select(2:7) %>%
+  pcp_scale(method="uniminmax") %>%
+  # pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = species)) +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP",
+                y = "Scaled Values",
+                x = "Variables") +
+  theme(legend.position = "bottom") +
+  facet_wrap(~sex) +
+  theme(axis.text.x = element_text(angle=45))
+```
+
+The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces nonlinear changes to the axes for more complex data representation.
+These can show more complicated relationships in the data that might not be visible in a regular PCP.
+Nonlinear scales such as logarithmic and exponential transformations are possible.
+@wegman1997 provide a comprehensive discussion of the GPCP idea. [This doesn't really add to the discussion - and the next sentence does not follow from this one. Rewrite to make your point clearer, and cite ideas, not people.]{.svp}
+This adjustment allows the visualization to display various data connections and handle skewed data distributions.
+
+### Hammock Plots: Categorical Variants of PCPs
+
+Hammock plots [are similar to]{.svp} parallel coordinate plots, [but were designed to show categorical data]{.svp}. 
+@symanzik2018 showed the Titanic dataset using hammock plots, arguing that "Hammock plots allow for line alignment representing similar or identical values." 
+This makes understanding the data in parallel coordinate space easier and gives you a better sense of the different data types and their groups. 
+They do say, though, that Hammock plots "may add visual clutter in cases lacking categorical data distinctions," which is meant to stress the problems that might arise when they are used with continuous variables.
+
+@kavvadias1996 use a decomposition method called "Hammock-on-ears" to work on bigger graph-theoretic problems, with the goal of enhancing the ability to find ties in large datasets. 
+This shows that Hammock plots can handle large amounts of complex data. However, they warn that "the method may require significant computational resources," which means it might not work for simpler or smaller-scale tasks. [Actually, it means the opposite - if you don't have the computer power, you can't use the method for big datasets, but it probably works for smaller ones]{.svp}
+
+@pilhofer2012 show that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters. [Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}
+This is especially helpful in datasets that are hard to see [Why are they hard to see?]{.svp} because Hammock plots make it easier to separate the data. 
+Still, Pilhöfer et al. points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
+They suggest that Hammock plots work best for datasets with clear clusters [Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.
+
+@ge2020 improved the framework for visualizing data by adding Hammock plots to a grammar-based system. [What? No, that's the first ggpcp paper draft -- it didn't talk about Hammock plots. You want to look into the research Heike did with Vendettuoli circa 2012-2015 for hammock plots and variations]{.svp}
+This makes them better suited for data that has both category and numerical relationships. They say this grammar-based adaptation "retains the established behaviors of parallel coordinates" while giving you more options for dealing with edge cases like categorical ties. 
+This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
+[Also, please don't cite arxiv papers when a peer-reviewed version exists -- e.g. Penguins go Parallel]{.svp}
+
+@vanderplas2023 investigate more deeply how useful Hammock plots are for dealing with numerical ties in categorical datasets. 
+They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
+However, they also admit that these plots are "less effective for continuous data without ties or when categorical values are minimal," [This phrase does not exist in the paper!]{.svp} suggesting that Hammock plots offer limited benefits in uniformly distributed datasets.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-hammock
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Hammock"
+#|   
+data(mtcars)
+
+ggparallel(list("gear", "cyl"), data=mtcars, method="hammock", ratio=0.25) + 
+  theme_minimal() +
+  theme(legend.position = "bottom") 
+# Filter out NA values for easier plotting
+# penguins_clean <- penguins %>% 
+#   na.omit() %>%
+#    mutate(
+#     species = as.factor(species),  # Encode species as numeric
+#     island = as.factor(island),    # Encode island as numeric
+#     sex = as.factor(sex) )
+# # Create Hammock Plot
+# hammock_plot <- ggparallel(list("year", "body_mass_g"), 
+#                             data = penguins_clean, 
+#                             method = "hammock", 
+#                            ratio=0.25) +
+#   labs(title = "Parallel Coordinate Plot for Penguin Species, Island, and Sex") +
+#   theme_minimal()
+# 
+# # Create Parallel Coordinate Plot
+# parallel_plot <- ggpairs(penguins_clean, columns = c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"),
+#                          aes(color = species, alpha = 0.5)) +
+#   theme_minimal() +
+#   labs(title = "Parallel Coordinate Plot for Penguin Measurements")
+# 
+# # Combine the two plots for side-by-side comparison
+# combined_plot <- hammock_plot + parallel_plot +
+#   plot_layout(ncol = 2) +
+#   plot_annotation(title = "Comparison of Hammock Plot and Parallel Coordinate Plot")
+# 
+# # Print the combined plot
+# print(combined_plot)
+
+```
+
+@fig-hammock is a Hammock plot that shows the relationship between two categorical variables, gear and cylinders (cyl). Each color-coded band represents a different category within these variables. The plot provides frequency but lacks precise counts or numeric values. Overplotting is evident, making it difficult to trace individual pathways. The plot shows the general distribution and relationships between gear and cylinder categories, but lacks numeric relationships or exact proportions.
+
+## Bundling and Curving
 
 Bundling and curving techniques have been introduced to handle visual clutter, especially with high-dimensional data. These techniques group similar paths, making patterns more visible and reducing overplotting. Bundling and curving significantly reduce clutter, making spotting overarching trends and common patterns easier. Holten and van Wijk noted that "bundling offers a compelling solution to mitigate the chaos often found in high-dimensional visualizations" [@holten2009].
 
@@ -142,11 +334,12 @@ ggparcoord(
      labs(title = "Parallel Coordinate Plot with Bundling and Curving",
                    x = "Variables",
                    y = "Scaled Value") +
+  theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45))
 
 ```
 
-In @fig-bundling, the parallel coordinate plot adds bundling and curving, which makes the lines smoother, less distracting, and better able to tell the patterns between the species apart. It's easier to see general trends within each species when the data is bundled, but it still doesn't show specific distribution shapes like a histogram might. Bundling makes it harder to see outliers in this image because the extreme values are "pulled" into the main flow, making it harder to see individual deviations. The curved lines make the relationships between the variables stand out, indicating that specific measurements may go up or down together depending on the species. Still, they make it harder to see small changes between individual points.
+In @fig-bundling, the PCP modification demonstrates adding bundling and curving, which makes the lines smoother, less distracting, and better able to tell the patterns between the species apart. It's easier to see general trends within each species when the data is bundled, but it still doesn't show specific distribution shapes like a histogram might. Bundling makes it harder to see outliers in this image because the extreme values are "pulled" into the main flow, making it harder to see individual deviations. The curved lines make the relationships between the variables stand out, indicating that specific measurements may go up or down together depending on the species. Still, they make it harder to see small changes between individual points.
 
 Moustafa et al. combine parallel coordinate plots (PCPs) with parallel coordinate density plots (PCDPs) to reduce clutter when working with big datasets. As part of Moustafa's methodology, the standard PCP is mutated into a density plot. This creates plot areas with more observations that stand out and reduce visual clutter [@moustafa2011].
 
@@ -156,73 +349,8 @@ Moustafa's research indicates that to deal with even larger datasets more effici
 
 Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. "The clarity gained in bundle simplification comes at the cost of data precision," warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
 
-
-
-### Dimension Reduction Techniques
-
-Dimensionality reduction techniques such as Principal Component Analysis (PCA) and Independent Component Analysis (ICA) are frequently used to improve the readability of PCPs before charting. These strategies help to reduce the number of dimensions while retaining the most informative parts of the data. PCPs can be used to visualize reduced dimensions, providing a better understanding of high-dimensional interactions. Axis ordering is another important feature that has been adjusted. The relationships between variables can be highlighted by sorting the axes according to measurements such as correlation or mutual information. Automatic axis arrangement techniques have been developed to reduce line crossings, making recognizing patterns easier.
-
-The article "Orientation-Enhanced Parallel Coordinate Plots" by Raidou et al. describes a new way to make parallel coordinate plots (PCPs) more accessible to read and understand. The authors suggest a method that uses input about direction to solve the clutter and overlap problems with regular PCPs. This method changes the direction of the plot axes on the fly by applying both automatic orientation and user-interactive adjustments. This method reduces visual noise and makes data patterns and correlations more visible. This will make it easier for users to study and analyze large datasets, [@raidou2015].
-
-The suggested orientation-enhanced PCPs are designed with the user's needs at the forefront, offering a more informative visual representation. Several preprocessing steps, including principal component analysis (PCA) and multi-dimensional scaling (MDS), were employed to determine the optimal axis orientation. This ensures that data clusters are maximally separated and data lines are minimally overlapped. The interactive features allow users to adjust the orientation according to their preferences and requirements, enhancing the usability and adaptability of the plots for research needs [@raidou2015].
-
-Dimension reduction has become critical for managing PCPs with high-dimensional data. Techniques such as principal component analysis (PCA) and clustering help to focus on the most significant data features. Reducing dimensions simplifies analysis, enabling analysts to focus on the most important features while avoiding overwhelming visual data. "Dimension reduction helps to retain essential information without drowning the user in less relevant details," [@wegman1997].
-
-Wegman and Luo (1997) applied PCA within PCPs, enabling users to represent key data features while minimizing less relevant dimensions [@wegman1997]. Guo et al. (2011) utilized clustering and hierarchical dimension reduction techniques to streamline high-dimensional datasets, enhancing usability without sacrificing detail [@guo2012]. Yang et al. (2013) demonstrated the integration of non-linear dimension reduction methods within PCPs to capture complex relationships in data more effectively [@yang2017].
-
-Dimension reduction techniques like PCA or clustering can inadvertently remove nuances or minor patterns that might be relevant in specific cases. Guo et al. (2011) caution that, "while beneficial, these methods might lead to information loss, potentially masking relationships only visible in higher dimensions."
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-pca
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "A PCA in Parallel Coordinate Plot"
-
-
-# Remove rows with missing data from the dataset
-penguins_clean <- penguins %>%
-  na.omit() %>%
-  select(-island, -sex, -year)
-
-# Perform PCA on the numeric columns
-penguins_pca <- prcomp(penguins_clean %>%
-                         select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g),
-                       center = TRUE, scale. = TRUE)
-
-# Create a data frame with the PCA results
-penguins_pca_df <- as.data.frame(penguins_pca$x)
-# Add species as a categorical variable to the PCA data frame
-penguins_pca_df$species <- penguins_clean$species
-
-# Create a parallel coordinate plot using ggparcoord for the PCA results
-ggparcoord(
-  data = penguins_pca_df,
-  columns = 1:4, # Using the PCA components
-  groupColumn = 5,
-  scale = "uniminmax", # Scale columns to range between [0, 1]
-  alphaLines = 0.3, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
-  mapping = ggplot2::aes(color = species) # Color lines by species
-) +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
-                y = "Scaled PCA Values",
-                x = "Principal Components") +
-  theme(axis.text.x = element_text(angle=45))
-
-```
-
-In @fig-pca, the parallel coordinate plot incorporates principal component analysis (PCA) components (PC1 to PC4) on the x-axis, with the scaled PCA values on the y-axis, color-coded by species (Adelie in red, Chinstrap in green, and Gentoo in blue).
-PCA reduces dimensionality, meaning that each PC represents a combination of the original variables, simplifying complex relationships.
-The lines between components show how each penguin transitions across these derived features, making it easier to observe general trends for each species in the reduced space.
-Due to the numerous overlapping lines, overplotting remains an issue, though species-level patterns are visible, with distinct separations in specific PCs.
-Outliers are challenging to detect due to the bundled nature of the lines.
-While distribution shapes aren’t explicitly visible, the clustered points at each PC axis indicate each species' general concentration of values.
-Though individual variability remains obscured, relationships between PCs and species are implied through color-coded clusters and trends, suggesting some separation between species along specific principal components.
-
 ### Enhanced Color Encoding and Shading
+
 
 Visual upgrades like color coding, opacity modifications, and changing line thickness have been implemented to solve overplotting concerns, particularly with massive datasets.
 Significant data trends can be highlighted using different colors or modifying line opacity in response to data density, with less relevant information deemphasized.
@@ -274,7 +402,7 @@ ggparcoord(
   groupColumn = 1,
   scale = "uniminmax", # Scale columns to range between [0, 1]
   alphaLines = 0.5, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
+  #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species), # Color lines by species
   shadeBox = NULL # Use to add shading to enhance visual distinction between variables
 ) +
@@ -296,90 +424,72 @@ The plot doesn't show individual distribution shapes, but how the lines are grou
 The general trends of each species' lines suggest relationships between numerical factors, but it still needs to be easier to figure out individual correlations because they overlap.
 This graph gives a broad picture of trends across species, but it could be better at picking out specific data points or rare observations.
 
-### Reordering and Axis Flipping
+## Dimension Reduction Techniques
 
-Adaptive reordering and axis flipping based on correlation measures or user-defined parameters can simplify the analysis of multidimensional relationships.
-Reordering and axis flipping align more relevant dimensions, minimizing intersections and making relationships more interpretable.
-"Reordering transforms PCPs from a cluttered tangle into a roadmap of relationships," [@inselberg1990parallel].
+Dimensionality reduction techniques such as Principal Component Analysis (PCA) and Independent Component Analysis (ICA) are frequently used to improve the readability of PCPs before charting. These strategies help to reduce the number of dimensions while retaining the most informative parts of the data. PCPs can be used to visualize reduced dimensions, providing a better understanding of high-dimensional interactions. Axis ordering is another important feature that has been adjusted. The relationships between variables can be highlighted by sorting the axes according to measurements such as correlation or mutual information. Automatic axis arrangement techniques have been developed to reduce line crossings, making recognizing patterns easier.
 
-Inselberg and Dimsdale proposed reordering to enhance interpretability, especially for highly interrelated variables.
-LeBlanc et al. introduced correlation-based reordering to position axes, reducing visual clutter by aligning more related dimensions [@leblanc1990].
-Peng et al. (2004) enabled automatic reordering algorithms that flip axes according to user-defined weights, giving users more control over PCP readability.
+The article "Orientation-Enhanced Parallel Coordinate Plots" by Raidou et al. describes a new way to make parallel coordinate plots (PCPs) more accessible to read and understand. The authors suggest a method that uses input about direction to solve the clutter and overlap problems with regular PCPs. This method changes the direction of the plot axes on the fly by applying both automatic orientation and user-interactive adjustments. This method reduces visual noise and makes data patterns and correlations more visible. This will make it easier for users to study and analyze large datasets, [@raidou2015].
 
-Changing the order of the axes in parallel coordinate plots can make them easier to read by putting variables that are strongly correlated or connected by theme next to each other.
-Moving the axes around reduces the amount of visual noise caused by crossings between variables that aren't strongly linked to each other.
-This makes patterns and clusters stand out more.
-The method of minimizing visual noise helps show hidden patterns in the data that would not be seen otherwise.
-Researchers @johansson2005 and @wegman1997 all found that reordering is an important way to find connections in PCPs.
-If you use well-thought-out reordering algorithms, you can see groups, trends, and outliers more clearly and avoid the feeling of overplotting.
-This method works incredibly well for grouping data with many dimensions, making it easier to see.
+The suggested orientation-enhanced PCPs are designed with the user's needs at the forefront, offering a more informative visual representation. Several preprocessing steps, including principal component analysis (PCA) and multi-dimensional scaling (MDS), were employed to determine the optimal axis orientation. This ensures that data clusters are maximally separated and data lines are minimally overlapped. The interactive features allow users to adjust the orientation according to their preferences and requirements, enhancing the usability and adaptability of the plots for research needs [@raidou2015].
 
-Automatic reordering may reduce control over axis sequence, potentially misaligning dimensions relevant to a specific analytical question.
-LeBlanc et al. pointed out that "the gain in interpretability through automated ordering can sometimes sacrifice user intention, misaligning axes crucial to the analysis context."
+Dimension reduction has become critical for managing PCPs with high-dimensional data. Techniques such as principal component analysis (PCA) and clustering help to focus on the most significant data features. Reducing dimensions simplifies analysis, enabling analysts to focus on the most important features while avoiding overwhelming visual data. "Dimension reduction helps to retain essential information without drowning the user in less relevant details," [@wegman1997].
 
-Axis flipping is a way to eliminate unnecessary line crossings and bring out trends in data by flipping the scale of one or more axes.
-It works well when two PCP axes next to each other have negatively correlated factors.
-This change allows different patterns to show up without too many crossings, giving a clearer picture of how the data is related.
-Axis flipping is an important tool for dealing with negative correlations because it clarifies the connection between dimensions by reducing visual interference.
-It also shows patterns of correlation that regular PCPs might miss, especially when working with datasets that have many factors that are unrelated to each other or are related in the opposite way.
-Automated axis flipping methods can change plots on the fly based on data, which lowers the chance of mistakes when users interpret PCPs.
-Heinrich and Dasgupta's studies both agree that axis flipping makes PCPs easier to understand by turning bad relationships into a more familiar shape [@dasgupta2010, @review].
+Wegman and Luo applied PCA within PCPs, enabling users to represent key data features while minimizing less relevant dimensions [@wegman1997]. Guo et al. utilized clustering and hierarchical dimension reduction techniques to streamline high-dimensional datasets, enhancing usability without sacrificing detail [@guo2012]. Yang et al. demonstrated the integration of non-linear dimension reduction methods within PCPs to capture complex relationships in data more effectively [@yang2017].
 
-Reordering and flipping axes based on correlation or user-defined parameters simplify the interpretation of complex relationships.
-"Dynamic reordering optimizes the alignment of correlated variables, making it easier to identify associations and trends across dimensions" [@yuan2009].
-This adaptation increases flexibility, allowing the plot to respond to specific analytical needs and user preferences.
-
-Reordering and axis shifting work well together to fix the issue of overplotting in PCPs.
-Rearranging linked variables makes them easier to see while flipping the axes reduces the number of times lines cross for negatively correlated variables.
-Combining these two tools makes looking for patterns and exploring large datasets easier.
-
-By using these methods, users can better understand how multiple variables are connected, which helps them make better decisions based on visual information.
-Research shows that these methods make parallel coordinate plots easier to understand, more accurate, and better able to find groups and trends, all of which are very important for data analysts.
-
-Continuous reordering can create inconsistency, as users may find it challenging to track relationships when axes are frequently altered.
-"Constant reconfiguration of the axes can disrupt the analytical flow, making it difficult to build a stable mental model of the data structure" [@review].
-Additionally, for datasets with minimal correlation, this method may offer limited value, as reordering may not result in clearer insights.
+Dimension reduction techniques like PCA or clustering can inadvertently remove nuances or minor patterns that might be relevant in specific cases. Guo et al. caution that, "while beneficial, these methods might lead to information loss, potentially masking relationships only visible in higher dimensions," [@guo2012].
 
 ```{r}
 #| echo: false
 #| warning: false
-#| label: fig-reordering
+#| label: fig-pca
 #| layout-valign: bottom
 #| fig-subcap: 
-#|   - "Reordering and Axis Flipping in PCP"
+#|   - "A PCA in Parallel Coordinate Plot"
 
-# Reorder columns for better interpretability
-penguins_reordered <- penguins_clean %>%
-  select(species, flipper_length_mm, body_mass_g, bill_length_mm, bill_depth_mm)
 
-# Create a parallel coordinate plot with reordering and axis flipping using ggparcoord
+# Remove rows with missing data from the dataset
+penguins_clean <- penguins %>%
+  na.omit() %>%
+  select(-island, -sex, -year)
+
+# Perform PCA on the numeric columns
+penguins_pca <- prcomp(penguins_clean %>%
+                         select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g),
+                       center = TRUE, scale. = TRUE)
+
+# Create a data frame with the PCA results
+penguins_pca_df <- as.data.frame(penguins_pca$x)
+# Add species as a categorical variable to the PCA data frame
+penguins_pca_df$species <- penguins_clean$species
+
+# Create a parallel coordinate plot using ggparcoord for the PCA results
 ggparcoord(
-  data = penguins_reordered,
-  columns = 2:5, # Using the reordered numeric columns
-  groupColumn = 1,
+  data = penguins_pca_df,
+  columns = 1:4, # Using the PCA components
+  groupColumn = 5,
   scale = "uniminmax", # Scale columns to range between [0, 1]
-  alphaLines = 0.5, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
-  mapping = ggplot2::aes(color = species)
+  alphaLines = 0.3, # Set transparency for lines
+  #showPoints = TRUE, # Show points on lines
+  mapping = ggplot2::aes(color = species) # Color lines by species
 ) +
-  #scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Reordering and Axis Flipping",
-                y = "Scaled Values",
-                x = "Variables") +
+  ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
+                y = "Scaled PCA Values",
+                x = "Principal Components") +
   theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
   theme(axis.text.x = element_text(angle=45))
+
 ```
 
-In @fig-reordering, the parallel coordinate map changes the variables by rearranging them and flipping the axes to show patterns and connections between the penguin species more clearly.
-By flipping some axes and putting related factors closer together (like body mass and flipper length), the plot makes species-based trends stand out more: The Gentoo (blue) tends to have a shallower bill but a bigger body and longer flippers, while the Adelie (red) tends to have the opposite pattern.
-Overplotting is still a problem, especially when values are close together in the middle ranges, making it hard to tell the difference between lines or peaks.
-You can't see the distributions' exact forms, but the lines' density and spread along each axis give you a good idea of the range of values for each species.
-The new order makes relationships between variables stand out more because the changes between the axes make species-based correlations in measurement trends more apparent.
-However, individual relationships are still hard to see because lines cross.
+In @fig-pca, the parallel coordinate plot incorporates principal component analysis (PCA) components (PC1 to PC4) on the x-axis, with the scaled PCA values on the y-axis, color-coded by species (Adelie in red, Chinstrap in green, and Gentoo in blue).
+PCA reduces dimensionality, meaning that each PC represents a combination of the original variables, simplifying complex relationships.
+The lines between components show how each penguin transitions across these derived features, making it easier to observe general trends for each species in the reduced space.
+Due to the numerous overlapping lines, overplotting remains an issue, though species-level patterns are visible, with distinct separations in specific PCs.
+Outliers are challenging to detect due to the bundled nature of the lines.
+While distribution shapes aren’t explicitly visible, the clustered points at each PC axis indicate each species' general concentration of values.
+Though individual variability remains obscured, relationships between PCs and species are implied through color-coded clusters and trends, suggesting some separation between species along specific principal components.
 
-### Cluster-Based and Hierarchical PCPs
+## Cluster-Based and Hierarchical PCPs
 
 Clustering techniques, such as spectral clustering, have been used in PCPs to group related data points and expose the underlying structure of high-dimensional datasets.
 Clustering data and viewing the clusters in parallel coordinate plots makes detecting links between data points and cluster features easier.
@@ -450,26 +560,26 @@ ggparcoord(
   theme(axis.text.x = element_text(angle=45))
 ```
 
-### Optimized Layout Algorithms
+## Optimized Layout Algorithms
 
 Layout algorithms for PCPs have been optimized to handle multi-dimensional data while minimizing line crossings, which enhances clarity and allows for smoother navigation.
 Optimized layouts minimize line crossings, making PCPs more straightforward, particularly with extensive, high-dimensional data.
-"Effective layout design in PCPs can be the difference between comprehensibility and chaos," Ankerst et al. claim, emphasizing that thoughtful placement enhances legibility [@ankerst1998].
+"Effective layout design in PCPs can be the difference between comprehensibility and chaos." [@ankerst1998]
+[Is there a user study showing that this makes PCPs easier to read?]{.svp}
 
-Ankerst et al. proposed a layout algorithm that places axes to minimize line crossings, increasing the legibility of high-dimensional PCPs.
-Johansson et al. optimized the axis positioning algorithm to maximize the space between overlapping lines, improving data distinction [@johansson2005].
+[Automatic, heuristic PCP layout algorithms may produce results that do not]{.svp} align with user-defined analysis needs [@johansson2005].
+Instead, @johansson2005 optimized the axis positioning algorithm to maximize the space between overlapping lines, improving data distinction. [What does data distinction mean here? Are there experimental studies showing this?]{.svp}
+
 Hao et al. (2007) implemented a randomized layout approach that provides an efficient layout for PCPs, beneficial for large, high-dimensional data.
 
-Layout optimizations sometimes follow heuristic approaches that may not always align with user-defined analysis needs, possibly overlooking preferred layouts.
-Johansson et al. state that "algorithmically optimized layouts prioritize minimal intersections over interpretability, occasionally misaligning with the user's focus.," [@johansson2005].
+[You need to show these different options and comment on the differences! Provide more detail about whether experimental evidence supports the approach. How does the approach in @ankerst1998 compare to the ggpcp ordering approach to minimize line crossings in one direction or another for categorical variables? I suspect that these algorithms change axis positioning, where ggpcp changes ordering within a category -- but you need to explicitly make that comparison.]{.svp}
 
 ```{r}
 #| echo: false
 #| warning: false
 #| label: fig-optimized
 #| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Algorithm Optimized Layout in PCP"
+#| fig-cap: "Algorithm Optimized Layout in PCP. [There needs to be a lot more information here -- what do you see from the picture?]{.svp}"
 
 # Calculate the correlation matrix for optimized ordering
 cor_matrix <- cor(penguins_clean %>%
@@ -487,7 +597,7 @@ ggparcoord(
   groupColumn = "species",
   scale = "uniminmax", # Scale columns to range between [0, 1]
   alphaLines = 0.5, # Set transparency for lines
-  showPoints = TRUE, # Show points on lines
+  #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
   scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
@@ -499,86 +609,123 @@ ggparcoord(
   theme(axis.text.x = element_text(angle=45))
 ```
 
-### Categorical and Hybrid PCPs
+## Interactive and Dynamic
 
-Traditional PCPs were primarily designed to collect continuous data.
-However, real-world datasets often contain a mix of continuous, ordinal, and categorical data.
-To solve this, changes have been made to display mixed-type data within the same PCP simultaneously.
-Categorical data, for example, can be visually differentiated using unique colors, symbols, or segmented lines, although continuous variables are still represented by standard lines linking the axes.
-Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation.
-Specific strategies, like adjustments to the ends of links, have been suggested to enhance how category and numerical values are connected visually.
-This strategy enhances the interpretability of mixed data by modifying the plotting criteria for axes representing category variables.
+The addition of interactive features has substantially increased the usefulness of PCPs. Interactive PCPs enable users to dynamically change axes, reorder them, filter data based on specified criteria, and even invert axes to study data from various angles. These characteristics enable real-time data analysis, leading to a deeper understanding of patterns and correlations. Brushing and connecting allow users to highlight specific data points across many axes, whereas filtering hides lines that do not satisfy set criteria, decreasing clutter. The interactive characteristics of PCPs make them more amenable to exploratory data analysis, particularly in big and complicated datasets [@heinrich2013].
 
-CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
-Siirtola and Räihä introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs, [@siirtola2006].
-Inselberg enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power [@inselberg2009].
-Johansson and Forsell explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis, [@johansson2015].
+Heinrich and Weiskopf's 2013 paper "State of the Art of Parallel Coordinates" thoroughly reviews visualization methods for parallel coordinates. It includes a taxonomy that groups the different approaches into different categories. The writers discuss various ways to model, see, and work with parallel coordinates. They also show how these methods can be used for everyday tasks in knowledge discovery, like sorting, clustering, and regression. Some of the most important advances are discussing geometric models, interpolation methods, and the point-line duality that makes up the basis of parallel coordinate plots. The study discusses a better understanding of data using density-based visualizations, axis ordering, and improvements such as brushing and bundling.
 
-The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces nonlinear changes to the axes for more complex data representation.
-These can show more complicated relationships in the data that might not be visible in a regular PCP.
-Nonlinear scales such as logarithmic and exponential transformations are possible.
-In their work in 1997, Wegman and Luo provided a comprehensive discussion of the GPCP idea.
-This adjustment allows the visualization to display various data connections and handle skewed data distributions [@wegman1997].
+The study points out some problems with parallel coordinates, like overplotting and the need for good axis arrangement. It also suggests ways to get around these problems, such as clustering and density estimation. To make it easier to see patterns and understand data, researchers look into different ways to map it, such as curves, shapes, and density plots. The writers also talk about how parallel coordinates can be used in real life in engineering and the life sciences. This shows how useful and flexible they are for high-dimensional data visualization tasks.
 
-CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation.
-Wegman et al. (1990) suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
-Holten and van Wijk (2009) introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
-LeBlanc et al. (1990) highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.
+Initially, modifications in parallel coordinate plots have dynamic features, which allow users to select, highlight, and filter data dimensions or specific data points in real-time. This has facilitated more precise and focused analysis within large datasets. Interaction allows users to engage with data intuitively, selectively focusing on areas of interest. "Interactive filtering and brushing make it easier to identify patterns within large datasets, aiding discovery and hypothesis generation" [@Wegman:1990].
+
+In 1990, Wegman et al. introduced fundamental techniques for interaction with multidimensional data, laying the groundwork for modern interactive PCPs. Siirtola and Räihä developed interactive features like brushing and linking to assist in dimensional analysis, making comparing attributes within large datasets easier [@siirtola2006]. Inselberg expanded these features by enabling dynamic filtering and axis rearrangement to tailor the display to user needs [@inselberg2009].
+
+Increased complexity can overwhelm novice users, requiring more computational power and potentially slowing down analysis in high-dimensional datasets. Inselberg noted, "While interactivity provides insight, it can lead to user fatigue in complex datasets due to the cognitive load required for multi-step filtering," [@inselberg2009].
+
+The live parallel coordinates plot on Plotly's ggplot2 page has many dynamic features that make looking at many different data types easy. Users can interact with the plot by moving their mouse across parallel axes to filter and separate specific data ranges. This lets them analyze only certain factors. When you move your mouse over a line, a tooltip appears with all of that line's numbers for each dimension. This makes it easier to understand large datasets. You can change the order of the axes by dragging them horizontally. This lets users adjust the dimensions to find hidden patterns and connections more easily.
+
+Additionally, brush choices change the visualization in real-time, drawing more attention to relevant data paths and lessening the importance of others. This makes it easier to spot trends and outliers. These interactive parts work together to create an easy-to-use and adaptable way to see and analyze high-dimensional data in a parallel coordinates environment, [@plotly-pcp].
+
+[Interactive Parallel Coordinate Plot](https://plotly.com/ggplot2/parallel-coordinates-plot/)
+
+## Reordering and Axis Flipping
+
+Adaptive reordering and axis flipping based on correlation measures or user-defined parameters can simplify the analysis of multidimensional relationships.
+Reordering and axis flipping align more relevant dimensions, minimizing intersections and making relationships more interpretable.
+"Reordering transforms PCPs from a cluttered tangle into a roadmap of relationships," [@inselberg1990parallel].
+
+Inselberg and Dimsdale proposed reordering to enhance interpretability, especially for highly interrelated variables.
+LeBlanc et al. introduced correlation-based reordering to position axes, reducing visual clutter by aligning more related dimensions [@leblanc1990].
+Peng et al. (2004) enabled automatic reordering algorithms that flip axes according to user-defined weights, giving users more control over PCP readability.
+
+Changing the order of the axes in parallel coordinate plots can make them easier to read by putting variables that are strongly correlated or connected by theme next to each other.
+Moving the axes around reduces the amount of visual noise caused by crossings between variables that aren't strongly linked to each other.
+This makes patterns and clusters stand out more.
+The method of minimizing visual noise helps show hidden patterns in the data that would not be seen otherwise.
+Researchers @johansson2005 and @wegman1997 all found that reordering is an important way to find connections in PCPs.
+If you use well-thought-out reordering algorithms, you can see groups, trends, and outliers more clearly and avoid the feeling of overplotting.
+This method works incredibly well for grouping data with many dimensions, making it easier to see.
+
+Automatic reordering may reduce control over axis sequence, potentially misaligning dimensions relevant to a specific analytical question.
+LeBlanc et al. pointed out that "the gain in interpretability through automated ordering can sometimes sacrifice user intention, misaligning axes crucial to the analysis context."
+
+Axis flipping is a way to eliminate unnecessary line crossings and bring out trends in data by flipping the scale of one or more axes.
+It works well when two PCP axes next to each other have negatively correlated factors.
+This change allows different patterns to show up without too many crossings, giving a clearer picture of how the data is related.
+Axis flipping is an important tool for dealing with negative correlations because it clarifies the connection between dimensions by reducing visual interference.
+It also shows patterns of correlation that regular PCPs might miss, especially when working with datasets that have many factors that are unrelated to each other or are related in the opposite way.
+Automated axis flipping methods can change plots on the fly based on data, which lowers the chance of mistakes when users interpret PCPs.
+Heinrich and Dasgupta's studies both agree that axis flipping makes PCPs easier to understand by turning bad relationships into a more familiar shape [@dasgupta2010, @review].
+
+Reordering and flipping axes based on correlation or user-defined parameters simplify the interpretation of complex relationships.
+"Dynamic reordering optimizes the alignment of correlated variables, making it easier to identify associations and trends across dimensions" [@yuan2009].
+This adaptation increases flexibility, allowing the plot to respond to specific analytical needs and user preferences.
+
+Reordering and axis shifting work well together to fix the issue of overplotting in PCPs.
+Rearranging linked variables makes them easier to see while flipping the axes reduces the number of times lines cross for negatively correlated variables.
+Combining these two tools makes looking for patterns and exploring large datasets easier. [Citation needed]{.svp}
+By using these methods, users can better understand how multiple variables are connected, which helps them make better decisions based on visual information.
+Research shows [Citation needed]{.svp} that these methods make parallel coordinate plots easier to understand, more accurate, and better able to find groups and trends, all of which are very important for data analysts.
+Continuous reordering can create inconsistency, as users may find it challenging to track relationships when axes are frequently altered.
+"Constant reconfiguration of the axes can disrupt the analytical flow, making it difficult to build a stable mental model of the data structure" [@review].
+Additionally, for datasets with minimal correlation, this method may offer limited value, as reordering may not result in clearer insights.
 
 ```{r}
 #| echo: false
 #| warning: false
-#| label: fig-hybrid
+#| label: fig-reordering
 #| layout-valign: bottom
 #| fig-subcap: 
-#|   - "Categorical and Hybrid in PCP"
+#|   - "Reordering and Axis Flipping in PCP"
 
-# Remove rows with missing data from the dataset
-penguins_clean_cat <- penguins %>%
-  na.omit() %>%
-  select(-year)
+# Reorder columns for better interpretability
+penguins_reordered <- penguins_clean %>%
+  select(species, flipper_length_mm, body_mass_g, bill_length_mm, bill_depth_mm)
 
-# Convert categorical variables to factors
-penguins_clean_cat <- penguins_clean_cat %>%
-  mutate(island = as.factor(island),
-         sex = as.factor(sex),
-         species = as.factor(species))
-
-# Create a parallel coordinate plot using both numeric and categorical variables
-
-penguins_clean_cat %>%
-  pcp_select(2:7) %>%
-  pcp_scale(method="uniminmax") %>%
-  # pcp_arrange() %>%
-  ggplot(aes_pcp()) +
-  geom_pcp_axes() +
-  geom_pcp(aes(colour = species)) +
+# Create a parallel coordinate plot with reordering and axis flipping using ggparcoord
+ggparcoord(
+  data = penguins_reordered,
+  columns = 2:5, # Using the reordered numeric columns
+  groupColumn = 1,
+  scale = "uniminmax", # Scale columns to range between [0, 1]
+  alphaLines = 0.5, # Set transparency for lines
+  #showPoints = TRUE, # Show points on lines
+  mapping = ggplot2::aes(color = species)
+) +
+  #scale_color_manual(values = c("Adelie" = "#1f78b4", "Chinstrap" = "#33a02c", "Gentoo" = "#e31a1c")) +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP",
+  ggplot2::labs(title = "Parallel Coordinate Plot with Reordering and Axis Flipping",
                 y = "Scaled Values",
                 x = "Variables") +
   theme(legend.position = "bottom") +
-  facet_wrap(~sex) +
+  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
   theme(axis.text.x = element_text(angle=45))
 ```
 
-## Handling Numerical Ties
+In @fig-reordering, the parallel coordinate map changes the variables by rearranging them and flipping the axes to show patterns and connections between the penguin species more clearly.
+By flipping some axes and putting related factors closer together (like body mass and flipper length), the plot makes species-based trends stand out more: The Gentoo (blue) tends to have a shallower bill but a bigger body and longer flippers, while the Adelie (red) tends to have the opposite pattern.
+Overplotting is still a problem, especially when values are close together in the middle ranges, making it hard to tell the difference between lines or peaks.
+You can't see the distributions' exact forms, but the lines' density and spread along each axis give you a good idea of the range of values for each species.
+The new order makes relationships between variables stand out more because the changes between the axes make species-based correlations in measurement trends more apparent.
+However, individual relationships are still hard to see because lines cross.
 
-Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear.
-Previously, statistical methods focused on rank-based approaches and binary data handling.
-They often needed help with tied observations, which threw off distributions or made them more complex.
-Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand.
-As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually.
-There are now several ways to deal with ties, such as slowly increasing the space between values.
-This makes the visualization more accurate and easier to understand without changing the structure of the data itself.
+# Handling Numerical Ties
 
-### Random Jittering of Data Points
+Getting rid of ties in statistical data analysis has been hard for a long time for experts who want to make visualizations more clear. Previously, statistical methods focused on rank-based approaches and binary data handling. They often needed help with tied observations, which threw off distributions or made them more complex. Earlier methods for dealing with ties depended on changing ranking systems or adding rules to break ties, which could make results less accurate or easier to understand. As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland created new ways to deal with ties visually. There are now several ways to deal with ties, such as slowly increasing the space between values. This makes the visualization more accurate and easier to understand without changing the structure of the data itself.
+
+Tufte's work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise---any element that complicates or crowds the visual field---can impede the interpretation of data. He advocates for "graphical excellence," a design philosophy that presents data most clearly and efficiently. According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. "Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships," [@tufte2001].
+
+In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. Tufte calls this "chartjunk." He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. For instance, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard.
+
+## Random Jittering of Data Points
 
 Random jittering of data points is a standard method that adds a small random value to each tied observation.
 This is especially helpful in scatter plots and dot plots to keep them from being too dense.
 This approach, discussed in “Graphical Methods for Data Analysis” by Chambers et al., is easy to use and keeps the overall distribution, making things clearer without changing the data [@chambers1983].
 One problem with random jittering is that it can hide exact numbers, making it hard to understand if the jittering distance is too big.
 Experiments show that jittering makes visualizations much clearer when there are small overlaps, especially when used rarely.
+
 
 In random jittering, we add a small random value (usually drawn from a uniform or normal distribution) to each tied observation to differentiate them.
 
@@ -594,7 +741,7 @@ where:
 -   $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$,
 -   $\sigma$ is the standard deviation for the normal jitter.
 
-### Rank Jittering (Rank Adjustment)
+## Rank Jittering (Rank Adjustment)
 
 Rank jittering is another useful method for non-parametric analyses.
 It changes the ranks of tied values instead of the real data values.
@@ -619,7 +766,7 @@ where:
 -   $\delta_i \sim \mathcal{N}(0,\sigma_{rank}^2)$
 -   $\sigma_{rank}$ are small values ensuring that the adjustment is minor.
 
-### Deterministic Jittering (Fixed Perturbation)
+## Deterministic Jittering (Fixed Perturbation)
 
 When you need to be clear, deterministic jitter gives you a structured way to do it by adding a small fixed value (epsilon) to each tied observation instead of depending on chance.
 This method explained in more detail in Tukey's “Exploratory Data Analysis”, is useful when random noise is not wanted because it ensures that each observation is moved in a way that can be predicted and repeated [@david1977].
@@ -640,7 +787,7 @@ where:
 -   $i$ is the indeex of the tied observation (e.g., $i = 1,2,...,n$),
 -   $\epsilon$ is a small fixed distance chosen based on the data scale.
 
-### Mean or Median Splitting
+## Mean or Median Splitting
 
 One more popular method is mean or median splitting, which gives values tied to their mean or median values.
 This method works especially well for symmetric distributions and is perfect for images that need to show things centrally, like box plots.
@@ -664,13 +811,14 @@ $x'_i = x_{mean}$ or $x'_i = x_{median}$
 
 This replaces each tied value $x_i$ with the computed mean or median, clustering them at a central point.
 
-### Kernel Density Estimation (KDE) with Bandwidth Adjustment
+## Kernel Density Estimation (KDE) with Bandwidth Adjustment
 
 Kernel density estimation (KDE) with bandwidth adjustment is a powerful method for density visualizations.
 It spreads out overlapping observations by giving each tied value a slightly different weight.
 This method works especially well in density plots because it evens data distributions without changing the original numbers.
 Silverman's work in “Density Estimation for Statistics and Data Analysis” shows how KDE with changed bandwidths correctly shows multimodal distributions, reducing errors caused by tied values.
 KDE works, but you must be careful when choosing the bandwidth because making the wrong choice can lead to misleading visual representations, especially when files are very concentrated [@silverman2018].
+
 
 For KDE with bandwidth adjustment, each data point is used to estimate a probability density function (PDF) by smoothing over a specified bandwidth $h$, which can be adjusted to account for ties.
 
@@ -697,7 +845,7 @@ In this case, adding the distance between values tied across multiple axes could
 By creating a new method for parallel coordinate plots that adds space between ties in a planned way, we could see data trends and links across dimensions more clearly while keeping the dataset's integrity.
 This new idea would make it easier to understand complex, multidimensional data.
 
-## Handling Ties in PCPs
+# Handling Ties in PCPs
 
 The idea of adding distance to visual ties has changed over time as methods for visualizing data have improved to find a balance between detail and clarity in large datasets.
 In the early days of visualization, especially in network analysis and multidimensional scaling, closeness and alignment were the main ways to show patterns and ties between things.
@@ -710,7 +858,7 @@ In PCPs, early studies showed that visual distance could make intersections clea
 As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005].
 This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
 
-### Axis Reordering
+## Axis Reordering
 
 As mentioned in the section on modifications, axis reordering changes the order of dimensions to reduce the number of times lines cross between variables in PCPs, a type of data display.
 This method makes clusters easier to see by lining up visually linked variables, cutting down on clutter, and making patterns stand out more without overlapping.
@@ -740,6 +888,7 @@ p1 <- ggparcoord(
 ) +
   #ggtitle("Without Axis Reordering")  +
   theme_minimal() +
+  theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45))
 
 # Example of a parallel coordinate plot with axis reordering to minimize tie overlap
@@ -751,13 +900,16 @@ p2 <- ggparcoord(
   order = "skewness") +   # skewness axis reordering to handle ties and improve interpretability
   #ggtitle("With Skewness Axis Reordering") +
   theme_minimal() +
+  theme(legend.position = "bottom")  +
   theme(axis.text.x = element_text(angle=45))
 
+# Try using patchwork. Think about removing the legend and adding that in the section.
 grid.arrange(p1,p2, ncol=2)
 
 ```
 
-### Line Bundling
+## Line Bundling
+
 
 By putting similar lines into "bundles," line bundling cuts down on unnecessary crossings and clutter.
 This method works well in dense PCPs, where many lines cross and make it hard to see individual patterns.
@@ -766,7 +918,8 @@ Experiments have shown that bundling makes large datasets easier to read, which 
 It makes things easier to understand by collecting similar data lines; this works especially well for numerical ties where values are close but not exactly the same.
 Bundling, on the other hand, can hide individual lines within a group, making it hard to tell one data point from another.
 
-### Quantization and Aggregation
+
+## Quantization and Aggregation
 
 Quantization, also known as Quantized Generalized Parallel Coordinate Plots or QGPCP, groups close-together values into bins.
 This makes it easier to see patterns in tightly packed data.
@@ -808,13 +961,14 @@ ggparcoord(
   columns = 2:8,    # Use all columns, including encoded categorical variables
   groupColumn = 1,  # Grouping by species
   scale = "uniminmax", # Scale columns to the same range
-  showPoints = TRUE,   # Show points on the lines
+  #showPoints = TRUE,   # Show points on the lines
   alphaLines = 0.6     # Transparency of lines
 ) + 
   theme_minimal() + 
   labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset",
        x = "Attributes",
        y = "Quantized/Encoded Values") +
+  theme(legend.position = "bottom")  +
   theme(axis.text.x = element_text(angle=45))
 ```
 
@@ -824,7 +978,7 @@ However, this needs to improve some of the accuracy of the original data.
 The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live.
 Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
 
-### Color-Coding and Transparency
+## Color-Coding and Transparency
 
 By changing the color and transparency of lines, you can tell them apart based on density, categories, or values.
 This makes it easier to tell the difference between PCP lines that meet.
@@ -834,7 +988,8 @@ This tool can be used to handle both numerical and categorical ties.
 The color and transparency options make it easy to visually separate clusters without changing where the lines are placed.
 However, this method might only work for plots with little information because even changes in color can't fully fix heavy overplotting.
 
-### Edge Bundling for Categorical Data
+## Edge Bundling for Categorical Data
+
 
 Edge bundling, which comes from network visualization, groups paths for category values in PCPs.
 This method works best with categorical data because it lets you visually break up ties without changing other factors.
@@ -844,7 +999,7 @@ Edge bundling is an excellent way to clear up clutter and make categorical group
 It lets users see categorical differences without messing up numerical relationships.
 On the other hand, each bundle may hide small details, making them less useful for datasets that need a lot of precision.
 
-### Stacked Histograms and Density Plots
+## Stacked Histograms and Density Plots
 
 This change adds histograms or density plots on top of PCPs to show how category data is distributed in terms of frequency.
 This lets users see how distributions change without adding extra line clutter.
@@ -854,7 +1009,8 @@ Clear frequency-based differentiation in categorical data without too much line 
 Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant [@bok2020].
 Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes
 
-### Perceptual Cues (Line Thickness, Texture, etc.)
+
+## Perceptual Cues (Line Thickness, Texture, etc.)
 
 By changing the lines' width, texture, or other visual properties, you can tell them apart from overlapping lines.
 This helps people see patterns and tell values apart without separating them physically.
@@ -865,4 +1021,4 @@ Studies with users showed that changes in how people saw things made finding pat
 This made it easier for PCPs to look around [@chang2018].
 In areas with many people, it could be useful because overlapped lines can make it harder to see.
 
-## References
+# References
