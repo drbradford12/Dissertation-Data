@@ -73,8 +73,17 @@ suppressWarnings(
   theme(axis.text.x = element_text(angle=45))
   )
 ```
+[I think it might be best to customize the ggpairs plot so that it's only a scatterplot matrix -- that makes for a simpler comparison than the multiplot hybrid beast that's the default ggpairs plot. Scatterplot matrices are the most direct comparison to PCPs because they show Cartesian pairs of variables]{.svp}
 
-@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatterplots, and correlation matrices. It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related. Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data. The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}. [While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} Overall, the matrix-style plot does an excellent job of showing the links within and between variables. [The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
+@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatterplots, and correlation matrices. 
+It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related.
+Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). 
+The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. 
+In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data. 
+The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}. 
+[While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} 
+Overall, the matrix-style plot does an excellent job of showing the links within and between variables. 
+[The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
 
 ```{r}
 #| echo: false
@@ -114,7 +123,7 @@ The Gentoo (blue) tends to have higher body mass and flipper length values, whil
 
 <!-- For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension.  -->
 
-[As originally proposed,]{.svp} PCPs [could]{.svp} be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}. 
+[As originally proposed,]{.svp} PCPs [could]{.svp} be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}.
 [The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot .]{.svp} 
 [A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp} 
 [In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johansson2015] may support identification of clusters and outliers in multidimensional space.]{.svp}
@@ -148,17 +157,21 @@ penguins %>%
 
 ## Why?
 
-Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
-This means that complex relationships between different factors can be studied repeatedly. 
-PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
-However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting and can become difficult to read or interpret when N is large, but because they overplot, they can get messy with large datasets. 
-It can be more challenging to understand the data than with Cartesian coordinates, and you must go through a learning process to get the majority of them as well.
-
-Cartesian coordinates, on the other hand, are straightforward to understand because they are simple and well-known. 
+[Plots using]{.svp} Cartesian coordinates are straightforward to understand because they are [commonly encountered and taught in grade school]{.svp}. 
+[Unfortunately, plots using Cartesian coordinates, such as scatterplots, are limited to two variables displayed using spatial dimensions, which are perceived more accurately than other aesthetic mappings such as color and shape [@cleveland1984].]{.svp}
+[Projections of three-dimensional scatterplots can be created, but these charts can be difficult to read and interpret; interactive 3D scatterplots still suffer from the loss of information inherent to 2D projection on a screen, but allow for some sense of the full shape of the data.]{.svp}
+[Data sets with more than 3 numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne] XXX PCA XXX, or plotting bivariate relationships between variables in order to visualize these data sets.]{.svp}
 They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
 Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
 They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
 Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
+
+Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
+This means that complex relationships between different factors can be studied repeatedly. [repeatedly?? Not sure what you mean by this]{.svp}
+PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. [are great for is very informal language -- can you rephrase this to be more formal? e.g. PCPs effectively show bivariate relationships, clusters of similar data points across multiple variables, and outliers, as shown in  ...., and then provide a figure showing how you can see those qualities within a PCP?]{.svp}
+However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting, [becoming]{.svp} difficult to read [and]{.svp} interpret when N is large. 
+[In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in @fig-features]{.svp}. 
+[This lack of familiarity may be the biggest drawback of PCPs; however, there are ... studies which explore this issue.]{.svp} [XXX are there studies that explore how quickly people acclimate to PCPs? If not, we should consider running one!]{.svp}
 
 # Modifications to Parallel Coordinate Plots
 
