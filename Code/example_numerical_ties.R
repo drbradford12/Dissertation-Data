@@ -14,27 +14,48 @@ calculate_jitter_amount <- function(data, factor = 0.1) {
   return(jitter_amounts)
 }
 
-# Function to create categorical jitter
-# categorical_jitter <- function(column, factor = 0.1) {
-#   unique_levels <- unique(column)
-#   level_jitter <- seq(-factor, factor, length.out = length(unique_levels))
-#   names(level_jitter) <- unique_levels
-#   return(level_jitter[column])
-# }
+# Generic function for jittering numeric values
+apply_jitter <- function(data, jitter_type = "random", amount = 0.5) {
+  modified_data <- data
+
+  # Identify numeric columns
+  numeric_cols <- sapply(modified_data, is.numeric)
+
+  # Apply the selected jittering method
+  modified_data[numeric_cols] <- lapply(modified_data[numeric_cols], function(col) {
+    if (jitter_type == "random") {
+      jitter(col, amount = amount)
+    } else if (jitter_type == "rank") {
+      rank_col <- rank(col, na.last = "keep")
+      col + rank_col * amount
+    } else if (jitter_type == "deterministic") {
+      ifelse(duplicated(col), col + amount, col)
+    } else if (jitter_type == "mean_split") {
+      col_mean <- mean(col, na.rm = TRUE)
+      ifelse(duplicated(col), col + (col - col_mean) * amount, col)
+    } else if (jitter_type == "kde") {
+      density_values <- density(na.omit(col), na.rm = TRUE)$bw
+      col + density_values[match(col, density_values)] * amount
+    } else {
+      stop("Invalid jitter_type. Choose from 'random', 'rank', 'deterministic', 'mean_split', or 'kde'.")
+    }
+  })
+
+  return(modified_data)
+}
 
 # Function to plot parallel coordinates with jitter for ties
-plot_parallel_with_jitter <- function(data, factor = 0.1) {
+plot_parallel_with_jitter <- function(ogdata, data, factor = 0.1) {
   # Remove rows with missing values
+  ogdata <- na.omit(ogdata)
   data <- na.omit(data)
-
   # Calculate jitter amounts for numerical columns
   jitter_amounts <- calculate_jitter_amount(data, factor)
 
 
   num_cols <- sapply(data, is.numeric)
 
-
-  og_ggp <- data %>%
+  og_ggp <- ogdata %>%
     mutate(year = factor(year)) %>%
     pcp_select(3:6, year) %>%  # Adding year as a factor and selecting required variables
     pcp_scale(method="uniminmax") %>%
@@ -45,6 +66,9 @@ plot_parallel_with_jitter <- function(data, factor = 0.1) {
     geom_pcp(aes(colour = species), overplot = "none") +
     geom_pcp_labels() +
     theme_minimal() +
+    scale_color_manual(
+      values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+    ) +
     labs(title = "Parallel Coordinate Plot without Jitter",
          color = "Species") +
     theme(axis.text.x = element_text(angle = 45))
@@ -70,6 +94,9 @@ plot_parallel_with_jitter <- function(data, factor = 0.1) {
     geom_pcp(aes(colour = species), overplot = "none") +
     #geom_pcp_labels() +
     theme_minimal() +
+    scale_color_manual(
+      values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+    ) +
     labs(title = "Parallel Coordinate Plot with Jitter",
          color = "Species") +
     theme(axis.text.x = element_text(angle = 45))
@@ -77,7 +104,6 @@ plot_parallel_with_jitter <- function(data, factor = 0.1) {
   # Print the plot
   print(grid.arrange(og_ggp, ggp, nrow = 2))
 }
-
 
 # Function to determine delta distance for each point in numerical ties
 determine_delta_distance <- function(data) {
@@ -103,9 +129,25 @@ determine_delta_distance <- function(data) {
 
 # Load the penguins dataset and call the function
 data("penguins")
-plot_parallel_with_jitter(penguins, factor = 0.07)
-determine_delta_distance(penguins)
+plot_parallel_with_jitter(penguins, apply_jitter(penguins, jitter_type = "random", amount = 2), factor = 0.07)
+
+plot_parallel_with_jitter(penguins, apply_jitter(penguins, jitter_type = "rank", amount = 2), factor = 0.07)
+
+plot_parallel_with_jitter(penguins, apply_jitter(penguins, jitter_type = "deterministic", amount = 2), factor = 0.07)
+
+plot_parallel_with_jitter(penguins, apply_jitter(penguins, jitter_type = "mean_split", amount = 2), factor = 0.07)
+
+#plot_parallel_with_jitter(penguins, apply_jitter(penguins, jitter_type = "kde", amount = 2), factor = 0.07)
+
+#determine_delta_distance(penguins)
 
 
+
+
+
+
+
+# Apply the function to the penguins dataset
+penguins_jittered <- apply_jitter(penguins, jitter_type = "random", amount = 2)
 
 

@@ -834,7 +834,7 @@ This makes the visualization more accurate and easier to understand without chan
 Tufte's work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise---any element that complicates or crowds the visual field---can impede the interpretation of data. 
 He advocates for "graphical excellence," a design philosophy that presents data most clearly and efficiently. 
 According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. 
-<!--"Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships," [@ware2009].-->
+Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships.
 
 In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. 
 Tufte calls this "chartjunk." 
