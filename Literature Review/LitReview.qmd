@@ -272,10 +272,13 @@ This is especially helpful in datasets that are hard to see [Why are they hard t
 Still, Pilhöfer et al. points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
 They suggest that Hammock plots work best for datasets with clear clusters [Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.
 
-@ge2020 improved the framework for visualizing data by adding Hammock plots to a grammar-based system. [What? No, that's the first ggpcp paper draft -- it didn't talk about Hammock plots. You want to look into the research Heike did with Vendettuoli circa 2012-2015 for hammock plots and variations]{.svp}
-This makes them better suited for data that has both category and numerical relationships. They say this grammar-based adaptation "retains the established behaviors of parallel coordinates" while giving you more options for dealing with edge cases like categorical ties. 
+[@hofmann2013]{.db} improved the framework for visualizing data by adding Hammock plots to a grammar-based system [called `ggparallel`]{.db}. [What? No, that's the first ggpcp paper draft -- it didn't talk about Hammock plots. You want to look into the research Heike did with Vendettuoli circa 2012-2015 for hammock plots and variations]{.svp}
+This makes them better suited for data that has both category and numerical relationships. 
+They say this grammar-based adaptation retains the established behaviors of parallel coordinate while giving you more options for dealing with edge cases like categorical ties. 
 This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
 [Also, please don't cite arxiv papers when a peer-reviewed version exists -- e.g. Penguins go Parallel]{.svp}
+
+[I would like to get rid of the section below and highlight the work "Hammock Plots: Visualizing Categorical and Numerical Variables" by Schonlau]{.db}
 
 @vanderplas2023 investigate more deeply how useful Hammock plots are for dealing with numerical ties in categorical datasets. 
 They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
@@ -399,7 +402,7 @@ This makes PCPs even better at analysis. With its interactive nature, people who
 Moustafa's research indicates that to deal with even larger datasets more efficiently, future efforts should focus on enhancing density estimation methods. 
 These methods can be used in biology and finance to demonstrate their usefulness and adaptability for examining real-world data.
 
-Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. "The clarity gained in bundle simplification comes at the cost of data precision," warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
+Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. The clarity gained in bundle simplification comes at the cost of data precision, warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
 
 ### Enhanced Color Encoding and Shading
 
@@ -500,14 +503,15 @@ The interactive features allow users to adjust the orientation according to thei
 
 Dimension reduction has become critical for managing PCPs with high-dimensional data. 
 Techniques such as principal component analysis (PCA) and clustering help to focus on the most significant data features. 
-Reducing dimensions simplifies analysis, enabling analysts to focus on the most important features while avoiding overwhelming visual data. "Dimension reduction helps to retain essential information without drowning the user in less relevant details," [@wegman1997].
+Reducing dimensions simplifies analysis, enabling analysts to focus on the most important features while avoiding overwhelming visual data. 
+Dimension reduction helps to retain essential information without drowning the user in less relevant details [@wegman1997].
 
 Wegman and Luo applied PCA within PCPs, enabling users to represent key data features while minimizing less relevant dimensions [@wegman1997]. 
 Guo et al. utilized clustering and hierarchical dimension reduction techniques to streamline high-dimensional datasets, enhancing usability without sacrificing detail [@guo2012]. 
 Yang et al. demonstrated the integration of non-linear dimension reduction methods within PCPs to capture complex relationships in data more effectively [@yang2017].
 
 Dimension reduction techniques like PCA or clustering can inadvertently remove nuances or minor patterns that might be relevant in specific cases. 
-Guo et al. caution that, "while beneficial, these methods might lead to information loss, potentially masking relationships only visible in higher dimensions," [@guo2012].
+Guo et al. caution that, while beneficial, these methods might lead to information loss, potentially masking relationships only visible in higher dimensions, [@guo2012].
 
 ```{r}
 #| echo: false
@@ -591,7 +595,7 @@ Geng et al. applied clustering in PCPs to group similar data points, highlightin
 Poco et al. extended these techniques by incorporating hierarchical clustering for user-defined levels of granularity [@poco2011].
 
 Although clusters simplify the data landscape, they can obscure individual data points.
-Geng et al. observed that "while useful for general patterns, clustering may bury unique or outlier data, potentially hiding significant findings in homogenous groups," [@geng2005].
+Geng et al. observed that while useful for general patterns, clustering may bury unique or outlier data, potentially hiding significant findings in homogenous groups, [@geng2005].
 
 ```{r}
 #| echo: false
@@ -764,7 +768,7 @@ Automated axis flipping methods can change plots on the fly based on data, which
 Heinrich and Dasgupta's studies both agree that axis flipping makes PCPs easier to understand by turning bad relationships into a more familiar shape [@dasgupta2010, @review].
 
 Reordering and flipping axes based on correlation or user-defined parameters simplify the interpretation of complex relationships.
-"Dynamic reordering optimizes the alignment of correlated variables, making it easier to identify associations and trends across dimensions" [@yuan2009].
+Dynamic reordering optimizes the alignment of correlated variables, making it easier to identify associations and trends across dimensions [@yuan2009].
 This adaptation increases flexibility, allowing the plot to respond to specific analytical needs and user preferences.
 
 Reordering and axis shifting work well together to fix the issue of overplotting in PCPs.
