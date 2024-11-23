@@ -811,7 +811,12 @@ ggparcoord(
                 x = "Variables") +
   theme(legend.position = "bottom") +
   ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45),
+        axis.line.y = element_blank(), # Remove y-axis line
+        axis.ticks.y = element_blank(), # Remove y-axis ticks
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) 
+
 ```
 
 In @fig-reordering, the parallel coordinate map changes the variables by rearranging them and flipping the axes to show patterns and connections between the penguin species more clearly.
@@ -839,7 +844,7 @@ Distancing tied values in complex visualizations can reduce interpretative diffi
 In complicated graphs like parallel coordinate plots, tied numbers often cause lines to overlap and hide other data points. 
 Tufte calls this "chartjunk." 
 He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. 
-For instance, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard [@tufte2001].
+For example, if a vast dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard [@tufte2001].
 
 ## Random Jittering of Data Points
 
@@ -892,7 +897,11 @@ ggparcoord(
                 x = "Variables") +
   theme(legend.position = "bottom") +
   ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45),
+        axis.line.y = element_blank(), # Remove y-axis line
+        axis.ticks.y = element_blank(), # Remove y-axis ticks
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) 
 
 
 ```
@@ -956,7 +965,12 @@ ggparcoord(
                 x = "Variables") +
   theme(legend.position = "bottom") +
   ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45),
+        axis.line.y = element_blank(), # Remove y-axis line
+        axis.ticks.y = element_blank(), # Remove y-axis ticks
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) 
+
 
 
 ```
@@ -1013,7 +1027,11 @@ ggparcoord(
                 x = "Variables") +
   theme(legend.position = "bottom") +
   ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45),
+        axis.line.y = element_blank(), # Remove y-axis line
+        axis.ticks.y = element_blank(), # Remove y-axis ticks
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) 
 
 
 ```
@@ -1075,7 +1093,12 @@ ggparcoord(
                 x = "Variables") +
   theme(legend.position = "bottom") +
   ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45),
+        axis.line.y = element_blank(), # Remove y-axis line
+        axis.ticks.y = element_blank(), # Remove y-axis ticks
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) 
+
 
 
 ```
@@ -1134,11 +1157,14 @@ ggparcoord(
   ) +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment",
-                y = "Scaled Values",
                 x = "Variables") +
   theme(legend.position = "bottom") +
   ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45),
+        axis.line.y = element_blank(), # Remove y-axis line
+        axis.ticks.y = element_blank(), # Remove y-axis ticks
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) 
 
 
 ```
