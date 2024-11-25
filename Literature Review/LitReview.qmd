@@ -297,6 +297,17 @@ This makes Hammock plots more flexible for use with large datasets. [Please don'
 They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
 However, they also admit that these plots are "less effective for continuous data without ties or when categorical values are minimal," [This phrase does not exist in the paper!]{.svp} suggesting that Hammock plots offer limited benefits in uniformly distributed datasets.
 
+[@Hofmann:2013 worked on Common Angle Plots, and Schonlau added Hammock plots to improve categorical data display.
+However, they approached the problem in different ways. 
+@schonlau2024 Hammock Plots: Visualizing Categorical and Numerical Variables generalizes parallel coordinate plots by swapping lines with box elements. 
+The width of the boxes shows the number of observations, so they can be used for both categorical and mixed data. 
+By changing traditional Hammock plot designs, Schonlau deals with perceptual problems like the reverse line width illusion. 
+Hofmann's work also raises this question. 
+Hofmann's Common Angle Plots are unique because they use consistent angular links to fix problems when line slopes or widths are different. 
+This ensures that the visualizations are accurate. 
+Schonlau stresses the importance of being flexible with different data types, while Hofmann uses a consistent angular structure to clarify interpretations. 
+Together, these approaches show a shared desire to make categorical and mixed data displays more accurate and useful, using different but complementary methods.]{.db}
+
 ```{r}
 #| echo: false
 #| warning: false
