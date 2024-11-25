@@ -859,7 +859,9 @@ Tufte calls this "chartjunk."
 He says that even minor cuts in visual noise can make it much easier for people to process information quickly and correctly. 
 For example, if an extensive dataset has many similar or similar values, separating the tied values can help the viewer see trends and relationships without having to think too hard.
 
-## Random Jittering of Data Points
+## Jittering Points
+
+### Random Jittering of Data Points
 
 Random jittering of data points is a standard method that adds a small random value to each tied observation.
 This is especially helpful in scatter plots and dot plots to keep them from being too dense.
@@ -920,7 +922,7 @@ ggparcoord(
 ```
 
 
-## Rank Jittering (Rank Adjustment)
+### Rank Jittering (Rank Adjustment)
 
 Rank jittering is another useful method for non-parametric analyses.
 It changes the ranks of tied values instead of the real data values.
@@ -988,7 +990,15 @@ ggparcoord(
 
 ```
 
-## Deterministic Jittering (Fixed Perturbation)
+A systematic way to use binary relationships in the data is to use ranking differences to break up ties. 
+@ipkovich2021 writes that rank-based separation ensures that each tied observation is positioned proportionally to its relative rank, maintaining interpretability and visual clarity. 
+This is one way to get rid of visual clutter in PCPs. 
+This rank-based method assigns spacing factors based on rank differences to ensure that overlapped lines are spread evenly across the plot. 
+The method works well to reduce overlap and maintain the order of the items, but it can be very time-consuming to run on big datasets with many ties. 
+In any case, it works incredibly well for showing categorical or ordinal data where order is important.
+
+
+### Deterministic Jittering (Fixed Perturbation)
 
 When you need to be clear, deterministic jitter gives you a structured way to do it by adding a small fixed value (epsilon) to each tied observation instead of depending on chance.
 This method explained in more detail in @david1977 “Exploratory Data Analysis”, is useful when random noise is not wanted because it ensures that each observation is moved in a way that can be predicted and repeated.
@@ -1048,6 +1058,16 @@ ggparcoord(
 
 
 ```
+
+
+Jittering can be a common way to deal with ties in parallel coordinate plots (PCPs). 
+It involves adding small amounts of random or predictable noise to tied observations. 
+@swayne2003 handle ties by jittering as an intuitive way to separate tied values in 2-D correlation tours without distorting their statistical relationships. 
+While jittering makes things easier to see, its main flaw is that it needs to be easier to figure out the right amount of noise. 
+Similarly, @few2008solutions calls jittering a practical solution to the perceptual challenges caused by overplotting.
+They point out that it can tell the difference between lines that overlap while keeping the structure of the whole picture. 
+Their review of the current solution stresses that jittering can improve visual clarity in dense datasets, mainly when carefully regulated.
+
 
 ## Mean or Median Splitting
 
@@ -1182,6 +1202,15 @@ ggparcoord(
 
 ```
 
+
+Advanced visual methods, such as depth cues and density adjustments, are used to deal with ties by making PCPs look like they are in three dimensions.  
+When combined with line transparency, Depth Cue Parallel Coordinates (DCPC) provide an effective means of visually distinguishing overlapping trends with teemporal binning that employs perception-based coloring and concepts, [@johansson2007]. 
+This method was created to deal with the problem of having a lot of temporal data. 
+Their primary focus is on using transparency and brightness changes to layer connected information, which lets users see data as if it were in three-dimensional space. 
+This method keeps the original data and ensures each line can remain identified. 
+Although the technique works, it requires advanced rendering tools that might not be easy to find in all visualization settings.
+
+
 Each way to show data with ties has unique benefits depending on the type of display and the type of data.
 Random and predictable jittering, for example, works well in scatterplots because they stop the plot from getting too big and show hidden patterns.
 KDE and rank-based methods, on the other hand, work well in density plots and ordinal visualizations.
@@ -1210,9 +1239,9 @@ As mentioned in the section on modifications, axis reordering changes the order 
 This method makes clusters easier to see by lining up visually linked variables, cutting down on clutter, and making patterns stand out more without overlapping.
 One benefit is that it works well for datasets where certain factors are strongly related, making clusters and trends easier to read without changing the data.
 Changing the variable order for clarity rather than data continuity could make it hard to tell if the data is in order.
-Blumenschein et al. say that reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge. This shows how important changing the arrangement can be for seeing clearly.
+@blumenschein2020 say that reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge. This shows how important changing the arrangement can be for seeing clearly.
 Studies in this area have shown that changing the order of dimensions makes it much easier to find patterns in datasets where dimensions are linked.
-However, it only works well on datasets with dimensions tied together [@blumenschein2020].
+However, it only works well on datasets with dimensions tied together.
 
 ```{r}
 #| echo: false
@@ -1354,22 +1383,23 @@ On the other hand, each bundle may hide small details, making them less useful f
 
 This change adds histograms or density plots on top of PCPs to show how category data is distributed in terms of frequency.
 This lets users see how distributions change without adding extra line clutter.
-According to Bok et al., adding histogram overlays gives categorical context, making variable distributions easier to see without affecting line continuity.
+According to @bok2020, adding histogram overlays gives categorical context, making variable distributions easier to see without affecting line continuity.
 This means that frequency-based cues can help you understand categorical distributions without adding more visual clutter.
 Clear frequency-based differentiation in categorical data without too much line overlap improves the visual understanding of distributions when used with PCPs.
-Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant [@bok2020].
-Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes
+Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant.
+Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes.
 
 
 ## Perceptual Cues (Line Thickness, Texture, etc.)
 
 By changing the lines' width, texture, or other visual properties, you can tell them apart from overlapping lines.
 This helps people see patterns and tell values apart without separating them physically.
-According to Chang et al., "Perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns." These cues help with cognitive grouping and pattern differentiation, even in complicated datasets.
+According to @chang2018, perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns. 
+These cues help with cognitive grouping and pattern differentiation, even in complicated datasets.
 They work well in areas with a lot of visual information because they let users see trends without changing the structure or order of the data.
 They are helpful for both numerical and categorical ties.
 Studies with users showed that changes in how people saw things made finding patterns and trends in large, complex datasets easier.
-This made it easier for PCPs to look around [@chang2018].
+This made it easier for PCPs to look around.
 In areas with many people, it could be useful because overlapped lines can make it harder to see.
 
 # References
