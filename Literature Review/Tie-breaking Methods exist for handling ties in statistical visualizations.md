@@ -45,7 +45,7 @@ The document also talks about different ways to show tied data, like jittering, 
 
 4. First-Come, First-Served
   
-    *  Description: This method assigns the lower rank to the first tied value(s) encountered, followed by the next tied value(s).  
+    * Description: This method assigns the lower rank to the first tied value(s) encountered, followed by the next tied value(s).  
     * Use Case: Suitable when the sequence of data entry or occurrence matters, such as in queueing systems or time-based analysis.  
     * Reference: This approach is often implemented in systems handling sequential data but needs to be more widely cited in formal academic literature.
 
