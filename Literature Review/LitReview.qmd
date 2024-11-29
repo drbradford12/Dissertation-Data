@@ -92,11 +92,11 @@ suppressWarnings(
   ) 
   )
 ```
-[I think it might be best to customize the ggpairs plot so that it's only a scatterplot matrix -- that makes for a simpler comparison than the multiplot hybrid beast that's the default ggpairs plot. Scatterplot matrices are the most direct comparison to PCPs because they show Cartesian pairs of variables]{.svp}
+<!--[I think it might be best to customize the ggpairs plot so that it's only a scatterplot matrix -- that makes for a simpler comparison than the multiplot hybrid beast that's the default ggpairs plot. Scatterplot matrices are the most direct comparison to PCPs because they show Cartesian pairs of variables]{.svp}-->
 
-@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatterplots, and correlation matrices. 
+@fig-ggpairs is a generalized pairs plot, containing density plots, scatterplots, and correlation matrices. 
 It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related.
-Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). 
+<!--Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). -->
 The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. 
 In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data. 
 The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}. 
@@ -876,7 +876,7 @@ For example, if an extensive dataset has many similar or similar values, separat
 
 Random jittering of data points is a standard method that adds a small random value to each tied observation.
 This is especially helpful in scatter plots and dot plots to keep them from being too dense.
-This approach, discussed in “Graphical Methods for Data Analysis” by Chambers et al., is easy to use and keeps the overall distribution, making things clearer without changing the data [@chambers1983].
+This approach, discussed in “Graphical Methods for Data Analysis," is easy to use and keeps the overall distribution, making things clearer without changing the data [@chambers1983].
 One problem with random jittering is that it can hide exact numbers, making it hard to understand if the jittering distance is too big.
 Experiments show that jittering makes visualizations much clearer when there are small overlaps, especially when used rarely.
 
@@ -1238,10 +1238,11 @@ In the early days of visualization, especially in network analysis and multidime
 However, as data grew, visual clutter became a big problem.
 This was especially true in parallel coordinates plots (PCPs), where lines and intersections that overlapped made it hard to see the underlying data structure.
 To fix this problem, researchers started looking into ways to give representational parts of these graphs more "visual distance." They did this using methods like line bundling and changing the spacing between lines to avoid overplotting.
-<!--This change is emphasized by Chang et al., who say that "perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns," [@chang2018].-->
+"In PCP, participants had to re-order the axes to examine all dimensions, whereas in SPLOM it is straightforward to identify correlation. 
+This result confirms earlier studies showing PCP participants struggle to identify correlation due to the complexity of cross-line patterns," [@chang2018a]
 This shows how separating visual elements can help with cognitive grouping without breaking up the continuity of the data.
 In PCPs, early studies showed that visual distance could make intersections clearer and improve the overall shape of individual paths.
-<!--As Guo et al. say, "Thresholding reduces noise, allowing significant intersections to remain prominent, thereby clarifying the underlying data structure without distorting continuity," [@guo2005]. -->
+@guo2005a say, "...nested-means approach reduces overlapping problems and ensures the mean value of each variable is always at the midpoint on each axis."
 This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
 
 ## Axis Reordering
