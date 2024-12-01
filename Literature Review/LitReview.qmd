@@ -38,6 +38,14 @@ require(gridExtra)
 library(ggridges)
 library(patchwork)
 library(ggparallel)
+theme_set(theme_bw())
+
+penguin_scale_color <-   function(...) scale_color_manual(
+    "Species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000", ...)
+  )  
+penguin_scale_fill <-   function(...) scale_fill_manual(
+    "Species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000", ...)
+  )  
 ```
 
 # Introduction
@@ -47,8 +55,6 @@ library(ggparallel)
 [In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
 
 [Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@alber2020]. Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.]{.db}
-
-[\st{ Our data-driven modern civilization [A bit trite...]{.svp} now depends heavily on the ability to precisely evaluate and exploit [exploit?? Maybe a different word?]{.svp} huge and complex datasets. A common way [Not sure PCPs are actually all that common, but they are a good solution]{.svp} to visually show high-dimensional data is with parallel coordinate plots (PCPs).}]{.db} 
 
 [Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg1985]. By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.]{.db} These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
 
@@ -65,6 +71,7 @@ Parallel coordinate plots (PCPs) leverage a projective coordinate [system, inste
 ```{r}
 #| echo: false
 #| warning: false
+#| message: false
 #| label: fig-ggpairs
 #| layout-valign: bottom
 #| fig-cap: "A generalized pairs plot"
@@ -75,31 +82,24 @@ penguins_clean <- na.omit(penguins)
 
 suppressWarnings(
   ggpairs(penguins_clean[,c(3:6)], 
-        lower = list(continuous = wrap("points")),
+          lower = list(continuous = wrap("points")),
           mapping = aes(color = penguins_clean$species),
           columnLabels = c("bill_length[mm]", "bill_depth[mm]",
                            "flipper_length[mm]", "body_mass[g]" ), 
-        diag = list(continuous = wrap("blank")),
+          diag = list(continuous = wrap("blank")),
           #diag = list(continuous = wrap("densityDiag", alpha = 0.5),
-           #           discrete = "barDiag")
-        )+
-  theme(axis.text.x = element_text(angle=45)) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  )  +
-  scale_fill_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) 
-  )
+          #           discrete = "barDiag")
+  )+
+    theme(axis.text.x = element_text(angle=45)) +
+    penguin_scale_color()
+)
 ```
-[I think it might be best to customize the ggpairs plot so that it's only a scatterplot matrix -- that makes for a simpler comparison than the multiplot hybrid beast that's the default ggpairs plot. Scatterplot matrices are the most direct comparison to PCPs because they show Cartesian pairs of variables]{.svp}
 
-@fig-ggpairs is a generalized pairs plot, containing histograms, density plots, scatterplots, and correlation matrices. 
+@fig-ggpairs is a [**scatterplot matrix**, which shows pairwise relationships between variables in Cartesian space]{.svp}. 
 It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related.
-Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass). 
-The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values. 
-In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data. 
-The scatter plots show [the bivariate relationship between pairs of numerical variables]{.svp}. 
+<!-- Histograms and density plots [provide univariate distribution information to supplement the bivariate scatterplots for numeric variables]{.svp} (bill length, bill depth, flipper length, and body mass).  -->
+<!-- The density plots show clear trends for each species, regarding the length of the bills and flippers, where Gentoo penguins tend to have higher values.  -->
+<!-- In the boxplots that show body mass and flipper length, outliers are clear because they show numbers very different from the rest of the data.  -->
 [While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} 
 Overall, the matrix-style plot does an excellent job of showing the links within and between variables. 
 [The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
@@ -109,29 +109,30 @@ Overall, the matrix-style plot does an excellent job of showing the links within
 #| warning: false
 #| label: fig-pcp
 #| layout-valign: bottom
-#| fig-subcap: 
-#|   - "A parallel coordinate plot"
+#| fig-cap: "A parallel coordinate plot"
+#| fig-width: 8
+#| fig-height: 4
+#| cache: false
 
 penguins %>%
   pcp_select(3:6) %>%
   pcp_scale(method="uniminmax") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
-  geom_pcp(aes(colour = species)) + 
+  geom_pcp(aes(colour = species), alpha = 0.5) + 
   theme_pcp() + 
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) 
+  penguin_scale_color() + 
+  theme(legend.position = "bottom", legend.direction = "horizontal")
 
 ```
 
 In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. 
 The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. 
 [There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. ]{.svp}
-[Even in projection space, we can see Simpson's paradox at work; the middle plot in the fourth row of @fig-ggpairs shows the same basic information.]{.svp} 
+[Even in projection space, we can see Simpson's paradox at work; the second plot in the third row of @fig-ggpairs shows the same basic information.]{.svp} 
 [While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp} 
-[At each vertical axis, the plot resembles a rug plot, which can provide some information about density, but is less direct than a continuous density plot, such as those shown on the diagonal of @fig-ggpairs.]{.svp} 
-[@cleveland1993]{.db}
+[At each vertical axis, the plot resembles a rug plot,]{.svp}[@cleveland1993]{.db} [which can provide some information about the distribution of the variable, but is less direct than a continuous density plot.]{.svp} 
+
 
 <!-- It's hard to directly find outliers in @fig-pcp because the merging lines make it hard to see individual differences.  -->
 
@@ -162,14 +163,13 @@ penguins %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
-  geom_pcp(aes(colour = species), alpha = 0.5) + 
   geom_pcp_boxes() + 
+  geom_pcp(aes(colour = species), alpha = 0.5) + 
   geom_pcp_labels() +
   theme_pcp() +
-  scale_color_discrete(guide = "none")+
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) 
+  penguin_scale_color() + 
+  penguin_scale_fill() + 
+  guides(color = F)
 ```
 
 <!-- - lines overlap and need to be distinguishable, and when there are large datasets, even non-identical segments can be hard to identify because of the number of line segments.  -->
@@ -182,10 +182,10 @@ penguins %>%
 
 ## Why?
 
-[Plots using]{.svp} Cartesian coordinates are straightforward to understand because they are [commonly encountered and taught in grade school]{.svp}. 
+[Plots using]{.svp} Cartesian coordinates are straightforward, in part because they are [commonly encountered and taught in grade school]{.svp}. 
 [Unfortunately, plots using Cartesian coordinates, such as scatterplots, are limited to two variables displayed using spatial dimensions, which are perceived more accurately than other aesthetic mappings such as color and shape [@cleveland1984].]{.svp}
 [Projections of three-dimensional scatterplots can be created, but these charts can be difficult to read and interpret; interactive 3D scatterplots still suffer from the loss of information inherent to 2D projection on a screen, but allow for some sense of the full shape of the data.]{.svp}
-[Data sets with more than 3 numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne] XXX PCA XXX, or plotting bivariate relationships between variables in order to visualize these data sets.]{.svp}
+[Data sets with more than 3 numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne;@abdiPrincipalComponentAnalysis2010], or plotting bivariate relationships between variables in order to visualize these data sets.]{.svp}
 They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
 Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
 They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
@@ -198,11 +198,11 @@ However, as with their Cartesian equivalents, PCPs are vulnerable to overplottin
 [In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in @fig-features]{.svp}. 
 [This lack of familiarity may be the biggest drawback of PCPs; however, there are ... studies which explore this issue.]{.svp} [XXX are there studies that explore how quickly people acclimate to PCPs? If not, we should consider running one!]{.svp}
 
-# Modifications to Parallel Coordinate Plots
+# Variations on Parallel Coordinate Plots
 
 Since @Inselberg1985 introduced parallel coordinate plots (PCPs) in 1985, considerable advances have been made to address the original method's framework and improve its capacity to depict high-dimensional data effectively.
 The enhancements include changes to visual representation, handling various kinds of interactive data elements, and incorporating advanced computational approaches to increase the clarity and interpretability of the visualizations. 
-[In this section, we examine some of the modifications proposed to enhance PCPs after their original introduction.]{.svp}
+[In this section, we examine some of the modifications proposed to enhance PCPs after their original introduction, as well as variations on PCPs which evolved in parallel for e.g. categorical variables.]{.svp}
 
 ## Categorical and Hybrid PCPs
 
@@ -259,9 +259,7 @@ penguins_clean_cat %>%
   theme(legend.position = "bottom") +
   facet_wrap(~sex) +
   theme(axis.text.x = element_text(angle=45)) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) 
+  penguin_scale_color()
 ```
 
 The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces nonlinear changes to the axes for more complex data representation.
@@ -270,9 +268,13 @@ Nonlinear scales such as logarithmic and exponential transformations are possibl
 @wegman1997 provide a comprehensive discussion of the GPCP idea. [This doesn't really add to the discussion - and the next sentence does not follow from this one. Rewrite to make your point clearer, and cite ideas, not people.]{.svp}
 This adjustment allows the visualization to display various data connections and handle skewed data distributions.
 
-### Hammock Plots: Categorical Variants of PCPs
+### Categorical Variants of PCPs
 
-Hammock plots [are similar to]{.svp} parallel coordinate plots, [but were designed to show categorical data]{.svp}. 
+[Parallel sets plots are similar to PCPs, but are designed for categorical variables.]
+
+Hammock plots [are similar to]{.svp} parallel coordinate plots, [but were designed to show categorical data [@schonlauVisualizingCategoricalData2003]]{.svp}. 
+[Hammock plots ]
+
 @symanzik2018 showed the Titanic dataset using hammock plots, arguing that "Hammock plots allow for line alignment representing similar or identical values." 
 This makes understanding the data in parallel coordinate space easier and gives you a better sense of the different data types and their groups. 
 They do say, though, that Hammock plots "may add visual clutter in cases lacking categorical data distinctions," which is meant to stress the problems that might arise when they are used with continuous variables.
@@ -285,7 +287,7 @@ This is especially helpful in datasets that are hard to see [Why are they hard t
 Still, Pilhöfer et al. points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
 They suggest that Hammock plots work best for datasets with clear clusters [Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.
 
-[@hofmann2013]{.db} improved the framework for visualizing data by adding Hammock plots to a grammar-based system [called `ggparallel`]{.db}. [What? No, that's the first ggpcp paper draft -- it didn't talk about Hammock plots. You want to look into the research Heike did with Vendettuoli circa 2012-2015 for hammock plots and variations]{.svp}
+[The `ggparallel` package]{.svp} [@hofmann2013]{.db} [provided a grammar-based interface]{.svp} for visualizing [multivariate categorical]{.svp} data, implementing Hammock plots [@schonlau2024].
 This makes them better suited for data that has both category and numerical relationships. 
 They say this grammar-based adaptation retains the established behaviors of parallel coordinate while giving you more options for dealing with edge cases like categorical ties. 
 This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
@@ -297,12 +299,12 @@ This makes Hammock plots more flexible for use with large datasets. [Please don'
 They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
 However, they also admit that these plots are "less effective for continuous data without ties or when categorical values are minimal," [This phrase does not exist in the paper!]{.svp} suggesting that Hammock plots offer limited benefits in uniformly distributed datasets.
 
-[@Hofmann:2013 worked on Common Angle Plots, and Schonlau added Hammock plots to improve categorical data display.
+[@hofmannCommonAnglePlots2013 worked on Common Angle Plots, and Schonlau added Hammock plots to improve categorical data display.
 However, they approached the problem in different ways. 
 @schonlau2024 Hammock Plots: Visualizing Categorical and Numerical Variables generalizes parallel coordinate plots by swapping lines with box elements. 
 The width of the boxes shows the number of observations, so they can be used for both categorical and mixed data. 
 By changing traditional Hammock plot designs, Schonlau deals with perceptual problems like the reverse line width illusion. 
-Hofmann's work also raises this question. 
+@hofmannCommonAnglePlots2013 also addresses the line width illusion, proposing Common Angle plots that use a constant angle to mitigate the line width illusion while maintaining visual continuity of the categories. 
 Hofmann's Common Angle Plots are unique because they use consistent angular links to fix problems when line slopes or widths are different. 
 This ensures that the visualizations are accurate. 
 Schonlau stresses the importance of being flexible with different data types, while Hofmann uses a consistent angular structure to clarify interpretations. 
@@ -314,28 +316,41 @@ Together, these approaches show a shared desire to make categorical and mixed da
 #| label: fig-hammock
 #| layout-valign: bottom
 #| fig-subcap: 
-#|   - "Hammock"
-#|   
-data(mtcars)
+#|   - "Hammock Plot [@schonlau2024]"
+#|   - "Common Angle Plot [@hofmannCommonAnglePlots2013]"
+#| fig-width: 8
+#| fig-height: 4
+#| layout-ncol: 1
 
-ggparallel(list("gear", "cyl"), data=mtcars, method="hammock", ratio=0.25) + 
-  theme_minimal() +
-  theme(legend.position = "bottom") 
+
 # Filter out NA values for easier plotting
-# penguins_clean <- penguins %>% 
-#   na.omit() %>%
-#    mutate(
-#     species = as.factor(species),  # Encode species as numeric
-#     island = as.factor(island),    # Encode island as numeric
-#     sex = as.factor(sex) )
-# # Create Hammock Plot
-# hammock_plot <- ggparallel(list("year", "body_mass_g"), 
-#                             data = penguins_clean, 
-#                             method = "hammock", 
-#                            ratio=0.25) +
-#   labs(title = "Parallel Coordinate Plot for Penguin Species, Island, and Sex") +
-#   theme_minimal()
-# 
+penguins_clean <- penguins %>%
+  na.omit() %>%
+  mutate(
+    species = factor(species),  # Encode species as numeric
+    island = factor(island),    # Encode island as numeric
+    sex = factor(sex),
+    year = factor(year))
+
+# Create Hammock Plot
+ggparallel(list("year", "island", "sex", "species"),
+           data = as.data.frame(penguins_clean),
+           method = "hammock",
+           ratio=0.25) +
+  labs(title = "Parallel Coordinate Plot for Penguin Year, Species, Island, and Sex") +
+  penguin_scale_color() +
+  theme_minimal()
+
+
+# Create Hammock Plot
+ggparallel(list("year", "island", "sex", "species"),
+           data = as.data.frame(penguins_clean),
+           method = "angle",
+           ratio=0.25) +
+  labs(title = "Parallel Coordinate Plot for Penguin Year, Species, Island, and Sex") +
+  penguin_scale_color() +
+  theme_minimal()
+
 # # Create Parallel Coordinate Plot
 # parallel_plot <- ggpairs(penguins_clean, columns = c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"),
 #                          aes(color = species, alpha = 0.5)) +
