@@ -715,14 +715,13 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = cluster)
 ) +
- # scale_color_manual(values = c("1" = "#1f78b4", "2" = "#33a02c", "3" = "#e31a1c")) +
+  scale_color_manual(values = c("1" = "#540D6E", "2" = "#219B9D", "3" = "#FF8000")) +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Cluster-Based",
                 y = "Scaled Values",
                 x = "Variables") +
   theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45)) +
-    penguin_scale_color()
+  theme(axis.text.x = element_text(angle=45)) 
 ```
 
 ## Optimized Layout Algorithms
