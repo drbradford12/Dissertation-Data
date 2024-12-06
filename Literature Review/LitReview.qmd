@@ -50,7 +50,7 @@ penguin_scale_fill <-   function(...) scale_fill_manual(
 
 # Introduction
 
-[I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}
+<!--[I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}-->
 
 [In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
 
@@ -186,15 +186,16 @@ penguins %>%
 [Plots using]{.svp} Cartesian coordinates are straightforward, in part because they are [commonly encountered and taught in grade school]{.svp}. 
 [Unfortunately, plots using Cartesian coordinates, such as scatterplots, are limited to two variables displayed using spatial dimensions, which are perceived more accurately than other aesthetic mappings such as color and shape [@cleveland1984].]{.svp}
 [Projections of three-dimensional scatterplots can be created, but these charts can be difficult to read and interpret; interactive 3D scatterplots still suffer from the loss of information inherent to 2D projection on a screen, but allow for some sense of the full shape of the data.]{.svp}
-[Data sets with more than 3 numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne;@abdiPrincipalComponentAnalysis2010], or plotting bivariate relationships between variables in order to visualize these data sets.]{.svp}
+[Data sets with more than three numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne;@abdiPrincipalComponentAnalysis2010], or plotting bivariate relationships between variables in order to visualize these data sets.]{.svp}
 They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
 Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
 They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
 Cartesian graphs additionally can take up a lot of room, and for data with more dimensions, they usually need more than one plot.
 
 Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
-This means that complex relationships between different factors can be studied repeatedly. [repeatedly?? Not sure what you mean by this]{.svp}
-PCPs are great for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. [are great for is very informal language -- can you rephrase this to be more formal? e.g. PCPs effectively show bivariate relationships, clusters of similar data points across multiple variables, and outliers, as shown in  ...., and then provide a figure showing how you can see those qualities within a PCP?]{.svp}
+<!-- This means that complex relationships between different factors can be studied repeatedly. [repeatedly?? Not sure what you mean by this]{.svp}-->
+PCPs are useful for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
+<!-- [are great for is very informal language -- can you rephrase this to be more formal? e.g. PCPs effectively show bivariate relationships, clusters of similar data points across multiple variables, and outliers, as shown in  ...., and then provide a figure showing how you can see those qualities within a PCP?]{.svp} -->
 However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting, [becoming]{.svp} difficult to read [and]{.svp} interpret when N is large. 
 [In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in @fig-features]{.svp}. 
 [This lack of familiarity may be the biggest drawback of PCPs; however, there are ... studies which explore this issue.]{.svp} [XXX are there studies that explore how quickly people acclimate to PCPs? If not, we should consider running one!]{.svp}
@@ -278,7 +279,7 @@ These new ideas greatly improve the ease and usefulness of PCPs, making them mor
 ### Categorical Variants of PCPs
 
 [Parallel sets plots are similar to PCPs, but are designed for categorical variables.]{.svp}
-[Parallel sets are a technique for visualizing categorical data with great promise for assisting visual analytics. 
+Parallel sets are a technique for visualizing categorical data with great promise for assisting visual analytics. 
 Among their various important characteristics and improvements are frequency-based representation, flexibility to mixed data, quality measurements for improved visualization, interactive elements like axis reordering, and dynamic filtering.
 
 For frequency-based representations, parallel sets replace individual data points, abstracting data to emphasize linkages. 
@@ -292,31 +293,57 @@ Across many fields, including meteorology, consumer behavior study, marketing, a
 @dennig2021parsetgnostics introduced "ParSetgnostics," a set of quality metrics to reduce visual clutter in parallel sets​. 
 Metrics like overlap, ribbon width variance, and mutual information optimize dimension and category ordering, significantly improving visualizations' interpretability; for instance, applying these metrics reduced clutter by up to 81% in test cases.
 Parallel sets are also useful for instruction and analysis since their combination of statistical summaries and category flow analysis reveals a deeper understanding. 
-Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.]{.db}
+Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
 
 
 Hammock plots [are similar to]{.svp} parallel coordinate plots, [but were designed to show categorical data [@schonlauVisualizingCategoricalData2003]]{.svp}. 
-[Hammock plots ]
+Hammock plots represent a breakthrough in data visualization, particularly for managing numerical and categorical data. 
+While allowing mixed data types, they are meant to show relationships between categorical variables visually. 
+Especially in health science datasets, key characteristics of Hammock plots include their capacity to simplify complicated relationships and lower visual clutter by using "bandwidth" representations to highlight links between categories.
+
+When it comes to multidimensional categorical data, hammock plots show a more compact representation than mosaic plots, lowering the cognitive load on the observer and surpassing conventional tools like bar charts. 
+These benefits are absolutely vital in disciplines including health research, where datasets can comprise mixed numerical and categorical variables needing simultaneous display.
 
 @symanzik2018 showed the Titanic dataset using hammock plots, arguing that "Hammock plots allow for line alignment representing similar or identical values." 
 This makes understanding the data in parallel coordinate space easier and gives you a better sense of the different data types and their groups. 
 They do say, though, that Hammock plots "may add visual clutter in cases lacking categorical data distinctions," which is meant to stress the problems that might arise when they are used with continuous variables.
 
 @kavvadias1996 use a decomposition method called "Hammock-on-ears" to work on bigger graph-theoretic problems, with the goal of enhancing the ability to find ties in large datasets. 
-This shows that Hammock plots can handle large amounts of complex data. However, they warn that "the method may require significant computational resources," which means it might not work for simpler or smaller-scale tasks. [Actually, it means the opposite - if you don't have the computer power, you can't use the method for big datasets, but it probably works for smaller ones]{.svp}
+This shows that Hammock plots can handle small amounts of complex data. 
+However, they warn that "the method may require significant computational resources," which means it might not work for complex or larger-scale tasks. 
+<!--[Actually, it means the opposite - if you don't have the computer power, you can't use the method for big datasets, but it probably works for smaller ones]{.svp}-->
 
-@pilhofer2012 show that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters. [Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}
-This is especially helpful in datasets that are hard to see [Why are they hard to see?]{.svp} because Hammock plots make it easier to separate the data. 
+@pilhofer2012 show that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters.
+Key strategies comprise clustering visualization, which employs algorithms to reorder rows and columns, obtain a pseudo-diagonal form, and resolve data connections via optimal sorting algorithms like the Weighted Bertin Classification Criteria (WBCC). 
+In graphical displays, these techniques minimize crossing lines or misalignments and maximize concordance.
+Optimized displays of clustering results, using the “Ecotest dataset,” show how ordering methods enhance cluster identification, @pilhofer2012a.
+The paper also offers an evidence-based method, using measures such as the Bertin Classification Criteria (BCC) to evaluate graphical order, supported by computational tests.
+Both theoretical considerations and actual data support the assertions regarding Hammock plots controlling clusters and tying off conflicts. 
+<!--[Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}-->
+<!--This is especially helpful in datasets that contain overlapping lines, which can be hard to due to  [Why are they hard to see?]{.svp}  because Hammock plots make it easier to separate the data. -->
+
 Still, @pilhofer2012 points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
-They suggest that Hammock plots work best for datasets with clear clusters [Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.
+They suggest that Hammock plots work best for datasets with clear clusters.
+Both visual and computational methods help to find definite clustering in the content. 
+The main technique is pseudo-diagonalization, in which rows and columns of a data matrix are rearranged to visually show clusters by combining similar entries. 
+This technique is compared by a top-down partitioning method, which clusters the data using measurements such as Kendall's $\tau$ or the Bertin Classification Criteria (BCC), determining ideal cut spots in rows and columns. 
+The BCC, which computes the difference between conforming and non-conforming pairings to gauge the alignment of matrix entries with a pseudo-diagonal form, is one of the metrics to evaluate clustering clarity. 
+The Weighted Bertin Classification Criteria (WBCC) emphasizes the proximity of data points and improves this by using distance-based weights; the Bertin Classification Index (BCI) scales the BCC to gauge the strength of the link between clusters. 
+BCI provides a consistent approach to evaluating datasets, with values ranging from 0 (perfectly aligned clusters) to 1 (indicating no clustering). 
+The main evaluation criterion for clarity is the degree to which the matrix resembles a block-diagonal structure; low BCI values imply unambiguous clusters, while high values indicate indistinct or overlapping groupings. 
+The paper also underlines the need for visual inspection, in which visually distinct and well-separated blocks in matrix plots—such as those shown in the Ecotest dataset examples—characterize clear grouping. 
+Still, clarity is very arbitrary since it depends on thresholds selected for BCI and the interpretability of the produced visuals. 
+This method detects and assesses clusters by combining empirical visualization with quantitative measurements.
 
-[The `ggparallel` package]{.svp} [@hofmann2013]{.db} [provided a grammar-based interface]{.svp} for visualizing [multivariate categorical]{.svp} data, implementing Hammock plots [@schonlau2024].
+<!--[Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.-->
+
+[The `ggparallel` package]{.svp} [@hofmannCommonAnglePlots2013]{.db} [provided a grammar-based interface]{.svp} for visualizing [multivariate categorical]{.svp} data, implementing Hammock plots [@schonlau2024].
 This makes them better suited for data that has both category and numerical relationships. 
 They say this grammar-based adaptation retains the established behaviors of parallel coordinate while giving you more options for dealing with edge cases like categorical ties. 
-This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
+<!-- This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
 [Also, please don't cite arxiv papers when a peer-reviewed version exists -- e.g. Penguins go Parallel]{.svp}
 
-<!-- [I would like to get rid of the section below and highlight the work "Hammock Plots: Visualizing Categorical and Numerical Variables" by Schonlau]{.db}
+ [I would like to get rid of the section below and highlight the work "Hammock Plots: Visualizing Categorical and Numerical Variables" by Schonlau]{.db}
 
 @vanderplas2023 investigate more deeply how useful Hammock plots are for dealing with numerical ties in categorical datasets. 
 They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
@@ -390,7 +417,11 @@ ggparallel(list("year", "island", "sex", "species"),
 
 ```
 
-@fig-hammock is a Hammock plot that shows the relationship between two categorical variables, gear and cylinders (cyl). Each color-coded band represents a different category within these variables. The plot provides frequency but lacks precise counts or numeric values. Overplotting is evident, making it difficult to trace individual pathways. The plot shows the general distribution and relationships between gear and cylinder categories, but lacks numeric relationships or exact proportions.
+@fig-hammock is a Hammock plot that shows the relationship between two categorical variables, gear and cylinders (cyl). 
+Each color-coded band represents a different category within these variables. 
+The plot provides frequency but lacks precise counts or numeric values. 
+Overplotting is evident, making it difficult to trace individual pathways. 
+The plot shows the general distribution and relationships between gear and cylinder categories, but lacks numeric relationships or exact proportions.
 
 ## Bundling and Curving
 
@@ -440,10 +471,7 @@ ggparcoord(
                    y = "Scaled Value") +
   theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45)) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) 
-
+    penguin_scale_color()
 ```
 
 In @fig-bundling, the PCP modification demonstrates adding bundling and curving, which makes the lines smoother, less distracting, and better able to tell the patterns between the species apart. 
@@ -464,7 +492,8 @@ This makes PCPs even better at analysis. With its interactive nature, people who
 Moustafa's research indicates that to deal with even larger datasets more efficiently, future efforts should focus on enhancing density estimation methods. 
 These methods can be used in biology and finance to demonstrate their usefulness and adaptability for examining real-world data.
 
-Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. The clarity gained in bundle simplification comes at the cost of data precision, warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
+Bundling groups with similar paths may also obscure individual data points or outliers, which can be crucial in some analyses. 
+The clarity gained in bundle simplification comes at the cost of data precision, warns McDonnell and Mueller, pointing out that outliers or unique data paths might be lost [@mcdonnell2008].
 
 ### Enhanced Color Encoding and Shading
 
@@ -522,9 +551,7 @@ ggparcoord(
   mapping = ggplot2::aes(color = species), # Color lines by species
   shadeBox = NULL # Use to add shading to enhance visual distinction between variables
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  )  +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Enhanced Color Encoding and Shading",
                 y = "Scaled Values",
@@ -608,9 +635,7 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species) # Color lines by species
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
                 y = "Scaled PCA Values",
@@ -697,9 +722,7 @@ ggparcoord(
                 x = "Variables") +
   theme(legend.position = "bottom") +
   theme(axis.text.x = element_text(angle=45)) +
-  scale_color_manual(
-    values = c("1" = "#540D6E", "2" = "#EE4266", "3" = "#FFD23F")
-  ) 
+    penguin_scale_color()
 ```
 
 ## Optimized Layout Algorithms
@@ -742,9 +765,7 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Optimized Layout",
                 y = "Scaled Values",
@@ -863,9 +884,7 @@ ggparcoord(
   #showPoints = TRUE, # Show points on lines
   mapping = ggplot2::aes(color = species)
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Reordering and Axis Flipping",
                 y = "Scaled Values",
@@ -951,9 +970,7 @@ ggparcoord(
   groupColumn = 1, # Color by species
   scale = "center"
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Random Jittering",
                 y = "Scaled Values",
@@ -1019,9 +1036,7 @@ ggparcoord(
   groupColumn = 1, # Color by species
   scale = "center"
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Rank Jittering",
                 y = "Scaled Values",
@@ -1089,9 +1104,7 @@ ggparcoord(
   groupColumn = 1, # Color by species
   scale = "center"
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Deterministic Jittering",
                 y = "Scaled Values",
@@ -1165,9 +1178,7 @@ ggparcoord(
   groupColumn = 1, # Color by species
   scale = "center"
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with Mean or Median Splitting",
                 y = "Scaled Values",
@@ -1233,9 +1244,7 @@ ggparcoord(
   groupColumn = 1, # Color by species
   scale = "center"
 ) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) +
+  penguin_scale_color() +
   ggplot2::theme_minimal() +
   ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment",
                 x = "Variables") +
@@ -1313,7 +1322,8 @@ p1 <- ggparcoord(
   #ggtitle("Without Axis Reordering")  +
   theme_minimal() +
   theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45))
+  theme(axis.text.x = element_text(angle=45)) +
+  penguin_scale_color()
 
 # Example of a parallel coordinate plot with axis reordering to minimize tie overlap
 p2 <- ggparcoord(
@@ -1322,8 +1332,7 @@ p2 <- ggparcoord(
   groupColumn = 1,
   scale = "uniminmax",
   order = "skewness") + # skewness axis reordering to handle ties and improve interpretability
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")) +   
+  penguin_scale_color()+   
   #ggtitle("With Skewness Axis Reordering") +
   theme_minimal() +
   theme(legend.position = "bottom")  +
@@ -1396,9 +1405,7 @@ ggparcoord(
        y = "Quantized/Encoded Values") +
   theme(legend.position = "bottom")  +
   theme(axis.text.x = element_text(angle=45)) +
-  scale_color_manual(
-    values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
-  ) 
+    penguin_scale_color()
 ```
 
 In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals.
