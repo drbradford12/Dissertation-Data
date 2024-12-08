@@ -857,7 +857,7 @@ Reordering and axis flipping align more relevant dimensions, minimizing intersec
 Reordering transforms PCPs from a cluttered tangle into a roadmap of relationships.
 
 @inselberg1990parallel proposed reordering to enhance interpretability, especially for highly interrelated variables.
-@leblanc1990. introduced correlation-based reordering to position axes, reducing visual clutter by aligning more related dimensions.
+@leblanc1990 introduced correlation-based reordering to position axes, reducing visual clutter by aligning more related dimensions.
 Peng et al. (2004) enabled automatic reordering algorithms that flip axes according to user-defined weights, giving users more control over PCP readability.
 
 Changing the order of the axes in parallel coordinate plots can make them easier to read by putting variables that are strongly correlated or connected by theme next to each other.
@@ -930,7 +930,7 @@ ggparcoord(
 ```
 
 In @fig-reordering, the parallel coordinate map changes the variables by rearranging them and flipping the axes to show patterns and connections between the penguin species more clearly.
-By flipping some axes and putting related factors closer together (like body mass and flipper length), the plot makes species-based trends stand out more: The Gentoo (blue) tends to have a shallower bill but a bigger body and longer flippers, while the Adelie (red) tends to have the opposite pattern.
+By flipping some axes and putting related factors closer together (like body mass and flipper length), the plot makes species-based trends stand out more: The Gentoo (purple) tends to have a shallower bill but a bigger body and longer flippers, while the Adelie (pale blue) tends to have the opposite pattern.
 Overplotting is still a problem, especially when values are close together in the middle ranges, making it hard to tell the difference between lines or peaks.
 You can't see the distributions' exact forms, but the lines' density and spread along each axis give you a good idea of the range of values for each species.
 The new order makes relationships between variables stand out more because the changes between the axes make species-based correlations in measurement trends more apparent.

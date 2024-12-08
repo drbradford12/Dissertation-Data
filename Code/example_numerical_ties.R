@@ -67,7 +67,7 @@ plot_parallel_with_jitter <- function(ogdata, data, factor = 0.1) {
     geom_pcp_labels() +
     theme_minimal() +
     scale_color_manual(
-      values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+      values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000")
     ) +
     labs(title = "Parallel Coordinate Plot without Jitter",
          color = "Species") +
@@ -95,7 +95,7 @@ plot_parallel_with_jitter <- function(ogdata, data, factor = 0.1) {
     #geom_pcp_labels() +
     theme_minimal() +
     scale_color_manual(
-      values = c("Gentoo" = "#540D6E", "Adelie" = "#EE4266", "Chinstrap" = "#FFD23F")
+      values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000")
     ) +
     labs(title = "Parallel Coordinate Plot with Jitter",
          color = "Species") +
@@ -142,12 +142,208 @@ plot_parallel_with_jitter(penguins, apply_jitter(penguins, jitter_type = "mean_s
 #determine_delta_distance(penguins)
 
 
-
-
-
-
-
 # Apply the function to the penguins dataset
 penguins_jittered <- apply_jitter(penguins, jitter_type = "random", amount = 2)
 
 
+
+# Function to identify numerical ties
+detect_ties <- function(data) {
+  # Identify numerical columns
+  numeric_data <- data %>% select(where(is.numeric))
+
+  # Calculate frequency of ties for each column
+  tie_count <- numeric_data %>%
+    summarise(across(everything(), ~ sum(duplicated(.))))
+
+  tie_percentage <- numeric_data %>%
+    summarise(across(everything(), ~ sum(duplicated(.)) / n() * 100))
+
+  return(list(tie_count = tie_count, tie_percentage = tie_percentage))
+}
+
+data("iris")
+
+# Detect numerical ties in the iris dataset
+numerical_ties <- detect_ties(iris)
+
+# Print the results
+print("Tie Counts:")
+print(numerical_ties$tie_count)
+
+print("Tie Percentages:")
+print(numerical_ties$tie_percentage)
+
+# Function to handle numerical ties using jittering
+handle_ties <- function(data, cols) {
+  data %>% mutate(across(all_of(cols), ~ jitter(.)))
+}
+
+# Columns to handle ties (numerical columns only)
+numerical_columns <- c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")
+
+# Handle numerical ties by jittering these columns
+iris_handled <- handle_ties(iris, numerical_columns)
+
+# Add a group column to represent the species
+iris_handled$Species <- as.factor(iris_handled$Species)
+
+
+plot_data <- iris %>%
+  mutate(Species = as.factor(Species))
+
+# Adaptive Privacy-Preserving Visualization
+# Adding noise to sensitive data
+plot_data_privacy <- plot_data %>%
+  mutate(across(starts_with("Sepal"), ~ . + rnorm(n(), mean = 0, sd = 0.1)),
+         across(starts_with("Petal"), ~ . + rnorm(n(), mean = 0, sd = 0.1)))
+
+GGally::ggparcoord(
+  data = plot_data_privacy,
+  columns = 1:4,
+  groupColumn = 5
+) +
+  ggtitle("Adaptive Privacy-Preserving Visualization")
+
+# Plane with Parallel Coordinates
+# Highlighting specific regions or planes
+highlight_plane <- plot_data %>%
+  mutate(Highlight = ifelse(Sepal.Width > 3.5, "Above Plane", "Below Plane"))
+
+GGally::ggparcoord(
+  data = highlight_plane,
+  columns = 1:4,
+  groupColumn = 7
+) +
+  ggtitle("Plane with Parallel Coordinates")
+
+# Hierarchical Exploration
+# Aggregating data by species
+hierarchical_data <- plot_data %>%
+  group_by(Species) %>%
+  summarise(across(everything(), mean))
+
+GGally::ggparcoord(
+  data = hierarchical_data,
+  columns = 1:4,
+  groupColumn = 5
+) +
+  ggtitle("Hierarchical Exploration")
+
+#### Promising Approaches to Numerical Ties ######
+
+# Function to add space to numerical ties in data
+add_space_to_ties <- function(data, tie_spacing = 0.01) {
+  # Identify numeric columns
+  num_cols <- sapply(data, is.numeric)
+
+  # Adjust numerical ties by adding incremental spacing using
+  # Group Averages Over Level Combinations of Factors
+
+  data[num_cols] <- lapply(data[num_cols], function(col) {
+    tie_indices <- ave(col, col, FUN = seq_along)
+    col + (tie_indices - 1) * tie_spacing
+  })
+
+  return(data)
+}
+
+# Function to plot parallel coordinates with spacing for numerical ties
+plot_parallel_with_spacing <- function(data, tie_spacing = 0.01) {
+  # Remove rows with missing values
+  data <- na.omit(data)
+
+  # Add spacing to numerical ties
+  data <- add_space_to_ties(data, tie_spacing)
+
+  # Create the parallel coordinate plot with adjusted spacing
+  ggp <- data %>%
+    pcp_select(species, 3:6, species) %>%
+    pcp_scale(method = "uniminmax") %>%
+    pcp_arrange() %>%
+    ggplot(aes_pcp()) +
+    geom_pcp_axes() +
+    geom_pcp(aes(colour = species)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45)) +
+    scale_color_manual(
+      values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000")
+    )
+
+  # Print the plot
+  print(ggp)
+}
+
+plot_parallel_with_spacing(penguins, tie_spacing = 0.5)
+
+
+# Function to add spacing to ties in numerical variables
+adjust_ties <- function(df, cols_to_adjust, epsilon = 1e-5) {
+  df_adjusted <- df
+
+  for (col in cols_to_adjust) {
+    if (is.numeric(df[[col]])) {
+      ties <- duplicated(df[[col]]) | duplicated(df[[col]], fromLast = TRUE)
+      unique_ties <- unique(df[[col]][ties])
+
+      for (tie in unique_ties) {
+        tie_indices <- which(df[[col]] == tie)
+        adjustment <- seq(-epsilon, epsilon, length.out = length(tie_indices))
+        df_adjusted[tie_indices, col] <- df[[col]][tie_indices] + adjustment
+      }
+    }
+  }
+
+  return(df_adjusted)
+}
+
+# Adjust ties in the numeric columns of iris
+adjusted_data <- adjust_ties(iris, cols_to_adjust = names(iris)[1:4])
+
+adjusted_data %>%
+  pcp_select(Species, 1:4, Species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(color = Species)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  scale_color_manual(
+    values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000")
+  )
+
+# Function to apply ggpcp tie-breaking to numerical data
+apply_tie_breaking <- function(df, cols_to_adjust) {
+  df_adjusted <- df
+
+  for (col in cols_to_adjust) {
+    if (is.numeric(df[[col]])) {
+      # Rank the values with ties.method = "random"
+      ranks <- rank(df[[col]], ties.method = "first")
+      # Scale ranks back to the original range
+      min_val <- min(df[[col]], na.rm = TRUE)
+      max_val <- max(df[[col]], na.rm = TRUE)
+      df_adjusted[[col]] <- scales::rescale(ranks, to = c(min_val, max_val))
+    }
+  }
+
+  return(df_adjusted)
+}
+
+# Apply tie-breaking to the numeric columns of iris
+adjusted_data <- apply_tie_breaking(iris, cols_to_adjust = names(iris)[1:4])
+
+adjusted_data %>%
+  mutate(Species = as.factor(Species)) %>%
+  pcp_select(Species, 1:4, Species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = Species), overplot = "none") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  scale_colour_manual(
+    values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000")
+  )
