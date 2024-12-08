@@ -1,0 +1,347 @@
+---
+title: "Promising Methods to Handling Numerical Ties in PCPs"
+format: 
+  pdf:
+    classoption: ["11pt", "english", "singlespacing", "headsepline"]
+    geometry:
+        - paper=letterpaper
+        - inner=2.5cm
+        - outer=3.8cm
+        - bindingoffset=.5cm
+        - top=0.75cm
+        - bottom=0.75cm
+        - left=1.25cm
+        - right=1.25cm
+---
+
+```{r include_packages, include = FALSE}
+library(GGally)
+library(palmerpenguins)
+library(tidyverse)
+library(gridExtra)
+library(ggpcp)
+data("penguins")
+theme_set(theme_bw())
+
+penguin_scale_color <-   function(...) scale_color_manual(
+    "Species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000", ...)
+  )  
+penguin_scale_fill <-   function(...) scale_fill_manual(
+    "Species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000", ...)
+  ) 
+
+penguins <- na.omit(penguins)
+
+
+og_pcp <- penguins %>%
+  pcp_select(species, 3:6, species) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes() + 
+  geom_pcp(aes(colour = species), alpha = 0.5) + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  penguin_scale_color() + 
+  penguin_scale_fill() + 
+  guides(color = F) + 
+  ggplot2::labs(title = "Unadjusted PCP of Palmer Penguins")
+
+
+og_pcp2 <- iris %>%
+  pcp_select(Species, 1:4, Species) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes() + 
+  geom_pcp(aes(colour = Species), alpha = 0.5) + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  scale_color_manual(
+    values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000")
+  ) +
+  guides(color = F) + 
+  ggplot2::labs(title = "Unadjusted PCP of Iris Dataset")
+```
+
+## Determine the numerical ties in the dataset
+
+```{r}
+#| echo: false
+#| warning: false
+#| 
+detect_ties <- function(data) {
+  # Identify numerical columns
+  numeric_data <- data %>% 
+    dplyr::select(where(is.numeric))
+
+  # Calculate frequency of ties for each column
+  tie_count <- numeric_data %>%
+    summarise(across(everything(), ~ sum(duplicated(.))))
+
+  tie_percentage <- numeric_data %>%
+    summarise(across(everything(), ~ sum(duplicated(.)) / n() * 100))
+
+  return(list(tie_count = tie_count, tie_percentage = tie_percentage))
+}
+
+
+# Detect numerical ties in the iris dataset
+numerical_ties <- detect_ties(penguins)
+
+# Print the results
+print("Tie Counts:")
+print(numerical_ties$tie_count)
+
+print("Tie Percentages:")
+print(numerical_ties$tie_percentage)
+```
+
+
+
+## Attempt 1: Incremental Offset (Sequential Tie Handling)
+
+*Equation*:
+
+$$
+value'_i = value_i + \Delta \times k
+$$
+Where:
+
+- $\Delta$ is a small offset.
+- $k$ is the relative position within the group of ties.
+
+*Description*:
+
+Adds a small incremental offset to each tied value based on its relative position in the tie group. Ensures that ties are visually and numerically distinct while maintaining an order.
+
+*Advantages*:
+
+- Maintains the tie order naturally.
+
+- Suitable for ordered or sequential data.
+
+*Implementation*:
+
+Ideal when you want to preserve some form of sequential relationship among tied values without introducing randomness.
+
+```{r}
+add_space_to_ties <- function(data, tie_spacing = 0.01) {
+  # Identify numeric columns
+  num_cols <- sapply(data, is.numeric)
+
+  # Adjust numerical ties by adding incremental spacing using
+  # Group Averages Over Level Combinations of Factors
+
+  data[num_cols] <- lapply(data[num_cols], function(col) {
+    tie_indices <- ave(col, col, FUN = seq_along)
+    col + (tie_indices - 1) * tie_spacing
+  })
+
+  return(data)
+}
+
+```
+
+
+*PCP Implementation*
+
+```{r}
+#| echo: false
+#| warning: false
+#| layout-valign: bottom
+#| fig-width: 8
+#| fig-height: 8
+
+
+plot_parallel_with_spacing <- function(data, tie_spacing = 0.01) {
+  # Remove rows with missing values
+  data <- na.omit(data)
+
+  # Add spacing to numerical ties
+  data <- add_space_to_ties(data, tie_spacing)
+
+  # Create the parallel coordinate plot with adjusted spacing
+  ggp <- data  %>%
+  pcp_select(species, 3:6, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
+   geom_pcp_labels() +
+  theme_pcp() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  penguin_scale_color() + 
+  guides(color = F) + 
+  ggplot2::labs(title = "Incremental Offset PCP of Palmer Penguins")
+
+  # Print the plot
+  return(ggp)
+}
+
+grid.arrange(og_pcp, plot_parallel_with_spacing(penguins,tie_spacing = 0.1), ncol = 1)
+
+
+```
+
+
+## Attempt 2: Jitter Spacing (Numerical Tie Handling)
+
+*Equation*:
+
+$$
+value'_i = value_i + \epsilon_i
+$$
+where:
+
+-   $value'_i$ is the jittered value of $value_i$,
+-   $\epsilon_i \sim \mathcal{U}(-\delta,\delta)$, a small random uniform jitter.
+
+*Description*:
+
+This method breaks numerical ties by adding a tiny random value ($\epsilon$) within a specified range $(-\delta,\delta)$. It ensures that tied values are slightly separated, preserving the overall data structure while improving visualization clarity.
+
+*Advantages*:
+
+- Simple and intuitive.
+
+- Works well for small datasets with occasional ties.
+
+*Implementation*:
+
+Applied to numeric columns. This is typically done before visualizing parallel coordinate plots or when preparing data for algorithms sensitive to ties.
+
+
+```{r}
+adjust_ties <- function(df, cols_to_adjust, epsilon = 1e-5) {
+  df_adjusted <- df
+
+  for (col in cols_to_adjust) {
+    if (is.numeric(df[[col]])) {
+      ties <- duplicated(df[[col]]) | duplicated(df[[col]], fromLast = TRUE)
+      unique_ties <- unique(df[[col]][ties])
+
+      for (tie in unique_ties) {
+        tie_indices <- which(df[[col]] == tie)
+        adjustment <- seq(-epsilon, epsilon, length.out = length(tie_indices))
+        df_adjusted[tie_indices, col] <- df[[col]][tie_indices] + adjustment
+      }
+    }
+  }
+
+  return(df_adjusted)
+}
+
+```
+
+
+*PCP Implementation*
+
+```{r}
+#| echo: false
+#| warning: false
+#| layout-valign: bottom
+#| fig-width: 8
+#| fig-height: 8
+
+adjusted_penguins <- penguins %>% 
+  mutate(flipper_length_mm = as.double(flipper_length_mm),  
+         body_mass_g = as.double(body_mass_g))
+
+adjusted_data <- adjust_ties(adjusted_penguins, cols_to_adjust = names(adjusted_penguins)[3:6], epsilon = 0.1)
+
+p3 <- adjusted_data %>%
+  pcp_select(species, 3:6, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
+   geom_pcp_labels() +
+  theme_pcp() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  penguin_scale_color() + 
+  guides(color = F) + 
+  ggplot2::labs(title = "Jitter Spacing PCP of Palmer Penguins")
+  
+
+grid.arrange(og_pcp, p3, ncol = 1)
+
+```
+
+
+## Attempt 3: Random Rank Shuffle (Numerical and Categorical Tie Handling)
+
+*Equation*:
+
+$$
+Rank_i = rank(Value_i , ties.method="random")
+$$
+
+*Description*:
+
+Tied values are assigned random ranks, ensuring that the order of ties is resolved randomly while maintaining the distribution. For categorical data, this is applied to ordinal values derived from categories, which are then shuffled if tied.
+
+*Advantages*:
+
+- Guarantees tie resolution without adding noise to the original data.
+
+- Compatible with both numerical and categorical data.
+
+*Implementation*:
+
+Useful for both numeric and categorical data before plotting or modeling to minimize ambiguity in ties. This method aligns well with the ranking logic used in ggpcp.
+
+```{r}
+apply_tie_breaking <- function(df, cols_to_adjust) {
+  df_adjusted <- df
+
+  for (col in cols_to_adjust) {
+    if (is.numeric(df[[col]])) {
+      # Rank the values with ties.method = "random"
+      ranks <- rank(df[[col]], ties.method = "first")
+      # Scale ranks back to the original range
+      min_val <- min(df[[col]], na.rm = TRUE)
+      max_val <- max(df[[col]], na.rm = TRUE)
+      df_adjusted[[col]] <- scales::rescale(ranks, to = c(min_val, max_val))
+    }
+  }
+
+  return(df_adjusted)
+}
+
+```
+
+*PCP Implementation*
+
+```{r}
+#| echo: false
+#| warning: false
+#| layout-valign: bottom
+#| fig-width: 8
+#| fig-height: 8
+
+# Apply tie-breaking to the numeric columns of iris
+adjusted_data <- apply_tie_breaking(penguins, cols_to_adjust = names(penguins)[3:6])
+
+p4 <- adjusted_data %>%
+  pcp_select(species, 3:6, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
+   geom_pcp_labels() +
+  theme_pcp() +
+  #theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  penguin_scale_color() + 
+  guides(color = F) + 
+  ggplot2::labs(title = "Random Rank Shuffle PCP of Palmer Penguins")
+  
+
+grid.arrange(og_pcp, p4, ncol = 1)
+```
+
+

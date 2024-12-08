@@ -198,9 +198,28 @@ plot_data_privacy <- plot_data %>%
   mutate(across(starts_with("Sepal"), ~ . + rnorm(n(), mean = 0, sd = 0.1)),
          across(starts_with("Petal"), ~ . + rnorm(n(), mean = 0, sd = 0.1)))
 
+plot_data_privacy <- penguins_clean %>%
+  mutate(across(starts_with("_mm"), ~ . + rnorm(n(), mean = 0, sd = 0.1)),
+         across(starts_with("_g"), ~ . + rnorm(n(), mean = 0, sd = 0.1)))
+
+
+plot_data_privacy %>%
+  pcp_select(species, 3:6, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
+  geom_pcp_labels() +
+  theme_pcp() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  penguin_scale_color() +
+  guides(color = F) +
+  ggtitle("Adaptive Privacy-Preserving Visualization")
+
 GGally::ggparcoord(
   data = plot_data_privacy,
-  columns = 1:4,
+  columns = c(5,1:4,5),
   groupColumn = 5
 ) +
   ggtitle("Adaptive Privacy-Preserving Visualization")
@@ -298,7 +317,7 @@ adjust_ties <- function(df, cols_to_adjust, epsilon = 1e-5) {
 }
 
 # Adjust ties in the numeric columns of iris
-adjusted_data <- adjust_ties(iris, cols_to_adjust = names(iris)[1:4])
+adjusted_data <- adjust_ties(iris, cols_to_adjust = names(iris)[1:4], epsilon = 0.1)
 
 adjusted_data %>%
   pcp_select(Species, 1:4, Species) %>%
