@@ -2,7 +2,7 @@
 title: "Promising Methods to Handling Numerical Ties in PCPs"
 format: 
   pdf:
-    classoption: ["11pt", "english", "singlespacing", "headsepline"]
+    classoption: ["10pt", "english", "singlespacing", "headsepline"]
     geometry:
         - paper=letterpaper
         - inner=2.5cm
@@ -12,6 +12,9 @@ format:
         - bottom=0.75cm
         - left=1.25cm
         - right=1.25cm
+    include-in-header:
+      text: |
+        \usepackage{float}
 ---
 
 ```{r include_packages, include = FALSE}
@@ -47,29 +50,18 @@ og_pcp <- penguins %>%
   guides(color = F) + 
   ggplot2::labs(title = "Unadjusted PCP of Palmer Penguins")
 
-
-og_pcp2 <- iris %>%
-  pcp_select(Species, 1:4, Species) %>%
-  pcp_scale(method="uniminmax") %>%
-  pcp_arrange(method = "from-left") %>%
-  ggplot(aes_pcp()) +
-  geom_pcp_boxes() + 
-  geom_pcp(aes(colour = Species), alpha = 0.5) + 
-  geom_pcp_labels() +
-  theme_pcp() +
-  scale_color_manual(
-    values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000")
-  ) +
-  guides(color = F) + 
-  ggplot2::labs(title = "Unadjusted PCP of Iris Dataset")
 ```
 
 ## Determine the numerical ties in the dataset
 
+Let's determine the number of numerical ties in the dataset.
+
 ```{r}
 #| echo: false
 #| warning: false
-#| 
+#| tbl-pos: "h!"
+#| results: 'asis'
+
 detect_ties <- function(data) {
   # Identify numerical columns
   numeric_data <- data %>% 
@@ -85,19 +77,25 @@ detect_ties <- function(data) {
   return(list(tie_count = tie_count, tie_percentage = tie_percentage))
 }
 
-
-# Detect numerical ties in the iris dataset
+# Detect numerical ties in the penguins dataset
 numerical_ties <- detect_ties(penguins)
 
-# Print the results
-print("Tie Counts:")
-print(numerical_ties$tie_count)
+tbl <- as.data.frame(numerical_ties$tie_count %>%
+  bind_rows(numerical_ties$tie_percentage) )
 
-print("Tie Percentages:")
-print(numerical_ties$tie_percentage)
+row.names(tbl) <- c("Tie Counts", "Tie Percentages")
+
+tbl %>% 
+  rownames_to_column('cat_name') %>% 
+  gt::gt() %>%
+  gt::fmt_number(
+    columns = c(bill_length_mm:year),
+    decimals = 1,
+    use_seps = FALSE
+  ) %>%
+  gt::as_latex()
+
 ```
-
-
 
 ## Attempt 1: Incremental Offset (Sequential Tie Handling)
 
@@ -152,7 +150,6 @@ add_space_to_ties <- function(data, tie_spacing = 0.01) {
 #| layout-valign: bottom
 #| fig-width: 8
 #| fig-height: 8
-
 
 plot_parallel_with_spacing <- function(data, tie_spacing = 0.01) {
   # Remove rows with missing values
@@ -315,7 +312,7 @@ apply_tie_breaking <- function(df, cols_to_adjust) {
 
 *PCP Implementation*
 
-```{r}
+```{r, fig.pos="H"}
 #| echo: false
 #| warning: false
 #| layout-valign: bottom

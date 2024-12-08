@@ -366,3 +366,51 @@ adjusted_data %>%
   scale_colour_manual(
     values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000")
   )
+
+
+
+# Select numeric columns and outcome variable (species)
+penguins_numeric <- penguins %>%
+  dplyr::select(species, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
+
+# Tie-breaking function for numerical data with multiple rescaling options
+tie_break_numeric <- function(df, group_var, num_var, method = "cumsum") {
+  df <- df %>%
+    arrange({{ group_var }}, {{ num_var }}) %>%
+    group_by({{ group_var }}) %>%
+    mutate(
+      delta = c(0, diff({{ num_var }})),
+      adjusted = case_when(
+        method == "cumsum" ~ {{ num_var }} + cumsum(delta + 1e-4),
+        method == "rank" ~ scales::rescale(rank({{ num_var }}, ties.method = "first"), to = range({{ num_var }}, na.rm = TRUE)),
+        method == "zscore" ~ ({{ num_var }} - mean({{ num_var }}, na.rm = TRUE)) / sd({{ num_var }}, na.rm = TRUE),
+        TRUE ~ {{ num_var }}
+      )
+    ) %>%
+    ungroup()
+  return(df)
+}
+
+
+# Apply tie-breaking for all numeric variables
+penguins_tiebroken <- penguins_numeric  %>%
+  mutate(flipper_length_mm = as.double(flipper_length_mm),
+         body_mass_g = as.double(body_mass_g))
+
+for (var in names(penguins_numeric)[-1]) {
+  penguins_tiebroken <- tie_break_numeric(penguins_tiebroken, species, !!sym(var), method = "zscore")
+}
+
+penguins_tiebroken %>%
+  pcp_select(species, 2:5, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  penguin_scale_color() +
+  guides(color = F)
+
+
