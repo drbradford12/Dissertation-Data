@@ -37,7 +37,8 @@ penguins <- na.omit(penguins)
 
 
 og_pcp <- penguins %>%
-  pcp_select(species, 3:6, species) %>%
+  mutate(year = as.factor(year)) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
@@ -59,7 +60,7 @@ Let's determine the number of numerical ties in the dataset.
 ```{r}
 #| echo: false
 #| warning: false
-#| tbl-pos: "h!"
+#| tbl-pos: "h"
 #| results: 'asis'
 
 detect_ties <- function(data) {
@@ -323,7 +324,8 @@ apply_tie_breaking <- function(df, cols_to_adjust) {
 adjusted_data <- apply_tie_breaking(penguins, cols_to_adjust = names(penguins)[3:6])
 
 p4 <- adjusted_data %>%
-  pcp_select(species, 3:6, species) %>%
+  mutate(year = as.factor(year)) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method = "uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
