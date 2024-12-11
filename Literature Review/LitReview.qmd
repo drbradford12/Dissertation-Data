@@ -52,21 +52,41 @@ penguin_scale_fill <-   function(...) scale_fill_manual(
 
 <!--[I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}-->
 
-[In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
+[In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. 
+High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. 
+Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. 
+However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
 
-[Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@alber2020]. Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.]{.db}
+[Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. 
+Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@velagala2020]. 
+Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. 
+These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.]{.db}
 
-[Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg1985]. By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.]{.db} These plots are especially good at showing relationships and trends between multiple factors. However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. This can cause important information to be lost in the research. This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
+[Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. 
+PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg1985]. 
+By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.]{.db} 
+These plots are especially good at showing relationships and trends between multiple factors. 
+However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. 
+This can cause important information to be lost in the research. 
+This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. 
+We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. 
+Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
 
 <!--The accuracy of data interpretation is highest when dealing directly with numerical values or one-dimensional visual representations [@spence1990]. That is becoming more and more impractical as the size and dimension of datasets continue to increase. To make judgments based on data, it is necessary to find methods of simplifying and consolidating datasets without sacrificing significant information. Data visualization, such as graphs or tables, is often an essential and invaluable intermediate step between raw data and an observer's decision-making process. An effective data visualization communicates the gist of a data set in a way that is easy for an observer to understand and evaluate; ideally, data visualizations slightly sacrifice accuracy (relative to a table of values) in favor of a greater understanding of the relationship between observations or variables. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp}-->
 
-Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the x and y axis. Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than p = 3 or 4 variables are shown (including the x and y coordinates). When it is necessary to understand the relationship between more than four variables, visualizations on a Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@inselberg1997]. Other approaches are necessary when it is necessary to understand $p \geq 4$ dimensions of data. Here, we examine parallel coordinate plots (PCPs) as a solution to $p \geq 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high N and/or high p dimensional data. We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N \geq 4$ dimensional data across different magnitudes of N (observations) and p (variables).
+Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the $x$ and $y$ axis. 
+Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than $p = 3\: or \:4$ variables are shown (including the $x$ and $y$ coordinates). 
+When it is necessary to understand the relationship between more than four variables, visualizations on a 
+Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@inselberg1997]. Other approaches are necessary when it is necessary to understand $p \geq 4$ dimensions of data. 
+Here, we examine parallel coordinate plots (PCPs) as a solution to $p \geq 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high $N$ and/or high $p$ dimensional data. 
+We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N \geq 4$ dimensional data across different magnitudes of $N$ (observations) and $p$ (variables).
 
 <!--Stimulus-responsive attention often arises when an observer recognizes that a particular graphical element in a stimulus signals valuable information, guiding further search to improve judgment accuracy. @spence1990 talked about the importance of visual psychophysics in figuring out how simple parts of graphs can be used to convey information. He stressed that how well we can understand graphs relies on our cognitive and visual abilities. Cleveland and McGill's study on graphical perception in 1984 found that people have different skill levels when decoding multidimensional data [@cleveland1984]. This shows that designs like generalized parallel coordinate plots must consider cognitive and perceptual variability. These plots show many dimensions within a single visual glyph, and the small changes between them make it much harder to understand complicated visual data. Additional studies, like @heer2010 and @simkin1987, built on these ideas by showing that mistakes happen at different points in information processing and that different graphs are better for different jobs depending on the user's accuracy. It was emphasized by @carswell1992 and @shah2011 that task difficulty and perceptual processes interact. These articles say differences in how people think and perceive things should be considered when making generalized parallel coordinate plots to show multidimensional data. [I don't know that we need this paragraph here, at the moment. Don't get rid of it entirely, though, it's not bad -- just not quite on topic here]{.svp} -->
 
 # Parallel Coordinate Plots (PCPs)
 
-Parallel coordinate plots (PCPs) leverage a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg1985]. The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp}
+Parallel coordinate plots (PCPs) leverage a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg1985]. 
+The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp}
 
 ```{r}
 #| echo: false
@@ -148,7 +168,7 @@ The Gentoo (blue) tends to have higher body mass and flipper length values, whil
 <!-- For high-dimensional data, parallel coordinate plots (PCPs) are a standard visualization tool whereby data points are shown as a line intersecting a series of vertical axes representing the different variables in the dataset, therefore indicating a dimension.  -->
 
 [As originally proposed,]{.svp} PCPs [could]{.svp} be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}.
-[The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot .]{.svp} 
+[The `ggpcp` package [@vanderplas2023] introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot.]{.svp} 
 [A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp} 
 [In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johansson2015] may support identification of clusters and outliers in multidimensional space.]{.svp}
 
@@ -197,8 +217,15 @@ Parallel coordinate plots (PCPs) are an excellent way to show data with many dim
 PCPs are useful for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
 <!-- [are great for is very informal language -- can you rephrase this to be more formal? e.g. PCPs effectively show bivariate relationships, clusters of similar data points across multiple variables, and outliers, as shown in  ...., and then provide a figure showing how you can see those qualities within a PCP?]{.svp} -->
 However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting, [becoming]{.svp} difficult to read [and]{.svp} interpret when N is large. 
-[In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in @fig-features]{.svp}. 
-[This lack of familiarity may be the biggest drawback of PCPs; however, there are ... studies which explore this issue.]{.svp} [XXX are there studies that explore how quickly people acclimate to PCPs? If not, we should consider running one!]{.svp}
+[In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in [Fig @fig-features] ]{.svp}. 
+Comparisons show that whilst PCPs are more suited for exploratory research when dimensions surpass reasonable limits for scatterplot matrices [@munzner2014; @inselberg2009], scatterplot matrices clearly show a depiction of interdimensional interactions for small to medium-scale data.
+
+Although PCPs are sometimes criticized for overplotting and difficulty recognizing patterns, such as clusters or non-linear correlations, which scatterplots more efficiently disclose, PCPs provide a compact depiction of high-dimensional data [@johansson2005; @qu2007]. 
+Studies show, however, that users adjust to PCPs relatively fast following appropriate introduction since interactive techniques and hierarchical approaches significantly increase their usability [@fua1999; @claessen2011].
+When combined with user training and interactive visualization techniques, PCPs remain beneficial for exploratory analysis of higher-dimensional data, even if scatterplots provide instantaneous interpretability and clarity—especially for two-dimensional relationships [@inselberg2009; @heinrich2013].
+
+
+<!--[This lack of familiarity may be the biggest drawback of PCPs; however, there are ... studies which explore this issue.]{.svp} [XXX are there studies that explore how quickly people acclimate to PCPs? If not, we should consider running one!]{.svp}-->
 
 # Variations on Parallel Coordinate Plots
 
@@ -432,7 +459,7 @@ ggparallel(list("year", "island", "sex", "species"),
 
 ```
 
-@fig-hammock is a Hammock plot that shows the relationship between two categorical variables, gear and cylinders (cyl). 
+[Fig @fig-hammock-1] is a Hammock plot that shows the relationship between two categorical variables, gear and cylinders (cyl). 
 Each color-coded band represents a different category within these variables. 
 The plot provides frequency but lacks precise counts or numeric values. 
 Overplotting is evident, making it difficult to trace individual pathways. 
@@ -1502,5 +1529,7 @@ They are helpful for both numerical and categorical ties.
 Studies with users showed that changes in how people saw things made finding patterns and trends in large, complex datasets easier.
 This made it easier for PCPs to look around.
 In areas with many people, it could be useful because overlapped lines can make it harder to see.
+
+\newpage
 
 # References
