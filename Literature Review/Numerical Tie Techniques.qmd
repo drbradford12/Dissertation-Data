@@ -43,7 +43,7 @@ og_pcp <- penguins %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_boxes() + 
-  geom_pcp(aes(colour = species), alpha = 0.5) + 
+  geom_pcp(aes(colour = species), overplot = "none", alpha = 0.5) + 
   geom_pcp_labels() +
   theme_pcp() +
   penguin_scale_color() + 

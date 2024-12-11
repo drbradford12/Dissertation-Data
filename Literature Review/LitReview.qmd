@@ -221,10 +221,25 @@ CPCPs use discrete axis segments or unique markers for each category, transformi
 @inselberg2009 enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power.
 @johansson2015 explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis.
 
-CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}
-[@Wegman:1990]{.db} <!--[Use the citation -- @XXX]{.svp}--> suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
-[@holten2009]{.db} <!--[Use the citation -- @XXX]{.svp}--> introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
-[@leblanc1990]{.db} <!--[Use the citation -- @XXX]{.svp}-->  highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.
+<!--CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}-->
+
+Designed to accommodate categorical data using methods including axis restructuring, symbols, and color-coding to increase clarity and comprehension, Categorical Parallel Coordinate Plots (CPCPs) are a development of Parallel Coordinate Plots (PCPs). 
+Looking at the given papers, CPCPs come from more general ideas than from them straightforwardly. 
+Although it does not particularly address categorical variables, @Wegman:1990 groundbreaking study on PCPs offers the mathematical underpinning for visualizing high-dimensional numerical data. 
+Every PCP invention, including CPCPs, is built on this work. 
+@leblanc1990 investigation of PCPs for assessing concurrent program performance emphasizes PCP adaptability but mainly focuses on numerical or sequential data rather than categorical data.
+
+@holten2009's work on force-directed edge bundling aims to improve graph visualizations by lowering visual clutter, which guides the CPCP objectives of increasing interpretability. 
+Though it has nothing to do with PCPs or categorical data, its primary goal is to make complex data visualizations more readable. 
+Therefore, even if these papers specifically address CPCPs, they add to the larger conversation on developing multidimensional visualizing techniques.
+
+Beyond categorical data, the CPCP innovations—axis structure and the use of symbols and colors—are relevant to additional PCP versions. 
+These ideas improve the interpretability of interactive PCRs, hybrid PCRs combining data kinds, and continuous PCRs. 
+CPCPs observe both a tool for categorical data but also larger progress in multidimensional data display.
+
+<!--[@Wegman:1990]{.db} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
+[@holten2009]{.db} introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
+[@leblanc1990]{.db} highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.-->
 
 ```{r}
 #| echo: false
@@ -513,7 +528,7 @@ Their method lets users change these settings in real-time, which makes it easie
 In the same way, @raidou2015, in "Orientation-Enhanced Parallel Coordinate Plots," talk about how different levels of opacity and color can help draw attention to patterns, show line densities, and allow for interactive data study.
 In their work, they also talk about how to deal with the problem of overplotting in complex datasets by smoothing and averaging polylines.
 
-In their paper "Visual Clustering in Parallel Coordinates," @zhou2008 make another important addition by suggesting a tool that lets users choose color and opacity to draw attention to clusters in the data.
+In their paper, "Visual Clustering in Parallel Coordinates," @zhou2008 make another important addition by suggesting a tool that lets users choose color and opacity to draw attention to clusters in the data.
 This method helps tell the difference between data groups and changes the shape of curves to make things clearer.
 In their paper "Hierarchical Parallel Coordinates for Exploration of Large Datasets," @fua1999 also talk about ways to reduce visual clutter by changing the thickness of lines and using hierarchical data representations.
 These methods make it possible to effectively visualize data density, which gives you a better look at the trends hidden in big datasets.
@@ -749,7 +764,7 @@ Feature animation represents cluster variance and skewness, aiding in identifyin
 Variance-based animations guide users to regions requiring detailed investigation, reducing analysis complexity. 
 Overall, these methods efficiently and effectively visualize clusters, enhancing the understanding of data structures and trends.]{.db}
 
-[You need to show these different options and comment on the differences! Provide more detail about whether experimental evidence supports the approach. How does the approach in @ankerst1998 compare to the ggpcp ordering approach to minimize line crossings in one direction or another for categorical variables? I suspect that these algorithms change axis positioning, where ggpcp changes ordering within a category -- but you need to explicitly make that comparison.]{.svp}
+<!--[You need to show these different options and comment on the differences! Provide more detail about whether experimental evidence supports the approach. How does the approach in @ankerst1998 compare to the ggpcp ordering approach to minimize line crossings in one direction or another for categorical variables? I suspect that these algorithms change axis positioning, where ggpcp changes ordering within a category -- but you need to explicitly make that comparison.]{.svp}-->
 
 Two visualization techniques, the Similarity Clustering Approach [@ankerst1998] and Clustered Parallel Coordinates and High-Precision Textures [@johansson2005], seek to improve interpretability by rearranging variables based on similarity rather than visual clutter reduction. 
 The similarity clustering method emphasizes functional linkages and correlations and arranges dimensions based on their similarity; it does not explicitly seek to reduce line crossings, particularly for categorical data.
@@ -885,9 +900,9 @@ This adaptation increases flexibility, allowing the plot to respond to specific 
 
 Reordering and axis shifting work well together to fix the issue of overplotting in PCPs.
 Rearranging linked variables makes them easier to see while flipping the axes reduces the number of times lines cross for negatively correlated variables.
-Combining these two tools makes looking for patterns and exploring large datasets easier. [Citation needed]{.svp}
+Combining these two tools makes looking for patterns and exploring large datasets easier, [@healey1999]. <!--[Citation needed]{.svp}-->
 By using these methods, users can better understand how multiple variables are connected, which helps them make better decisions based on visual information.
-Research shows [Citation needed]{.svp} that these methods make parallel coordinate plots easier to understand, more accurate, and better able to find groups and trends, all of which are very important for data analysts.
+@heinrich2013 shows that these methods make parallel coordinate plots easier to understand, more accurate, and better able to find groups and trends, all of which are very important for data analysts.
 Continuous reordering can create inconsistency, as users may find it challenging to track relationships when axes are frequently altered.
 "Constant reconfiguration of the axes can disrupt the analytical flow, making it difficult to build a stable mental model of the data structure" [@review].
 Additionally, for datasets with minimal correlation, this method may offer limited value, as reordering may not result in clearer insights.
@@ -946,7 +961,7 @@ As graphics data analysis grew, pioneers like Tukey, Chambers, and Cleveland cre
 There are now several ways to deal with ties, such as slowly increasing the space between values. 
 This makes the visualization more accurate and easier to understand without changing the structure of the data itself.
 
-@tufte2001 work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise---any element that complicates or crowds the visual field---can impede the interpretation of data. 
+@tufte2001 work, particularly in "The Visual Display of Quantitative Information", is grounded in empirical evidence that shows how visual noise, any element that complicates or crowds the visual field, can impede the interpretation of data. 
 He advocates for "graphical excellence," a design philosophy that presents data most clearly and efficiently. 
 According to Tufte, separating tied values can reduce overlapping lines and decrease visual noise, making it easier for users to see patterns and accurately compare variables. 
 Distancing tied values in complex visualizations can reduce interpretative difficulty by reducing visual noise, aiding rapid perception of quantitative relationships.
