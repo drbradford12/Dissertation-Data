@@ -169,7 +169,7 @@ plot_parallel_with_spacing <- function(data, tie_spacing = 0.01) {
   geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
    geom_pcp_labels() +
   theme_pcp() +
-  theme(axis.text.x = element_text(angle = 45)) +
+  #theme(axis.text.x = element_text(angle = 45)) +
   penguin_scale_color() + 
   guides(color = F) + 
   ggplot2::labs(title = "Incremental Offset PCP of Palmer Penguins")
@@ -258,7 +258,7 @@ p3 <- adjusted_data %>%
   geom_pcp(aes(color = species), overplot = "none", alpha = 0.5) +
    geom_pcp_labels() +
   theme_pcp() +
-  theme(axis.text.x = element_text(angle = 45)) +
+  #theme(axis.text.x = element_text(angle = 45)) +
   penguin_scale_color() + 
   guides(color = F) + 
   ggplot2::labs(title = "Jitter Spacing PCP of Palmer Penguins")
@@ -334,7 +334,7 @@ p4 <- adjusted_data %>%
    geom_pcp_labels() +
   theme_pcp() +
   #theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45)) +
+  #theme(axis.text.x = element_text(angle = 45)) +
   penguin_scale_color() + 
   guides(color = F) + 
   ggplot2::labs(title = "Random Rank Shuffle PCP of Palmer Penguins")
@@ -344,3 +344,175 @@ grid.arrange(og_pcp, p4, ncol = 1)
 ```
 
 
+## Attempt 4: "Cascade Rank Tie-Breaker" Method
+
+*Key Equations*:
+
+1. Initial Rank Assignment:
+
+Assign initial ranks to each variable, handling ties using a user-specified method.
+
+$$
+R_{i,j} =  \begin{cases}
+              rank(x_{i,j}, \text{ties.method}) & \text{ if } x_{i,j} \text{ is numeric} \\
+              as.numeric(foctor(x_{i,j})) & \text{ if } x_{i,j} \text{ is categorical}
+          \end{cases}
+$$
+2. Sequential Rank Adjustment Based on Previous Variables:
+
+Refine ranks by incorporating information from preceding variables to break ties and maintain a hierarchical influence.
+
+$$
+NormPrev_{i,j-1} =  \begin{cases}
+              \frac{R_{i,j-1} - min(R_{i,j-1})}{max(R_{i,j-1}) - min(R_{i,j-1})} & \text{ if method = "range"}  \\
+              \frac{R_{i,j-1} - min(R_{i,j-1})}{\sigma(R_{i,j-1})} & \text{ if method = "sd"}
+          \end{cases}
+$$
+
+3. Adjusted Current Rank:
+
+Incorporate the normalized previous rank into the current rank:
+
+$$
+R'_{i,j} =  \begin{cases}
+              R_{i,j} & \text{ if } j = 1 \\
+              R'_{i,j} + \epsilon \times NormPrev_{i,j-1} & \text{ if } j > 1
+          \end{cases}
+$$
+- $\epsilon$: A small constant (e.g., 0.01) to control the influence of the previouse rank.
+
+4. Final Data Arrangement for Visualization
+
+Combine the original data with adjusted ranks and arrange the dataset to reflect the unique ordering derived from the "Cascade Rank-Tie Breaker" method.
+
+$$
+Ranked \; data = original \; data \cup R' \; and\; sorted \;by \; R'_{1}, R'_{2}, ..., R'_{n}
+$$
+
+
+
+*Description*:
+
+The "Cascade Rank-Tie Breaker" method systematically assigns ranks to each variable in a dataset, ensuring that ties are resolved by leveraging information from previous variables. 
+This hierarchical approach maintains the integrity and relative importance of variables, making it particularly useful for data visualization techniques like Parallel Coordinate Plots.
+
+*Advantages*:
+
+- **Hierarchical Influence**: Earlier variables in the dataset have a stronger impact on the ranking, preserving the logical flow and importance of variables.
+
+- **Flexible Tie Handling**: Users can specify different ties.method options (e.g., "min", "average") to control how ties are resolved during the initial ranking.
+
+- **Scalability**: Efficiently handles multiple variables and large datasets by sequentially adjusting ranks.
+Enhanced Visualization: Facilitates clearer and more informative multivariate visualizations by ensuring a unique and meaningful ordering of data points.
+
+- **Customization**: Allows users to choose between different normalization methods ("range", "sd") and to define custom normalization functions, tailoring the method to specific analytical needs.
+
+*Implementation*:
+
+```{r}
+cascade_tie_break <- function(data, method = c("range", "sd"), ties_method = "min") {
+  # Match the 'method' argument to ensure it's one of the allowed options
+  method <- match.arg(method)
+  
+  # Validate the 'ties_method' argument to ensure it's a valid option for the rank function
+  valid_ties_methods <- c("average", "first", "random", "max", "min")
+  if (!ties_method %in% valid_ties_methods) {
+    stop(paste("Invalid ties_method. Choose one of:", paste(valid_ties_methods, collapse = ", ")))
+  }
+  
+  # Initialize a dataframe to store ranks, excluding any existing 'rank' columns
+  rank_df <- data.frame(id = 1:nrow(data))
+  
+  # Iterate over each column to assign ranks
+  for (i in seq_along(data)) {
+    var <- data[[i]]
+    
+    # Determine if the variable is numeric or categorical
+    if (is.numeric(var)) {
+      # Apply the specified ties.method in the rank function
+      current_rank <- rank(var, ties.method = ties_method)
+    } else {
+      # For categorical variables, convert factors to numeric ranks based on their levels
+      current_rank <- as.numeric(as.factor(var))
+    }
+    
+    # If not the first variable, adjust ranks based on the previous variable
+    if (i > 1) {
+      prev_rank <- rank_df[[i - 1]]
+      
+      # Normalize the previous rank based on the selected method
+      if (method == "range") {
+        norm_prev_rank <- (prev_rank - min(prev_rank)) / (max(prev_rank) - min(prev_rank))
+      } else if (method == "sd") {
+        norm_prev_rank <- (prev_rank - min(prev_rank)) / sd(prev_rank)
+      }
+      
+      # Adjust the current rank by adding a small fraction of the normalized previous rank
+      # This helps in breaking ties based on the previous variable
+      current_rank <- current_rank + norm_prev_rank * 0.01
+    }
+    
+    # Assign the adjusted rank to the rank dataframe
+    rank_df[[i]] <- current_rank
+  }
+  
+  # Combine the original data with the rank dataframe, excluding the 'id' column
+  ranked_data <- bind_cols(data, rank_df[ , -1])
+  
+  # Arrange the data based on the cumulative adjusted ranks to establish a unique ordering
+  ranked_data <- ranked_data %>%
+    arrange(across(starts_with("rank")))
+  
+  return(ranked_data)
+}
+```
+
+*PCP Implementation*
+
+```{r}
+#| echo: false
+#| warning: false
+#| layout-valign: bottom
+#| fig-width: 8
+#| fig-height: 8
+
+# Apply tie-breaking to the numeric columns of iris
+ranked_penguins <- cascade_tie_break(penguins, method = "sd", ties_method = "average")
+
+add_spacing <- function(ranked_data) {
+  spaced_data <- ranked_data
+  for (i in seq_along(ranked_data)) {
+    var <- ranked_data[[i]]
+    if (is.numeric(var)) {
+      # Add small spacing based on the range
+      range_val <- max(var) - min(var)
+      spaced_data[[i]] <- var + (rank(var) - 1) * (range_val * 0.02)
+    } else {
+      # For categorical variables, convert to factor and adjust levels with spaces
+      spaced_levels <- paste0(levels(as.factor(var)), "")
+      spaced_data[[i]] <- factor(var, levels = levels(as.factor(var)))
+      levels(spaced_data[[i]]) <- spaced_levels
+    }
+  }
+  return(spaced_data)
+}
+
+spaced_penguins <- add_spacing(ranked_penguins)
+
+p5 <- spaced_penguins %>%
+  pcp_select(species, 3:8, species) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes() + 
+  geom_pcp(aes(colour = species), overplot = "none", alpha = 0.5) + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  scale_colour_manual(
+    "species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000"))  + 
+  guides(color = F) + 
+  ggplot2::labs(title = "Cascadde Ranked PCP of Palmer Penguins")
+  
+
+grid.arrange(og_pcp, p5, ncol = 1)
+```
