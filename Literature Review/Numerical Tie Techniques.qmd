@@ -38,7 +38,7 @@ penguins <- na.omit(penguins)
 
 og_pcp <- penguins %>%
   mutate(year = as.factor(year)) %>%
-  pcp_select(species, 3:8, species) %>%
+  pcp_select(species, 3:6, species) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
@@ -325,7 +325,7 @@ adjusted_data <- apply_tie_breaking(penguins, cols_to_adjust = names(penguins)[3
 
 p4 <- adjusted_data %>%
   mutate(year = as.factor(year)) %>%
-  pcp_select(species, 3:8, species) %>%
+  pcp_select(species, 3:6, species) %>%
   pcp_scale(method = "uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
@@ -500,7 +500,7 @@ add_spacing <- function(ranked_data) {
 spaced_penguins <- add_spacing(ranked_penguins)
 
 p5 <- spaced_penguins %>%
-  pcp_select(species, 3:8, species) %>%
+  pcp_select(species, 3:6, species) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
@@ -511,7 +511,7 @@ p5 <- spaced_penguins %>%
   scale_colour_manual(
     "species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000"))  + 
   guides(color = F) + 
-  ggplot2::labs(title = "Cascadde Ranked PCP of Palmer Penguins")
+  ggplot2::labs(title = "Cascade Ranked PCP of Palmer Penguins")
   
 
 grid.arrange(og_pcp, p5, ncol = 1)
