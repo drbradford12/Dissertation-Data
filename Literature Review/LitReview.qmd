@@ -1323,13 +1323,32 @@ By balancing noise and structure, deterministic jittering provides a reliable an
 
 ## Mean or Median Splitting
 
-One more popular method is mean or median splitting, which gives values tied to their mean or median values.
-This method works especially well for symmetric distributions and is perfect for images that need to show things centrally, like box plots.
-@wilcox2017 “Modern Statistics for the Social and Behavioral Sciences” shows that splitting the mean or median gives a fair view, especially for boxplot data.
-This method works best with datasets with few ties because it can hide the range and variability within tied numbers if used too much.
+Mean or median splitting is another widely used method for resolving ties in data analysis and visualization. 
+This approach replaces tied values with their mean or median, effectively centering the tied observations on their central tendency. 
+This technique works particularly well for symmetric distributions, where the mean and median closely align, and for visualizations that emphasize central values, such as box plots. 
 
-In mean or median splitting, we replace each tied value with the mean or median of the tied group.
-This technique centers tied observations on their central tendency.
+As detailed in @wilcox2017’s Modern Statistics for the Social and Behavioral Sciences, mean or median splitting provides a balanced and fair representation of tied data, mainly when used in boxplot visualizations. 
+Assigning tied observations to their central values ensures that the visual representation reflects the dataset's core tendencies without distorting its overall structure.
+
+This method is especially well-suited for visualizations prioritizing central tendencies, such as box plots or histograms. 
+By centering tied values, mean or median splitting emphasizes the median line or the mean's location, enhancing the clarity of the visualization.
+It is beneficial for datasets with minimal ties, as it preserves the integrity of the distribution while reducing visual clutter caused by overlapping points or lines.
+
+Mean or median splitting is advantageous in cases where the tied group size is small, as it minimizes the impact on the range and variability of the dataset. 
+For example, replacing tied values with their mean or median preserves the dataset's balance in symmetric distributions, ensuring the visualization remains accurate and interpretable.
+
+Despite its strengths, mean or median splitting has limitations, particularly for datasets with numerous ties. 
+Excessive use of this method can obscure the variability within tied groups, creating a homogenized view that may not accurately reflect the diversity of the data. 
+This can be problematic when understanding the range of tied observations is critical, such as in scatter plots or other point-based visualizations.
+
+Moreover, mean or median splitting assumes that the central value represents the tied group, which may not hold for skewed distributions. 
+In these cases, using the mean or median may introduce bias, potentially distorting the interpretation of the data. 
+Therefore, it is essential to consider the dataset’s characteristics when applying this technique carefully.
+
+In practice, mean or median splitting involves identifying groups of tied values and replacing each observation with the mean or median of the group. 
+For example, this technique can emphasize the data's central line (median) or central tendency (mean) in a box plot, reducing ambiguity caused by overlapping points. 
+The simplicity of implementation and its alignment with central tendency measures make this method a popular choice for summarizing tied data in visualizations.
+
 
 For set of tied values $x_1, x_2,...,x_n$ let:
 
@@ -1386,6 +1405,9 @@ ggparcoord(
 
 ```
 
+Mean or median splitting offers a centered and balanced approach to handling ties, making it ideal for symmetric distributions and visualizations focused on central tendencies. 
+While it enhances clarity in datasets with few ties, its limitations in preserving variability and representing skewed distributions highlight the importance of careful application. 
+By centering tied observations on their mean or median, this technique provides a straightforward solution for improving the interpretability of tied data, particularly in visualizations like box plots that prioritize centrality.
 
 ## Kernel Density Estimation (KDE) with Bandwidth Adjustment
 
