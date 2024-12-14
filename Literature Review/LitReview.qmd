@@ -261,7 +261,7 @@ Though it has nothing to do with PCPs or categorical data, its primary goal is t
 Therefore, even if these papers specifically address CPCPs, they add to the larger conversation on developing multidimensional visualizing techniques.
 
 Beyond categorical data, the CPCP innovations—axis structure and the use of symbols and colors—are relevant to additional PCP versions. 
-These ideas improve the interpretability of interactive PCRs, hybrid PCRs combining data kinds, and continuous PCRs. 
+These ideas improve the interpretability of interactive PCPs, hybrid PCPs combining data kinds, and continuous PCPs. 
 CPCPs observe both a tool for categorical data but also larger progress in multidimensional data display.
 
 <!--[@Wegman:1990]{.db} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
@@ -275,7 +275,9 @@ CPCPs observe both a tool for categorical data but also larger progress in multi
 #| layout-valign: bottom
 #| fig-subcap: 
 #|   - "Categorical and Hybrid in PCP"
-
+#| fig-width: 8
+#| fig-height: 6
+#| 
 # Remove rows with missing data from the dataset
 penguins_clean_cat <- penguins %>%
   na.omit() %>%
@@ -292,17 +294,14 @@ penguins_clean_cat <- penguins_clean_cat %>%
 penguins_clean_cat %>%
   pcp_select(2:7) %>%
   pcp_scale(method="uniminmax") %>%
-  # pcp_arrange() %>%
+  pcp_arrange() %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = species)) +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  facet_wrap(~sex) +
-  theme(axis.text.x = element_text(angle=45)) +
+  ggplot2::theme_bw() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP") +
+  facet_wrap(~sex)+ 
+  guides(color = F) +
   penguin_scale_color()
 ```
 
@@ -506,14 +505,10 @@ ggparcoord(
   groupColumn = 1,
   alphaLines = 0.5,
   splineFactor = 5
-) +
-     theme_minimal() +
-     labs(title = "Parallel Coordinate Plot with Bundling and Curving",
-                   x = "Variables",
-                   y = "Scaled Value") +
-  theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45)) +
-    penguin_scale_color()
+) + theme_minimal() +
+  labs(title = "Parallel Coordinate Plot with Bundling and Curving") +
+  penguin_scale_color() +
+  guides(color = F)
 ```
 
 In @fig-bundling, a PCP modified with bundling and curving demonstrates how these techniques smooth lines, reduce distractions and highlight patterns across different species. 
@@ -590,11 +585,8 @@ ggparcoord(
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Enhanced Color Encoding and Shading",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45))
+  guides(color = F) +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Enhanced Color Encoding and Shading")
 ```
 
 The parallel coordinate plot illustrated in @fig-encoding employs enhanced color coding to distinguish between species effectively. 
@@ -684,11 +676,8 @@ ggparcoord(
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements",
-                y = "Scaled PCA Values",
-                x = "Principal Components") +
-  theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45))
+  ggplot2::labs(title = "Parallel Coordinate Plot with PCA elements") + 
+  guides(color = F)
 
 ```
 
@@ -779,11 +768,8 @@ ggparcoord(
 ) +
   scale_color_manual(values = c("1" = "#540D6E", "2" = "#219B9D", "3" = "#FF8000")) +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Cluster-Based",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45)) 
+  ggplot2::labs(title = "Parallel Coordinate Plot with Cluster-Based") + 
+  guides(color = F)
 ```
 
 ## Optimized Layout Algorithms
@@ -861,11 +847,8 @@ ggparcoord(
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Optimized Layout",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45))
+  ggplot2::labs(title = "Parallel Coordinate Plot with Optimized Layout") + 
+  guides(color = F)
 ```
 
 ## Interactive and Dynamic
@@ -981,16 +964,9 @@ ggparcoord(
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Reordering and Axis Flipping",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45),
-        axis.line.y = element_blank(), # Remove y-axis line
-        axis.ticks.y = element_blank(), # Remove y-axis ticks
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) 
+  ggplot2::labs(title = "Parallel Coordinate Plot with Reordering and Axis Flipping") +
+  ggplot2::scale_y_reverse() + 
+  guides(color = F)
 
 ```
 
@@ -1102,22 +1078,15 @@ penguins_jittered$year <- jitter(penguins_jittered$year, amount = 2)
 # Plot Parallel Coordinate Plot
 ggparcoord(
   data = penguins_jittered,
-  columns = c(3:6,8), # Select numerical columns
+  columns = c(3:6), # Select numerical columns
   groupColumn = 1, # Color by species
-  scale = "center"
+  scale = "center", # Scale columns to range between [0, 1]
+  alphaLines = 0.5 # Set transparency for lines
 ) +
   penguin_scale_color() +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Random Jittering",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45),
-        axis.line.y = element_blank(), # Remove y-axis line
-        axis.ticks.y = element_blank(), # Remove y-axis ticks
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) 
+  ggplot2::labs(title = "Parallel Coordinate Plot with Random Jittering") +
+  guides(color = F) +
+  ggplot2::scale_y_reverse() # Flip the y-axis to observe the effect
 
 
 ```
@@ -1197,24 +1166,16 @@ penguins_ranked$year <- penguins_ranked$year +
 # Plot Parallel Coordinate Plot
 ggparcoord(
   data = penguins_ranked,
-  columns = c(3:6,8), # Select numerical columns
+  columns = c(3:6), # Select numerical columns
   groupColumn = 1, # Color by species
-  scale = "center"
+  scale = "center",
+  alphaLines = 0.5
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Rank Jittering",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45),
-        axis.line.y = element_blank(), # Remove y-axis line
-        axis.ticks.y = element_blank(), # Remove y-axis ticks
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) 
-
-
+  ggplot2::labs(title = "Parallel Coordinate Plot with Rank Jittering") +
+  guides(color = F) +
+  ggplot2::scale_y_reverse() 
 
 ```
 
@@ -1293,22 +1254,16 @@ penguins_fixed$year <- ifelse(duplicated(penguins_fixed$year),
 # Plot Parallel Coordinate Plot
 ggparcoord(
   data = penguins_fixed,
-  columns = c(3:6, 8), # Select numerical columns
+  columns = c(3:6), # Select numerical columns
   groupColumn = 1, # Color by species
-  scale = "center"
+  scale = "center",
+  alphaLines = 0.5
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Deterministic Jittering",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45),
-        axis.line.y = element_blank(), # Remove y-axis line
-        axis.ticks.y = element_blank(), # Remove y-axis ticks
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) 
+  ggplot2::labs(title = "Parallel Coordinate Plot with Deterministic Jittering") +
+  ggplot2::scale_y_reverse() +
+  guides(color = F)
 
 
 ```
@@ -1384,23 +1339,16 @@ penguins_mean$year <- ifelse(duplicated(penguins_mean$year),
 # Plot Parallel Coordinate Plot
 ggparcoord(
   data = penguins_mean,
-  columns = c(3:6,8), # Select numerical columns
+  columns = c(3:6), # Select numerical columns
   groupColumn = 1, # Color by species
-  scale = "center"
+  scale = "center",
+  alphaLines = 0.5
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Mean or Median Splitting",
-                y = "Scaled Values",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45),
-        axis.line.y = element_blank(), # Remove y-axis line
-        axis.ticks.y = element_blank(), # Remove y-axis ticks
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) 
-
+  ggplot2::labs(title = "Parallel Coordinate Plot with Mean or Median Splitting") +
+  theme(legend.position = "bottom") + 
+  guides(color = F) 
 
 
 ```
@@ -1411,14 +1359,17 @@ By centering tied observations on their mean or median, this technique provides 
 
 ## Kernel Density Estimation (KDE) with Bandwidth Adjustment
 
-Kernel density estimation (KDE) with bandwidth adjustment is a powerful method for density visualizations.
-It spreads out overlapping observations by giving each tied value a slightly different weight.
-This method works especially well in density plots because it evens data distributions without changing the original numbers.
-@silverman2018 work in “Density Estimation for Statistics and Data Analysis” shows how KDE with changed bandwidths correctly shows multimodal distributions, reducing errors caused by tied values.
-KDE works, but you must be careful when choosing the bandwidth because making the wrong choice can lead to misleading visual representations, especially when files are very concentrated.
+Kernel Density Estimation (KDE) is a powerful method for creating smooth density visualizations by spreading overlapping observations. 
+By assigning slightly different weights to tied values, KDE maintains the original data while providing a more continuous and visually interpretable representation of the distribution. 
+This technique is especially effective for multimodal distributions, where tied observations can obscure peaks or create misleading impressions of uniformity.
 
+As discussed in @silverman2018’s Density Estimation for Statistics and Data Analysis, adjusting the bandwidth in KDE enables an accurate depiction of multimodal distributions, reducing errors caused by ties. 
+Bandwidth selection is critical. 
+Determining the degree of smoothing applied to the data and choosing an appropriate bandwidth balance the need to spread out tied values while preserving the distribution’s key features. 
+Incorrect bandwidth choices, particularly in datasets with tightly clustered values, can lead to over-smoothing or under-smoothing, distorting the visualization.
+KDE excels in density plots, offering a visually intuitive way to represent the data’s underlying distribution. 
+However, its reliance on careful bandwidth tuning requires expertise, especially for datasets with high variability or dense clusters.
 
-For KDE with bandwidth adjustment, each data point is used to estimate a probability density function (PDF) by smoothing over a specified bandwidth $h$, which can be adjusted to account for ties.
 
 The KDE for a set of observations $x_1, x_2,...,x_n$ is:
 
@@ -1441,6 +1392,9 @@ The choice of bandwidth $h$ controls the amount of smoothing, which helps visual
 #| layout-valign: bottom
 #| fig-subcap: 
 #|   - "KDE with Bandwidth Adjustment of Data Points in PCP"
+#| fig-width: 8
+#| fig-height: 8
+
 
 # KDE transformation
 penguins_kde <- penguins
@@ -1453,56 +1407,98 @@ penguins_kde$year <- penguins_kde$year + penguins_kde$year_density * 0.1
 # Plot Parallel Coordinate Plot
 ggparcoord(
   data = penguins_kde,
-  columns = c(3:6,8), # Select numerical columns
+  columns = c(3:6), # Select numerical columns
   groupColumn = 1, # Color by species
-  scale = "center"
+  scale = "center",
+  alphaLines = 0.5
 ) +
   penguin_scale_color() +
   ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment",
-                x = "Variables") +
-  theme(legend.position = "bottom") +
-  ggplot2::scale_y_reverse() + # Flip the y-axis to observe the effect
-  theme(axis.text.x = element_text(angle=45),
-        axis.line.y = element_blank(), # Remove y-axis line
-        axis.ticks.y = element_blank(), # Remove y-axis ticks
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) 
-
+  ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment") +
+  ggplot2::scale_y_reverse() + 
+  guides(color=F)
 
 ```
 
 
-Advanced visual methods, such as depth cues and density adjustments, are used to deal with ties by making PCPs look like they are in three dimensions.  
-When combined with line transparency, Depth Cue Parallel Coordinates (DCPC) provide an effective means of visually distinguishing overlapping trends with teemporal binning that employs perception-based coloring and concepts, [@johansson2007]. 
-This method was created to deal with the problem of having a lot of temporal data. 
-Their primary focus is on using transparency and brightness changes to layer connected information, which lets users see data as if it were in three-dimensional space. 
-This method keeps the original data and ensures each line can remain identified. 
-Although the technique works, it requires advanced rendering tools that might not be easy to find in all visualization settings.
+## Depth Cues
 
+Traditional methods for handling ties often need more effective high-dimensional visualizations, such as parallel coordinate plots (PCPs), as overlapping lines obscure trends and connections. 
+Advanced visual techniques, such as Depth Cue Parallel Coordinates (DCPC), address this challenge by introducing depth perception cues to create a three-dimensional effect.
 
-Each way to show data with ties has unique benefits depending on the type of display and the type of data.
-Random and predictable jittering, for example, works well in scatterplots because they stop the plot from getting too big and show hidden patterns.
-KDE and rank-based methods, on the other hand, work well in density plots and ordinal visualizations.
-Researchers can improve visual clarity by using only some of these methods, ensuring the representation is correct and easy to understand.
-However, when parallel coordinate plots are used, where multiple directions are plotted simultaneously, the old ways of dealing with ties only sometimes work.
-In this case, adding the distance between values tied across multiple axes could show patterns and connections that are hard to see because the lines overlap.
-By creating a new method for parallel coordinate plots that adds space between ties in a planned way, we could see data trends and links across dimensions more clearly while keeping the dataset's integrity.
-This new idea would make it easier to understand complex, multidimensional data.
+As demonstrated in @johansson2007’s work, DCPC combines line transparency and brightness adjustments to layer information visually. 
+Temporal binning and perception-based coloring add further clarity, enabling users to distinguish overlapping trends effectively. 
+These techniques are designed to handle temporal data with high dimensionality, where conventional visualization methods struggle to reveal patterns.
+
+DCPC preserves the original dataset by ensuring each line remains identifiable, even in densely populated plots. 
+While this method significantly enhances clarity, it requires advanced rendering tools, which may only be available in some visualization settings. 
+The computational complexity of generating depth cues and transparency effects can pose challenges, especially for large datasets.
+
+Different techniques for handling ties excel in specific contexts, depending on the type of visualization and the nature of the data:
+
+ - Jittering (random or deterministic): Ideal for scatterplots and similar two-dimensional visualizations, jittering separates tied values by adding small random or fixed displacements. 
+ This approach effectively reveals hidden patterns and reduces visual clutter in dense datasets.
+
+- KDE and rank-based methods: are best suited for density plots and ordinal visualizations. 
+KDE spreads out tied values smoothly, preserving the overall distribution, while rank-based methods emphasize ordinal relationships without distorting the data.
+
+- DCPC and advanced PCP techniques: For multidimensional data, especially in PCPs, traditional methods often fail to address overlapping lines adequately. 
+DCPC introduces visual depth and transparency to resolve these issues, providing clarity in complex datasets.
+
+While existing methods improve clarity in specific visualization contexts, PCPs present unique challenges due to their high-dimensional nature and the tendency for lines to overlap extensively. 
+Traditional techniques like jittering and KDE, designed for two-dimensional visualizations, only sometimes scale effectively to PCPs.
+
+A promising solution involves systematically introducing spacing between tied values across multiple axes in PCPs. 
+This method would distribute tied observations more evenly, reducing overlaps and revealing otherwise obscured patterns.
+Researchers could uncover trends and connections by designing this approach to account for relationships across dimensions while preserving the dataset’s structure and integrity.
+
+Such a method could combine rank-based adjustments, deterministic jittering, and transparency techniques to create a more precise and insightful visualization of high-dimensional data. 
+Incorporating this approach into PCPs would significantly enhance their utility for exploring complex, multidimensional datasets.
+
+Each method for handling ties---whether jittering, KDE, rank-based adjustments, or depth cueing---has unique strengths tailored to specific visualization needs. 
+While jittering and KDE are effective for scatterplots and density plots, advanced techniques like DCPC are better suited for high-dimensional visualizations like PCPs. 
+Developing a dedicated method for handling ties in PCPs, such as planned spacing across axes, could further advance the field, enabling researchers to explore complex data more effectively while maintaining visual clarity and data integrity. 
+This innovation would provide a transformative step in high-dimensional data visualization, making uncovering trends and connections across diverse datasets easier.
+
 
 # Handling Ties in PCPs
 
-The idea of adding distance to visual ties has changed over time as methods for visualizing data have improved to find a balance between detail and clarity in large datasets.
-In the early days of visualization, especially in network analysis and multidimensional scaling, closeness and alignment were the main ways to show patterns and ties between things.
-However, as data grew, visual clutter became a big problem.
-This was especially true in parallel coordinates plots (PCPs), where lines and intersections that overlapped made it hard to see the underlying data structure.
-To fix this problem, researchers started looking into ways to give representational parts of these graphs more "visual distance." They did this using methods like line bundling and changing the spacing between lines to avoid overplotting.
-"In PCP, participants had to re-order the axes to examine all dimensions, whereas in SPLOM it is straightforward to identify correlation. 
-This result confirms earlier studies showing PCP participants struggle to identify correlation due to the complexity of cross-line patterns," [@chang2018a]
-This shows how separating visual elements can help with cognitive grouping without breaking up the continuity of the data.
-In PCPs, early studies showed that visual distance could make intersections clearer and improve the overall shape of individual paths.
-@guo2005a say, "...nested-means approach reduces overlapping problems and ensures the mean value of each variable is always at the midpoint on each axis."
-This theory has shaped later developments, showing visual distance as a spatial tool and a key cognitive help in data interpretation needed to get around today's more complex visualizations.
+Adding distance to visual ties has evolved significantly alongside advancements in data visualization, mainly as the need to balance detail and clarity in large datasets has grown. 
+Early visualization methods, especially in network analysis and multidimensional scaling, relied heavily on proximity and alignment to convey patterns and relationships. 
+These techniques were effective for smaller datasets but struggled to scale as the complexity and volume of data increased.
+
+Visual clutter emerged as a significant challenge, particularly in parallel coordinate plots (PCPs), where overlapping lines and intersections often obscured underlying data structures. 
+As PCPs became more common for high-dimensional data analysis, the density of lines made it increasingly difficult for users to discern meaningful trends and relationships. 
+To address this, researchers began developing techniques to increase the "visual distance" between elements in these visualizations, reducing overplotting while preserving the continuity of the visualization data.
+
+Early studies of PCPs highlighted the importance of visual distance in aiding cognitive interpretation. 
+@chang2018a compared PCPs and scatterplot matrices (SPLOMs), observing that users struggled to identify correlations in PCPs due to the complexity of cross-line patterns. 
+They noted, "In PCP, participants had to reorder the axes to examine all dimensions, whereas in SPLOM, it is straightforward to identify correlation." 
+This underscores how increasing visual distance between overlapping elements can simplify cognitive grouping without fragmenting the data.
+
+Researchers have explored methods to enhance visual distance, including line bundling, spacing adjustments, and axis reordering. 
+These approaches create separation between lines and intersections, allowing individual paths to emerge more distinctly. 
+For instance, in PCPs, early experiments showed that increasing visual distance improved the clarity of intersections, enabling users to trace relationships across dimensions better and understand the overall structure of the data.
+
+One foundational technique that has influenced the development of visual distance in PCPs is the "nested-means" approach introduced by @guo2005a. 
+This method creates a more organized and interpretable visualization by reducing overlapping lines and ensuring that the mean value of each variable is consistently placed at the midpoint of its axis. 
+@guo2005a noted that this approach not only addresses overplotting issues but also preserves the central tendencies of the data, enhancing both visual clarity and analytical utility.
+
+Line bundling, another key advancement, groups similar paths together, reducing the visual chaos caused by overlapping lines. 
+While this method simplifies the overall visualization, it introduces a trade-off by obscuring some outliers or unique paths. 
+Combining bundling with line spacing adjustments or transparency techniques helps mitigate this limitation, ensuring that critical data points remain visible while reducing clutter.
+
+These methods collectively illustrate how visual distance is a spatial and cognitive tool that enables users to navigate increasingly complex datasets more efficiently. 
+By strategically separating visual elements, researchers can guide users' attention to key patterns and trends without disrupting the continuity of the data.
+
+As datasets grow more intricate, the role of visual distance has expanded beyond PCPs to encompass a wide range of visualization techniques. 
+From scatterplots to network graphs, methods that enhance visual distance are critical in reducing clutter and improving interpretability. 
+For example, in modern PCPs, combining visual distance with dynamic interactivity—such as brushing, filtering, and axis flipping—further enhances users' ability to explore relationships across dimensions.
+
+Today, visual distance is recognized as an essential component of effective data visualization. 
+It reduces perceptual overload and facilitates cognitive processing, helping analysts uncover insights in even the most complex datasets. 
+By applying lessons learned from early studies and continuing to refine these techniques, modern visualizations can strike the delicate balance between detail and clarity, empowering users to make sense of their data confidently.
+
 
 ## Axis Reordering
 
@@ -1522,6 +1518,9 @@ However, it only works well on datasets with dimensions tied together.
 #| fig-subcap: 
 #|   - "PCP Without Axis Reordering"
 #|   - "PCP With Skewness Axis Reordering"
+#| fig-width: 8
+#| fig-height: 4
+#| layout-ncol: 1
 
 penguins <- na.omit(penguins)
 
@@ -1534,9 +1533,8 @@ p1 <- ggparcoord(
 ) +
   #ggtitle("Without Axis Reordering")  +
   theme_minimal() +
-  theme(legend.position = "bottom") +
-  theme(axis.text.x = element_text(angle=45)) +
-  penguin_scale_color()
+  penguin_scale_color() + 
+  guides(color = F) 
 
 # Example of a parallel coordinate plot with axis reordering to minimize tie overlap
 p2 <- ggparcoord(
@@ -1548,8 +1546,7 @@ p2 <- ggparcoord(
   penguin_scale_color()+   
   #ggtitle("With Skewness Axis Reordering") +
   theme_minimal() +
-  theme(legend.position = "bottom")  +
-  theme(axis.text.x = element_text(angle=45))
+  guides(color = F) 
 
 # Try using patchwork. Think about removing the legend and adding that in the section.
 grid.arrange(p1,p2, ncol=2)
@@ -1569,15 +1566,42 @@ Bundling, on the other hand, can hide individual lines within a group, making it
 
 ## Quantization and Aggregation
 
-Quantization, also known as Quantized Generalized Parallel Coordinate Plots or QGPCP, groups close-together values into bins.
-This makes it easier to see patterns in tightly packed data.
-This method cuts down on the number of lines that cross each other, which makes it great for big datasets.
-Moustafa states, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." This shows that removing some details can make data easier to read.
-Quantization can keep important patterns while lowering noise, as tests on real-world data show.
-However, it may hide small but important differences in the data [@moustafa2009].
-It makes the image easier to understand by removing small details.
-This is helpful for high-dimensional datasets with a lot of line overlap.
-However, detail can be lost during aggregation, making this method less useful for situations where exact data representation is needed.
+Quantization, referred to as Quantized Generalized Parallel Coordinate Plots (QGPCP), is a technique that groups close-together values into bins, reducing visual clutter and improving the readability of tightly packed data. 
+This method is particularly effective for managing large datasets, where overplotting and excessive line crossings obscure meaningful trends and patterns.
+
+By aggregating similar values into quantized bins, QGPCP simplifies visualizations without significantly altering the overall data structure. 
+As Moustafa explains, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." 
+This highlights the trade-off inherent in quantization: sacrificing granular detail to enhance interpretability. 
+Tests on real-world data have demonstrated that this approach preserves important patterns while reducing visual noise, making it an invaluable tool for exploring high-dimensional datasets.
+
+Quantization excels in scenarios where high-dimensional datasets result in extensive line overlap. 
+By reducing the number of distinct lines in a parallel coordinate plot (PCP), this method creates a cleaner, more navigable visualization. 
+Key benefits of quantization include:
+
+- Improved Clarity: Aggregating close values minimizes line crossings, enabling users to discern trends more quickly. 
+Patterns previously obscured by overplotting become more apparent, enhancing the user's ability to interpret the data.
+
+- Noise Reduction: By removing small-scale variations, quantization reduces the visual complexity of the plot. 
+This makes it easier for analysts to focus on larger trends and relationships across dimensions.
+
+- Scalability: Quantization is particularly effective for large datasets, where traditional visualization methods struggle to handle the volume of overlapping data points. 
+Aggregating values optimizes visualizations for datasets with high-dimensional complexity.
+
+While quantization simplifies visualizations, it has limitations that make it less suitable for specific analytical contexts. 
+Chief among these is the potential loss of detail. 
+Aggregating values into bins can obscure small but meaningful differences, which may be critical in scenarios requiring precision. 
+For example:
+
+- Loss of Granularity: By grouping data points, quantization may mask outliers or subtle variations that provide valuable insights.
+
+- Bias in Representation: The choice of bin size and boundaries can influence the visualization, potentially introducing artifacts or skewing interpretations.
+
+- Limited Utility for Precision Tasks: Quantization may oversimplify the visualization for analyses that demand exact data representation, such as identifying specific outliers or subtle correlations.
+
+As Moustafa notes [@moustafa2009], the method’s strength lies in its ability to simplify densely packed datasets, which comes at the cost of fine-grained detail. 
+Thus, the technique is best suited for exploratory analyses where the goal is to identify broad patterns rather than focus on precise data points.
+
+
 
 ```{r}
 #| echo: false
@@ -1606,19 +1630,16 @@ penguins_encoded <- penguins_clean %>%
 # Create the parallel coordinate plot
 ggparcoord(
   data = penguins_encoded,
-  columns = 2:8,    # Use all columns, including encoded categorical variables
+  columns = 3:6,    # Use all columns, including encoded categorical variables
   groupColumn = 1,  # Grouping by species
   scale = "uniminmax", # Scale columns to the same range
   #showPoints = TRUE,   # Show points on the lines
-  alphaLines = 0.6     # Transparency of lines
+  alphaLines = 0.5     # Transparency of lines
 ) + 
   theme_minimal() + 
-  labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset",
-       x = "Attributes",
-       y = "Quantized/Encoded Values") +
-  theme(legend.position = "bottom")  +
-  theme(axis.text.x = element_text(angle=45)) +
-    penguin_scale_color()
+  labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset") +
+  guides(color=F) +
+  penguin_scale_color()
 ```
 
 In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals.
@@ -1626,6 +1647,11 @@ Quantization makes the visualization even easier by putting numbers into groups.
 However, this needs to improve some of the accuracy of the original data.
 The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live.
 Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
+
+Quantization, or QGPCP, is a powerful method for simplifying dense datasets in parallel coordinate plots and similar visualizations. 
+Grouping close-together values into bins minimizes overplotting, reduces noise, and highlights overarching trends. 
+While it sacrifices some granularity, the technique is highly effective for exploratory data analysis and high-dimensional datasets where clarity is important. 
+When applied thoughtfully, quantization balances detail and readability, making it a valuable tool for modern data visualization.
 
 ## Color-Coding and Transparency
 
