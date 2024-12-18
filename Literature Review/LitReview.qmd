@@ -370,7 +370,7 @@ Combining categories and automating axis selections guarantees that parallel set
 
 
 
-## Categorical and Mixed Variable Parallel Representations
+## Mixed Variable Parallel Representations
 
 ### Parallel Sets Plots
 
