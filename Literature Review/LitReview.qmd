@@ -906,6 +906,28 @@ ggparcoord(
   guides(color = F)
 ```
 
+
+# Perceptual Challenges with PCPs
+
+- Clutter
+
+- Interpretation isn't natural
+
+- following an observation across the plot
+
+- line width illusion susceptibility
+
+
+
+# Optimization of PCPs
+
+
+
+
+
+
+# Interactivity 
+
 ## Interactive and Dynamic
 
 The integration of interactive features has significantly improved the utility and flexibility of parallel coordinate plots (PCPs). 
@@ -1043,6 +1065,246 @@ This limitation underscores the trade-offs of PCPs: while reordering and axis fl
 
 The figure demonstrates the power of these adaptive techniques to make species-based correlations more apparent, even as challenges in visualizing fine-grained details persist. 
 Combining these strategies with additional methods, such as filtering or clustering, further enhances the utility of PCPs for analyzing complex datasets.
+
+
+
+
+# Handling Ties in PCPs
+
+Adding distance to visual ties has evolved significantly alongside advancements in data visualization, mainly as the need to balance detail and clarity in large datasets has grown. 
+Early visualization methods, especially in network analysis and multidimensional scaling, relied heavily on proximity and alignment to convey patterns and relationships. 
+These techniques were effective for smaller datasets but struggled to scale as the complexity and volume of data increased.
+
+Visual clutter emerged as a significant challenge, particularly in parallel coordinate plots (PCPs), where overlapping lines and intersections often obscured underlying data structures. 
+As PCPs became more common for high-dimensional data analysis, the density of lines made it increasingly difficult for users to discern meaningful trends and relationships. 
+To address this, researchers began developing techniques to increase the "visual distance" between elements in these visualizations, reducing overplotting while preserving the continuity of the visualization data.
+
+Early studies of PCPs highlighted the importance of visual distance in aiding cognitive interpretation. 
+@chang2018a compared PCPs and scatterplot matrices (SPLOMs), observing that users struggled to identify correlations in PCPs due to the complexity of cross-line patterns. 
+They noted, "In PCP, participants had to reorder the axes to examine all dimensions, whereas in SPLOM, it is straightforward to identify correlation." 
+This underscores how increasing visual distance between overlapping elements can simplify cognitive grouping without fragmenting the data.
+
+Researchers have explored methods to enhance visual distance, including line bundling, spacing adjustments, and axis reordering. 
+These approaches create separation between lines and intersections, allowing individual paths to emerge more distinctly. 
+For instance, in PCPs, early experiments showed that increasing visual distance improved the clarity of intersections, enabling users to trace relationships across dimensions better and understand the overall structure of the data.
+
+One foundational technique that has influenced the development of visual distance in PCPs is the "nested-means" approach introduced by @guo2005a. 
+This method creates a more organized and interpretable visualization by reducing overlapping lines and ensuring that the mean value of each variable is consistently placed at the midpoint of its axis. 
+@guo2005a noted that this approach not only addresses overplotting issues but also preserves the central tendencies of the data, enhancing both visual clarity and analytical utility.
+
+Line bundling, another key advancement, groups similar paths together, reducing the visual chaos caused by overlapping lines. 
+While this method simplifies the overall visualization, it introduces a trade-off by obscuring some outliers or unique paths. 
+Combining bundling with line spacing adjustments or transparency techniques helps mitigate this limitation, ensuring that critical data points remain visible while reducing clutter.
+
+These methods collectively illustrate how visual distance is a spatial and cognitive tool that enables users to navigate increasingly complex datasets more efficiently. 
+By strategically separating visual elements, researchers can guide users' attention to key patterns and trends without disrupting the continuity of the data.
+
+As datasets grow more intricate, the role of visual distance has expanded beyond PCPs to encompass a wide range of visualization techniques. 
+From scatterplots to network graphs, methods that enhance visual distance are critical in reducing clutter and improving interpretability. 
+For example, in modern PCPs, combining visual distance with dynamic interactivity—such as brushing, filtering, and axis flipping—further enhances users' ability to explore relationships across dimensions.
+
+Today, visual distance is recognized as an essential component of effective data visualization. 
+It reduces perceptual overload and facilitates cognitive processing, helping analysts uncover insights in even the most complex datasets. 
+By applying lessons learned from early studies and continuing to refine these techniques, modern visualizations can strike the delicate balance between detail and clarity, empowering users to make sense of their data confidently.
+
+
+## Axis Reordering
+
+As mentioned in the section on modifications, axis reordering changes the order of dimensions to reduce the number of times lines cross between variables in PCPs, a type of data display.
+This method makes clusters easier to see by lining up visually linked variables, cutting down on clutter, and making patterns stand out more without overlapping.
+One benefit is that it works well for datasets where certain factors are strongly related, making clusters and trends easier to read without changing the data.
+Changing the variable order for clarity rather than data continuity could make it hard to tell if the data is in order.
+@blumenschein2020 say that reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge. This shows how important changing the arrangement can be for seeing clearly.
+Studies in this area have shown that changing the order of dimensions makes it much easier to find patterns in datasets where dimensions are linked.
+However, it only works well on datasets with dimensions tied together.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-axis
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "PCP Without Axis Reordering"
+#|   - "PCP With Skewness Axis Reordering"
+#| fig-width: 8
+#| fig-height: 4
+#| layout-ncol: 1
+
+penguins <- na.omit(penguins)
+
+# Example of a parallel coordinate plot without handling ties explicitly
+p1 <- ggparcoord(
+  data = penguins,
+  columns = 3:6,  # Columns for numerical features (bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
+  groupColumn = 1,
+  scale = "uniminmax",  # Scaling to [0, 1] for better visualization
+) +
+  #ggtitle("Without Axis Reordering")  +
+  theme_minimal() +
+  penguin_scale_color() + 
+  guides(color = F) 
+
+# Example of a parallel coordinate plot with axis reordering to minimize tie overlap
+p2 <- ggparcoord(
+  data = penguins,
+  columns = 3:6,  # Columns for numerical features
+  groupColumn = 1,
+  scale = "uniminmax",
+  order = "skewness") + # skewness axis reordering to handle ties and improve interpretability
+  penguin_scale_color()+   
+  #ggtitle("With Skewness Axis Reordering") +
+  theme_minimal() +
+  guides(color = F) 
+
+# Try using patchwork. Think about removing the legend and adding that in the section.
+grid.arrange(p1,p2, ncol=2)
+
+```
+
+## Line Bundling
+
+
+By putting similar lines into "bundles," line bundling cuts down on unnecessary crossings and clutter.
+This method works well in dense PCPs, where many lines cross and make it hard to see individual patterns.
+Heinrich et al. say that "bundling lines based on value similarity reduces cognitive strain and enhances visual coherence in complex datasets." This shows how bundling can make complex data easier to understand without losing larger patterns.
+Experiments have shown that bundling makes large datasets easier to read, which makes it easier to find general trends even when the data is heavily packed [@heinrich2011].
+It makes things easier to understand by collecting similar data lines; this works especially well for numerical ties where values are close but not exactly the same.
+Bundling, on the other hand, can hide individual lines within a group, making it hard to tell one data point from another.
+
+
+## Quantization and Aggregation
+
+Quantization, referred to as Quantized Generalized Parallel Coordinate Plots (QGPCP), is a technique that groups close-together values into bins, reducing visual clutter and improving the readability of tightly packed data. 
+This method is particularly effective for managing large datasets, where overplotting and excessive line crossings obscure meaningful trends and patterns.
+
+By aggregating similar values into quantized bins, QGPCP simplifies visualizations without significantly altering the overall data structure. 
+As Moustafa explains, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." 
+This highlights the trade-off inherent in quantization: sacrificing granular detail to enhance interpretability. 
+Tests on real-world data have demonstrated that this approach preserves important patterns while reducing visual noise, making it an invaluable tool for exploring high-dimensional datasets.
+
+Quantization excels in scenarios where high-dimensional datasets result in extensive line overlap. 
+By reducing the number of distinct lines in a parallel coordinate plot (PCP), this method creates a cleaner, more navigable visualization. 
+Key benefits of quantization include:
+
+- Improved Clarity: Aggregating close values minimizes line crossings, enabling users to discern trends more quickly. 
+Patterns previously obscured by overplotting become more apparent, enhancing the user's ability to interpret the data.
+
+- Noise Reduction: By removing small-scale variations, quantization reduces the visual complexity of the plot. 
+This makes it easier for analysts to focus on larger trends and relationships across dimensions.
+
+- Scalability: Quantization is particularly effective for large datasets, where traditional visualization methods struggle to handle the volume of overlapping data points. 
+Aggregating values optimizes visualizations for datasets with high-dimensional complexity.
+
+While quantization simplifies visualizations, it has limitations that make it less suitable for specific analytical contexts. 
+Chief among these is the potential loss of detail. 
+Aggregating values into bins can obscure small but meaningful differences, which may be critical in scenarios requiring precision. 
+For example:
+
+- Loss of Granularity: By grouping data points, quantization may mask outliers or subtle variations that provide valuable insights.
+
+- Bias in Representation: The choice of bin size and boundaries can influence the visualization, potentially introducing artifacts or skewing interpretations.
+
+- Limited Utility for Precision Tasks: Quantization may oversimplify the visualization for analyses that demand exact data representation, such as identifying specific outliers or subtle correlations.
+
+As Moustafa notes [@moustafa2009], the method’s strength lies in its ability to simplify densely packed datasets, which comes at the cost of fine-grained detail. 
+Thus, the technique is best suited for exploratory analyses where the goal is to identify broad patterns rather than focus on precise data points.
+
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-qgpcp
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Quantized Generalized Parallel Coordinate Plots"
+#|   
+# Remove rows with NA values for simplicity
+penguins_clean <- penguins %>% 
+  na.omit()
+
+# Discretize/Quantize numerical columns and encode categorical variables
+penguins_encoded <- penguins_clean %>%
+  mutate(
+    species = as.factor(species),  # Encode species as numeric
+    island = as.numeric(as.factor(island)),    # Encode island as numeric
+    sex = as.numeric(as.factor(sex)),          # Encode sex as numeric
+    bill_length_mm = cut(bill_length_mm, breaks = 5, labels = FALSE),  # Quantize bill_length_mm
+    bill_depth_mm = cut(bill_depth_mm, breaks = 5, labels = FALSE),    # Quantize bill_depth_mm
+    flipper_length_mm = cut(flipper_length_mm, breaks = 5, labels = FALSE), # Quantize flipper_length_mm
+    body_mass_g = cut(body_mass_g, breaks = 5, labels = FALSE)         # Quantize body_mass_g
+  )
+
+# Create the parallel coordinate plot
+ggparcoord(
+  data = penguins_encoded,
+  columns = 3:6,    # Use all columns, including encoded categorical variables
+  groupColumn = 1,  # Grouping by species
+  scale = "uniminmax", # Scale columns to the same range
+  #showPoints = TRUE,   # Show points on the lines
+  alphaLines = 0.5     # Transparency of lines
+) + 
+  theme_minimal() + 
+  labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset") +
+  guides(color=F) +
+  penguin_scale_color()
+```
+
+In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals.
+Quantization makes the visualization even easier by putting numbers into groups.
+However, this needs to improve some of the accuracy of the original data.
+The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live.
+Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
+
+Quantization, or QGPCP, is a powerful method for simplifying dense datasets in parallel coordinate plots and similar visualizations. 
+Grouping close-together values into bins minimizes overplotting, reduces noise, and highlights overarching trends. 
+While it sacrifices some granularity, the technique is highly effective for exploratory data analysis and high-dimensional datasets where clarity is important. 
+When applied thoughtfully, quantization balances detail and readability, making it a valuable tool for modern data visualization.
+
+## Color-Coding and Transparency
+
+By changing the color and transparency of lines, you can tell them apart based on density, categories, or values.
+This makes it easier to tell the difference between PCP lines that meet.
+Firat et al. say, "Line brushing and transparency adjustments improve the gestalt of the data clusters." This means that changes in how we see things help us group data cognitively without changing the structure.
+Firat et al. say that user tests have shown that PCPs with color-coded and clear lines are easier to understand and recognize patterns, especially for differentiating categorical data [@firat2023].
+This tool can be used to handle both numerical and categorical ties.
+The color and transparency options make it easy to visually separate clusters without changing where the lines are placed.
+However, this method might only work for plots with little information because even changes in color can't fully fix heavy overplotting.
+
+## Edge Bundling for Categorical Data
+
+
+Edge bundling, which comes from network visualization, groups paths for category values in PCPs.
+This method works best with categorical data because it lets you visually break up ties without changing other factors.
+Palmas et al. state that "bundling lines with similar orientations prevents overplotting, allowing clearer identification of dominant trends within complex data." This means bundling can help find trends even in spaces with many dimensions.
+Bundling made finding categorical clusters in complex PCPs easier and decreased users' work [@palmas2014].
+Edge bundling is an excellent way to clear up clutter and make categorical groups easier to see.
+It lets users see categorical differences without messing up numerical relationships.
+On the other hand, each bundle may hide small details, making them less useful for datasets that need a lot of precision.
+
+## Stacked Histograms and Density Plots
+
+This change adds histograms or density plots on top of PCPs to show how category data is distributed in terms of frequency.
+This lets users see how distributions change without adding extra line clutter.
+According to @bok2020, adding histogram overlays gives categorical context, making variable distributions easier to see without affecting line continuity.
+This means that frequency-based cues can help you understand categorical distributions without adding more visual clutter.
+Clear frequency-based differentiation in categorical data without too much line overlap improves the visual understanding of distributions when used with PCPs.
+Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant.
+Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes.
+
+
+## Perceptual Cues (Line Thickness, Texture, etc.)
+
+By changing the lines' width, texture, or other visual properties, you can tell them apart from overlapping lines.
+This helps people see patterns and tell values apart without separating them physically.
+According to @chang2018, perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns. 
+These cues help with cognitive grouping and pattern differentiation, even in complicated datasets.
+They work well in areas with a lot of visual information because they let users see trends without changing the structure or order of the data.
+They are helpful for both numerical and categorical ties.
+Studies with users showed that changes in how people saw things made finding patterns and trends in large, complex datasets easier.
+This made it easier for PCPs to look around.
+In areas with many people, it could be useful because overlapped lines can make it harder to see.
+
 
 
 # Handling Numerical Ties
@@ -1514,243 +1776,6 @@ Each method for handling ties---whether jittering, KDE, rank-based adjustments, 
 While jittering and KDE are effective for scatterplots and density plots, advanced techniques like DCPC are better suited for high-dimensional visualizations like PCPs. 
 Developing a dedicated method for handling ties in PCPs, such as planned spacing across axes, could further advance the field, enabling researchers to explore complex data more effectively while maintaining visual clarity and data integrity. 
 This innovation would provide a transformative step in high-dimensional data visualization, making uncovering trends and connections across diverse datasets easier.
-
-
-# Handling Ties in PCPs
-
-Adding distance to visual ties has evolved significantly alongside advancements in data visualization, mainly as the need to balance detail and clarity in large datasets has grown. 
-Early visualization methods, especially in network analysis and multidimensional scaling, relied heavily on proximity and alignment to convey patterns and relationships. 
-These techniques were effective for smaller datasets but struggled to scale as the complexity and volume of data increased.
-
-Visual clutter emerged as a significant challenge, particularly in parallel coordinate plots (PCPs), where overlapping lines and intersections often obscured underlying data structures. 
-As PCPs became more common for high-dimensional data analysis, the density of lines made it increasingly difficult for users to discern meaningful trends and relationships. 
-To address this, researchers began developing techniques to increase the "visual distance" between elements in these visualizations, reducing overplotting while preserving the continuity of the visualization data.
-
-Early studies of PCPs highlighted the importance of visual distance in aiding cognitive interpretation. 
-@chang2018a compared PCPs and scatterplot matrices (SPLOMs), observing that users struggled to identify correlations in PCPs due to the complexity of cross-line patterns. 
-They noted, "In PCP, participants had to reorder the axes to examine all dimensions, whereas in SPLOM, it is straightforward to identify correlation." 
-This underscores how increasing visual distance between overlapping elements can simplify cognitive grouping without fragmenting the data.
-
-Researchers have explored methods to enhance visual distance, including line bundling, spacing adjustments, and axis reordering. 
-These approaches create separation between lines and intersections, allowing individual paths to emerge more distinctly. 
-For instance, in PCPs, early experiments showed that increasing visual distance improved the clarity of intersections, enabling users to trace relationships across dimensions better and understand the overall structure of the data.
-
-One foundational technique that has influenced the development of visual distance in PCPs is the "nested-means" approach introduced by @guo2005a. 
-This method creates a more organized and interpretable visualization by reducing overlapping lines and ensuring that the mean value of each variable is consistently placed at the midpoint of its axis. 
-@guo2005a noted that this approach not only addresses overplotting issues but also preserves the central tendencies of the data, enhancing both visual clarity and analytical utility.
-
-Line bundling, another key advancement, groups similar paths together, reducing the visual chaos caused by overlapping lines. 
-While this method simplifies the overall visualization, it introduces a trade-off by obscuring some outliers or unique paths. 
-Combining bundling with line spacing adjustments or transparency techniques helps mitigate this limitation, ensuring that critical data points remain visible while reducing clutter.
-
-These methods collectively illustrate how visual distance is a spatial and cognitive tool that enables users to navigate increasingly complex datasets more efficiently. 
-By strategically separating visual elements, researchers can guide users' attention to key patterns and trends without disrupting the continuity of the data.
-
-As datasets grow more intricate, the role of visual distance has expanded beyond PCPs to encompass a wide range of visualization techniques. 
-From scatterplots to network graphs, methods that enhance visual distance are critical in reducing clutter and improving interpretability. 
-For example, in modern PCPs, combining visual distance with dynamic interactivity—such as brushing, filtering, and axis flipping—further enhances users' ability to explore relationships across dimensions.
-
-Today, visual distance is recognized as an essential component of effective data visualization. 
-It reduces perceptual overload and facilitates cognitive processing, helping analysts uncover insights in even the most complex datasets. 
-By applying lessons learned from early studies and continuing to refine these techniques, modern visualizations can strike the delicate balance between detail and clarity, empowering users to make sense of their data confidently.
-
-
-## Axis Reordering
-
-As mentioned in the section on modifications, axis reordering changes the order of dimensions to reduce the number of times lines cross between variables in PCPs, a type of data display.
-This method makes clusters easier to see by lining up visually linked variables, cutting down on clutter, and making patterns stand out more without overlapping.
-One benefit is that it works well for datasets where certain factors are strongly related, making clusters and trends easier to read without changing the data.
-Changing the variable order for clarity rather than data continuity could make it hard to tell if the data is in order.
-@blumenschein2020 say that reordering based on correlation minimizes unnecessary line intersections, allowing natural clusters to emerge. This shows how important changing the arrangement can be for seeing clearly.
-Studies in this area have shown that changing the order of dimensions makes it much easier to find patterns in datasets where dimensions are linked.
-However, it only works well on datasets with dimensions tied together.
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-axis
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "PCP Without Axis Reordering"
-#|   - "PCP With Skewness Axis Reordering"
-#| fig-width: 8
-#| fig-height: 4
-#| layout-ncol: 1
-
-penguins <- na.omit(penguins)
-
-# Example of a parallel coordinate plot without handling ties explicitly
-p1 <- ggparcoord(
-  data = penguins,
-  columns = 3:6,  # Columns for numerical features (bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g)
-  groupColumn = 1,
-  scale = "uniminmax",  # Scaling to [0, 1] for better visualization
-) +
-  #ggtitle("Without Axis Reordering")  +
-  theme_minimal() +
-  penguin_scale_color() + 
-  guides(color = F) 
-
-# Example of a parallel coordinate plot with axis reordering to minimize tie overlap
-p2 <- ggparcoord(
-  data = penguins,
-  columns = 3:6,  # Columns for numerical features
-  groupColumn = 1,
-  scale = "uniminmax",
-  order = "skewness") + # skewness axis reordering to handle ties and improve interpretability
-  penguin_scale_color()+   
-  #ggtitle("With Skewness Axis Reordering") +
-  theme_minimal() +
-  guides(color = F) 
-
-# Try using patchwork. Think about removing the legend and adding that in the section.
-grid.arrange(p1,p2, ncol=2)
-
-```
-
-## Line Bundling
-
-
-By putting similar lines into "bundles," line bundling cuts down on unnecessary crossings and clutter.
-This method works well in dense PCPs, where many lines cross and make it hard to see individual patterns.
-Heinrich et al. say that "bundling lines based on value similarity reduces cognitive strain and enhances visual coherence in complex datasets." This shows how bundling can make complex data easier to understand without losing larger patterns.
-Experiments have shown that bundling makes large datasets easier to read, which makes it easier to find general trends even when the data is heavily packed [@heinrich2011].
-It makes things easier to understand by collecting similar data lines; this works especially well for numerical ties where values are close but not exactly the same.
-Bundling, on the other hand, can hide individual lines within a group, making it hard to tell one data point from another.
-
-
-## Quantization and Aggregation
-
-Quantization, referred to as Quantized Generalized Parallel Coordinate Plots (QGPCP), is a technique that groups close-together values into bins, reducing visual clutter and improving the readability of tightly packed data. 
-This method is particularly effective for managing large datasets, where overplotting and excessive line crossings obscure meaningful trends and patterns.
-
-By aggregating similar values into quantized bins, QGPCP simplifies visualizations without significantly altering the overall data structure. 
-As Moustafa explains, "By quantizing close data points, we can minimize overplotting and improve discernment of overall trends." 
-This highlights the trade-off inherent in quantization: sacrificing granular detail to enhance interpretability. 
-Tests on real-world data have demonstrated that this approach preserves important patterns while reducing visual noise, making it an invaluable tool for exploring high-dimensional datasets.
-
-Quantization excels in scenarios where high-dimensional datasets result in extensive line overlap. 
-By reducing the number of distinct lines in a parallel coordinate plot (PCP), this method creates a cleaner, more navigable visualization. 
-Key benefits of quantization include:
-
-- Improved Clarity: Aggregating close values minimizes line crossings, enabling users to discern trends more quickly. 
-Patterns previously obscured by overplotting become more apparent, enhancing the user's ability to interpret the data.
-
-- Noise Reduction: By removing small-scale variations, quantization reduces the visual complexity of the plot. 
-This makes it easier for analysts to focus on larger trends and relationships across dimensions.
-
-- Scalability: Quantization is particularly effective for large datasets, where traditional visualization methods struggle to handle the volume of overlapping data points. 
-Aggregating values optimizes visualizations for datasets with high-dimensional complexity.
-
-While quantization simplifies visualizations, it has limitations that make it less suitable for specific analytical contexts. 
-Chief among these is the potential loss of detail. 
-Aggregating values into bins can obscure small but meaningful differences, which may be critical in scenarios requiring precision. 
-For example:
-
-- Loss of Granularity: By grouping data points, quantization may mask outliers or subtle variations that provide valuable insights.
-
-- Bias in Representation: The choice of bin size and boundaries can influence the visualization, potentially introducing artifacts or skewing interpretations.
-
-- Limited Utility for Precision Tasks: Quantization may oversimplify the visualization for analyses that demand exact data representation, such as identifying specific outliers or subtle correlations.
-
-As Moustafa notes [@moustafa2009], the method’s strength lies in its ability to simplify densely packed datasets, which comes at the cost of fine-grained detail. 
-Thus, the technique is best suited for exploratory analyses where the goal is to identify broad patterns rather than focus on precise data points.
-
-
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-qgpcp
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Quantized Generalized Parallel Coordinate Plots"
-#|   
-# Remove rows with NA values for simplicity
-penguins_clean <- penguins %>% 
-  na.omit()
-
-# Discretize/Quantize numerical columns and encode categorical variables
-penguins_encoded <- penguins_clean %>%
-  mutate(
-    species = as.factor(species),  # Encode species as numeric
-    island = as.numeric(as.factor(island)),    # Encode island as numeric
-    sex = as.numeric(as.factor(sex)),          # Encode sex as numeric
-    bill_length_mm = cut(bill_length_mm, breaks = 5, labels = FALSE),  # Quantize bill_length_mm
-    bill_depth_mm = cut(bill_depth_mm, breaks = 5, labels = FALSE),    # Quantize bill_depth_mm
-    flipper_length_mm = cut(flipper_length_mm, breaks = 5, labels = FALSE), # Quantize flipper_length_mm
-    body_mass_g = cut(body_mass_g, breaks = 5, labels = FALSE)         # Quantize body_mass_g
-  )
-
-# Create the parallel coordinate plot
-ggparcoord(
-  data = penguins_encoded,
-  columns = 3:6,    # Use all columns, including encoded categorical variables
-  groupColumn = 1,  # Grouping by species
-  scale = "uniminmax", # Scale columns to the same range
-  #showPoints = TRUE,   # Show points on the lines
-  alphaLines = 0.5     # Transparency of lines
-) + 
-  theme_minimal() + 
-  labs(title = "Quantized Parallel Coordinate Plot of Palmer Penguins Dataset") +
-  guides(color=F) +
-  penguin_scale_color()
-```
-
-In @fig-qgpcp, the overlapping of the Quantized Parallel Coordinate Plot makes it harder to find specific individuals.
-Quantization makes the visualization even easier by putting numbers into groups.
-However, this needs to improve some of the accuracy of the original data.
-The plot can help you see big patterns, like how some species may follow similar paths across many traits, but it doesn't show exactly how they are related or where they live.
-Using jittering or interactive plots to cut down on overplotting could make things clearer and make figuring out how factors relate easier.
-
-Quantization, or QGPCP, is a powerful method for simplifying dense datasets in parallel coordinate plots and similar visualizations. 
-Grouping close-together values into bins minimizes overplotting, reduces noise, and highlights overarching trends. 
-While it sacrifices some granularity, the technique is highly effective for exploratory data analysis and high-dimensional datasets where clarity is important. 
-When applied thoughtfully, quantization balances detail and readability, making it a valuable tool for modern data visualization.
-
-## Color-Coding and Transparency
-
-By changing the color and transparency of lines, you can tell them apart based on density, categories, or values.
-This makes it easier to tell the difference between PCP lines that meet.
-Firat et al. say, "Line brushing and transparency adjustments improve the gestalt of the data clusters." This means that changes in how we see things help us group data cognitively without changing the structure.
-Firat et al. say that user tests have shown that PCPs with color-coded and clear lines are easier to understand and recognize patterns, especially for differentiating categorical data [@firat2023].
-This tool can be used to handle both numerical and categorical ties.
-The color and transparency options make it easy to visually separate clusters without changing where the lines are placed.
-However, this method might only work for plots with little information because even changes in color can't fully fix heavy overplotting.
-
-## Edge Bundling for Categorical Data
-
-
-Edge bundling, which comes from network visualization, groups paths for category values in PCPs.
-This method works best with categorical data because it lets you visually break up ties without changing other factors.
-Palmas et al. state that "bundling lines with similar orientations prevents overplotting, allowing clearer identification of dominant trends within complex data." This means bundling can help find trends even in spaces with many dimensions.
-Bundling made finding categorical clusters in complex PCPs easier and decreased users' work [@palmas2014].
-Edge bundling is an excellent way to clear up clutter and make categorical groups easier to see.
-It lets users see categorical differences without messing up numerical relationships.
-On the other hand, each bundle may hide small details, making them less useful for datasets that need a lot of precision.
-
-## Stacked Histograms and Density Plots
-
-This change adds histograms or density plots on top of PCPs to show how category data is distributed in terms of frequency.
-This lets users see how distributions change without adding extra line clutter.
-According to @bok2020, adding histogram overlays gives categorical context, making variable distributions easier to see without affecting line continuity.
-This means that frequency-based cues can help you understand categorical distributions without adding more visual clutter.
-Clear frequency-based differentiation in categorical data without too much line overlap improves the visual understanding of distributions when used with PCPs.
-Real-world category dataset tests showed that histogram overlays made it easier to differentiate between data sets and see what they meant.
-Adding histograms makes things look more complicated, which could be too much for some people if used with other PCP changes.
-
-
-## Perceptual Cues (Line Thickness, Texture, etc.)
-
-By changing the lines' width, texture, or other visual properties, you can tell them apart from overlapping lines.
-This helps people see patterns and tell values apart without separating them physically.
-According to @chang2018, perceptual variations in lines not only differentiate data but also enhance recognition of broader patterns. 
-These cues help with cognitive grouping and pattern differentiation, even in complicated datasets.
-They work well in areas with a lot of visual information because they let users see trends without changing the structure or order of the data.
-They are helpful for both numerical and categorical ties.
-Studies with users showed that changes in how people saw things made finding patterns and trends in large, complex datasets easier.
-This made it easier for PCPs to look around.
-In areas with many people, it could be useful because overlapped lines can make it harder to see.
 
 \newpage
 
