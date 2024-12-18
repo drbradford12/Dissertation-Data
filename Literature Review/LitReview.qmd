@@ -233,36 +233,56 @@ Since @Inselberg1985 introduced parallel coordinate plots (PCPs) in 1985, consid
 The enhancements include changes to visual representation, handling various kinds of interactive data elements, and incorporating advanced computational approaches to increase the clarity and interpretability of the visualizations. 
 [In this section, we examine some of the modifications proposed to enhance PCPs after their original introduction, as well as variations on PCPs which evolved in parallel for e.g. categorical variables.]{.svp}
 
-## Categorical and Hybrid PCPs
+## Categorical Parallel Axis Plots
 
-Traditional PCPs were primarily designed to collect continuous data.
+Traditional PCPs were primarily designed to [display]{.svp} continuous data.
 However, real-world datasets often contain a mix of continuous, ordinal, and categorical data.
-To solve this, changes have been made to display mixed-type data within the same PCP simultaneously.
-Categorical data, for example, can be visually differentiated using unique colors, symbols, or segmented lines, although continuous variables are still represented by standard lines linking the axes.
-Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation.
+[In parallel to the development of numerical PCPs, a number of categorical plots with similar goals developed. Over time, the different approaches to categorical and numerical variables converged, leading to several different types of mixed-variable, parallel axis plots.]{.svp}
+[We will first consider categorical plots with parallel vertical axes, and then examine mixed-type variants.]{.svp}
+
+
+XXX I think the thing this most needs is a clear timeline of what happened when, and a lot of reference checking, because I want to ensure we're not misattributing/mis-citing things. XXX
+
+Basic Outline:
+
+- Parallel Sets plots
+- Hammock plots
+- Alluvial plots/Sankey diagrams (these are slightly different -- describe why)
+
+Then move into mixed type plots - 
+
+Hurley (2004) end link algorithm -- how does this relate?
+ 
+
+<!-- Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation. -->
+CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
+<!-- @siirtola2006 introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs. XXX I cannot figure out where in the 2006 paper this comes up - all the values seem to be numerical XXX --> 
+<!-- CPCPs seem to handle both categorical and numeric variables (extracat package, cpcp function - interactive, or scpcp for static plots) -->
 Specific strategies, like adjustments to the ends of links, have been suggested to enhance how category and numerical values are connected visually.
 This strategy enhances the interpretability of mixed data by modifying the plotting criteria for axes representing category variables.
 
-CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
-@siirtola2006 introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs.
 @inselberg2009 enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power.
 @johansson2015 explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis.
 
 <!--CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}-->
 
-Designed to accommodate categorical data using methods including axis restructuring, symbols, and color-coding to increase clarity and comprehension, Categorical Parallel Coordinate Plots (CPCPs) are a development of Parallel Coordinate Plots (PCPs). 
-Looking at the given papers, CPCPs come from more general ideas than from them straightforwardly. 
-Although it does not particularly address categorical variables, @Wegman:1990 groundbreaking study on PCPs offers the mathematical underpinning for visualizing high-dimensional numerical data. 
-Every PCP invention, including CPCPs, is built on this work. 
+
+<!-- XXX None of these papers seem to be specifically related to CPCPs -- need to be very strict at distinguishing one type of thing from another. I'm not saying these aren't relevant, but if they are, put them somewhere else - right now, this section is more of a "junk drawer" in a kitchen than an organized space. XXX
+Designed to accommodate categorical data using methods including axis restructuring, symbols, and color-coding to increase clarity and comprehension, Categorical Parallel Coordinate Plots (CPCPs) are a development of Parallel Coordinate Plots (PCPs).
+Looking at the given papers, CPCPs come from more general ideas than from them straightforwardly.
+Although it does not particularly address categorical variables, @Wegman:1990 groundbreaking study on PCPs offers the mathematical underpinning for visualizing high-dimensional numerical data.
+Every PCP invention, including CPCPs, is built on this work.
 @leblanc1990 investigation of PCPs for assessing concurrent program performance emphasizes PCP adaptability but mainly focuses on numerical or sequential data rather than categorical data.
 
-@holten2009's work on force-directed edge bundling aims to improve graph visualizations by lowering visual clutter, which guides the CPCP objectives of increasing interpretability. 
-Though it has nothing to do with PCPs or categorical data, its primary goal is to make complex data visualizations more readable. 
+@holten2009's work on force-directed edge bundling aims to improve graph visualizations by lowering visual clutter, which guides the CPCP objectives of increasing interpretability.
+Though it has nothing to do with PCPs or categorical data, its primary goal is to make complex data visualizations more readable.
 Therefore, even if these papers specifically address CPCPs, they add to the larger conversation on developing multidimensional visualizing techniques.
 
 Beyond categorical data, the CPCP innovations—axis structure and the use of symbols and colors—are relevant to additional PCP versions. 
 These ideas improve the interpretability of interactive PCPs, hybrid PCPs combining data kinds, and continuous PCPs. 
 CPCPs observe both a tool for categorical data but also larger progress in multidimensional data display.
+-->
+
 
 <!--[@Wegman:1990]{.db} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
 [@holten2009]{.db} introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
@@ -305,9 +325,13 @@ penguins_clean_cat %>%
   penguin_scale_color()
 ```
 
-The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces nonlinear changes to the axes for more complex data representation.
-These can show more complicated relationships in the data that might not be visible in a regular PCP.
+The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces 
+<!-- XXX??? nonlinear XXX -->
+changes to the axes [to allow for]{.svp} more complex data representation.
+<!-- These can show more complicated relationships in the data that might not be visible in a regular PCP. -->
+<!-- No, they allow categorical and numerical variables to be shown while maintaining the ability to distinguish single observations...  -->
 Nonlinear scales such as logarithmic and exponential transformations are possible.
+
 @wegman1997a provide a comprehensive discussion of the GPCP idea stating, "The parallel coordinate plot is a geometric device for displaying points in high-dimensional spaces, in particular, for dimensions above three. 
 As such, it is a graphical alternative to the conventional scatterplot."
 The authors enable the visualization of data distributions, correlations, clusters, and higher-dimensional structures by connecting Cartesian and parallel coordinate representations.
