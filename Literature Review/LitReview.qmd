@@ -38,6 +38,9 @@ require(gridExtra)
 library(ggridges)
 library(patchwork)
 library(ggparallel)
+library(ggalluvial)
+library(ggsankey)
+library(ggforce)
 theme_set(theme_bw())
 
 penguin_scale_color <-   function(...) scale_color_manual(
@@ -241,112 +244,73 @@ However, real-world datasets often contain a mix of continuous, ordinal, and cat
 [We will first consider categorical plots with parallel vertical axes, and then examine mixed-type variants.]{.svp}
 
 
-XXX I think the thing this most needs is a clear timeline of what happened when, and a lot of reference checking, because I want to ensure we're not misattributing/mis-citing things. XXX
+<!-- XXX I think the thing this most needs is a clear timeline of what happened when, and a lot of reference checking, because I want to ensure we're not misattributing/mis-citing things. XXX -->
 
-Basic Outline:
+<!-- Basic Outline: -->
 
-- Parallel Sets plots
-- Hammock plots
-- Alluvial plots/Sankey diagrams (these are slightly different -- describe why)
+<!-- - Parallel Sets plots -->
+<!-- - Hammock plots -->
+<!-- - Alluvial plots/Sankey diagrams (these are slightly different -- describe why) -->
 
-Then move into mixed type plots - 
-
-Hurley (2004) end link algorithm -- how does this relate?
- 
-
-<!-- Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation. -->
-CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
-<!-- @siirtola2006 introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs. XXX I cannot figure out where in the 2006 paper this comes up - all the values seem to be numerical XXX --> 
-<!-- CPCPs seem to handle both categorical and numeric variables (extracat package, cpcp function - interactive, or scpcp for static plots) -->
-Specific strategies, like adjustments to the ends of links, have been suggested to enhance how category and numerical values are connected visually.
-This strategy enhances the interpretability of mixed data by modifying the plotting criteria for axes representing category variables.
-
-@inselberg2009 enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power.
-@johansson2015 explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis.
-
-<!--CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}-->
-
-
-<!-- XXX None of these papers seem to be specifically related to CPCPs -- need to be very strict at distinguishing one type of thing from another. I'm not saying these aren't relevant, but if they are, put them somewhere else - right now, this section is more of a "junk drawer" in a kitchen than an organized space. XXX
-Designed to accommodate categorical data using methods including axis restructuring, symbols, and color-coding to increase clarity and comprehension, Categorical Parallel Coordinate Plots (CPCPs) are a development of Parallel Coordinate Plots (PCPs).
-Looking at the given papers, CPCPs come from more general ideas than from them straightforwardly.
-Although it does not particularly address categorical variables, @Wegman:1990 groundbreaking study on PCPs offers the mathematical underpinning for visualizing high-dimensional numerical data.
-Every PCP invention, including CPCPs, is built on this work.
-@leblanc1990 investigation of PCPs for assessing concurrent program performance emphasizes PCP adaptability but mainly focuses on numerical or sequential data rather than categorical data.
-
-@holten2009's work on force-directed edge bundling aims to improve graph visualizations by lowering visual clutter, which guides the CPCP objectives of increasing interpretability.
-Though it has nothing to do with PCPs or categorical data, its primary goal is to make complex data visualizations more readable.
-Therefore, even if these papers specifically address CPCPs, they add to the larger conversation on developing multidimensional visualizing techniques.
-
-Beyond categorical data, the CPCP innovations—axis structure and the use of symbols and colors—are relevant to additional PCP versions. 
-These ideas improve the interpretability of interactive PCPs, hybrid PCPs combining data kinds, and continuous PCPs. 
-CPCPs observe both a tool for categorical data but also larger progress in multidimensional data display.
--->
-
-
-<!--[@Wegman:1990]{.db} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
-[@holten2009]{.db} introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
-[@leblanc1990]{.db} highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.-->
+### Parallel Sets Plots
 
 ```{r}
 #| echo: false
 #| warning: false
-#| label: fig-hybrid
+#| message: false
+#| label: fig-psets
 #| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Categorical and Hybrid in PCP"
+#| fig-cap: "A Parallel Sets Plot"
 #| fig-width: 8
-#| fig-height: 6
-#| 
-# Remove rows with missing data from the dataset
-penguins_clean_cat <- penguins %>%
-  na.omit() %>%
-  select(-year)
+#| fig-height: 8
 
-# Convert categorical variables to factors
-penguins_clean_cat <- penguins_clean_cat %>%
-  mutate(island = as.factor(island),
-         sex = as.factor(sex),
-         species = as.factor(species))
+# Data Preparation
+penguins_clean <- na.omit(penguins)
 
-# Create a parallel coordinate plot using both numeric and categorical variables
+penguins_counts <- penguins_clean %>%
+  group_by(species, island, sex) %>%
+  summarise(count = n()) %>%
+  ungroup()
 
-penguins_clean_cat %>%
-  pcp_select(2:7) %>%
-  pcp_scale(method="uniminmax") %>%
-  pcp_arrange() %>%
-  ggplot(aes_pcp()) +
-  geom_pcp_axes() +
-  geom_pcp(aes(colour = species)) +
-  ggplot2::theme_bw() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP") +
-  facet_wrap(~sex)+ 
-  guides(color = F) +
-  penguin_scale_color()
+# Transform data for parallel sets
+data_parallel <- gather_set_data(penguins_counts, 1:3)
+
+# Create Parallel Set Plot
+ggplot(data_parallel, aes(x = x, id = id, split = y, value = count)) +
+  geom_parallel_sets(aes(fill = species), alpha = 0.5, axis.width = 0.1) +
+  geom_parallel_sets_axes(axis.width = 0.1) +
+  geom_parallel_sets_labels(colour = 'white', size = 3) +
+  penguin_scale_fill() +
+  theme_minimal() +
+  labs(
+    title = "Parallel Set Plot of Penguins Dataset",
+    x = "Attributes",
+    y = "Count",
+    fill = "Species"
+  )
 ```
 
-The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces 
-<!-- XXX??? nonlinear XXX -->
-changes to the axes [to allow for]{.svp} more complex data representation.
-<!-- These can show more complicated relationships in the data that might not be visible in a regular PCP. -->
-<!-- No, they allow categorical and numerical variables to be shown while maintaining the ability to distinguish single observations...  -->
-Nonlinear scales such as logarithmic and exponential transformations are possible.
+<!-- XXX Kosara (2006) XXX -->
+
+Designed to examine multidimensional numerical data, parallel sets originated from parallel coordinate charts, first proposed by Alfred Inselberg in the 1950s. 
+Led by Daniel Keim and others, the adaptation of categorical data first surfaced in the late 1990s. 
+@kosara2006parallel further refined these methods by emphasizing the design and use of parallel plots to make complicated relationships more understandable.
+
+Dynamic, interactive visualizations were made possible by developments in computational tools such as D3.js and Matplotlib in the 2010s. 
+Temporal zooming and filtering improved the analytical depth. 
+Therefore, these tools have become more critical for historical study [@bostock2011d3].
+
+Parallel sets present multidimensional relationships, enabling access to complicated information, trends, and anomaly-revealing power. 
+They may oversimplify continuous data and, in poorly crafted designs, provide cluttered, difficult-to-interpret visuals.
+
+Parallel sets provide an intense way to find trends in multidimensional datasets and help to close the gap between quantitative and qualitative historical studies. 
+These tools allow for predictive modeling of historical trends as computer capability increases and machine learning interacts with data visualization, changing our understanding of the past and its consequences for the present. 
+Basic advances like @kosara2006parallel and the ongoing improvement of parallel sets plots promise a future of more affluent, more perceptive historical research.
 
 
-<!-- Not sure where this should go, but it's not here....? -->
-<!-- @wegman1997a provide a comprehensive discussion of the GPCP idea stating, "The parallel coordinate plot is a geometric device for displaying points in high-dimensional spaces, in particular, for dimensions above three.  -->
-<!-- As such, it is a graphical alternative to the conventional scatterplot." -->
-<!-- The authors enable the visualization of data distributions, correlations, clusters, and higher-dimensional structures by connecting Cartesian and parallel coordinate representations. -->
-<!-- The "grand tour" idea is important for seeing how dynamic high-dimensional structures change over time because it allows data analysts to examine very large and very complex data sets.  -->
-<!-- This method avoids the problems of axis adjacency in PCPs by constantly rotating the data axes.  -->
-<!-- It ensures that every possible combination of variables is explored dynamically. -->
-<!-- These new ideas greatly improve the ease and usefulness of PCPs, making them more useful in many situations and giving us tools for exploring and analyzing data in the modern world, [@wegman1997]. -->
+<!-- Line-width illusion issues led to introduction of common angle plots in 2013ish -->
 
 
-### Categorical Variants of PCPs
-
-Among their various important characteristics and improvements are frequency-based representation, flexibility to mixed data, quality measurements for improved visualization, interactive elements like axis reordering, and dynamic filtering.
-<!-- XXX I Have no idea what you're getting at here XXX -->
 
 For frequency-based representations, parallel sets replace individual data points, abstracting data to emphasize linkages. 
 The SET-STAT-MAP system is flexible for mixed-data situations like environmental and policy studies because it expands parallel sets to include numerical and spatial data, @wang2022set. 
@@ -367,15 +331,6 @@ Parallel sets are also useful for instruction and analysis since their combinati
 <!-- XXX then demonstrate this, rather than just stating it as a fact. Why are they useful for instruction and analysis? This sentence doesn't make that much sense ...  -->
 Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
 <!-- XXX these are two different ideas - categories, and axis selection/ordering. Let's keep them separate and not conflate them. XXX -->
-
-
-
-## Mixed Variable Parallel Representations
-
-### Parallel Sets Plots
-
-<!-- XXX Kosara (2006) XXX -->
-<!-- Line-width illusion issues led to introduction of common angle plots in 2013ish -->
 
 ### Hammock Plots
 
@@ -517,6 +472,217 @@ This ensures that the visualizations are]{.db} [perceived accurately, preserving
 <!-- XXX I would like to see more separation between hammock and common angle plots. To separate the two, read the papers from around when common angle plots were created and see what the common angle papers say about hammock plots, critique-wise. XXX -->
 [Schonlau stresses the importance of being flexible with different data types, while Hofmann uses a consistent angular structure to clarify interpretations. 
 Together, these approaches show a shared desire to make categorical and mixed data displays more accurate and useful, using different but complementary methods.]{.db}
+
+
+
+### Alluvial plots & Sankey diagrams
+
+**Alluvial Plots**
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-alluvial
+#| layout-valign: bottom
+#| fig-cap: "A Alluvial Plots"
+#| fig-width: 8
+#| fig-height: 8
+
+# Load the penguins dataset
+data <- na.omit(penguins) # Remove rows with NA values
+
+# Prepare the data for the Alluvial plot
+alluvial_data <- data.frame(
+  Species = data$species,
+  Island = data$island,
+  Sex = data$sex
+)
+
+# Create the Alluvial plot
+ggplot(alluvial_data, aes(
+  axis1 = Species,
+  axis2 = Island,
+  axis3 = Sex
+)) +
+  geom_alluvium(aes(fill = Species), width = 0.1) +
+  geom_stratum(width = 0.1, fill = "grey", color = "black") +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Species", "Island", "Sex"), expand = c(0.15, 0.15)) +
+  theme_minimal() +
+  ggtitle("Penguins Alluvial Plot") +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  penguin_scale_fill()
+
+```
+
+Alluvial plots are a powerful tool for visualizing flows and transitions in categorical data, capturing changes over time or across dimensions. 
+Their conceptual inspiration stems from stratified data representations, evoking imagery of sedimentation patterns in geology. 
+Popularized in the early 2000s, these plots have found applications in diverse fields, such as sociology and genomics, where understanding relationships and transitions within datasets is critical[@rosvall2008maps].
+
+The structure of alluvial plots centers around parallel axes that represent categorical dimensions, with bands connecting related elements across these axes. 
+The width of the bands may indicate magnitude or relative importance, but the primary focus is on qualitative transitions. 
+For instance, in bibliometrics, alluvial plots can illustrate the evolution of research topics, while in sociology, they depict migration patterns or demographic shifts [@bastiani2004]. 
+These visualizations are particularly valued for intuitively conveying complex categorical relationships.
+
+
+**Sankey Diagrams**
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| eval: false
+#| label: fig-sankey
+#| layout-valign: bottom
+#| fig-cap: "A Sankey Diagram"
+#| fig-width: 8
+#| fig-height: 8
+
+# Remove rows with missing values
+penguins_clean <- na.omit(penguins)
+
+# Create a tidy data frame with relevant variables
+penguins_sankey <- penguins_clean  %>%
+  group_by(species, island, sex) %>%
+  summarise(count = n()) %>%
+  make_long(species, island, sex)
+
+# Create Sankey plot
+ggplot(penguins_sankey, aes(x = x, 
+                            next_x = next_x, 
+                            node = node, 
+                            next_node = next_node)) +
+  geom_sankey(aes(fill = node), alpha = 0.8) +
+  geom_sankey_label(aes(label = node), size = 3, color = "white") +
+  penguin_scale_fill() +
+  theme_sankey(base_size = 16) +
+  labs(
+    title = "Parallel Set Plot of Penguins Dataset",
+    x = "Attributes",
+    y = "Count",
+    fill = "Species"
+  )
+
+```
+
+
+Sankey diagrams, introduced in 1898 by M.H.P.R. Sankey during his study of steam engine efficiency, were initially devised to illustrate energy flows. 
+Over time, their scope has broadened to encompass resource allocations, material transfers, and financial systems, finding relevance in fields like environmental science, logistics, and economics [@schmidt1925].
+
+The defining feature of a Sankey diagram is its proportional representation of flow magnitude. 
+Nodes, representing entities or processes, are connected by links whose widths correspond to the transferred quantity. 
+This emphasis on proportionality makes Sankey diagrams ideal for visualizing resource distributions, identifying inefficiencies, and analyzing systems with significant quantitative components. 
+For example, they are often used to track energy inputs and losses in power plants or to represent financial data [@tufte1983].
+
+Sankey diagrams and alluvial plots are data visualization techniques that differ in purpose and design. 
+Sankey diagrams focus on quantitative data flows, such as energy or resource transfers, whereas alluvial plots focus on categorical transitions and linkages. 
+They use nodes and proportional linkages to represent flow magnitude, whereas alluvial charts use parallel axes connected by bands to show categorical correlations. 
+Sankey diagrams are more suited to systems with numerical flows, such as energy analysis or financial tracking. 
+In contrast, alluvial plots are better suited to investigating trends in categorical data across dimensions. 
+Both visualizations are cross-disciplinary, scalable to various datasets, and provide considerable customization possibilities.
+
+Then move into mixed type plots - 
+
+Hurley (2004) end link algorithm -- how does this relate?
+ 
+
+<!-- Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation. -->
+CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
+<!-- @siirtola2006 introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs. XXX I cannot figure out where in the 2006 paper this comes up - all the values seem to be numerical XXX --> 
+<!-- CPCPs seem to handle both categorical and numeric variables (extracat package, cpcp function - interactive, or scpcp for static plots) -->
+Specific strategies, like adjustments to the ends of links, have been suggested to enhance how category and numerical values are connected visually.
+This strategy enhances the interpretability of mixed data by modifying the plotting criteria for axes representing category variables.
+
+@inselberg2009 enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power.
+@johansson2015 explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis.
+
+<!--CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}-->
+
+
+<!-- XXX None of these papers seem to be specifically related to CPCPs -- need to be very strict at distinguishing one type of thing from another. I'm not saying these aren't relevant, but if they are, put them somewhere else - right now, this section is more of a "junk drawer" in a kitchen than an organized space. XXX
+Designed to accommodate categorical data using methods including axis restructuring, symbols, and color-coding to increase clarity and comprehension, Categorical Parallel Coordinate Plots (CPCPs) are a development of Parallel Coordinate Plots (PCPs).
+Looking at the given papers, CPCPs come from more general ideas than from them straightforwardly.
+Although it does not particularly address categorical variables, @Wegman:1990 groundbreaking study on PCPs offers the mathematical underpinning for visualizing high-dimensional numerical data.
+Every PCP invention, including CPCPs, is built on this work.
+@leblanc1990 investigation of PCPs for assessing concurrent program performance emphasizes PCP adaptability but mainly focuses on numerical or sequential data rather than categorical data.
+
+@holten2009's work on force-directed edge bundling aims to improve graph visualizations by lowering visual clutter, which guides the CPCP objectives of increasing interpretability.
+Though it has nothing to do with PCPs or categorical data, its primary goal is to make complex data visualizations more readable.
+Therefore, even if these papers specifically address CPCPs, they add to the larger conversation on developing multidimensional visualizing techniques.
+
+Beyond categorical data, the CPCP innovations—axis structure and the use of symbols and colors—are relevant to additional PCP versions. 
+These ideas improve the interpretability of interactive PCPs, hybrid PCPs combining data kinds, and continuous PCPs. 
+CPCPs observe both a tool for categorical data but also larger progress in multidimensional data display.
+-->
+
+
+<!--[@Wegman:1990]{.db} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
+[@holten2009]{.db} introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
+[@leblanc1990]{.db} highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.-->
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-hybrid
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Categorical and Hybrid in PCP"
+#| fig-width: 8
+#| fig-height: 6
+#| 
+# Remove rows with missing data from the dataset
+penguins_clean_cat <- penguins %>%
+  na.omit() %>%
+  select(-year)
+
+# Convert categorical variables to factors
+penguins_clean_cat <- penguins_clean_cat %>%
+  mutate(island = as.factor(island),
+         sex = as.factor(sex),
+         species = as.factor(species))
+
+# Create a parallel coordinate plot using both numeric and categorical variables
+
+penguins_clean_cat %>%
+  pcp_select(2:7) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = species)) +
+  ggplot2::theme_bw() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP") +
+  facet_wrap(~sex)+ 
+  guides(color = F) +
+  penguin_scale_color()
+```
+
+The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces 
+<!-- XXX??? nonlinear XXX -->
+changes to the axes [to allow for]{.svp} more complex data representation.
+<!-- These can show more complicated relationships in the data that might not be visible in a regular PCP. -->
+<!-- No, they allow categorical and numerical variables to be shown while maintaining the ability to distinguish single observations...  -->
+Nonlinear scales such as logarithmic and exponential transformations are possible.
+
+
+<!-- Not sure where this should go, but it's not here....? -->
+<!-- @wegman1997a provide a comprehensive discussion of the GPCP idea stating, "The parallel coordinate plot is a geometric device for displaying points in high-dimensional spaces, in particular, for dimensions above three.  -->
+<!-- As such, it is a graphical alternative to the conventional scatterplot." -->
+<!-- The authors enable the visualization of data distributions, correlations, clusters, and higher-dimensional structures by connecting Cartesian and parallel coordinate representations. -->
+<!-- The "grand tour" idea is important for seeing how dynamic high-dimensional structures change over time because it allows data analysts to examine very large and very complex data sets.  -->
+<!-- This method avoids the problems of axis adjacency in PCPs by constantly rotating the data axes.  -->
+<!-- It ensures that every possible combination of variables is explored dynamically. -->
+<!-- These new ideas greatly improve the ease and usefulness of PCPs, making them more useful in many situations and giving us tools for exploring and analyzing data in the modern world, [@wegman1997]. -->
+
+
+
+
+
+
+## Mixed Variable Parallel Representations
+
+
 
 
 ## Bundling and Curving
