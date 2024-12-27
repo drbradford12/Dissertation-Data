@@ -230,18 +230,78 @@ When combined with user training and interactive visualization techniques, PCPs 
 
 <!--[This lack of familiarity may be the biggest drawback of PCPs; however, there are ... studies which explore this issue.]{.svp} [XXX are there studies that explore how quickly people acclimate to PCPs? If not, we should consider running one!]{.svp}-->
 
+# Multidimesnional Data Visualization Timeline
+
+Growing in tandem with data's increasing complexity and variety, data visualization has become a vital instrument for understanding and presenting difficult datasets. 
+Visualization methods have evolved greatly to suit multidimensional, hierarchical, and mixed data types from their early roots in the 19th century to current computing breakthroughs. 
+The historical evolution and linkages of several visualization techniques—including Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and variations of Parallel Coordinate Plots—are thoroughly explored in this literature study. 
+Their development chronicles a path of invention based on fundamental ideas that build on them to meet new problems.
+
+## Early Roots: 19th-century beginnings
+
+Early statistical graphics from the 19th century—bar charts, pie charts, and flow maps—laid the foundation for contemporary visualization methods. 
+Though limited in scope, mainly concentrating on small, univariate datasets, these techniques showed relationships between data points.
+
+## Foundations of Parallel Coordinate Plots in the Mid-20th Century
+
+Alfred Inselberg debuted Parallel Coordinate Plots, a novel technique for visualizing high-dimensional numerical data 1985. 
+This method mapped data points onto parallel axes, addressing the difficulty of expressing multidimensional datasets. 
+Early generations struggled to handle categorical variables or mixed data types, even if highly effective for numerical data. 
+Notwithstanding these restrictions, Parallel Coordinate Plots set the stage for later developments, especially in increasing their adaptability and relevance.
+
+## Late in the 20th century: investigating flow-based visualizations
+
+Flow-based visualization methods first arose in the late 20th century. 
+Created by Irish engineer Matthew Sankey in the late 19th century to graph energy flows, Sankey diagrams attracted fresh interest because of their capacity to show proportional relationships inside systems. 
+Later adaptations for more general uses like material flows, industrial efficiency, and network analysis came from these diagrams. 
+Still, its strict framework and low interactivity drove the demand for more flexible methods.
+
+## Early in the new millennium: Hierarchical visualizations and parallel sets introduced
+
+Parallel Sets by Kosara, Bendix, and Hauser launched a significant leap ahead in 2001. 
+Designed primarily to manage categorical data, this method was a transforming adaption of Parallel Coordinate Plots. 
+Parallel Sets filled a considerable void in visualization tools by grouping data points into categories and showing their relationships across several dimensions. 
+This invention also made it possible to investigate hierarchical and networked data structures, producing Hammock Plots that improved how hierarchical links in intricate datasets were portrayed.
+
+## Early in 2000: Development of Flow-Based Methods
+
+Flow-based methods also witnessed significant improvement concurrently. 
+Sankey Diagrams' adaptation into Alluvial Plots added more freedom in capturing temporal dynamics and category transitions. 
+This development made changes visible over time, broadening their relevance in corporate analytics, social science, and environmental research. 
+The improved capacity to depict dynamic processes signaled a sea change in flow-based visualizations.
+
+## Mid-2000s: Parallel Coordinate Visualization Advancements
+
+Parallel coordinate visualizations advanced still more in the middle of the 2000s. 
+Inselberg's original framework was extended to support mixed data types and improved interaction, increasing the method's adaptability. 
+Users could interactively examine datasets and find hidden patterns using innovations, including brushing, filtering, and dynamic axes reordering. 
+Generalized Parallel Coordinate Plots were developed during this time to easily handle mixed numerical and categorical datasets, extending these powers.
+
+## Late 2000s: Development of Specialized Methods
+
+Specialized visualization techniques first surfaced in the late 2000s to handle problems unique to a field. 
+Common Angle Plots presented radial patterns to view cyclic data, such as temporal trends, more efficiently. 
+This method improved the interpretability and clarity of such datasets by addressing the constraints of linear layouts in expressing periodic patterns.
+
+## Interconnected Evolution
+
+The evolution of these approaches reveals a common ancestry of invention and iterative improvement. 
+Data visualization's linked character is shown in the often inspired development in one field by advances in another. 
+Parallel Sets, for example, affected hierarchical visualizations that later shaped flow diagrams such as Sankey and Alluvial Plots. 
+Similarly, the iterative improvements of Parallel Coordinate Plots underlined the need to combine several data types while keeping clarity and scalability.
+ 
 # Variations on Parallel Coordinate Plots
 
 Since @Inselberg1985 introduced parallel coordinate plots (PCPs) in 1985, considerable advances have been made to address the original method's framework and improve its capacity to depict high-dimensional data effectively.
 The enhancements include changes to visual representation, handling various kinds of interactive data elements, and incorporating advanced computational approaches to increase the clarity and interpretability of the visualizations. 
-[In this section, we examine some of the modifications proposed to enhance PCPs after their original introduction, as well as variations on PCPs which evolved in parallel for e.g. categorical variables.]{.svp}
+In this section, we examine some of the modifications proposed to enhance PCPs after their original introduction, as well as variations on PCPs which evolved in parallel for e.g. categorical variables.
 
 ## Categorical Parallel Axis Plots
 
-Traditional PCPs were primarily designed to [display]{.svp} continuous data.
+Traditional PCPs were primarily designed to display continuous data.
 However, real-world datasets often contain a mix of continuous, ordinal, and categorical data.
-[In parallel to the development of numerical PCPs, a number of categorical plots with similar goals developed. Over time, the different approaches to categorical and numerical variables converged, leading to several different types of mixed-variable, parallel axis plots.]{.svp}
-[We will first consider categorical plots with parallel vertical axes, and then examine mixed-type variants.]{.svp}
+In parallel to the development of numerical PCPs, a number of categorical plots with similar goals developed. Over time, the different approaches to categorical and numerical variables converged, leading to several different types of mixed-variable, parallel axis plots.
+We will first consider categorical plots with parallel vertical axes, and then examine mixed-type variants.
 
 
 <!-- XXX I think the thing this most needs is a clear timeline of what happened when, and a lot of reference checking, because I want to ensure we're not misattributing/mis-citing things. XXX -->
@@ -251,6 +311,8 @@ However, real-world datasets often contain a mix of continuous, ordinal, and cat
 <!-- - Parallel Sets plots -->
 <!-- - Hammock plots -->
 <!-- - Alluvial plots/Sankey diagrams (these are slightly different -- describe why) -->
+
+
 
 ### Parallel Sets Plots
 
@@ -262,7 +324,7 @@ However, real-world datasets often contain a mix of continuous, ordinal, and cat
 #| layout-valign: bottom
 #| fig-cap: "A Parallel Sets Plot"
 #| fig-width: 8
-#| fig-height: 8
+#| fig-height: 6
 
 # Data Preparation
 penguins_clean <- na.omit(penguins)
@@ -309,34 +371,34 @@ Basic advances like @kosara2006parallel and the ongoing improvement of parallel 
 
 
 <!-- Line-width illusion issues led to introduction of common angle plots in 2013ish -->
+The line-width illusion, also known as the sine illusion, describes a perceptual phenomenon where variations in line width distort the perceived relationships or angles in visualizations. 
+This illusion can mislead viewers, causing misinterpretations of visualized data. 
+@sineillusion identified this issue in their work on three-dimensional visualizations. 
+Their analysis demonstrated how distortions from this illusion affected viewer cognition and highlighted the urgent need for alternative visualization methods to mitigate such biases.
 
+@hofmannCommonAnglePlots2013 further explored this illusion in categorical data visualizations. 
+They emphasized that inconsistent line widths or inappropriate geometric representations exacerbated perceptual inaccuracies, complicating the extraction of meaningful insights. 
+These findings called for more robust visualization strategies, particularly for datasets with overlapping or closely related dimensions.
 
-
-For frequency-based representations, parallel sets replace individual data points, abstracting data to emphasize linkages. 
+<!--For frequency-based representations, parallel sets replace individual data points, abstracting data to emphasize linkages. 
 The SET-STAT-MAP system is flexible for mixed-data situations like environmental and policy studies because it expands parallel sets to include numerical and spatial data, @wang2022set. 
-Quality measures, including overlap, ribbon width variance, and mutual information, optimize dimension and category ordering and improve visualizations' interpretability.
+Quality measures, including overlap, ribbon width variance, and mutual information, optimize dimension and category ordering and improve visualizations' interpretability. -->
 <!-- XXX You're going to need to demonstrate any variations you talk about, but you first need to establish the basis XXX -->
 
-Parallel sets depend on interactivity to allow users to investigate data relationships more naturally. 
+<!--Parallel sets depend on interactivity to allow users to investigate data relationships more naturally. -->
 <!-- XXX does this mean you can't have static parallel sets plots??? I am pretty sure that's a thing. XXX -->
-These tools let users create aesthetically pleasing layouts that best fit their application. 
-Across many fields, including meteorology, consumer behavior study, marketing, and resource management, parallel sets find application.
+<!--These tools let users create aesthetically pleasing layouts that best fit their application. 
+Across many fields, including meteorology, consumer behavior study, marketing, and resource management, parallel sets find application.-->
 <!-- XXX not that useful/interesting/relevant XXX -->
 
 
-<!-- This parsetgnostics paper is a riff on the pargnostics paper by Dasgupta/Kosara in 2010... I would discuss both papers in a subsection labeled "Optimization" or something like that... but first you'll need to demonstrate that ordering matters in both the order of the lines within categories, the order of the axes, and the drawing order (what lands on top?) with examples.-->
-@dennig2021parsetgnostics introduced "ParSetgnostics," a set of quality metrics to reduce visual clutter in parallel sets​. 
-Metrics like overlap, ribbon width variance, and mutual information optimize dimension and category ordering, significantly improving visualizations' interpretability; for instance, applying these metrics reduced clutter by up to 81% in test cases.
-Parallel sets are also useful for instruction and analysis since their combination of statistical summaries and category flow analysis reveals a deeper understanding. 
-<!-- XXX then demonstrate this, rather than just stating it as a fact. Why are they useful for instruction and analysis? This sentence doesn't make that much sense ...  -->
-Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
-<!-- XXX these are two different ideas - categories, and axis selection/ordering. Let's keep them separate and not conflate them. XXX -->
+
 
 ### Hammock Plots
 
 <!-- XXX Introduced in 2003ish? XXX -->
 
-Hammock plots [are similar to]{.svp} parallel coordinate plots, [but were designed to show categorical data [@schonlauVisualizingCategoricalData2003]]{.svp}. 
+Hammock plots are similar to parallel coordinate plots, but were designed to show categorical data [@schonlauVisualizingCategoricalData2003]. 
 
 ```{r}
 #| echo: false
@@ -449,9 +511,9 @@ This method detects and assesses clusters by combining empirical visualization w
 
 <!--[Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.-->
 
-[The `ggparallel` package]{.svp} [@hofmannCommonAnglePlots2013]{.db} [provided a grammar-based interface]{.svp} for visualizing [multivariate categorical]{.svp} data, implementing Hammock plots [@schonlau2024].
+The `ggparallel` package @hofmannCommonAnglePlots2013 provided a grammar-based interface for visualizing multivariate categorical data, implementing Hammock plots [@schonlau2024].
 This makes them better suited for data that has both category and numerical relationships. 
-[This]{.svp} grammar-based adaptation [retains the]{.svp} established behaviors of parallel categorical displays while providing additional [options to handle]{.svp} edge cases like categorical ties. 
+This grammar-based adaptation retains the established behaviors of parallel categorical displays while providing additional options to handle edge cases like categorical ties. 
 <!-- This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
 [Also, please don't cite arxiv papers when a peer-reviewed version exists -- e.g. Penguins go Parallel]{.svp}
 
@@ -461,17 +523,17 @@ This makes them better suited for data that has both category and numerical rela
 They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
 However, they also admit that these plots are "less effective for continuous data without ties or when categorical values are minimal," [This phrase does not exist in the paper!]{.svp} suggesting that Hammock plots offer limited benefits in uniformly distributed datasets. -->
 
-[@hofmannCommonAnglePlots2013 worked on Common Angle Plots, and Schonlau added Hammock plots to improve categorical data display.
+@hofmannCommonAnglePlots2013 worked on Common Angle Plots, and Schonlau added Hammock plots to improve categorical data display.
 However, they approached the problem in different ways. 
 @schonlau2024 Hammock Plots: Visualizing Categorical and Numerical Variables generalizes parallel coordinate plots by swapping lines with box elements. 
 The width of the boxes shows the number of observations, so they can be used for both categorical and mixed data. 
 By changing traditional Hammock plot designs, Schonlau deals with perceptual problems like the reverse line width illusion. 
 @hofmannCommonAnglePlots2013 also addresses the line width illusion, proposing Common Angle plots that use a constant angle to mitigate the line width illusion while maintaining visual continuity of the categories. 
 Hofmann's Common Angle Plots are unique because they use consistent angular links to fix problems when line slopes or widths are different. 
-This ensures that the visualizations are]{.db} [perceived accurately, preserving the marginal proportions while still connecting observations across parallel axes.]{.svp} 
+This ensures that the visualizations are perceived accurately, preserving the marginal proportions while still connecting observations across parallel axes.
 <!-- XXX I would like to see more separation between hammock and common angle plots. To separate the two, read the papers from around when common angle plots were created and see what the common angle papers say about hammock plots, critique-wise. XXX -->
-[Schonlau stresses the importance of being flexible with different data types, while Hofmann uses a consistent angular structure to clarify interpretations. 
-Together, these approaches show a shared desire to make categorical and mixed data displays more accurate and useful, using different but complementary methods.]{.db}
+Schonlau stresses the importance of being flexible with different data types, while Hofmann uses a consistent angular structure to clarify interpretations. 
+Together, these approaches show a shared desire to make categorical and mixed data displays more accurate and useful, using different but complementary methods.
 
 
 
@@ -487,7 +549,7 @@ Together, these approaches show a shared desire to make categorical and mixed da
 #| layout-valign: bottom
 #| fig-cap: "A Alluvial Plots"
 #| fig-width: 8
-#| fig-height: 8
+#| fig-height: 6
 
 # Load the penguins dataset
 data <- na.omit(penguins) # Remove rows with NA values
@@ -518,7 +580,7 @@ ggplot(alluvial_data, aes(
 
 Alluvial plots are a powerful tool for visualizing flows and transitions in categorical data, capturing changes over time or across dimensions. 
 Their conceptual inspiration stems from stratified data representations, evoking imagery of sedimentation patterns in geology. 
-Popularized in the early 2000s, these plots have found applications in diverse fields, such as sociology and genomics, where understanding relationships and transitions within datasets is critical[@rosvall2008maps].
+Popularized in the early 2000s, these plots have found applications in diverse fields, such as sociology and genomics, where understanding relationships and transitions within datasets is critical [@rosvall2008maps].
 
 The structure of alluvial plots centers around parallel axes that represent categorical dimensions, with bands connecting related elements across these axes. 
 The width of the bands may indicate magnitude or relative importance, but the primary focus is on qualitative transitions. 
@@ -537,7 +599,7 @@ These visualizations are particularly valued for intuitively conveying complex c
 #| layout-valign: bottom
 #| fig-cap: "A Sankey Diagram"
 #| fig-width: 8
-#| fig-height: 8
+#| fig-height: 6
 
 # Remove rows with missing values
 penguins_clean <- na.omit(penguins)
@@ -1087,7 +1149,13 @@ ggparcoord(
 
 # Optimization of PCPs
 
-
+<!-- This parsetgnostics paper is a riff on the pargnostics paper by Dasgupta/Kosara in 2010... I would discuss both papers in a subsection labeled "Optimization" or something like that... but first you'll need to demonstrate that ordering matters in both the order of the lines within categories, the order of the axes, and the drawing order (what lands on top?) with examples.-->
+@dennig2021parsetgnostics introduced "ParSetgnostics," a set of quality metrics to reduce visual clutter in parallel sets​. 
+Metrics like overlap, ribbon width variance, and mutual information optimize dimension and category ordering, significantly improving visualizations' interpretability; for instance, applying these metrics reduced clutter by up to 81% in test cases.
+Parallel sets are also useful for instruction and analysis since their combination of statistical summaries and category flow analysis reveals a deeper understanding. 
+<!-- XXX then demonstrate this, rather than just stating it as a fact. Why are they useful for instruction and analysis? This sentence doesn't make that much sense ...  -->
+Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
+<!-- XXX these are two different ideas - categories, and axis selection/ordering. Let's keep them separate and not conflate them. XXX -->
 
 
 
