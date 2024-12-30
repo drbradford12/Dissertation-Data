@@ -232,63 +232,60 @@ When combined with user training and interactive visualization techniques, PCPs 
 
 # Multidimesnional Data Visualization Timeline
 
-Growing in tandem with data's increasing complexity and variety, data visualization has become a vital instrument for understanding and presenting difficult datasets. 
-Visualization methods have evolved greatly to suit multidimensional, hierarchical, and mixed data types from their early roots in the 19th century to current computing breakthroughs. 
-The historical evolution and linkages of several visualization techniques—including Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and variations of Parallel Coordinate Plots—are thoroughly explored in this literature study. 
-Their development chronicles a path of invention based on fundamental ideas that build on them to meet new problems.
+With the increasing complexity and variety of data, visualization has emerged as a critical tool for analyzing and conveying intricate datasets. 
+From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
+This literature review delves into the historical development and interconnections among several key visualization techniques—Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and various adaptations of Parallel Coordinate Plots. 
+These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges.
 
-## Early Roots: 19th-century beginnings
+## Early Foundations: Statistical Graphics in the 19th Century
 
-Early statistical graphics from the 19th century—bar charts, pie charts, and flow maps—laid the foundation for contemporary visualization methods. 
-Though limited in scope, mainly concentrating on small, univariate datasets, these techniques showed relationships between data points.
+Statistical graphics of the 19th century—bar charts, pie charts, and flow maps—formed the groundwork for modern visualization techniques. 
+While these early tools primarily focused on small-scale, univariate datasets, they offered a glimpse into the potential of data relationships. 
+These methods demonstrated the power of visualizing data to uncover patterns, albeit with limited dimensionality and scope.
 
-## Foundations of Parallel Coordinate Plots in the Mid-20th Century
+## Emergence of Parallel Coordinate Plots in the Mid-20th Century
 
-Alfred Inselberg debuted Parallel Coordinate Plots, a novel technique for visualizing high-dimensional numerical data 1985. 
-This method mapped data points onto parallel axes, addressing the difficulty of expressing multidimensional datasets. 
-Early generations struggled to handle categorical variables or mixed data types, even if highly effective for numerical data. 
-Notwithstanding these restrictions, Parallel Coordinate Plots set the stage for later developments, especially in increasing their adaptability and relevance.
+The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data. 
+This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets. 
+Despite their utility for numerical data, early PCPs struggled with categorical and mixed data types. 
+Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability.
 
-## Late in the 20th century: investigating flow-based visualizations
+## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
 
-Flow-based visualization methods first arose in the late 20th century. 
-Created by Irish engineer Matthew Sankey in the late 19th century to graph energy flows, Sankey diagrams attracted fresh interest because of their capacity to show proportional relationships inside systems. 
-Later adaptations for more general uses like material flows, industrial efficiency, and network analysis came from these diagrams. 
-Still, its strict framework and low interactivity drove the demand for more flexible methods.
+Flow-based visualization methods gained renewed attention in the late 20th century, building on the Sankey diagrams introduced by Matthew Sankey in the late 19th century. 
+Initially designed to illustrate energy flows, these diagrams evolved to depict proportional relationships within broader contexts, such as material flows and network analyses. 
+However, their rigid structure and limited interactivity spurred interest in more versatile approaches.
 
-## Early in the new millennium: Hierarchical visualizations and parallel sets introduced
+## Hierarchical Data Visualization: Parallel Sets in the Early 2000s
 
-Parallel Sets by Kosara, Bendix, and Hauser launched a significant leap ahead in 2001. 
-Designed primarily to manage categorical data, this method was a transforming adaption of Parallel Coordinate Plots. 
-Parallel Sets filled a considerable void in visualization tools by grouping data points into categories and showing their relationships across several dimensions. 
-This invention also made it possible to investigate hierarchical and networked data structures, producing Hammock Plots that improved how hierarchical links in intricate datasets were portrayed.
+In 2001, Kosara, Bendix, and Hauser introduced Parallel Sets, a transformative adaptation of Parallel Coordinate Plots tailored for categorical data. 
+Parallel Sets addressed a critical gap in existing tools by grouping data points into categories and visualizing their relationships across dimensions. 
+This innovation facilitated the exploration of hierarchical and networked structures, paving the way for Hammock Plots to refine the depiction of complex hierarchical relationships further.
 
-## Early in 2000: Development of Flow-Based Methods
+## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
 
-Flow-based methods also witnessed significant improvement concurrently. 
-Sankey Diagrams' adaptation into Alluvial Plots added more freedom in capturing temporal dynamics and category transitions. 
-This development made changes visible over time, broadening their relevance in corporate analytics, social science, and environmental research. 
-The improved capacity to depict dynamic processes signaled a sea change in flow-based visualizations.
+Concurrently, flow-based methods witnessed substantial evolution with the emergence of Alluvial Plots. 
+By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
+Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization.
 
-## Mid-2000s: Parallel Coordinate Visualization Advancements
+## Mid-2000s: Enhancements in Parallel Coordinate Plots
 
-Parallel coordinate visualizations advanced still more in the middle of the 2000s. 
-Inselberg's original framework was extended to support mixed data types and improved interaction, increasing the method's adaptability. 
-Users could interactively examine datasets and find hidden patterns using innovations, including brushing, filtering, and dynamic axes reordering. 
-Generalized Parallel Coordinate Plots were developed during this time to easily handle mixed numerical and categorical datasets, extending these powers.
+Advancements in Parallel Coordinate Plots during the mid-2000s expanded their functionality to accommodate mixed data types and interactive exploration. 
+Features such as brushing, filtering, and dynamic axis reordering enabled users to uncover hidden patterns and insights within datasets. 
+Generalized Parallel Coordinate Plots emerged during this era, offering robust solutions for visualizing mixed numerical and categorical datasets while maintaining scalability and clarity.
 
-## Late 2000s: Development of Specialized Methods
+## Late 2000s: Specialized Visualization Techniques
 
-Specialized visualization techniques first surfaced in the late 2000s to handle problems unique to a field. 
-Common Angle Plots presented radial patterns to view cyclic data, such as temporal trends, more efficiently. 
-This method improved the interpretability and clarity of such datasets by addressing the constraints of linear layouts in expressing periodic patterns.
+The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges. 
+Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively. 
+By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
 
-## Interconnected Evolution
+## Interconnected Pathways of Evolution
 
-The evolution of these approaches reveals a common ancestry of invention and iterative improvement. 
-Data visualization's linked character is shown in the often inspired development in one field by advances in another. 
-Parallel Sets, for example, affected hierarchical visualizations that later shaped flow diagrams such as Sankey and Alluvial Plots. 
-Similarly, the iterative improvements of Parallel Coordinate Plots underlined the need to combine several data types while keeping clarity and scalability.
+The progression of these visualization techniques underscores a shared heritage of iterative improvement and cross-disciplinary inspiration. 
+For instance, Parallel Sets informed hierarchical visualizations, which subsequently influenced flow-based approaches like Sankey and Alluvial Plots. 
+Similarly, the iterative refinement of Parallel Coordinate Plots highlighted the necessity of integrating multiple data types while preserving clarity and scalability. 
+These interconnections exemplify the synergistic nature of advancements in data visualization.
  
 # Variations on Parallel Coordinate Plots
 
@@ -354,31 +351,33 @@ ggplot(data_parallel, aes(x = x, id = id, split = y, value = count)) +
 
 <!-- XXX Kosara (2006) XXX -->
 
-Designed to examine multidimensional numerical data, parallel sets originated from parallel coordinate charts, first proposed by Alfred Inselberg in the 1950s. 
-Led by Daniel Keim and others, the adaptation of categorical data first surfaced in the late 1990s. 
-@kosara2006parallel further refined these methods by emphasizing the design and use of parallel plots to make complicated relationships more understandable.
+Parallel Sets, designed to visualize multidimensional relationships in numerical data, trace their origins to Parallel Coordinate Plots, first introduced by Alfred Inselberg in the 1950s. 
+The adaptation for categorical data emerged in the late 1990s under Daniel Keim's and collaborators' leadership, addressing the growing need for tools capable of handling non-numerical datasets. 
+Subsequent refinements, particularly by @kosara2006, emphasized intuitive designs that improved the interpretability of complex relationships. 
+These advancements marked a significant step in broadening the scope of multidimensional visualization methods.
 
-Dynamic, interactive visualizations were made possible by developments in computational tools such as D3.js and Matplotlib in the 2010s. 
-Temporal zooming and filtering improved the analytical depth. 
-Therefore, these tools have become more critical for historical study [@bostock2011d3].
+The 2010s witnessed a transformative era for Parallel Sets through dynamic and interactive computational tools such as D3.js and Matplotlib. 
+Features like temporal zooming and filtering greatly enhanced the analytical depth of these visualizations. 
+By allowing seamless navigation across dimensions, these tools solidified their role in exploratory analysis and historical research, as highlighted by @bostock2011d3.
 
-Parallel sets present multidimensional relationships, enabling access to complicated information, trends, and anomaly-revealing power. 
-They may oversimplify continuous data and, in poorly crafted designs, provide cluttered, difficult-to-interpret visuals.
-
-Parallel sets provide an intense way to find trends in multidimensional datasets and help to close the gap between quantitative and qualitative historical studies. 
-These tools allow for predictive modeling of historical trends as computer capability increases and machine learning interacts with data visualization, changing our understanding of the past and its consequences for the present. 
-Basic advances like @kosara2006parallel and the ongoing improvement of parallel sets plots promise a future of more affluent, more perceptive historical research.
-
+Parallel Sets excel in revealing trends, anomalies, and intricate patterns within multidimensional datasets. 
+However, they are not without limitations. 
+Oversimplification of continuous data and challenges in readability—particularly in poorly designed implementations—can impede their effectiveness. 
+Nonetheless, these tools have proven instrumental in bridging quantitative and qualitative approaches to historical studies. 
+As computational capabilities expand and machine learning becomes increasingly integrated with data visualization, Parallel Sets hold the potential to redefine predictive modeling of historical trends and their implications for contemporary analysis.
 
 <!-- Line-width illusion issues led to introduction of common angle plots in 2013ish -->
-The line-width illusion, also known as the sine illusion, describes a perceptual phenomenon where variations in line width distort the perceived relationships or angles in visualizations. 
-This illusion can mislead viewers, causing misinterpretations of visualized data. 
-@sineillusion identified this issue in their work on three-dimensional visualizations. 
-Their analysis demonstrated how distortions from this illusion affected viewer cognition and highlighted the urgent need for alternative visualization methods to mitigate such biases.
+The line-width illusion, part of the broader category of perceptual distortions known as the sine illusion, presents a significant challenge in visual data interpretation. 
+This phenomenon causes variations in line width to distort perceived relationships or angles, leading to potential misinterpretations of visualized data. 
+Early explorations of this issue in three-dimensional visualizations, such as those by @sine, underscored its cognitive impact, highlighting the need for alternative visualization techniques to mitigate these biases.
 
-@hofmannCommonAnglePlots2013 further explored this illusion in categorical data visualizations. 
-They emphasized that inconsistent line widths or inappropriate geometric representations exacerbated perceptual inaccuracies, complicating the extraction of meaningful insights. 
-These findings called for more robust visualization strategies, particularly for datasets with overlapping or closely related dimensions.
+@hofmannCommonAnglePlots2013 further examined the implications of the line-width illusion in categorical data visualizations. 
+Their findings revealed that inconsistencies in line widths and unsuitable geometric representations exacerbated perceptual inaccuracies, complicating the interpretation of overlapping or closely related dimensions. 
+By proposing Common Angle Plots as a solution, they demonstrated how perceptually robust designs could minimize distortions and enhance the extraction of meaningful insights from complex datasets.
+
+These foundational studies underscore the necessity of addressing perceptual limitations in visualization design. 
+They emphasize the critical balance between aesthetic simplicity and cognitive accuracy in developing tools that empower users to derive reliable conclusions from data.
+
 
 <!--For frequency-based representations, parallel sets replace individual data points, abstracting data to emphasize linkages. 
 The SET-STAT-MAP system is flexible for mixed-data situations like environmental and policy studies because it expands parallel sets to include numerical and spatial data, @wang2022set. 
@@ -391,14 +390,9 @@ Quality measures, including overlap, ribbon width variance, and mutual informati
 Across many fields, including meteorology, consumer behavior study, marketing, and resource management, parallel sets find application.-->
 <!-- XXX not that useful/interesting/relevant XXX -->
 
-
-
-
 ### Hammock Plots
 
 <!-- XXX Introduced in 2003ish? XXX -->
-
-Hammock plots are similar to parallel coordinate plots, but were designed to show categorical data [@schonlauVisualizingCategoricalData2003]. 
 
 ```{r}
 #| echo: false
@@ -466,75 +460,48 @@ Overplotting is evident, making it difficult to trace individual pathways.
 The plot shows the general distribution and relationships between gear and cylinder categories, but lacks numeric relationships or exact proportions.
 
 
+@schonlauVisualizingCategoricalData2003 introduced Hammock Plots, a variation of Parallel Coordinate Plots, as a method for visualizing relationships between categorical variables. 
+Designed to handle mixed data types, Hammock Plots provides a visual framework to simplify complex relationships and reduce visual clutter through "bandwidth" representations that emphasize connections between categories. 
+This capability is particularly advantageous in health science datasets, where managing and interpreting intricate, multivariate data is essential.
+
 <!-- Hammock plots represent a breakthrough in data visualization, particularly for managing numerical and categorical data. XXX this doesn't say that much tbh - gush less, present more facts. -->
-While allowing mixed data types, they are meant to show relationships between categorical variables visually. 
+<!--While allowing mixed data types, they are meant to show relationships between categorical variables visually. -->
 <!-- XXX so if they're intended for categorical variables, why do they allow mixed types? What do the type transitions look like? XXX -->
-Especially in health science datasets, key characteristics of Hammock plots include their capacity to simplify complicated relationships and lower visual clutter by using "bandwidth" representations to highlight links between categories.
+Compared to mosaic plots, Hammock Plots offer a more compact and cognitively accessible representation of multidimensional categorical data. 
+By alleviating the cognitive load on observers, these visualizations surpass traditional tools such as bar charts, making them indispensable for applications in health research and other fields dealing with mixed numerical and categorical variables.
 
-When it comes to multidimensional categorical data, hammock plots show a more compact representation than mosaic plots, lowering the cognitive load on the observer and surpassing conventional tools like bar charts. 
-These benefits are absolutely vital in disciplines including health research, where datasets can comprise mixed numerical and categorical variables needing simultaneous display.
+@symanzik2018 utilized Hammock Plots to analyze the Titanic dataset, highlighting their ability to align lines representing similar or identical values. 
+This alignment facilitates the comprehension of relationships within the data, particularly in parallel coordinate spaces. 
+However, they also acknowledged potential drawbacks, noting that Hammock Plots may introduce visual clutter when categorical distinctions are insufficiently defined, underscoring challenges in their application to continuous data.
 
-@symanzik2018 showed the Titanic dataset using hammock plots, arguing that "Hammock plots allow for line alignment representing similar or identical values." 
-This makes understanding the data in parallel coordinate space easier and gives you a better sense of the different data types and their groups. 
-They do say, though, that Hammock plots "may add visual clutter in cases lacking categorical data distinctions," which is meant to stress the problems that might arise when they are used with continuous variables.
-
-@kavvadias1996 use a decomposition method called "Hammock-on-ears" to work on bigger graph-theoretic problems, with the goal of enhancing the ability to find ties in large datasets. 
-This shows that Hammock plots can handle small amounts of complex data. 
-However, they warn that "the method may require significant computational resources," which means it might not work for complex or larger-scale tasks. 
+Compared to mosaic plots, Hammock Plots offer a more compact and cognitively accessible representation of multidimensional categorical data. 
+By alleviating the cognitive load on observers, these visualizations surpass traditional tools such as bar charts, making them indispensable for applications in health research and other fields dealing with mixed numerical and categorical variables.
 <!--[Actually, it means the opposite - if you don't have the computer power, you can't use the method for big datasets, but it probably works for smaller ones]{.svp}-->
 
 <!-- XXX At some point, and I'm not quite sure where, this stops being about hammock plots and starts being about clustering. We need to figure out where/how. XXX -->
-@pilhofer2012 show that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters.
-<!-- XXX I think below this point should go into an optimization section XXX -->
-Key strategies comprise clustering visualization, which employs algorithms to reorder rows and columns, obtain a pseudo-diagonal form, and resolve data connections via optimal sorting algorithms like the Weighted Bertin Classification Criteria (WBCC). 
-In graphical displays, these techniques minimize crossing lines or misalignments and maximize concordance.
-Optimized displays of clustering results, using the “Ecotest dataset,” show how ordering methods enhance cluster identification, @pilhofer2012a.
-The paper also offers an evidence-based method, using measures such as the Bertin Classification Criteria (BCC) to evaluate graphical order, supported by computational tests.
-Both theoretical considerations and actual data support the assertions regarding Hammock plots controlling clusters and tying off conflicts. 
-<!--[Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}-->
-<!--This is especially helpful in datasets that contain overlapping lines, which can be hard to due to  [Why are they hard to see?]{.svp}  because Hammock plots make it easier to separate the data. -->
-
-Still, @pilhofer2012 points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
-They suggest that Hammock plots work best for datasets with clear clusters.
-Both visual and computational methods help to find definite clustering in the content. 
-The main technique is pseudo-diagonalization, in which rows and columns of a data matrix are rearranged to visually show clusters by combining similar entries. 
-This technique is compared by a top-down partitioning method, which clusters the data using measurements such as Kendall's $\tau$ or the Bertin Classification Criteria (BCC), determining ideal cut spots in rows and columns. 
-The BCC, which computes the difference between conforming and non-conforming pairings to gauge the alignment of matrix entries with a pseudo-diagonal form, is one of the metrics to evaluate clustering clarity. 
-The Weighted Bertin Classification Criteria (WBCC) emphasizes the proximity of data points and improves this by using distance-based weights; the Bertin Classification Index (BCI) scales the BCC to gauge the strength of the link between clusters. 
-BCI provides a consistent approach to evaluating datasets, with values ranging from 0 (perfectly aligned clusters) to 1 (indicating no clustering). 
-The main evaluation criterion for clarity is the degree to which the matrix resembles a block-diagonal structure; low BCI values imply unambiguous clusters, while high values indicate indistinct or overlapping groupings. 
-The paper also underlines the need for visual inspection, in which visually distinct and well-separated blocks in matrix plots—such as those shown in the Ecotest dataset examples—characterize clear grouping. 
-Still, clarity is very arbitrary since it depends on thresholds selected for BCI and the interpretability of the produced visuals. 
-This method detects and assesses clusters by combining empirical visualization with quantitative measurements.
-
+<!--@pilhofer2012 show that Hammock plots "manage clusters and resolve data ties" well, especially when comparing data clusters.-->
 
 
 <!--[Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.-->
+The integration of Hammock Plots into grammar-based visualization frameworks further expanded their applicability. 
+hofmannCommonAnglePlots2013 incorporated Hammock Plots into the `ggparallel` package, providing a grammar-driven interface for visualizing multivariate categorical data. 
+This implementation preserved the foundational principles of parallel categorical displays while introducing capabilities for addressing edge cases, such as managing categorical ties and combining numerical and categorical data. 
+schonlau2024 built on these advancements, adapting Hammock Plots to generalize Parallel Coordinate Plots by replacing lines with box elements. 
+This modification leveraged box widths to represent the number of observations, enhancing their utility for both categorical and mixed data types. 
+Schonlau’s approach also tackled perceptual issues, such as the reverse line width illusion, by refining traditional Hammock Plot designs.
 
-The `ggparallel` package @hofmannCommonAnglePlots2013 provided a grammar-based interface for visualizing multivariate categorical data, implementing Hammock plots [@schonlau2024].
-This makes them better suited for data that has both category and numerical relationships. 
-This grammar-based adaptation retains the established behaviors of parallel categorical displays while providing additional options to handle edge cases like categorical ties. 
-<!-- This makes Hammock plots more flexible for use with large datasets. [Please don't conflate PCPs and hammock plots -- they're similar, but not the same thing]{.svp} 
-[Also, please don't cite arxiv papers when a peer-reviewed version exists -- e.g. Penguins go Parallel]{.svp}
+Hammock Plots and Common Angle Plots address similar visualization challenges but through distinct methodologies. 
+Hofmann’s Common Angle Plots (2013) introduced a constant angular structure to mitigate the line width illusion while maintaining visual continuity between categories. 
+By ensuring consistent angular connections, this method preserved marginal proportions and provided perceptually robust visualizations.
 
- [I would like to get rid of the section below and highlight the work "Hammock Plots: Visualizing Categorical and Numerical Variables" by Schonlau]{.db}
+Schonlau’s adaptations, on the other hand, emphasized flexibility across diverse data types. 
+By addressing both categorical and mixed data displays, Schonlau’s Hammock Plots underscored the importance of adaptability in visualization tools. 
+Despite their differing approaches, both methods shared a common goal: enhancing the accuracy and usability of visualizations for categorical and mixed data.
 
-@vanderplas2023 investigate more deeply how useful Hammock plots are for dealing with numerical ties in categorical datasets. 
-They show that "Hammock plots reduce overlap in tied data," which makes it easier to understand parallel coordinate plots. [I can't find this quote anywhere in the paper -- are you actually copying quotes from the paper when you quote things??? Please go back and review all quotes and make sure you can put a page number that's accurate -- otherwise, remove the quotes and rephrase -- but make sure you're accurate to the meaning!!.]{.svp}
-However, they also admit that these plots are "less effective for continuous data without ties or when categorical values are minimal," [This phrase does not exist in the paper!]{.svp} suggesting that Hammock plots offer limited benefits in uniformly distributed datasets. -->
-
-@hofmannCommonAnglePlots2013 worked on Common Angle Plots, and Schonlau added Hammock plots to improve categorical data display.
-However, they approached the problem in different ways. 
-@schonlau2024 Hammock Plots: Visualizing Categorical and Numerical Variables generalizes parallel coordinate plots by swapping lines with box elements. 
-The width of the boxes shows the number of observations, so they can be used for both categorical and mixed data. 
-By changing traditional Hammock plot designs, Schonlau deals with perceptual problems like the reverse line width illusion. 
-@hofmannCommonAnglePlots2013 also addresses the line width illusion, proposing Common Angle plots that use a constant angle to mitigate the line width illusion while maintaining visual continuity of the categories. 
-Hofmann's Common Angle Plots are unique because they use consistent angular links to fix problems when line slopes or widths are different. 
-This ensures that the visualizations are perceived accurately, preserving the marginal proportions while still connecting observations across parallel axes.
 <!-- XXX I would like to see more separation between hammock and common angle plots. To separate the two, read the papers from around when common angle plots were created and see what the common angle papers say about hammock plots, critique-wise. XXX -->
-Schonlau stresses the importance of being flexible with different data types, while Hofmann uses a consistent angular structure to clarify interpretations. 
-Together, these approaches show a shared desire to make categorical and mixed data displays more accurate and useful, using different but complementary methods.
-
+Hofmann and Schonlau’s contributions represent complementary advances in the visualization of multivariate categorical data. 
+Hofmann’s focus on perceptual clarity through angular consistency and Schonlau’s emphasis on adaptability illustrate two facets of the ongoing effort to refine data visualization techniques. 
+Together, these approaches reflect a shared commitment to overcoming traditional visualization challenges, paving the way for more accurate, intuitive, and versatile tools for understanding complex datasets.
 
 
 ### Alluvial plots & Sankey diagrams
@@ -578,14 +545,15 @@ ggplot(alluvial_data, aes(
 
 ```
 
-Alluvial plots are a powerful tool for visualizing flows and transitions in categorical data, capturing changes over time or across dimensions. 
-Their conceptual inspiration stems from stratified data representations, evoking imagery of sedimentation patterns in geology. 
-Popularized in the early 2000s, these plots have found applications in diverse fields, such as sociology and genomics, where understanding relationships and transitions within datasets is critical [@rosvall2008maps].
+Alluvial plots provide a compelling framework for visualizing flows and transitions within categorical data, capturing changes across dimensions or over time. 
+Inspired by stratified data representations, these plots evoke the imagery of sedimentation patterns in geology, reflecting layered and interconnected structures. 
+Since their popularization in the early 2000s, alluvial plots have gained widespread application across fields such as sociology and genomics, where understanding transitions and relationships within datasets is essential [@rosvall2008maps].
 
-The structure of alluvial plots centers around parallel axes that represent categorical dimensions, with bands connecting related elements across these axes. 
-The width of the bands may indicate magnitude or relative importance, but the primary focus is on qualitative transitions. 
-For instance, in bibliometrics, alluvial plots can illustrate the evolution of research topics, while in sociology, they depict migration patterns or demographic shifts [@bastiani2004]. 
-These visualizations are particularly valued for intuitively conveying complex categorical relationships.
+The design of alluvial plots is centered around parallel axes representing categorical dimensions, with connecting bands illustrating relationships between elements across these axes. 
+The width of these bands often reflects magnitude or relative importance, though the primary emphasis remains on the qualitative nature of transitions. 
+For example, in bibliometrics, alluvial plots effectively trace the evolution of research topics over time. 
+Similarly, in sociology, they have been used to visualize migration patterns or demographic changes [@bastiani2004]. 
+These plots intuitively convey intricate categorical relationships, offering a visually accessible means of interpreting complex datasets.
 
 
 **Sankey Diagrams**
@@ -629,122 +597,91 @@ ggplot(penguins_sankey, aes(x = x,
 ```
 
 
-Sankey diagrams, introduced in 1898 by M.H.P.R. Sankey during his study of steam engine efficiency, were initially devised to illustrate energy flows. 
-Over time, their scope has broadened to encompass resource allocations, material transfers, and financial systems, finding relevance in fields like environmental science, logistics, and economics [@schmidt1925].
+Sankey diagrams, first introduced by M.H.P.R. Sankey in 1898 during his analysis of steam engine efficiency, were initially designed to illustrate energy flows. 
+Over the years, their application has expanded significantly, encompassing areas such as resource allocations, material transfers, and financial systems. 
+These diagrams have found utility across diverse fields, including environmental science, logistics, and economics [@schmidt1925].
 
-The defining feature of a Sankey diagram is its proportional representation of flow magnitude. 
-Nodes, representing entities or processes, are connected by links whose widths correspond to the transferred quantity. 
-This emphasis on proportionality makes Sankey diagrams ideal for visualizing resource distributions, identifying inefficiencies, and analyzing systems with significant quantitative components. 
-For example, they are often used to track energy inputs and losses in power plants or to represent financial data [@tufte1983].
+The defining characteristic of a Sankey diagram is its proportional representation of flow magnitude. 
+Nodes, representing entities or processes, are connected by links, whose widths are scaled to reflect the quantity being transferred. 
+This proportional emphasis makes Sankey diagrams particularly well-suited for visualizing resource distributions, diagnosing inefficiencies, and analyzing complex systems with substantial quantitative components. 
+For instance, they are commonly employed to trace energy inputs and losses in power plants or to map the flow of financial resources [@tufte1983].
 
-Sankey diagrams and alluvial plots are data visualization techniques that differ in purpose and design. 
-Sankey diagrams focus on quantitative data flows, such as energy or resource transfers, whereas alluvial plots focus on categorical transitions and linkages. 
-They use nodes and proportional linkages to represent flow magnitude, whereas alluvial charts use parallel axes connected by bands to show categorical correlations. 
-Sankey diagrams are more suited to systems with numerical flows, such as energy analysis or financial tracking. 
-In contrast, alluvial plots are better suited to investigating trends in categorical data across dimensions. 
-Both visualizations are cross-disciplinary, scalable to various datasets, and provide considerable customization possibilities.
+Sankey diagrams and alluvial plots share a focus on flow visualization but differ in their primary purpose and design. 
+Sankey diagrams are optimized for representing quantitative data flows, such as energy or resource transfers, with a focus on the magnitude of connections. 
+In contrast, alluvial plots are designed to visualize transitions and correlations within categorical datasets, emphasizing relationships rather than quantities.
+
+The structural distinctions between these techniques further highlight their unique strengths. 
+Sankey diagrams use nodes and proportional links to depict numerical flows, making them invaluable in energy analysis, financial tracking, and logistics. 
+Conversely, alluvial plots rely on parallel axes and connecting bands to represent categorical correlations, enabling an intuitive understanding of trends across dimensions.
+
+Both visualizations are cross-disciplinary, scalable to diverse datasets, and offer extensive customization options. 
+Their complementary strengths make them powerful tools for exploring and interpreting complex data in both numerical and categorical domains.
+
+The transition from categorical parallel axis plots to mixed-type visualizations represents a significant evolution in data visualization, driven by the growing need to analyze and represent heterogeneous datasets simultaneously. 
+Traditional parallel axis plots were initially designed to handle numerical or categorical data independently, often limiting their utility when datasets contained both types. 
+The development of mixed-type plots addressed this limitation by incorporating flexible mechanisms to integrate numerical values with categorical groupings, ensuring a seamless representation across diverse dimensions. 
+Key innovations, such as dynamic axis scaling, combined use of lines and bands, and interactive filtering, have enhanced the capacity of these plots to capture complex relationships within mixed datasets. 
+These advancements allow users to analyze continuous trends alongside discrete transitions, making them particularly valuable in domains such as genomics, social sciences, and finance, where datasets frequently encompass numerical measurements and categorical classifications. 
+By bridging the gap between purely categorical and numerical representations, mixed-type visualizations extend the interpretive power of parallel axis plots, enabling more nuanced and comprehensive insights into multidimensional data.
 
 Then move into mixed type plots - 
 
 Hurley (2004) end link algorithm -- how does this relate?
- 
 
-<!-- Categorical Parallel Coordinate Plots (CPCPs) were created to handle the challenge of representing categorical data in PCPs, which are not suitable for continuous axis representation. -->
-CPCPs use discrete axis segments or unique markers for each category, transforming categorical variables into distinguishable visual elements.
-<!-- @siirtola2006 introduced axis segmentation, using markers and spacings to represent categorical values distinctly, improving categorical data visualization in PCPs. XXX I cannot figure out where in the 2006 paper this comes up - all the values seem to be numerical XXX --> 
-<!-- CPCPs seem to handle both categorical and numeric variables (extracat package, cpcp function - interactive, or scpcp for static plots) -->
-Specific strategies, like adjustments to the ends of links, have been suggested to enhance how category and numerical values are connected visually.
-This strategy enhances the interpretability of mixed data by modifying the plotting criteria for axes representing category variables.
+## Mixed Variable Data Parallel Representations
 
-@inselberg2009 enhanced this representation by introducing specific encodings, which allowed categories to be differentiated visually, preserving the PCP's interpretative power.
-@johansson2015 explored alternative segmentation methods to minimize visual clutter, enabling effective handling of multiple categorical values on the same axis.
+The evolution of Parallel Coordinate Plots (PCPs) from tools for numerical data visualization to instruments for mixed-type datasets reflects a rich history of advancements in data visualization. 
+This body of literature explores key contributions and methodologies that have extended PCPs to represent heterogeneous datasets comprising categorical and numerical attributes. 
+These developments build upon foundational optimization principles, such as those proposed by Hurley, and emphasize clustering, interactivity, and dimensionality reduction innovations to enhance readability, interpretability, and analytical depth.
 
-<!--CPCPs adjust by organizing categorical axes more clearly or using symbols and colors to represent categories for easier interpretation. [Is this actually a CPCP development, or did it just develop alongside the idea of CPCPs? It seems like it would apply to all PCP-variants.]{.svp}-->
+### Historical Foundations and Early Innovations
 
+@friendly2001 provide a comprehensive account of the evolution of statistical graphics, including parallel coordinate systems, tracing their origins to foundational thematic cartography. 
+By emphasizing the historical significance of statistical graphics in multivariate data visualization, their work sets the stage for subsequent innovations, including Hurley’s algorithms.
+@hurley2004 made a pivotal contribution by introducing the end-link algorithm, which optimizes variable ordering in parallel plots to enhance the clarity and interpretability of multidimensional datasets. T
+his foundational work has since informed modern parallel axis plots, enabling better cluster recognition and visual analytics.
 
-<!-- XXX None of these papers seem to be specifically related to CPCPs -- need to be very strict at distinguishing one type of thing from another. I'm not saying these aren't relevant, but if they are, put them somewhere else - right now, this section is more of a "junk drawer" in a kitchen than an organized space. XXX
-Designed to accommodate categorical data using methods including axis restructuring, symbols, and color-coding to increase clarity and comprehension, Categorical Parallel Coordinate Plots (CPCPs) are a development of Parallel Coordinate Plots (PCPs).
-Looking at the given papers, CPCPs come from more general ideas than from them straightforwardly.
-Although it does not particularly address categorical variables, @Wegman:1990 groundbreaking study on PCPs offers the mathematical underpinning for visualizing high-dimensional numerical data.
-Every PCP invention, including CPCPs, is built on this work.
-@leblanc1990 investigation of PCPs for assessing concurrent program performance emphasizes PCP adaptability but mainly focuses on numerical or sequential data rather than categorical data.
+### Application-Driven Advancements
 
-@holten2009's work on force-directed edge bundling aims to improve graph visualizations by lowering visual clutter, which guides the CPCP objectives of increasing interpretability.
-Though it has nothing to do with PCPs or categorical data, its primary goal is to make complex data visualizations more readable.
-Therefore, even if these papers specifically address CPCPs, they add to the larger conversation on developing multidimensional visualizing techniques.
+@prodan2004 extended the application of visualization techniques through ZENTURIO, a grid-computing tool that incorporates visualization methodologies inspired by parallel axis plots. 
+Their work highlights the adaptability of PCPs in optimization contexts, aligning with Hurley’s emphasis on multidimensional clarity. 
+Similarly, @sartorio2004 utilized parallel plots to examine the relationships between BMI, age, and muscular power output, demonstrating the relevance of PCPs in biomedical studies. 
+@hemming2004 employed parallel plotting methods to analyze geological and climate data, offering a practical application of Hurley’s clustering principles in environmental datasets. 
+These studies underscore the versatility of PCPs across domains, from healthcare to environmental science.
 
-Beyond categorical data, the CPCP innovations—axis structure and the use of symbols and colors—are relevant to additional PCP versions. 
-These ideas improve the interpretability of interactive PCPs, hybrid PCPs combining data kinds, and continuous PCPs. 
-CPCPs observe both a tool for categorical data but also larger progress in multidimensional data display.
--->
+### Mixed-Type PCPs: Expanding Dimensions
 
+@kwak2008 advanced PCPs by applying them to mixed-type datasets, linking categorical and numerical variables through correlation metrics. 
+This approach, grounded in Hurley’s optimization principles, improved the interpretive clarity of PCPs and extended their applicability to heterogeneous data. 
+@wang2022 further innovated with Set-Stat-Map, a mixed-type PCP method for spatial data visualization. 
+By clustering variables and grouping categorical attributes, this approach facilitated the integration of geospatial and numerical data, enhancing usability in geospatial contexts.
 
-<!--[@Wegman:1990]{.db} suggested using symbols and color codes to represent categories, improving how categorical data is understood in parallel coordinates.
-[@holten2009]{.db} introduced color gradients for categories to facilitate distinguishing between multiple categorical values, especially in the analysis of intricate datasets.
-[@leblanc1990]{.db} highlighted the significance of arranging axes in CPCPs, positioning categories with strong relationships closer together to assist users in making meaningful comparisons.-->
+### Optimizing High-Dimensional Data
 
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-hybrid
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Categorical and Hybrid in PCP"
-#| fig-width: 8
-#| fig-height: 6
-#| 
-# Remove rows with missing data from the dataset
-penguins_clean_cat <- penguins %>%
-  na.omit() %>%
-  select(-year)
+@arif2012 combined PCPs with similarity-dissimilarity metrics to highlight patterns in biomedical datasets, optimizing axes for classification accuracy and cluster separation. 
+@shaham2015 introduced tree-based methods for mapping mixed-type data into PCPs, emphasizing hierarchical relationships and employing clustering and dimensionality reduction techniques. 
+These works extend the capabilities of PCPs to manage high-dimensional data, particularly in domains where hierarchical or clustered relationships are critical.
 
-# Convert categorical variables to factors
-penguins_clean_cat <- penguins_clean_cat %>%
-  mutate(island = as.factor(island),
-         sex = as.factor(sex),
-         species = as.factor(species))
+#Interactive and Real-Time Exploration
 
-# Create a parallel coordinate plot using both numeric and categorical variables
+@garrison2021 emphasized interactivity in their Dimlift framework, incorporating dimensional bundling for real-time exploration of mixed-type and incomplete datasets. 
+By extending Hurley’s clustering techniques, Dimlift enabled dynamic adjustments to visualizations, fostering deeper analytical engagement. 
+@tortora2024 introduced probabilistic clustering methods for PCPs, blending probabilistic models with deterministic visualization approaches to handle hybrid datasets effectively.
 
-penguins_clean_cat %>%
-  pcp_select(2:7) %>%
-  pcp_scale(method="uniminmax") %>%
-  pcp_arrange() %>%
-  ggplot(aes_pcp()) +
-  geom_pcp_axes() +
-  geom_pcp(aes(colour = species)) +
-  ggplot2::theme_bw() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Categorical and Hybrid PCP") +
-  facet_wrap(~sex)+ 
-  guides(color = F) +
-  penguin_scale_color()
-```
+#Practical Applications and Broader Contexts
 
-The Generalized Parallel Coordinate Plot (GPCP) is a modified version of the original PCP that introduces 
-<!-- XXX??? nonlinear XXX -->
-changes to the axes [to allow for]{.svp} more complex data representation.
-<!-- These can show more complicated relationships in the data that might not be visible in a regular PCP. -->
-<!-- No, they allow categorical and numerical variables to be shown while maintaining the ability to distinguish single observations...  -->
-Nonlinear scales such as logarithmic and exponential transformations are possible.
+@jones2004 applied statistical visualizations akin to Hurley’s principles to diagnose renal obstructions, illustrating the role of PCPs in healthcare analytics. 
+@markwick2004 utilized parallel axis methods to model elevation and climate data for simulation experiments, demonstrating their utility in palaeoenvironmental research. 
+@gower2004 explored mathematical optimization techniques in data visualization, providing theoretical underpinnings that support PCP advancements.
 
+@ma2020 advanced generative modeling techniques for heterogeneous datasets, visualizing results through pairwise PCPs. 
+This approach merged data generation with visualization, aligning with optimization techniques inspired by Hurley. 
+Integrating generative models into PCPs highlights the potential for uncovering more profound insights into complex mixed datasets.
 
-<!-- Not sure where this should go, but it's not here....? -->
-<!-- @wegman1997a provide a comprehensive discussion of the GPCP idea stating, "The parallel coordinate plot is a geometric device for displaying points in high-dimensional spaces, in particular, for dimensions above three.  -->
-<!-- As such, it is a graphical alternative to the conventional scatterplot." -->
-<!-- The authors enable the visualization of data distributions, correlations, clusters, and higher-dimensional structures by connecting Cartesian and parallel coordinate representations. -->
-<!-- The "grand tour" idea is important for seeing how dynamic high-dimensional structures change over time because it allows data analysts to examine very large and very complex data sets.  -->
-<!-- This method avoids the problems of axis adjacency in PCPs by constantly rotating the data axes.  -->
-<!-- It ensures that every possible combination of variables is explored dynamically. -->
-<!-- These new ideas greatly improve the ease and usefulness of PCPs, making them more useful in many situations and giving us tools for exploring and analyzing data in the modern world, [@wegman1997]. -->
-
-
-
-
-
-
-## Mixed Variable Parallel Representations
-
-
+These contributions collectively showcase Parallel Coordinate Plots' versatility and adaptability in visualizing mixed-type datasets. 
+By incorporating principles of clustering, optimization, and interactivity, researchers have enhanced the utility of PCPs across diverse domains, from biomedical diagnostics to geospatial analysis. 
+Integrating probabilistic and generative models further underscores the potential for future advancements, paving the way for more intuitive and powerful visualization tools. 
+These innovations build upon Hurley’s foundational work, reinforcing PCPs as indispensable instruments for exploring multidimensional data and uncovering hidden insights.
 
 
 ## Bundling and Curving
@@ -1156,6 +1093,28 @@ Parallel sets are also useful for instruction and analysis since their combinati
 <!-- XXX then demonstrate this, rather than just stating it as a fact. Why are they useful for instruction and analysis? This sentence doesn't make that much sense ...  -->
 Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
 <!-- XXX these are two different ideas - categories, and axis selection/ordering. Let's keep them separate and not conflate them. XXX -->
+
+<!-- XXX I think below this point should go into an optimization section XXX -->
+Key strategies comprise clustering visualization, which employs algorithms to reorder rows and columns, obtain a pseudo-diagonal form, and resolve data connections via optimal sorting algorithms like the Weighted Bertin Classification Criteria (WBCC). 
+In graphical displays, these techniques minimize crossing lines or misalignments and maximize concordance.
+Optimized displays of clustering results, using the “Ecotest dataset,” show how ordering methods enhance cluster identification, @pilhofer2012a.
+The paper also offers an evidence-based method, using measures such as the Bertin Classification Criteria (BCC) to evaluate graphical order, supported by computational tests.
+Both theoretical considerations and actual data support the assertions regarding Hammock plots controlling clusters and tying off conflicts. 
+<!--[Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}-->
+<!--This is especially helpful in datasets that contain overlapping lines, which can be hard to due to  [Why are they hard to see?]{.svp}  because Hammock plots make it easier to separate the data. -->
+
+Still, @pilhofer2012 points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
+They suggest that Hammock plots work best for datasets with clear clusters.
+Both visual and computational methods help to find definite clustering in the content. 
+The main technique is pseudo-diagonalization, in which rows and columns of a data matrix are rearranged to visually show clusters by combining similar entries. 
+This technique is compared by a top-down partitioning method, which clusters the data using measurements such as Kendall's $\tau$ or the Bertin Classification Criteria (BCC), determining ideal cut spots in rows and columns. 
+The BCC, which computes the difference between conforming and non-conforming pairings to gauge the alignment of matrix entries with a pseudo-diagonal form, is one of the metrics to evaluate clustering clarity. 
+The Weighted Bertin Classification Criteria (WBCC) emphasizes the proximity of data points and improves this by using distance-based weights; the Bertin Classification Index (BCI) scales the BCC to gauge the strength of the link between clusters. 
+BCI provides a consistent approach to evaluating datasets, with values ranging from 0 (perfectly aligned clusters) to 1 (indicating no clustering). 
+The main evaluation criterion for clarity is the degree to which the matrix resembles a block-diagonal structure; low BCI values imply unambiguous clusters, while high values indicate indistinct or overlapping groupings. 
+The paper also underlines the need for visual inspection, in which visually distinct and well-separated blocks in matrix plots—such as those shown in the Ecotest dataset examples—characterize clear grouping. 
+Still, clarity is very arbitrary since it depends on thresholds selected for BCI and the interpretability of the produced visuals. 
+This method detects and assesses clusters by combining empirical visualization with quantitative measurements.
 
 
 
