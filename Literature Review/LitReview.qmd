@@ -41,6 +41,9 @@ library(ggparallel)
 library(ggalluvial)
 library(ggsankey)
 library(ggforce)
+library(htmlwidgets)
+library(webshot2)
+library(networkD3)
 theme_set(theme_bw())
 
 penguin_scale_color <-   function(...) scale_color_manual(
@@ -353,7 +356,7 @@ ggplot(data_parallel, aes(x = x, id = id, split = y, value = count)) +
 
 Parallel Sets, designed to visualize multidimensional relationships in numerical data, trace their origins to Parallel Coordinate Plots, first introduced by Alfred Inselberg in the 1950s. 
 The adaptation for categorical data emerged in the late 1990s under Daniel Keim's and collaborators' leadership, addressing the growing need for tools capable of handling non-numerical datasets. 
-Subsequent refinements, particularly by @kosara2006, emphasized intuitive designs that improved the interpretability of complex relationships. 
+Subsequent refinements, particularly by @kosara2006parallel, emphasized intuitive designs that improved the interpretability of complex relationships. 
 These advancements marked a significant step in broadening the scope of multidimensional visualization methods.
 
 The 2010s witnessed a transformative era for Parallel Sets through dynamic and interactive computational tools such as D3.js and Matplotlib. 
@@ -552,7 +555,6 @@ Since their popularization in the early 2000s, alluvial plots have gained widesp
 The design of alluvial plots is centered around parallel axes representing categorical dimensions, with connecting bands illustrating relationships between elements across these axes. 
 The width of these bands often reflects magnitude or relative importance, though the primary emphasis remains on the qualitative nature of transitions. 
 For example, in bibliometrics, alluvial plots effectively trace the evolution of research topics over time. 
-Similarly, in sociology, they have been used to visualize migration patterns or demographic changes [@bastiani2004]. 
 These plots intuitively convey intricate categorical relationships, offering a visually accessible means of interpreting complex datasets.
 
 
@@ -562,49 +564,72 @@ These plots intuitively convey intricate categorical relationships, offering a v
 #| echo: false
 #| warning: false
 #| message: false
-#| eval: false
 #| label: fig-sankey
 #| layout-valign: bottom
 #| fig-cap: "A Sankey Diagram"
 #| fig-width: 8
 #| fig-height: 6
 
-# Remove rows with missing values
-penguins_clean <- na.omit(penguins)
+#  Load and preprocess the penguins dataset
+data <- na.omit(penguins) # Remove rows with missing values
 
-# Create a tidy data frame with relevant variables
-penguins_sankey <- penguins_clean  %>%
-  group_by(species, island, sex) %>%
-  summarise(count = n()) %>%
-  make_long(species, island, sex)
+# Create a summary dataset for the Sankey Diagram
+summary_data <- data %>%
+  count(species, island, sex, name = "count") %>%
+  ungroup()
 
-# Create Sankey plot
-ggplot(penguins_sankey, aes(x = x, 
-                            next_x = next_x, 
-                            node = node, 
-                            next_node = next_node)) +
-  geom_sankey(aes(fill = node), alpha = 0.8) +
-  geom_sankey_label(aes(label = node), size = 3, color = "white") +
-  penguin_scale_fill() +
-  theme_sankey(base_size = 16) +
-  labs(
-    title = "Parallel Set Plot of Penguins Dataset",
-    x = "Attributes",
-    y = "Count",
-    fill = "Species"
-  )
+# Prepare nodes
+nodes <- data.frame(
+  name = unique(c(summary_data$species, summary_data$island, summary_data$sex))
+)
 
+# Prepare links
+links <- summary_data %>%
+  mutate(
+    source = match(species, nodes$name) - 1,
+    target1 = match(island, nodes$name) - 1,
+    target2 = match(sex, nodes$name) - 1
+  ) %>%
+  select(source, target1, target2, count)
+
+# Separate links for species -> island and island -> sex
+links_species_to_island <- links %>%
+  select(source, target = target1, value = count)
+
+links_island_to_sex <- links %>%
+  select(source = target1, target = target2, value = count)
+
+# Combine all links
+links_combined <- bind_rows(links_species_to_island, links_island_to_sex)
+
+# Create the Sankey Diagram
+sankey <- sankeyNetwork(
+  Links = links_combined,
+  Nodes = nodes,
+  Source = "source",
+  Target = "target",
+  Value = "value",
+  NodeID = "name",
+  fontSize = 12,
+  nodeWidth = 30
+)
+
+#ggsave("images/sankey.png", sankey)
+# Save the Sankey Diagram as an HTML widget and capture it as an image
+saveWidget(sankey, "sankey.html")
+webshot("sankey.html", "images/sankey.png")
+
+#knitr::include_graphics("/Users/dbradford4/Documents/GitHub/Dissertation-Data/Literature Review/images/sankey.png")
 ```
 
-
-Sankey diagrams, first introduced by M.H.P.R. Sankey in 1898 during his analysis of steam engine efficiency, were initially designed to illustrate energy flows. 
+Sankey diagrams, first introduced by @kennedy1898thermal during his analysis of steam engine efficiency, were initially designed to illustrate energy flows. 
 Over the years, their application has expanded significantly, encompassing areas such as resource allocations, material transfers, and financial systems. 
-These diagrams have found utility across diverse fields, including environmental science, logistics, and economics [@schmidt1925].
+These diagrams have found utility across diverse fields, including environmental science, logistics, and economics. <!--[@schmidt1925].-->
 
 The defining characteristic of a Sankey diagram is its proportional representation of flow magnitude. 
 Nodes, representing entities or processes, are connected by links, whose widths are scaled to reflect the quantity being transferred. 
 This proportional emphasis makes Sankey diagrams particularly well-suited for visualizing resource distributions, diagnosing inefficiencies, and analyzing complex systems with substantial quantitative components. 
-For instance, they are commonly employed to trace energy inputs and losses in power plants or to map the flow of financial resources [@tufte1983].
+For instance, they are commonly employed to trace energy inputs and losses in power plants or to map the flow of financial resources [@tufte1983visual].
 
 Sankey diagrams and alluvial plots share a focus on flow visualization but differ in their primary purpose and design. 
 Sankey diagrams are optimized for representing quantitative data flows, such as energy or resource transfers, with a focus on the magnitude of connections. 
@@ -624,9 +649,9 @@ Key innovations, such as dynamic axis scaling, combined use of lines and bands, 
 These advancements allow users to analyze continuous trends alongside discrete transitions, making them particularly valuable in domains such as genomics, social sciences, and finance, where datasets frequently encompass numerical measurements and categorical classifications. 
 By bridging the gap between purely categorical and numerical representations, mixed-type visualizations extend the interpretive power of parallel axis plots, enabling more nuanced and comprehensive insights into multidimensional data.
 
-Then move into mixed type plots - 
+<!--Then move into mixed type plots - 
 
-Hurley (2004) end link algorithm -- how does this relate?
+Hurley (2004) end link algorithm -- how does this relate?-->
 
 ## Mixed Variable Data Parallel Representations
 
@@ -636,45 +661,43 @@ These developments build upon foundational optimization principles, such as thos
 
 ### Historical Foundations and Early Innovations
 
-@friendly2001 provide a comprehensive account of the evolution of statistical graphics, including parallel coordinate systems, tracing their origins to foundational thematic cartography. 
+@friendly2001milestones provide a comprehensive account of the evolution of statistical graphics, including parallel coordinate systems, tracing their origins to foundational thematic cartography. 
 By emphasizing the historical significance of statistical graphics in multivariate data visualization, their work sets the stage for subsequent innovations, including Hurley’s algorithms.
-@hurley2004 made a pivotal contribution by introducing the end-link algorithm, which optimizes variable ordering in parallel plots to enhance the clarity and interpretability of multidimensional datasets. T
-his foundational work has since informed modern parallel axis plots, enabling better cluster recognition and visual analytics.
+@hurley2004clustering made a pivotal contribution by introducing the end-link algorithm, which optimizes variable ordering in parallel plots to enhance the clarity and interpretability of multidimensional datasets. 
+This foundational work has since informed modern parallel axis plots, enabling better cluster recognition and visual analytics.
 
 ### Application-Driven Advancements
 
-@prodan2004 extended the application of visualization techniques through ZENTURIO, a grid-computing tool that incorporates visualization methodologies inspired by parallel axis plots. 
-Their work highlights the adaptability of PCPs in optimization contexts, aligning with Hurley’s emphasis on multidimensional clarity. 
-Similarly, @sartorio2004 utilized parallel plots to examine the relationships between BMI, age, and muscular power output, demonstrating the relevance of PCPs in biomedical studies. 
-@hemming2004 employed parallel plotting methods to analyze geological and climate data, offering a practical application of Hurley’s clustering principles in environmental datasets. 
+@sartorio2004influence utilized parallel plots to examine the relationships between BMI, age, and muscular power output, demonstrating the relevance of PCPs in biomedical studies. 
+@hemming2004heinrich employed parallel plotting methods to analyze geological and climate data, offering a practical application of Hurley’s clustering principles in environmental datasets. 
 These studies underscore the versatility of PCPs across domains, from healthcare to environmental science.
 
 ### Mixed-Type PCPs: Expanding Dimensions
 
-@kwak2008 advanced PCPs by applying them to mixed-type datasets, linking categorical and numerical variables through correlation metrics. 
+@kwak2008parallel advanced PCPs by applying them to mixed-type datasets, linking categorical and numerical variables through correlation metrics. 
 This approach, grounded in Hurley’s optimization principles, improved the interpretive clarity of PCPs and extended their applicability to heterogeneous data. 
-@wang2022 further innovated with Set-Stat-Map, a mixed-type PCP method for spatial data visualization. 
+@wang2022set further innovated with Set-Stat-Map, a mixed-type PCP method for spatial data visualization. 
 By clustering variables and grouping categorical attributes, this approach facilitated the integration of geospatial and numerical data, enhancing usability in geospatial contexts.
 
 ### Optimizing High-Dimensional Data
 
-@arif2012 combined PCPs with similarity-dissimilarity metrics to highlight patterns in biomedical datasets, optimizing axes for classification accuracy and cluster separation. 
-@shaham2015 introduced tree-based methods for mapping mixed-type data into PCPs, emphasizing hierarchical relationships and employing clustering and dimensionality reduction techniques. 
+@arif2012similarity combined PCPs with similarity-dissimilarity metrics to highlight patterns in biomedical datasets, optimizing axes for classification accuracy and cluster separation. 
+@shaham2015visualizing introduced tree-based methods for mapping mixed-type data into PCPs, emphasizing hierarchical relationships and employing clustering and dimensionality reduction techniques. 
 These works extend the capabilities of PCPs to manage high-dimensional data, particularly in domains where hierarchical or clustered relationships are critical.
 
-#Interactive and Real-Time Exploration
+### Interactive and Real-Time Exploration
 
-@garrison2021 emphasized interactivity in their Dimlift framework, incorporating dimensional bundling for real-time exploration of mixed-type and incomplete datasets. 
+@garrison2021dimlift emphasized interactivity in their Dimlift framework, incorporating dimensional bundling for real-time exploration of mixed-type and incomplete datasets. 
 By extending Hurley’s clustering techniques, Dimlift enabled dynamic adjustments to visualizations, fostering deeper analytical engagement. 
-@tortora2024 introduced probabilistic clustering methods for PCPs, blending probabilistic models with deterministic visualization approaches to handle hybrid datasets effectively.
+@tortora2024fpdclustering introduced probabilistic clustering methods for PCPs, blending probabilistic models with deterministic visualization approaches to handle hybrid datasets effectively.
 
-#Practical Applications and Broader Contexts
+### Practical Applications and Broader Contexts
 
-@jones2004 applied statistical visualizations akin to Hurley’s principles to diagnose renal obstructions, illustrating the role of PCPs in healthcare analytics. 
-@markwick2004 utilized parallel axis methods to model elevation and climate data for simulation experiments, demonstrating their utility in palaeoenvironmental research. 
-@gower2004 explored mathematical optimization techniques in data visualization, providing theoretical underpinnings that support PCP advancements.
+@jones2004renal applied statistical visualizations akin to Hurley’s principles to diagnose renal obstructions, illustrating the role of PCPs in healthcare analytics. 
+@markwick2004palaeo utilized parallel axis methods to model elevation and climate data for simulation experiments, demonstrating their utility in palaeoenvironmental research. 
+@gower2004procrustes explored mathematical optimization techniques in data visualization, providing theoretical underpinnings that support PCP advancements.
 
-@ma2020 advanced generative modeling techniques for heterogeneous datasets, visualizing results through pairwise PCPs. 
+@ma2020vaem advanced generative modeling techniques for heterogeneous datasets, visualizing results through pairwise PCPs. 
 This approach merged data generation with visualization, aligning with optimization techniques inspired by Hurley. 
 Integrating generative models into PCPs highlights the potential for uncovering more profound insights into complex mixed datasets.
 
