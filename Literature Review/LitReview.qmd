@@ -58,19 +58,19 @@ penguin_scale_fill <-   function(...) scale_fill_manual(
 
 <!--[I think the thing to do in the introduction is describe the problem of both large $n$ and large $p$ data; then state that your focus will primarily be on ways to work with data that has $p\geq 4$ and $n\geq 50$ to enhance our ability to visually detect patterns across multiple dimensions. You can introduce PCPs as a way to track a single observation across multiple dimensions, and then you can narrow down your focus into the problem of ties and how they disrupt the ability to keep track of a single observation.]{.svp}-->
 
-[In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. 
+In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. 
 High-dimensional data, where $p \geq 4$ and $n \geq 50$, is increasingly common in genomics, finance, and social sciences domains. 
 Analyzing such data often requires methods that enhance interpretability while preserving the intricate relationships within the data. 
-However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.]{.db}
+However, the scale of observations and variables can obscure meaningful patterns and impede traditional visualization techniques.
 
-[Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. 
+Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. 
 Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@velagala2020]. 
 Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. 
-These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.]{.db}
+These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.
 
-[Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. 
+Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. 
 PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg1985]. 
-By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.]{.db} 
+By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.
 These plots are especially good at showing relationships and trends between multiple factors. 
 However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. 
 This can cause important information to be lost in the research. 
@@ -235,9 +235,8 @@ When combined with user training and interactive visualization techniques, PCPs 
 
 # Multidimesnional Data Visualization Timeline
 
-With the increasing complexity and variety of data, visualization has emerged as a critical tool for analyzing and conveying intricate datasets. 
 From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
-This literature review delves into the historical development and interconnections among several key visualization techniques—Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and various adaptations of Parallel Coordinate Plots. 
+This section delves into the historical development and interconnections among several key visualization techniques—Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and various adaptations of Parallel Coordinate Plots. 
 These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges.
 
 ## Early Foundations: Statistical Graphics in the 19th Century
