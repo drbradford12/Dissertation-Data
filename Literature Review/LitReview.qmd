@@ -660,6 +660,20 @@ These innovations build upon Hurley’s foundational work, reinforcing PCPs as i
 
 # Perceptual Challenges with PCPs
 
+Parallel Coordinate Plots (PCPs) have become increasingly useful yet sophisticated ways to show high-dimensional correlations as datasets become more complicated and multidimensional. 
+Still, the inherent difficulties of PCPs—from visual clutter and perceptual biases to cognitive and computational demands—continue to restrict their accessibility and efficacy.
+
+The interaction of technical details of visualization design with cognitive processes, including perception and attention, is a vast field of research. 
+Insights from cognitive psychology, human-computer interaction, and statistical graphics emphasize the need for careful methods that address user heterogeneity and design constraints. 
+These developments, which address problems such as line-width illusions and clutter and incorporate immersive technology, highlight the necessity of merging technical developments with user-centered strategies.
+
+While these advancements solve many issues related to PCPs, they also highlight an even more general opportunity: improving PCPs to make them more scalable, efficient, and understandable. 
+We can approach thoroughly realizing PCPs in high-dimensional data visualization by investigating methods that include dimensionality reduction, subspace projections, and rendering improvements. 
+This shift toward optimization represents the next phase in PCP advancement, broadening their applicability for even more challenging analytical assignments.
+
+In the following section, we explore optimization techniques that improve PCP performance and scalability and open the path for a new generation of high-dimensional visualization tools.
+
+
 ## Balancing Accuracy and Comprehensibility in Data Visualization
 
 The accuracy of data interpretation is highest when working directly with numerical values or one-dimensional visual representations, as noted by @spence1990. 
@@ -811,78 +825,6 @@ From computational techniques to algorithmic advancements, these strategies prom
 
 # Optimization of PCPs
 
-<!-- This parsetgnostics paper is a riff on the pargnostics paper by Dasgupta/Kosara in 2010... I would discuss both papers in a subsection labeled "Optimization" or something like that... but first you'll need to demonstrate that ordering matters in both the order of the lines within categories, the order of the axes, and the drawing order (what lands on top?) with examples.-->
-@dennig2021parsetgnostics introduced "ParSetgnostics," a set of quality metrics to reduce visual clutter in parallel sets​. 
-Metrics like overlap, ribbon width variance, and mutual information optimize dimension and category ordering, significantly improving visualizations' interpretability; for instance, applying these metrics reduced clutter by up to 81% in test cases.
-Parallel sets are also useful for instruction and analysis since their combination of statistical summaries and category flow analysis reveals a deeper understanding. 
-<!-- XXX then demonstrate this, rather than just stating it as a fact. Why are they useful for instruction and analysis? This sentence doesn't make that much sense ...  -->
-Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
-<!-- XXX these are two different ideas - categories, and axis selection/ordering. Let's keep them separate and not conflate them. XXX -->
-
-<!-- XXX I think below this point should go into an optimization section XXX -->
-Key strategies comprise clustering visualization, which employs algorithms to reorder rows and columns, obtain a pseudo-diagonal form, and resolve data connections via optimal sorting algorithms like the Weighted Bertin Classification Criteria (WBCC). 
-In graphical displays, these techniques minimize crossing lines or misalignments and maximize concordance.
-Optimized displays of clustering results, using the “Ecotest dataset,” show how ordering methods enhance cluster identification, @pilhofer2012a.
-The paper also offers an evidence-based method, using measures such as the Bertin Classification Criteria (BCC) to evaluate graphical order, supported by computational tests.
-Both theoretical considerations and actual data support the assertions regarding Hammock plots controlling clusters and tying off conflicts. 
-<!--[Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}-->
-<!--This is especially helpful in datasets that contain overlapping lines, which can be hard to due to  [Why are they hard to see?]{.svp}  because Hammock plots make it easier to separate the data. -->
-
-Still, @pilhofer2012 points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
-They suggest that Hammock plots work best for datasets with clear clusters.
-Both visual and computational methods help to find definite clustering in the content. 
-The main technique is pseudo-diagonalization, in which rows and columns of a data matrix are rearranged to visually show clusters by combining similar entries. 
-This technique is compared by a top-down partitioning method, which clusters the data using measurements such as Kendall's $\tau$ or the Bertin Classification Criteria (BCC), determining ideal cut spots in rows and columns. 
-The BCC, which computes the difference between conforming and non-conforming pairings to gauge the alignment of matrix entries with a pseudo-diagonal form, is one of the metrics to evaluate clustering clarity. 
-The Weighted Bertin Classification Criteria (WBCC) emphasizes the proximity of data points and improves this by using distance-based weights; the Bertin Classification Index (BCI) scales the BCC to gauge the strength of the link between clusters. 
-BCI provides a consistent approach to evaluating datasets, with values ranging from 0 (perfectly aligned clusters) to 1 (indicating no clustering). 
-The main evaluation criterion for clarity is the degree to which the matrix resembles a block-diagonal structure; low BCI values imply unambiguous clusters, while high values indicate indistinct or overlapping groupings. 
-The paper also underlines the need for visual inspection, in which visually distinct and well-separated blocks in matrix plots—such as those shown in the Ecotest dataset examples—characterize clear grouping. 
-Still, clarity is very arbitrary since it depends on thresholds selected for BCI and the interpretability of the produced visuals. 
-This method detects and assesses clusters by combining empirical visualization with quantitative measurements.
-
-
-
-The integration of interactive features has significantly improved the utility and flexibility of parallel coordinate plots (PCPs). 
-These enhancements allow users to dynamically reorder axes, filter data based on specified criteria, and invert axes to view data from different perspectives. 
-Brushing and connecting highlight specific data points across axes while filtering reduces clutter by hiding irrelevant lines. 
-These capabilities facilitate real-time data analysis, enabling users to uncover patterns and correlations intuitively. 
-Interactive PCPs are particularly valuable for exploratory data analysis, especially when dealing with large and complex datasets.
-
-@heinrich2013's State of the Art of Parallel Coordinates provides a comprehensive review of PCP visualization techniques, categorizing them into a taxonomy of approaches. 
-The study highlights modeling methods, visualizing, and interacting with PCPs, emphasizing their applications in knowledge discovery tasks like sorting, clustering, and regression. 
-Key advancements include geometric modeling, interpolation techniques, point-line duality, and foundational principles of PCPs. 
-Further innovations discussed include density-based visualizations, improved axis ordering, and interactive techniques such as brushing and bundling, which address challenges like overplotting and poor axis arrangements.
-
-The study also explores practical applications of PCPs in engineering and life sciences, underscoring their adaptability for high-dimensional data analysis. 
-Techniques like clustering, density estimation, and interactive filtering enhance data exploration, enabling users to map patterns through curves, shapes, and density plots.
-
-Interactive features in PCPs have revolutionized how users interact with high-dimensional datasets. Tools like brushing, linking, and filtering allow precise and focused analysis. 
-These capabilities help users engage intuitively with data, selectively highlighting areas of interest to identify patterns and generate hypotheses. 
-Real-time interaction, such as reordering axes or filtering data points, makes large datasets more manageable and supports discovery.
-
-The early groundwork for interactive PCPs was laid by @Wegman:1990, who introduced fundamental techniques for multidimensional data interaction. 
-Building on this foundation, @siirtola2006 implemented brushing and linking to improve dimensional analysis, allowing for easier comparisons across attributes in large datasets. 
-@inselberg2009 further expanded these tools, introducing dynamic filtering and axis rearrangement, enabling users to tailor PCP visualizations to their needs.
-
-While interactivity enhances insight, it can also introduce challenges. 
-Increased complexity can overwhelm novice users and demand higher computational resources, potentially slowing analysis in high-dimensional datasets. 
-As @inselberg2009 noted, the cognitive load of multi-step filtering and interaction can lead to user fatigue. 
-Addressing this balance requires careful interface design to ensure that interactive features remain accessible and intuitive.
-
-Modern implementations, such as the live parallel coordinate plots on Plotly's ggplot2 platform, demonstrate how interactivity can streamline data analysis. 
-Users can filter and separate data ranges by moving their mouse across parallel axes, with tooltips providing detailed information about individual data points. 
-Drag-and-drop axis reordering allows users to adjust dimensions to uncover hidden patterns and correlations. 
-Brushing options dynamically emphasize relevant data paths, making trends and outliers visible while downplaying less critical information [@plotly-pcp]. 
-
-[Interactive Parallel Coordinate Plot](https://plotly.com/ggplot2/parallel-coordinates-plot/)
-
-Interactive PCPs continue to evolve, offering increasingly intuitive and adaptable methods for high-dimensional data exploration. 
-By combining dynamic features like axis reordering, filtering, and brushing, PCPs enable users to extract meaningful insights from complex datasets. 
-However, balancing usability with computational demands and minimizing user fatigue remain ongoing challenges. 
-Future developments will likely focus on enhancing user interfaces and optimizing algorithms to make interactive PCPs more efficient and accessible for a broader range of users and applications.
-
-
 ## Reordering and Axis Flipping
 
 Adaptive reordering and axis flipping are essential techniques for simplifying the analysis of multidimensional relationships in parallel coordinate plots (PCPs). 
@@ -980,7 +922,170 @@ This limitation underscores the trade-offs of PCPs: while reordering and axis fl
 The figure demonstrates the power of these adaptive techniques to make species-based correlations more apparent, even as challenges in visualizing fine-grained details persist. 
 Combining these strategies with additional methods, such as filtering or clustering, further enhances the utility of PCPs for analyzing complex datasets.
 
+## Pargnostics
+<!-- This parsetgnostics paper is a riff on the pargnostics paper by Dasgupta/Kosara in 2010... I would discuss both papers in a subsection labeled "Optimization" or something like that... but first you'll need to demonstrate that ordering matters in both the order of the lines within categories, the order of the axes, and the drawing order (what lands on top?) with examples.-->
 
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-pargnostics
+#| layout-valign: bottom
+#| fig-width: 8
+#| fig-height: 8
+#| layout-ncol: 2
+
+# Load and prepare the penguins dataset
+data <- palmerpenguins::penguins %>%
+  select(species, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g) %>%
+  na.omit()
+#par(mfrow = c(2, 2))
+
+# Standardize numerical columns for better PCP visualization
+data_scaled <- data %>%
+  mutate(across(where(is.numeric), scale))
+
+# Default axis order
+ggparcoord(data_scaled,
+           columns = 2:5,
+           groupColumn = 1,
+           title = "Parallel Coordinate Plot with Default Axis Order") + 
+  penguin_scale_color() +
+  guides(color = F)
+
+# Reordered axes to emphasize correlations
+ggparcoord(data_scaled,
+           columns = c(2, 4, 5, 3), # Reordering axes
+           groupColumn = 1,
+           title = "Reordered Axes to Emphasize Correlations") + 
+  penguin_scale_color() +
+  guides(color = F)  
+
+
+# Highlight a specific species by ordering lines
+data_ordered <- data_scaled %>%
+  arrange(species) # Sorting by species
+
+ggparcoord(data_ordered,
+           columns = 2:5,
+           groupColumn = 1,
+           title = "Parallel Coordinate Plot with Ordered Lines") + 
+  penguin_scale_color() +
+  guides(color = F)
+
+# Apply alpha transparency for better handling of dense overplotting
+ggparcoord(data_scaled,
+           columns = 2:5,
+           groupColumn = 1,
+           alphaLines = 0.4, # Adding transparency
+           title = "Parallel Coordinate Plot with Transparency to Mitigate Overplotting") + 
+  penguin_scale_color() +
+  guides(color = F) 
+
+
+#grid.arrange(og_plot, reord_plot, ordered_lines,trans_plot, ncol = 2)
+
+```
+
+@fig-pargnostics-1 shows the default axis arrangement without optimization. 
+While the data is represented faithfully, the lack of deliberate axis order makes it challenging to discern meaningful relationships or clusters due to overlapping lines and clutter.
+
+The order of axes in a PCP is a primary determinant of clarity. 
+@dasgupta2010 introduced Pargnostics, a framework leveraging screen-space metrics to optimize axis arrangements. 
+Pargnostics helps identify axis sequences that emphasize meaningful relationships between variables by focusing on metrics like clutter reduction and outlier detection. 
+For instance, swapping adjacent axes can unveil previously obscured correlations, enabling users to discern patterns and trends better. 
+This technique has proven effective across diverse applications, including climate data analysis and medical diagnostics, where understanding variable interdependencies is paramount. 
+By reordering the axes based on meaningful relationships between variables, @fig-pargnostics-2 highlights correlations that were previously obscured. 
+For example, adjacent placement of highly correlated dimensions simplifies the identification of patterns, making trends more accessible to the observer.
+
+In addition to axis ordering, the arrangement of lines within PCPs plays a crucial role in mitigating visual clutter and improving pattern visibility. 
+As developed by Dasgupta and Kosara (2011), adaptive sorting techniques use clustering algorithms to reorder lines dynamically. 
+By prioritizing critical data subsets and de-emphasizing less relevant observations, these methods enable users to focus on regions of interest while maintaining the integrity of the broader dataset. 
+This approach is particularly valuable in high-density datasets, where overlapping lines obscure important relationships. 
+@fig-pargnostics-3 showcases line ordering based on clustering techniques. 
+Critical data subsets are prioritized, with similar trajectories grouped together to reduce visual clutter and emphasize key patterns. 
+This approach enhances the viewer's ability to focus on important data points while preserving overall dataset integrity.
+
+The drawing order of lines in PCPs determines which data points are most visible in overlapping regions. 
+@review emphasized the importance of visualization layering, where higher-priority lines are drawn on top to prevent occlusion by less critical data. 
+Techniques such as transparency adjustments and overplotting mitigation further enhance legibility, ensuring that essential patterns and outliers remain prominent. 
+These methods allow users to navigate complex datasets more precisely, even when dealing with dense or highly variable data.
+
+Integrating line and axis ordering strategies creates a synergistic effect, optimizing cluster detection and correlation identification. 
+@firat2023 demonstrate the effectiveness of these combined approaches in ensemble data visualization and anomaly detection. 
+These methods achieve a higher degree of clarity and functionality by simultaneously addressing axes and line arrangements, making PCPs more versatile and impactful across various fields.
+Adjusting line transparency effectively mitigates the effects of overplotting in dense datasets, @fig-pargnostics-4. 
+Subtle variations in opacity help to reveal underlying structures and clusters, ensuring that both prominent and less frequent patterns remain visible without overwhelming the visualization.
+
+
+@dennig2021parsetgnostics introduced "ParSetgnostics," a set of quality metrics to reduce visual clutter in parallel sets. 
+Metrics like overlap, ribbon width variance, and mutual information optimize dimension and category ordering, significantly improving visualizations' interpretability; for instance, applying these metrics reduced clutter by up to 81% in test cases.
+Parallel sets are also useful for instruction and analysis since their combination of statistical summaries and category flow analysis reveals a deeper understanding. 
+<!-- XXX then demonstrate this, rather than just stating it as a fact. Why are they useful for instruction and analysis? This sentence doesn't make that much sense ...  -->
+Combining categories and automating axis selections guarantees that parallel sets stay scalable, therefore matching the aim of reducing the number of possible combinations produced on display without compromising data integrity.
+<!-- XXX these are two different ideas - categories, and axis selection/ordering. Let's keep them separate and not conflate them. XXX -->
+
+<!-- XXX I think below this point should go into an optimization section XXX -->
+Key strategies comprise clustering visualization, which employs algorithms to reorder rows and columns, obtain a pseudo-diagonal form, and resolve data connections via optimal sorting algorithms like the Weighted Bertin Classification Criteria (WBCC). 
+In graphical displays, these techniques minimize crossing lines or misalignments and maximize concordance.
+Optimized displays of clustering results, using the “Ecotest dataset,” show how ordering methods enhance cluster identification, @pilhofer2012a.
+The paper also offers an evidence-based method, using measures such as the Bertin Classification Criteria (BCC) to evaluate graphical order, supported by computational tests.
+Both theoretical considerations and actual data support the assertions regarding Hammock plots controlling clusters and tying off conflicts. 
+<!--[Show how? Is there an experiment? Or is this just a claim based on intuition?]{.svp}-->
+<!--This is especially helpful in datasets that contain overlapping lines, which can be hard to due to  [Why are they hard to see?]{.svp}  because Hammock plots make it easier to separate the data. -->
+
+Still, @pilhofer2012 points out a problem: "The focus on clustering may introduce unnecessary complexity in dispersed data." 
+They suggest that Hammock plots work best for datasets with clear clusters.
+Both visual and computational methods help to find definite clustering in the content. 
+The main technique is pseudo-diagonalization, in which rows and columns of a data matrix are rearranged to visually show clusters by combining similar entries. 
+This technique is compared by a top-down partitioning method, which clusters the data using measurements such as Kendall's $\tau$ or the Bertin Classification Criteria (BCC), determining ideal cut spots in rows and columns. 
+The BCC, which computes the difference between conforming and non-conforming pairings to gauge the alignment of matrix entries with a pseudo-diagonal form, is one of the metrics to evaluate clustering clarity. 
+The Weighted Bertin Classification Criteria (WBCC) emphasizes the proximity of data points and improves this by using distance-based weights; the Bertin Classification Index (BCI) scales the BCC to gauge the strength of the link between clusters. 
+BCI provides a consistent approach to evaluating datasets, with values ranging from 0 (perfectly aligned clusters) to 1 (indicating no clustering). 
+The main evaluation criterion for clarity is the degree to which the matrix resembles a block-diagonal structure; low BCI values imply unambiguous clusters, while high values indicate indistinct or overlapping groupings. 
+The paper also underlines the need for visual inspection, in which visually distinct and well-separated blocks in matrix plots—such as those shown in the Ecotest dataset examples—characterize clear grouping. 
+Still, clarity is very arbitrary since it depends on thresholds selected for BCI and the interpretability of the produced visuals. 
+This method detects and assesses clusters by combining empirical visualization with quantitative measurements.
+
+# Interactivity 
+
+The integration of interactive features has significantly improved the utility and flexibility of parallel coordinate plots (PCPs). 
+These enhancements allow users to dynamically reorder axes, filter data based on specified criteria, and invert axes to view data from different perspectives. 
+Brushing and connecting highlight specific data points across axes while filtering reduces clutter by hiding irrelevant lines. 
+These capabilities facilitate real-time data analysis, enabling users to uncover patterns and correlations intuitively. 
+Interactive PCPs are particularly valuable for exploratory data analysis, especially when dealing with large and complex datasets.
+
+@heinrich2013's State of the Art of Parallel Coordinates provides a comprehensive review of PCP visualization techniques, categorizing them into a taxonomy of approaches. 
+The study highlights modeling methods, visualizing, and interacting with PCPs, emphasizing their applications in knowledge discovery tasks like sorting, clustering, and regression. 
+Key advancements include geometric modeling, interpolation techniques, point-line duality, and foundational principles of PCPs. 
+Further innovations discussed include density-based visualizations, improved axis ordering, and interactive techniques such as brushing and bundling, which address challenges like overplotting and poor axis arrangements.
+
+The study also explores practical applications of PCPs in engineering and life sciences, underscoring their adaptability for high-dimensional data analysis. 
+Techniques like clustering, density estimation, and interactive filtering enhance data exploration, enabling users to map patterns through curves, shapes, and density plots.
+
+Interactive features in PCPs have revolutionized how users interact with high-dimensional datasets. Tools like brushing, linking, and filtering allow precise and focused analysis. 
+These capabilities help users engage intuitively with data, selectively highlighting areas of interest to identify patterns and generate hypotheses. 
+Real-time interaction, such as reordering axes or filtering data points, makes large datasets more manageable and supports discovery.
+
+The early groundwork for interactive PCPs was laid by @Wegman:1990, who introduced fundamental techniques for multidimensional data interaction. 
+Building on this foundation, @siirtola2006 implemented brushing and linking to improve dimensional analysis, allowing for easier comparisons across attributes in large datasets. 
+@inselberg2009 further expanded these tools, introducing dynamic filtering and axis rearrangement, enabling users to tailor PCP visualizations to their needs.
+
+While interactivity enhances insight, it can also introduce challenges. 
+Increased complexity can overwhelm novice users and demand higher computational resources, potentially slowing analysis in high-dimensional datasets. 
+As @inselberg2009 noted, the cognitive load of multi-step filtering and interaction can lead to user fatigue. 
+Addressing this balance requires careful interface design to ensure that interactive features remain accessible and intuitive.
+
+Modern implementations, such as the live parallel coordinate plots on Plotly's ggplot2 platform, demonstrate how interactivity can streamline data analysis. 
+Users can filter and separate data ranges by moving their mouse across parallel axes, with tooltips providing detailed information about individual data points. 
+Drag-and-drop axis reordering allows users to adjust dimensions to uncover hidden patterns and correlations. 
+Brushing options dynamically emphasize relevant data paths, making trends and outliers visible while downplaying less critical information [@plotly-pcp]. 
+
+[Interactive Parallel Coordinate Plot](https://plotly.com/ggplot2/parallel-coordinates-plot/)
+
+Interactive PCPs continue to evolve, offering increasingly intuitive and adaptable methods for high-dimensional data exploration. 
+By combining dynamic features like axis reordering, filtering, and brushing, PCPs enable users to extract meaningful insights from complex datasets. 
+However, balancing usability with computational demands and minimizing user fatigue remain ongoing challenges. 
+Future developments will likely focus on enhancing user interfaces and optimizing algorithms to make interactive PCPs more efficient and accessible for a broader range of users and applications.
 
 
 # Handling Ties in PCPs
