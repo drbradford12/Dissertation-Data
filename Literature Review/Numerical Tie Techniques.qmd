@@ -10,8 +10,8 @@ format:
         - bindingoffset=.5cm
         - top=0.75cm
         - bottom=0.75cm
-        - left=1.25cm
-        - right=1.25cm
+        - left=1.75cm
+        - right=1.75cm
     include-in-header:
       text: |
         \usepackage{float}
@@ -274,7 +274,7 @@ grid.arrange(og_pcp, p3, ncol = 1)
 *Equation*:
 
 $$
-Rank_i = rank(Value_i , ties.method="random")
+Rank_i = rank(Value_i , ties.method= "random")
 $$
 
 *Description*:

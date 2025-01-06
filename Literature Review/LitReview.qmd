@@ -993,12 +993,12 @@ The order of axes in a PCP is a primary determinant of clarity.
 @dasgupta2010 introduced Pargnostics, a framework leveraging screen-space metrics to optimize axis arrangements. 
 Pargnostics helps identify axis sequences that emphasize meaningful relationships between variables by focusing on metrics like clutter reduction and outlier detection. 
 For instance, swapping adjacent axes can unveil previously obscured correlations, enabling users to discern patterns and trends better. 
-This technique has proven effective across diverse applications, including climate data analysis and medical diagnostics, where understanding variable interdependencies is paramount. 
+This technique has proven effective across diverse applications, including climate data analysis and medical diagnostics, where understanding variable interdependencies is most important. 
 By reordering the axes based on meaningful relationships between variables, @fig-pargnostics-2 highlights correlations that were previously obscured. 
 For example, adjacent placement of highly correlated dimensions simplifies the identification of patterns, making trends more accessible to the observer.
 
 In addition to axis ordering, the arrangement of lines within PCPs plays a crucial role in mitigating visual clutter and improving pattern visibility. 
-As developed by Dasgupta and Kosara (2011), adaptive sorting techniques use clustering algorithms to reorder lines dynamically. 
+As developed by @dasgupta2011adaptive, adaptive sorting techniques use clustering algorithms to reorder lines dynamically. 
 By prioritizing critical data subsets and de-emphasizing less relevant observations, these methods enable users to focus on regions of interest while maintaining the integrity of the broader dataset. 
 This approach is particularly valuable in high-density datasets, where overlapping lines obscure important relationships. 
 @fig-pargnostics-3 showcases line ordering based on clustering techniques. 
@@ -1015,7 +1015,6 @@ Integrating line and axis ordering strategies creates a synergistic effect, opti
 These methods achieve a higher degree of clarity and functionality by simultaneously addressing axes and line arrangements, making PCPs more versatile and impactful across various fields.
 Adjusting line transparency effectively mitigates the effects of overplotting in dense datasets, @fig-pargnostics-4. 
 Subtle variations in opacity help to reveal underlying structures and clusters, ensuring that both prominent and less frequent patterns remain visible without overwhelming the visualization.
-
 
 @dennig2021parsetgnostics introduced "ParSetgnostics," a set of quality metrics to reduce visual clutter in parallel sets. 
 Metrics like overlap, ribbon width variance, and mutual information optimize dimension and category ordering, significantly improving visualizations' interpretability; for instance, applying these metrics reduced clutter by up to 81% in test cases.
@@ -1088,43 +1087,525 @@ However, balancing usability with computational demands and minimizing user fati
 Future developments will likely focus on enhancing user interfaces and optimizing algorithms to make interactive PCPs more efficient and accessible for a broader range of users and applications.
 
 
+
+# Handling Numerical Ties
+
+The challenge of managing tied values in statistical data analysis has long perplexed experts striving for clarity in visualizations. 
+Traditionally, statistical approaches relied on rank-based methods or binary data handling, which often struggled with tied observations. 
+These ties could distort distributions or complicate their interpretation. 
+Early solutions involved modifying ranking systems or introducing tie-breaking rules, but these adjustments frequently sacrificed accuracy or interpretability.
+
+As graphical data analysis grew, pioneers such as Tukey, Chambers, and Cleveland developed innovative approaches to handle tied values visually. 
+Techniques such as gradually increasing the spacing between tied observations have emerged, enabling more accurate and comprehensible visualizations without altering the underlying data structure. 
+These advancements underscore the importance of visualization for effectively addressing longstanding challenges in statistical analysis.
+
+@tufte2001’s seminal work, The Visual Display of Quantitative Information, highlights the detrimental impact of visual noise—any element that crowds or complicates the visual field—on data interpretation. 
+Tufte’s "graphical excellence" principle emphasizes designing visualizations that present data as clearly and efficiently as possible. 
+He argues that separating tied values in complex datasets can significantly reduce overlapping lines and visual clutter, enhancing the viewer’s ability to accurately identify patterns and compare variables.
+
+In line with Tufte’s philosophy, distancing tied values in dense visualizations, such as parallel coordinate plots (PCPs), reduces interpretative difficulty. 
+By decreasing visual noise, users can more rapidly and effectively perceive quantitative relationships, leading to more precise insights from the data.
+
+In complex visualizations like PCPs, tied values often cause overlapping lines that obscure other data points, masking trends, and outliers. 
+Tufte describes excessive clutter as "chartjunk," unnecessary visual elements that hinder comprehension. 
+He emphasizes that even small reductions in visual noise can substantially improve a viewer's ability to process information quickly and accurately.
+
+For example, introducing slight separations between tied values can make patterns and relationships more discernible in large datasets where similar values cluster tightly. 
+This adjustment reduces cognitive load, allowing viewers to extract meaningful insights without effort. 
+By addressing ties visually rather than through statistical manipulation, modern visualization techniques preserve data integrity while improving clarity, aligning with Tufte’s vision of effective data presentation.
+
+
+## Jittering Points
+
+### Random Jittering of Data Points
+
+Random jittering is a widely used technique in data visualization, where small random values are added to tied observations to prevent excessive density and improve clarity. 
+This method is particularly effective in scatter plots, dot plots, and other visualizations where overlapping data points can obscure patterns and relationships. 
+By subtly adjusting the position of tied values, random jittering ensures that individual points remain visible, making the overall distribution easier to interpret without altering the underlying data.
+
+First introduced in Graphical Methods for Data Analysis [@chambers1983], random jittering is a simple yet powerful tool for managing overlaps in data visualizations. 
+Typically, the added values are drawn from a uniform or normal distribution, with the range or standard deviation carefully chosen to maintain the integrity of the dataset. 
+This approach preserves the overall shape of the data distribution while addressing visual clutter.
+
+Experiments have shown that jittering significantly enhances the readability of visualizations, especially when overlaps are minimal or occur infrequently. 
+It is beneficial for datasets with many tied values, where dense clustering can make it difficult to discern individual data points. 
+In these scenarios, jittering highlights trends and patterns without compromising the viewer’s ability to understand the broader dataset.
+
+However, random jittering has its limitations. 
+One notable drawback is the potential loss of precision, as the exact values of tied observations become obscured. 
+If the jittering distance is too large, it may create an impression of variability where none exists, misleading viewers. 
+To mitigate this issue, the amount of jitter should be kept minimal and proportional to the scale of the data.
+
+In practice, the effectiveness of jittering depends on the nature of the dataset and the visualization context. 
+For example, small-scale jittering can separate overlapping points in scatter plots where points represent discrete categories or measurements without distorting the categorical structure. 
+In contrast, jittering must be applied cautiously for continuous data to avoid introducing apparent trends or deviations.
+
+Additionally, the choice of distribution for generating jitter values plays a crucial role. 
+Uniform distributions are often preferred for their simplicity and predictability, ensuring consistent point spacing. 
+On the other hand, normal distributions can mimic natural variations, which may be more suitable for datasets representing real-world phenomena. 
+In either case, transparency and precise documentation of the jittering process are essential to maintain trust and interpretability in the visualization.
+
+Random jittering is a valuable tool for improving the clarity of data visualizations, particularly in scenarios where tied observations lead to visual clutter. 
+By carefully balancing the amount and distribution of jitter, analysts can preserve the integrity of the data while enhancing its interpretability. 
+While not without limitations, when used judiciously, jittering can reveal hidden patterns, reduce cognitive load, and provide a clearer picture of the underlying data, making it an indispensable technique in the modern data visualization toolkit.
+
+For a set of tied values $x_1, x_2,...,x_n$, we define:
+
+$$
+x'_i = x_i + \epsilon_i
+$$
+
+where:
+
+-   $x'_i$ is the jittered value of $x_i$,
+-   $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$,
+-   $\sigma$ is the standard deviation for the normal jitter.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-random_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Random Jittering of Data Points in PCP"
+
+# Add random jitter to numerical columns
+penguins_jittered <- penguins
+penguins_jittered$year <- jitter(penguins_jittered$year, amount = 2)
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_jittered,
+  columns = c(3:6), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center", # Scale columns to range between [0, 1]
+  alphaLines = 0.5 # Set transparency for lines
+) +
+  penguin_scale_color() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Random Jittering") +
+  guides(color = F) +
+  ggplot2::scale_y_reverse() # Flip the y-axis to observe the effect
+
+
+```
+
+
+### Rank Jittering (Rank Adjustment)
+
+Rank jittering is an effective technique used primarily in non-parametric analyses to address the challenges tied values pose. 
+Instead of modifying the data values, this method adjusts the ranks of tied observations, making it easier to discern ordinal relationships in visualizations and rank-based tests such as the Wilcoxon signed-rank test. 
+By preserving the ordinal nature of the data, rank jittering maintains the integrity of non-parametric analyses while reducing the impact of ties on interpretability.
+
+As detailed in @conover1999’s Practical Nonparametric Statistics, rank jittering retains the ordinal structure of the dataset without significantly altering the underlying distribution. 
+This ensures that results from rank-based analyses remain valid and reliable. 
+The primary advantage of rank jittering lies in its ability to maintain rank-based interpretations while minimizing tied observations' visual or analytical impact. 
+This is especially beneficial in statistical contexts where the rank order carries critical meaning.
+
+Rank jittering involves adding a slight, random, or systematic adjustment to the ranks of tied observations, effectively breaking ties without altering the data values. 
+The adjustments can be random (introducing variability) or systematic (maintaining proportionality among tied ranks). 
+This technique is commonly applied to datasets undergoing rank-based testing, ensuring more straightforward visualizations and more precise analyses.
+
+One systematic approach to rank jittering leverages binary relationships within the data to create proportional separations among tied ranks. 
+As discussed by @ipkovich2021, rank-based separation distributes tied observations evenly while maintaining interpretability and reducing visual clutter. 
+This method is beneficial in parallel coordinate plots (PCPs), where overlapping lines from tied values often obscure trends and patterns. 
+By assigning spacing factors based on rank differences, rank jittering effectively spreads overlapped lines, enhancing clarity and readability.
+
+The key strength of rank jittering lies in its ability to reduce visual and analytical noise while preserving the order and interpretability of the data. 
+It is especially well-suited for categorical or ordinal datasets where maintaining order is critical. 
+For example, in PCPs or other rank-based visualizations, rank jittering highlights relationships and reduces clutter, making it easier to identify trends or categories.
+
+However, rank jittering also presents challenges. 
+Computational complexity increases with the size of the dataset, as handling large numbers of tied values requires significant processing power. 
+Additionally, excessive adjustments to ranks may inadvertently alter test significance levels, potentially affecting the outcomes of non-parametric analyses. 
+This highlights the importance of carefully calibrating the extent of jitter applied, particularly in large datasets with many ties.
+
+Rank jittering is particularly effective in scenarios where maintaining the ordinal nature of data is essential, such as non-parametric statistical tests or visualizations of categorical and ordinal data. 
+Its application is most valuable when:
+
+- Non-parametric analyses require clear distinctions among ranks to ensure accurate results (e.g., Wilcoxon signed-rank test).
+
+- Visual clarity is needed in datasets with overlapping ranks, such as PCPs or rank-based heatmaps.
+
+- Order preservation is critical to the interpretability of the data, particularly in ordinal or categorical contexts.
+
+Despite its advantages, rank jittering should be used judiciously. 
+Careful calibration of adjustments is necessary to balance the benefits of reduced clutter and improved interpretability against the risks of computational inefficiency and potential distortions in statistical results.
+
+
+For tied ranks $R_1, R_2,...,R_n$:
+
+$$
+R'_i = R_ii + \delta_i
+$$
+
+where:
+
+-   $R'_i$ is the jittered rank of $R_i$,
+-   $\delta_i \sim \mathcal{N}(0,\sigma_{rank}^2)$
+-   $\sigma_{rank}$ are small values ensuring that the adjustment is minor.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-rank_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Rank Jittering of Data Points in PCP"
+
+penguins_ranked <- penguins
+penguins_ranked <- penguins_ranked[order(penguins_ranked$year, na.last = NA), ]
+penguins_ranked$year_rank <- rank(penguins_ranked$year, na.last = "keep")
+
+# Add rank-based jitter
+penguins_ranked$year <- penguins_ranked$year + 
+                                     penguins_ranked$year_rank * 0.5
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_ranked,
+  columns = c(3:6), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center",
+  alphaLines = 0.5
+) +
+  penguin_scale_color() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Rank Jittering") +
+  guides(color = F) +
+  ggplot2::scale_y_reverse() 
+
+```
+
+
+Rank jittering is a powerful tool for addressing ties in non-parametric analyses and visualizations. 
+This method enhances clarity and interpretability by preserving the ordinal structure of data while reducing the impact of ties. 
+Though computationally intensive for large datasets, its ability to maintain rank-based relationships makes it indispensable for categorical or ordinal data applications. 
+When applied carefully, rank jittering provides a robust solution for resolving ties without compromising the integrity of the data or analysis.
+
+
+### Deterministic Jittering (Fixed Perturbation)
+
+Deterministic jittering offers a structured and repeatable solution for addressing tied observations in data visualizations. 
+Unlike random jittering, which relies on chance, deterministic jittering adds a small, fixed value (epsilon) to each tied observation. 
+This predictable adjustment ensures that each data point is visually separated while maintaining the integrity of the dataset. 
+As detailed in @david1977’s Exploratory Data Analysis, deterministic jittering is particularly valuable in scenarios where random noise is undesirable, as it guarantees that the process is transparent, replicable, and free from stochastic variability.
+
+Deterministic jittering is more straightforward to understand and control than random jittering, making it an appealing choice for analysts who prioritize clarity and consistency. 
+However, it must be applied cautiously, especially in scaled datasets, to avoid introducing artificial patterns or misleading trends. 
+Properly calibrated, deterministic jittering can enhance visual clarity without compromising the statistical structure of the data.
+
+Jittering, whether random or deterministic, is a common technique for managing ties in visualizations like parallel coordinate plots (PCPs). 
+In PCPs, tied values often cause overlapping lines, obscuring patterns and making the data harder to interpret. 
+By adding small amounts of noise, jittering creates a visual separation between tied observations, improving clarity and facilitating analysis.
+
+@swayne2003 highlights jittering as an intuitive and effective way to handle ties in 2-D correlation tours, where dense overlapping values often distort visualizations. 
+They note that jittering separates tied values without distorting their underlying statistical relationships, preserving the dataset’s integrity. 
+Similarly, @few2008solutions describes jittering as a practical response to the perceptual challenges caused by overplotting. 
+By introducing subtle adjustments to tied values, jittering highlights individual lines or points in dense datasets while maintaining the overall structure of the visualization.
+
+While jittering enhances clarity, its effectiveness depends on selecting the appropriate amount of noise. 
+Excessive jittering can introduce artificial variability, potentially misleading viewers, while insufficient jittering may fail to separate tied observations adequately. 
+Deterministic jittering mitigates this issue by providing a fixed, controlled adjustment that can be calibrated to balance clarity with fidelity.
+
+In their review, @few2008solutions emphasize the importance of regulating jittering to avoid compromising the visualization’s accuracy. 
+The careful application ensures that jittering improves visual clarity without introducing distortions. 
+This approach is especially critical in dense datasets, where the balance between noise and structure can significantly affect interpretability.
+
+Deterministic jittering’s predictability makes it a preferred choice in applications where transparency and repeatability are essential. 
+For example, in datasets requiring precise replication of visualizations, deterministic jittering ensures that tied observations are consistently adjusted. 
+In contrast, random jittering is better suited for exploratory analyses, where variability is acceptable and often necessary to reveal hidden patterns.
+
+Both methods have their strengths and limitations. 
+Deterministic jittering excels in creating structured, predictable visualizations but risks introducing artificial patterns if overapplied. 
+While more flexible, random jittering may obscure the exact values of tied observations if the added noise is excessive or inconsistent. 
+The choice between the two depends on the specific analytical goals and the dataset’s characteristics characteristics.
+
+
+For tied values $x_1, x_2,...,x_n$, we use:
+
+$$
+x'_i = x_i + i\epsilon
+$$
+
+where:
+
+-   $x'_i$ is the adjusted value of $x_i$,
+-   $i$ is the indeex of the tied observation (e.g., $i = 1,2,...,n$),
+-   $\epsilon$ is a small fixed distance chosen based on the data scale.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-deterministic_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Deterministic Jittering of Data Points in PCP"
+
+# Add fixed perturbation
+penguins_fixed <- penguins
+penguins_fixed$year <- ifelse(duplicated(penguins_fixed$year),
+                                           penguins_fixed$year + 0.5,
+                                           penguins_fixed$year)
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_fixed,
+  columns = c(3:6), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center",
+  alphaLines = 0.5
+) +
+  penguin_scale_color() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Deterministic Jittering") +
+  ggplot2::scale_y_reverse() +
+  guides(color = F)
+
+
+```
+
+
+Whether random or deterministic, jittering is an indispensable tool for managing ties in data visualizations. 
+Deterministic jittering stands out for its clarity, repeatability, and ability to preserve the dataset’s statistical structure. 
+When applied carefully, it ensures that tied observations are visually distinct without introducing artificial patterns or distortions. 
+For dense visualizations like PCPs, jittering enhances interpretability and reduces the challenges posed by overplotting. 
+By balancing noise and structure, deterministic jittering provides a reliable and effective solution for creating clear and insightful data visualizations.
+
+
+## Mean or Median Splitting
+
+Mean or median splitting is another widely used method for resolving ties in data analysis and visualization. 
+This approach replaces tied values with their mean or median, effectively centering the tied observations on their central tendency. 
+This technique works particularly well for symmetric distributions, where the mean and median closely align, and for visualizations that emphasize central values, such as box plots. 
+
+As detailed in @wilcox2017’s Modern Statistics for the Social and Behavioral Sciences, mean or median splitting provides a balanced and fair representation of tied data, mainly when used in boxplot visualizations. 
+Assigning tied observations to their central values ensures that the visual representation reflects the dataset's core tendencies without distorting its overall structure.
+
+This method is especially well-suited for visualizations prioritizing central tendencies, such as box plots or histograms. 
+By centering tied values, mean or median splitting emphasizes the median line or the mean's location, enhancing the clarity of the visualization.
+It is beneficial for datasets with minimal ties, as it preserves the integrity of the distribution while reducing visual clutter caused by overlapping points or lines.
+
+Mean or median splitting is advantageous in cases where the tied group size is small, as it minimizes the impact on the range and variability of the dataset. 
+For example, replacing tied values with their mean or median preserves the dataset's balance in symmetric distributions, ensuring the visualization remains accurate and interpretable.
+
+Despite its strengths, mean or median splitting has limitations, particularly for datasets with numerous ties. 
+Excessive use of this method can obscure the variability within tied groups, creating a homogenized view that may not accurately reflect the diversity of the data. 
+This can be problematic when understanding the range of tied observations is critical, such as in scatter plots or other point-based visualizations.
+
+Moreover, mean or median splitting assumes that the central value represents the tied group, which may not hold for skewed distributions. 
+In these cases, using the mean or median may introduce bias, potentially distorting the interpretation of the data. 
+Therefore, it is essential to consider the dataset’s characteristics when applying this technique carefully.
+
+In practice, mean or median splitting involves identifying groups of tied values and replacing each observation with the mean or median of the group. 
+For example, this technique can emphasize the data's central line (median) or central tendency (mean) in a box plot, reducing ambiguity caused by overlapping points. 
+The simplicity of implementation and its alignment with central tendency measures make this method a popular choice for summarizing tied data in visualizations.
+
+
+For set of tied values $x_1, x_2,...,x_n$ let:
+
+\begin{center}
+$x_{mean} = \frac{1}{n}\sum^{n}_{i=1}x_i$ or $x_{median} = median(x_1, x_2,...,x_n)$
+\end{center}
+
+Then:
+
+\begin{center}
+$x'_i = x_{mean}$ or $x'_i = x_{median}$
+\end{center}
+
+This replaces each tied value $x_i$ with the computed mean or median, clustering them at a central point.
+
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-mean_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "Mean or Median Splitting of Data Points in PCP"
+
+# Mean splitting for ties
+penguins_mean <- penguins
+mean_year <- mean(penguins_mean$year, na.rm = TRUE)
+penguins_mean$year <- ifelse(duplicated(penguins_mean$year),
+                                          penguins_mean$year + (penguins_mean$year - mean_year) * 0.1,
+                                          penguins_mean$year)
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_mean,
+  columns = c(3:6), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center",
+  alphaLines = 0.5
+) +
+  penguin_scale_color() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with Mean or Median Splitting") +
+  theme(legend.position = "bottom") + 
+  guides(color = F) 
+
+
+```
+
+Mean or median splitting offers a centered and balanced approach to handling ties, making it ideal for symmetric distributions and visualizations focused on central tendencies. 
+While it enhances clarity in datasets with few ties, its limitations in preserving variability and representing skewed distributions highlight the importance of careful application. 
+By centering tied observations on their mean or median, this technique provides a straightforward solution for improving the interpretability of tied data, particularly in visualizations like box plots that prioritize centrality.
+
+## Kernel Density Estimation (KDE) with Bandwidth Adjustment
+
+Kernel Density Estimation (KDE) is a powerful method for creating smooth density visualizations by spreading overlapping observations. 
+By assigning slightly different weights to tied values, KDE maintains the original data while providing a more continuous and visually interpretable representation of the distribution. 
+This technique is especially effective for multimodal distributions, where tied observations can obscure peaks or create misleading impressions of uniformity.
+
+As discussed in @silverman2018’s Density Estimation for Statistics and Data Analysis, adjusting the bandwidth in KDE enables an accurate depiction of multimodal distributions, reducing errors caused by ties. 
+Bandwidth selection is critical. 
+Determining the degree of smoothing applied to the data and choosing an appropriate bandwidth balance the need to spread out tied values while preserving the distribution’s key features. 
+Incorrect bandwidth choices, particularly in datasets with tightly clustered values, can lead to over-smoothing or under-smoothing, distorting the visualization.
+KDE excels in density plots, offering a visually intuitive way to represent the data’s underlying distribution. 
+However, its reliance on careful bandwidth tuning requires expertise, especially for datasets with high variability or dense clusters.
+
+
+The KDE for a set of observations $x_1, x_2,...,x_n$ is:
+
+$$
+\hat{f}(x) = \frac{1}{nh}\sum^{n}_{i=1}K(\frac{x-x_i}{h})
+$$
+
+where:
+
+-   $\hat{f}(x)$ is the estimiated density at $x$,
+-   $K(\cdot)$ is a kernel function
+-   $h$ is the bandwidth, chosen to spread tied values slightly by selecting a larger $h$ for clusters of tied observations.
+
+The choice of bandwidth $h$ controls the amount of smoothing, which helps visually differentiate tied values.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-kde_jitter
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "KDE with Bandwidth Adjustment of Data Points in PCP"
+#| fig-width: 8
+#| fig-height: 8
+
+
+# KDE transformation
+penguins_kde <- penguins
+penguins_kde$year_density <- density(penguins_kde$year, na.rm = TRUE)$bw
+
+# Add KDE smoothed values
+penguins_kde$year <- penguins_kde$year + penguins_kde$year_density * 0.1
+
+
+# Plot Parallel Coordinate Plot
+ggparcoord(
+  data = penguins_kde,
+  columns = c(3:6), # Select numerical columns
+  groupColumn = 1, # Color by species
+  scale = "center",
+  alphaLines = 0.5
+) +
+  penguin_scale_color() +
+  ggplot2::theme_minimal() +
+  ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment") +
+  ggplot2::scale_y_reverse() + 
+  guides(color=F)
+
+```
+
+
+## Depth Cues
+
+Traditional methods for handling ties often need more effective high-dimensional visualizations, such as parallel coordinate plots (PCPs), as overlapping lines obscure trends and connections. 
+Advanced visual techniques, such as Depth Cue Parallel Coordinates (DCPC), address this challenge by introducing depth perception cues to create a three-dimensional effect.
+
+As demonstrated in @johansson2007’s work, DCPC combines line transparency and brightness adjustments to layer information visually. 
+Temporal binning and perception-based coloring add further clarity, enabling users to distinguish overlapping trends effectively. 
+These techniques are designed to handle temporal data with high dimensionality, where conventional visualization methods struggle to reveal patterns.
+
+DCPC preserves the original dataset by ensuring each line remains identifiable, even in densely populated plots. 
+While this method significantly enhances clarity, it requires advanced rendering tools, which may only be available in some visualization settings. 
+The computational complexity of generating depth cues and transparency effects can pose challenges, especially for large datasets.
+
+Different techniques for handling ties excel in specific contexts, depending on the type of visualization and the nature of the data:
+
+ - Jittering (random or deterministic): Ideal for scatterplots and similar two-dimensional visualizations, jittering separates tied values by adding small random or fixed displacements. 
+ This approach effectively reveals hidden patterns and reduces visual clutter in dense datasets.
+
+- KDE and rank-based methods: are best suited for density plots and ordinal visualizations. 
+KDE spreads out tied values smoothly, preserving the overall distribution, while rank-based methods emphasize ordinal relationships without distorting the data.
+
+- DCPC and advanced PCP techniques: For multidimensional data, especially in PCPs, traditional methods often fail to address overlapping lines adequately. 
+DCPC introduces visual depth and transparency to resolve these issues, providing clarity in complex datasets.
+
+While existing methods improve clarity in specific visualization contexts, PCPs present unique challenges due to their high-dimensional nature and the tendency for lines to overlap extensively. 
+Traditional techniques like jittering and KDE, designed for two-dimensional visualizations, only sometimes scale effectively to PCPs.
+
+A promising solution involves systematically introducing spacing between tied values across multiple axes in PCPs. 
+This method would distribute tied observations more evenly, reducing overlaps and revealing otherwise obscured patterns.
+Researchers could uncover trends and connections by designing this approach to account for relationships across dimensions while preserving the dataset’s structure and integrity.
+
+Such a method could combine rank-based adjustments, deterministic jittering, and transparency techniques to create a more precise and insightful visualization of high-dimensional data. 
+Incorporating this approach into PCPs would significantly enhance their utility for exploring complex, multidimensional datasets.
+
+Each method for handling ties---whether jittering, KDE, rank-based adjustments, or depth cueing---has unique strengths tailored to specific visualization needs. 
+While jittering and KDE are effective for scatterplots and density plots, advanced techniques like DCPC are better suited for high-dimensional visualizations like PCPs. 
+Developing a dedicated method for handling ties in PCPs, such as planned spacing across axes, could further advance the field, enabling researchers to explore complex data more effectively while maintaining visual clarity and data integrity. 
+This innovation would provide a transformative step in high-dimensional data visualization, making uncovering trends and connections across diverse datasets easier.
+
+
 # Handling Ties in PCPs
 
-Adding distance to visual ties has evolved significantly alongside advancements in data visualization, mainly as the need to balance detail and clarity in large datasets has grown. 
-Early visualization methods, especially in network analysis and multidimensional scaling, relied heavily on proximity and alignment to convey patterns and relationships. 
-These techniques were effective for smaller datasets but struggled to scale as the complexity and volume of data increased.
+The growing complexity and volume of datasets have fueled the advancement of data visualization approaches, which require creative ways to blend clarity and detail. 
+Early visualization techniques underlined closeness and alignment to expose patterns and linkages, especially in network research and multidimensional scaling. 
+Effective for smaller datasets, these methods failed as the data grew in complexity and scale, resulting in problems, including visual clutter.
 
-Visual clutter emerged as a significant challenge, particularly in parallel coordinate plots (PCPs), where overlapping lines and intersections often obscured underlying data structures. 
-As PCPs became more common for high-dimensional data analysis, the density of lines made it increasingly difficult for users to discern meaningful trends and relationships. 
-To address this, researchers began developing techniques to increase the "visual distance" between elements in these visualizations, reducing overplotting while preserving the continuity of the visualization data.
+Analyzing high-dimensional data has found great use for parallel coordinate plots (PCPs). 
+But overlapping lines and numerous intersections—which hide important data structures—often compromise their efficacy. 
+Especially with big datasets, this visual complexity makes it challenging for users to spot trends and linkages.
 
-Early studies of PCPs highlighted the importance of visual distance in aiding cognitive interpretation. 
-@chang2018a compared PCPs and scatterplot matrices (SPLOMs), observing that users struggled to identify correlations in PCPs due to the complexity of cross-line patterns. 
-They noted, "In PCP, participants had to reorder the axes to examine all dimensions, whereas in SPLOM, it is straightforward to identify correlation." 
-This underscores how increasing visual distance between overlapping elements can simplify cognitive grouping without fragmenting the data.
+Early studies focused on raising "visual distance"—the geographical separation of visual elements—" to address overplotting in PCPs." 
+On page 201, @chang2018, for example, compared PCPs with scatterplot matrices (SPLOMs) and discovered that complicated cross-line patterns caused users to find difficulty identifying correlations in PCPs. 
+They found, "In PCP, participants had to reorder the axes to examine all dimensions, whereas, in SPLOM, it is straightforward to identify correlation." 
+This shows how improving visual distance between overlapping items simplifies cognitive grouping without upsetting the continuity of the material.
 
-Researchers have explored methods to enhance visual distance, including line bundling, spacing adjustments, and axis reordering. 
-These approaches create separation between lines and intersections, allowing individual paths to emerge more distinctly. 
-For instance, in PCPs, early experiments showed that increasing visual distance improved the clarity of intersections, enabling users to trace relationships across dimensions better and understand the overall structure of the data.
+Researchers have devised several techniques to increase visual distance in PCPs:
+Line bundling: This method clusters related pathways, minimizing the visual anarchy by overlapping lines. 
+Bundling may hide unusual pathways or outliers even when it helps to visualize things more easily. 
+Bundling is sometimes used with transparency methods or line spacing changes to help minimize this and guarantee that important data points are still clear.
 
-One foundational technique that has influenced the development of visual distance in PCPs is the "nested-means" approach introduced by @guo2005. 
-This method creates a more organized and interpretable visualization by reducing overlapping lines and ensuring that the mean value of each variable is consistently placed at the midpoint of its axis. 
-@guo2005 noted that this approach not only addresses overplotting issues but also preserves the central tendencies of the data, enhancing both visual clarity and analytical utility.
+Introduced by @guo2005, the nested-means approach method methodically avoids overlapping lines by ensuring the mean value of every variable is centrally situated on its axis. 
+This method solves overplotting and maintains data-central tendencies, improving analytical value and clarity.
 
-Line bundling, another key advancement, groups similar paths together, reducing the visual chaos caused by overlapping lines. 
-While this method simplifies the overall visualization, it introduces a trade-off by obscuring some outliers or unique paths. 
-Combining bundling with line spacing adjustments or transparency techniques helps mitigate this limitation, ensuring that critical data points remain visible while reducing clutter.
+Changing the spacing between lines or reordering axes to align relevant dimensions lowers cognitive burden and facilitates tracing links between variables. 
+Early studies showed that these changes enhanced users' capacity to recognize trends across dimensions and interpret intersections.
 
-These methods collectively illustrate how visual distance is a spatial and cognitive tool that enables users to navigate increasingly complex datasets more efficiently. 
-By strategically separating visual elements, researchers can guide users' attention to key patterns and trends without disrupting the continuity of the data.
+Visual distance offers cognitive advantages beyond only aesthetics. 
+Reducing visual clutter helps users spot trends, patterns, and outliers more successfully. 
+These techniques act as cognitive tools, focusing on important components of challenging datasets. 
+For PCPs, for instance, adding small separations between connected values highlights intersections and relationships, allowing more accurate analysis without changing the fundamental data structure.
+It is especially helpful in maintaining the integrity of the graphic and stressing important trends such as line bundling and spacing changes. 
+These methods guarantee that anomalies or unusual trends remain obvious and enable users to concentrate on the general structure of the data.
 
-As datasets grow more intricate, the role of visual distance has expanded beyond PCPs to encompass a wide range of visualization techniques. 
-From scatterplots to network graphs, methods that enhance visual distance are critical in reducing clutter and improving interpretability. 
-For example, in modern PCPs, combining visual distance with dynamic interactivity—such as brushing, filtering, and axis flipping—further enhances users' ability to explore relationships across dimensions.
+Visual distance has evolved outside PCPs to various visualization methods as datasets become more complex. 
+Techniques improving visual distance help scatterplots, network graphs, and heat maps. 
+Dynamic interactivity—brushing, filtering, and axis flipping—allows users to explore relationships across dimensions more naturally, improving the usability of current visualizations.
 
-Today, visual distance is recognized as an essential component of effective data visualization. 
-It reduces perceptual overload and facilitates cognitive processing, helping analysts uncover insights in even the most complex datasets. 
-By applying lessons learned from early studies and continuing to refine these techniques, modern visualizations can strike the delicate balance between detail and clarity, empowering users to make sense of their data confidently.
+For example, @schonlauVisualizingCategoricalData2003 modify visual distance ideas using proportional box widths to show numerical and categorical data. 
+Likewise, @wegman1997 work on parallel coordinate density plots uses transparency and density changes to handle overplotting in high-dimensional data.
+
+Visual distance is today understood as a fundamental element of good data visualization. 
+Visual distance approaches simplify cognitive processing and help analysts find insights in even the most complicated datasets by lowering perceptual overload. 
+These developments help current visualizations achieve a careful mix of clarity and detail, boosting confidence in data interpretation.
+
+Data visualization keeps changing by extending early research and improving these methods, thereby arming users with strong instruments to make sense of their data. 
+Visual distance stays first as both a spatial and a cognitive tool, improving our capacity to negotiate and understand ever-complex datasets.
+
 
 # All Sections Moved for Flow
 
@@ -1715,476 +2196,6 @@ In areas with many people, it could be useful because overlapped lines can make 
 
 
 
-# Handling Numerical Ties
-
-The challenge of managing tied values in statistical data analysis has long perplexed experts striving for clarity in visualizations. 
-Traditionally, statistical approaches relied on rank-based methods or binary data handling, which often struggled with tied observations. 
-These ties could distort distributions or complicate their interpretation. 
-Early solutions involved modifying ranking systems or introducing tie-breaking rules, but these adjustments frequently sacrificed accuracy or interpretability.
-
-As graphical data analysis grew, pioneers such as Tukey, Chambers, and Cleveland developed innovative approaches to handle tied values visually. 
-Techniques such as gradually increasing the spacing between tied observations have emerged, enabling more accurate and comprehensible visualizations without altering the underlying data structure. 
-These advancements underscore the importance of visualization for effectively addressing longstanding challenges in statistical analysis.
-
-@tufte2001’s seminal work, The Visual Display of Quantitative Information, highlights the detrimental impact of visual noise—any element that crowds or complicates the visual field—on data interpretation. 
-Tufte’s "graphical excellence" principle emphasizes designing visualizations that present data as clearly and efficiently as possible. 
-He argues that separating tied values in complex datasets can significantly reduce overlapping lines and visual clutter, enhancing the viewer’s ability to accurately identify patterns and compare variables.
-
-In line with Tufte’s philosophy, distancing tied values in dense visualizations, such as parallel coordinate plots (PCPs), reduces interpretative difficulty. 
-By decreasing visual noise, users can more rapidly and effectively perceive quantitative relationships, leading to more precise insights from the data.
-
-In complex visualizations like PCPs, tied values often cause overlapping lines that obscure other data points, masking trends, and outliers. 
-Tufte describes excessive clutter as "chartjunk," unnecessary visual elements that hinder comprehension. 
-He emphasizes that even small reductions in visual noise can substantially improve a viewer's ability to process information quickly and accurately.
-
-For example, introducing slight separations between tied values can make patterns and relationships more discernible in large datasets where similar values cluster tightly. 
-This adjustment reduces cognitive load, allowing viewers to extract meaningful insights without effort. 
-By addressing ties visually rather than through statistical manipulation, modern visualization techniques preserve data integrity while improving clarity, aligning with Tufte’s vision of effective data presentation.
-
-
-## Jittering Points
-
-### Random Jittering of Data Points
-
-Random jittering is a widely used technique in data visualization, where small random values are added to tied observations to prevent excessive density and improve clarity. 
-This method is particularly effective in scatter plots, dot plots, and other visualizations where overlapping data points can obscure patterns and relationships. 
-By subtly adjusting the position of tied values, random jittering ensures that individual points remain visible, making the overall distribution easier to interpret without altering the underlying data.
-
-First introduced in Graphical Methods for Data Analysis [@chambers1983], random jittering is a simple yet powerful tool for managing overlaps in data visualizations. 
-Typically, the added values are drawn from a uniform or normal distribution, with the range or standard deviation carefully chosen to maintain the integrity of the dataset. 
-This approach preserves the overall shape of the data distribution while addressing visual clutter.
-
-Experiments have shown that jittering significantly enhances the readability of visualizations, especially when overlaps are minimal or occur infrequently. 
-It is beneficial for datasets with many tied values, where dense clustering can make it difficult to discern individual data points. 
-In these scenarios, jittering highlights trends and patterns without compromising the viewer’s ability to understand the broader dataset.
-
-However, random jittering has its limitations. 
-One notable drawback is the potential loss of precision, as the exact values of tied observations become obscured. 
-If the jittering distance is too large, it may create an impression of variability where none exists, misleading viewers. 
-To mitigate this issue, the amount of jitter should be kept minimal and proportional to the scale of the data.
-
-In practice, the effectiveness of jittering depends on the nature of the dataset and the visualization context. 
-For example, small-scale jittering can separate overlapping points in scatter plots where points represent discrete categories or measurements without distorting the categorical structure. 
-In contrast, jittering must be applied cautiously for continuous data to avoid introducing apparent trends or deviations.
-
-Additionally, the choice of distribution for generating jitter values plays a crucial role. 
-Uniform distributions are often preferred for their simplicity and predictability, ensuring consistent point spacing. 
-On the other hand, normal distributions can mimic natural variations, which may be more suitable for datasets representing real-world phenomena. 
-In either case, transparency and precise documentation of the jittering process are essential to maintain trust and interpretability in the visualization.
-
-Random jittering is a valuable tool for improving the clarity of data visualizations, particularly in scenarios where tied observations lead to visual clutter. 
-By carefully balancing the amount and distribution of jitter, analysts can preserve the integrity of the data while enhancing its interpretability. 
-While not without limitations, when used judiciously, jittering can reveal hidden patterns, reduce cognitive load, and provide a clearer picture of the underlying data, making it an indispensable technique in the modern data visualization toolkit.
-
-For a set of tied values $x_1, x_2,...,x_n$, we define:
-
-$$
-x'_i = x_i + \epsilon_i
-$$
-
-where:
-
--   $x'_i$ is the jittered value of $x_i$,
--   $\epsilon_i \sim \mathcal{N}(0,\sigma^2)$,
--   $\sigma$ is the standard deviation for the normal jitter.
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-random_jitter
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Random Jittering of Data Points in PCP"
-
-# Add random jitter to numerical columns
-penguins_jittered <- penguins
-penguins_jittered$year <- jitter(penguins_jittered$year, amount = 2)
-
-# Plot Parallel Coordinate Plot
-ggparcoord(
-  data = penguins_jittered,
-  columns = c(3:6), # Select numerical columns
-  groupColumn = 1, # Color by species
-  scale = "center", # Scale columns to range between [0, 1]
-  alphaLines = 0.5 # Set transparency for lines
-) +
-  penguin_scale_color() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Random Jittering") +
-  guides(color = F) +
-  ggplot2::scale_y_reverse() # Flip the y-axis to observe the effect
-
-
-```
-
-
-### Rank Jittering (Rank Adjustment)
-
-Rank jittering is an effective technique used primarily in non-parametric analyses to address the challenges tied values pose. 
-Instead of modifying the data values, this method adjusts the ranks of tied observations, making it easier to discern ordinal relationships in visualizations and rank-based tests such as the Wilcoxon signed-rank test. 
-By preserving the ordinal nature of the data, rank jittering maintains the integrity of non-parametric analyses while reducing the impact of ties on interpretability.
-
-As detailed in @conover1999’s Practical Nonparametric Statistics, rank jittering retains the ordinal structure of the dataset without significantly altering the underlying distribution. 
-This ensures that results from rank-based analyses remain valid and reliable. 
-The primary advantage of rank jittering lies in its ability to maintain rank-based interpretations while minimizing tied observations' visual or analytical impact. 
-This is especially beneficial in statistical contexts where the rank order carries critical meaning.
-
-Rank jittering involves adding a slight, random, or systematic adjustment to the ranks of tied observations, effectively breaking ties without altering the data values. 
-The adjustments can be random (introducing variability) or systematic (maintaining proportionality among tied ranks). 
-This technique is commonly applied to datasets undergoing rank-based testing, ensuring more straightforward visualizations and more precise analyses.
-
-One systematic approach to rank jittering leverages binary relationships within the data to create proportional separations among tied ranks. 
-As discussed by @ipkovich2021, rank-based separation distributes tied observations evenly while maintaining interpretability and reducing visual clutter. 
-This method is beneficial in parallel coordinate plots (PCPs), where overlapping lines from tied values often obscure trends and patterns. 
-By assigning spacing factors based on rank differences, rank jittering effectively spreads overlapped lines, enhancing clarity and readability.
-
-The key strength of rank jittering lies in its ability to reduce visual and analytical noise while preserving the order and interpretability of the data. 
-It is especially well-suited for categorical or ordinal datasets where maintaining order is critical. 
-For example, in PCPs or other rank-based visualizations, rank jittering highlights relationships and reduces clutter, making it easier to identify trends or categories.
-
-However, rank jittering also presents challenges. 
-Computational complexity increases with the size of the dataset, as handling large numbers of tied values requires significant processing power. 
-Additionally, excessive adjustments to ranks may inadvertently alter test significance levels, potentially affecting the outcomes of non-parametric analyses. 
-This highlights the importance of carefully calibrating the extent of jitter applied, particularly in large datasets with many ties.
-
-Rank jittering is particularly effective in scenarios where maintaining the ordinal nature of data is essential, such as non-parametric statistical tests or visualizations of categorical and ordinal data. 
-Its application is most valuable when:
-
-- Non-parametric analyses require clear distinctions among ranks to ensure accurate results (e.g., Wilcoxon signed-rank test).
-
-- Visual clarity is needed in datasets with overlapping ranks, such as PCPs or rank-based heatmaps.
-
-- Order preservation is critical to the interpretability of the data, particularly in ordinal or categorical contexts.
-
-Despite its advantages, rank jittering should be used judiciously. 
-Careful calibration of adjustments is necessary to balance the benefits of reduced clutter and improved interpretability against the risks of computational inefficiency and potential distortions in statistical results.
-
-
-For tied ranks $R_1, R_2,...,R_n$:
-
-$$
-R'_i = R_ii + \delta_i
-$$
-
-where:
-
--   $R'_i$ is the jittered rank of $R_i$,
--   $\delta_i \sim \mathcal{N}(0,\sigma_{rank}^2)$
--   $\sigma_{rank}$ are small values ensuring that the adjustment is minor.
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-rank_jitter
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Rank Jittering of Data Points in PCP"
-
-penguins_ranked <- penguins
-penguins_ranked <- penguins_ranked[order(penguins_ranked$year, na.last = NA), ]
-penguins_ranked$year_rank <- rank(penguins_ranked$year, na.last = "keep")
-
-# Add rank-based jitter
-penguins_ranked$year <- penguins_ranked$year + 
-                                     penguins_ranked$year_rank * 0.5
-
-
-# Plot Parallel Coordinate Plot
-ggparcoord(
-  data = penguins_ranked,
-  columns = c(3:6), # Select numerical columns
-  groupColumn = 1, # Color by species
-  scale = "center",
-  alphaLines = 0.5
-) +
-  penguin_scale_color() +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Rank Jittering") +
-  guides(color = F) +
-  ggplot2::scale_y_reverse() 
-
-```
-
-
-Rank jittering is a powerful tool for addressing ties in non-parametric analyses and visualizations. 
-This method enhances clarity and interpretability by preserving the ordinal structure of data while reducing the impact of ties. 
-Though computationally intensive for large datasets, its ability to maintain rank-based relationships makes it indispensable for categorical or ordinal data applications. 
-When applied carefully, rank jittering provides a robust solution for resolving ties without compromising the integrity of the data or analysis.
-
-
-### Deterministic Jittering (Fixed Perturbation)
-
-Deterministic jittering offers a structured and repeatable solution for addressing tied observations in data visualizations. 
-Unlike random jittering, which relies on chance, deterministic jittering adds a small, fixed value (epsilon) to each tied observation. 
-This predictable adjustment ensures that each data point is visually separated while maintaining the integrity of the dataset. 
-As detailed in @david1977’s Exploratory Data Analysis, deterministic jittering is particularly valuable in scenarios where random noise is undesirable, as it guarantees that the process is transparent, replicable, and free from stochastic variability.
-
-Deterministic jittering is more straightforward to understand and control than random jittering, making it an appealing choice for analysts who prioritize clarity and consistency. 
-However, it must be applied cautiously, especially in scaled datasets, to avoid introducing artificial patterns or misleading trends. 
-Properly calibrated, deterministic jittering can enhance visual clarity without compromising the statistical structure of the data.
-
-Jittering, whether random or deterministic, is a common technique for managing ties in visualizations like parallel coordinate plots (PCPs). 
-In PCPs, tied values often cause overlapping lines, obscuring patterns and making the data harder to interpret. 
-By adding small amounts of noise, jittering creates a visual separation between tied observations, improving clarity and facilitating analysis.
-
-@swayne2003 highlights jittering as an intuitive and effective way to handle ties in 2-D correlation tours, where dense overlapping values often distort visualizations. 
-They note that jittering separates tied values without distorting their underlying statistical relationships, preserving the dataset’s integrity. 
-Similarly, @few2008solutions describes jittering as a practical response to the perceptual challenges caused by overplotting. 
-By introducing subtle adjustments to tied values, jittering highlights individual lines or points in dense datasets while maintaining the overall structure of the visualization.
-
-While jittering enhances clarity, its effectiveness depends on selecting the appropriate amount of noise. 
-Excessive jittering can introduce artificial variability, potentially misleading viewers, while insufficient jittering may fail to separate tied observations adequately. 
-Deterministic jittering mitigates this issue by providing a fixed, controlled adjustment that can be calibrated to balance clarity with fidelity.
-
-In their review, @few2008solutions emphasize the importance of regulating jittering to avoid compromising the visualization’s accuracy. 
-The careful application ensures that jittering improves visual clarity without introducing distortions. 
-This approach is especially critical in dense datasets, where the balance between noise and structure can significantly affect interpretability.
-
-Deterministic jittering’s predictability makes it a preferred choice in applications where transparency and repeatability are essential. 
-For example, in datasets requiring precise replication of visualizations, deterministic jittering ensures that tied observations are consistently adjusted. 
-In contrast, random jittering is better suited for exploratory analyses, where variability is acceptable and often necessary to reveal hidden patterns.
-
-Both methods have their strengths and limitations. 
-Deterministic jittering excels in creating structured, predictable visualizations but risks introducing artificial patterns if overapplied. 
-While more flexible, random jittering may obscure the exact values of tied observations if the added noise is excessive or inconsistent. 
-The choice between the two depends on the specific analytical goals and the dataset’s characteristics characteristics.
-
-
-For tied values $x_1, x_2,...,x_n$, we use:
-
-$$
-x'_i = x_i + i\epsilon
-$$
-
-where:
-
--   $x'_i$ is the adjusted value of $x_i$,
--   $i$ is the indeex of the tied observation (e.g., $i = 1,2,...,n$),
--   $\epsilon$ is a small fixed distance chosen based on the data scale.
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-deterministic_jitter
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Deterministic Jittering of Data Points in PCP"
-
-# Add fixed perturbation
-penguins_fixed <- penguins
-penguins_fixed$year <- ifelse(duplicated(penguins_fixed$year),
-                                           penguins_fixed$year + 0.5,
-                                           penguins_fixed$year)
-
-
-# Plot Parallel Coordinate Plot
-ggparcoord(
-  data = penguins_fixed,
-  columns = c(3:6), # Select numerical columns
-  groupColumn = 1, # Color by species
-  scale = "center",
-  alphaLines = 0.5
-) +
-  penguin_scale_color() +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Deterministic Jittering") +
-  ggplot2::scale_y_reverse() +
-  guides(color = F)
-
-
-```
-
-
-Whether random or deterministic, jittering is an indispensable tool for managing ties in data visualizations. 
-Deterministic jittering stands out for its clarity, repeatability, and ability to preserve the dataset’s statistical structure. 
-When applied carefully, it ensures that tied observations are visually distinct without introducing artificial patterns or distortions. 
-For dense visualizations like PCPs, jittering enhances interpretability and reduces the challenges posed by overplotting. 
-By balancing noise and structure, deterministic jittering provides a reliable and effective solution for creating clear and insightful data visualizations.
-
-
-## Mean or Median Splitting
-
-Mean or median splitting is another widely used method for resolving ties in data analysis and visualization. 
-This approach replaces tied values with their mean or median, effectively centering the tied observations on their central tendency. 
-This technique works particularly well for symmetric distributions, where the mean and median closely align, and for visualizations that emphasize central values, such as box plots. 
-
-As detailed in @wilcox2017’s Modern Statistics for the Social and Behavioral Sciences, mean or median splitting provides a balanced and fair representation of tied data, mainly when used in boxplot visualizations. 
-Assigning tied observations to their central values ensures that the visual representation reflects the dataset's core tendencies without distorting its overall structure.
-
-This method is especially well-suited for visualizations prioritizing central tendencies, such as box plots or histograms. 
-By centering tied values, mean or median splitting emphasizes the median line or the mean's location, enhancing the clarity of the visualization.
-It is beneficial for datasets with minimal ties, as it preserves the integrity of the distribution while reducing visual clutter caused by overlapping points or lines.
-
-Mean or median splitting is advantageous in cases where the tied group size is small, as it minimizes the impact on the range and variability of the dataset. 
-For example, replacing tied values with their mean or median preserves the dataset's balance in symmetric distributions, ensuring the visualization remains accurate and interpretable.
-
-Despite its strengths, mean or median splitting has limitations, particularly for datasets with numerous ties. 
-Excessive use of this method can obscure the variability within tied groups, creating a homogenized view that may not accurately reflect the diversity of the data. 
-This can be problematic when understanding the range of tied observations is critical, such as in scatter plots or other point-based visualizations.
-
-Moreover, mean or median splitting assumes that the central value represents the tied group, which may not hold for skewed distributions. 
-In these cases, using the mean or median may introduce bias, potentially distorting the interpretation of the data. 
-Therefore, it is essential to consider the dataset’s characteristics when applying this technique carefully.
-
-In practice, mean or median splitting involves identifying groups of tied values and replacing each observation with the mean or median of the group. 
-For example, this technique can emphasize the data's central line (median) or central tendency (mean) in a box plot, reducing ambiguity caused by overlapping points. 
-The simplicity of implementation and its alignment with central tendency measures make this method a popular choice for summarizing tied data in visualizations.
-
-
-For set of tied values $x_1, x_2,...,x_n$ let:
-
-\begin{center}
-$x_{mean} = \frac{1}{n}\sum^{n}_{i=1}x_i$ or $x_{median} = median(x_1, x_2,...,x_n)$
-\end{center}
-
-Then:
-
-\begin{center}
-$x'_i = x_{mean}$ or $x'_i = x_{median}$
-\end{center}
-
-This replaces each tied value $x_i$ with the computed mean or median, clustering them at a central point.
-
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-mean_jitter
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "Mean or Median Splitting of Data Points in PCP"
-
-# Mean splitting for ties
-penguins_mean <- penguins
-mean_year <- mean(penguins_mean$year, na.rm = TRUE)
-penguins_mean$year <- ifelse(duplicated(penguins_mean$year),
-                                          penguins_mean$year + (penguins_mean$year - mean_year) * 0.1,
-                                          penguins_mean$year)
-
-
-# Plot Parallel Coordinate Plot
-ggparcoord(
-  data = penguins_mean,
-  columns = c(3:6), # Select numerical columns
-  groupColumn = 1, # Color by species
-  scale = "center",
-  alphaLines = 0.5
-) +
-  penguin_scale_color() +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with Mean or Median Splitting") +
-  theme(legend.position = "bottom") + 
-  guides(color = F) 
-
-
-```
-
-Mean or median splitting offers a centered and balanced approach to handling ties, making it ideal for symmetric distributions and visualizations focused on central tendencies. 
-While it enhances clarity in datasets with few ties, its limitations in preserving variability and representing skewed distributions highlight the importance of careful application. 
-By centering tied observations on their mean or median, this technique provides a straightforward solution for improving the interpretability of tied data, particularly in visualizations like box plots that prioritize centrality.
-
-## Kernel Density Estimation (KDE) with Bandwidth Adjustment
-
-Kernel Density Estimation (KDE) is a powerful method for creating smooth density visualizations by spreading overlapping observations. 
-By assigning slightly different weights to tied values, KDE maintains the original data while providing a more continuous and visually interpretable representation of the distribution. 
-This technique is especially effective for multimodal distributions, where tied observations can obscure peaks or create misleading impressions of uniformity.
-
-As discussed in @silverman2018’s Density Estimation for Statistics and Data Analysis, adjusting the bandwidth in KDE enables an accurate depiction of multimodal distributions, reducing errors caused by ties. 
-Bandwidth selection is critical. 
-Determining the degree of smoothing applied to the data and choosing an appropriate bandwidth balance the need to spread out tied values while preserving the distribution’s key features. 
-Incorrect bandwidth choices, particularly in datasets with tightly clustered values, can lead to over-smoothing or under-smoothing, distorting the visualization.
-KDE excels in density plots, offering a visually intuitive way to represent the data’s underlying distribution. 
-However, its reliance on careful bandwidth tuning requires expertise, especially for datasets with high variability or dense clusters.
-
-
-The KDE for a set of observations $x_1, x_2,...,x_n$ is:
-
-$$
-\hat{f}(x) = \frac{1}{nh}\sum^{n}_{i=1}K(\frac{x-x_i}{h})
-$$
-
-where:
-
--   $\hat{f}(x)$ is the estimiated density at $x$,
--   $K(\cdot)$ is a kernel function
--   $h$ is the bandwidth, chosen to spread tied values slightly by selecting a larger $h$ for clusters of tied observations.
-
-The choice of bandwidth $h$ controls the amount of smoothing, which helps visually differentiate tied values.
-
-```{r}
-#| echo: false
-#| warning: false
-#| label: fig-kde_jitter
-#| layout-valign: bottom
-#| fig-subcap: 
-#|   - "KDE with Bandwidth Adjustment of Data Points in PCP"
-#| fig-width: 8
-#| fig-height: 8
-
-
-# KDE transformation
-penguins_kde <- penguins
-penguins_kde$year_density <- density(penguins_kde$year, na.rm = TRUE)$bw
-
-# Add KDE smoothed values
-penguins_kde$year <- penguins_kde$year + penguins_kde$year_density * 0.1
-
-
-# Plot Parallel Coordinate Plot
-ggparcoord(
-  data = penguins_kde,
-  columns = c(3:6), # Select numerical columns
-  groupColumn = 1, # Color by species
-  scale = "center",
-  alphaLines = 0.5
-) +
-  penguin_scale_color() +
-  ggplot2::theme_minimal() +
-  ggplot2::labs(title = "Parallel Coordinate Plot with KDE with Bandwidth Adjustment") +
-  ggplot2::scale_y_reverse() + 
-  guides(color=F)
-
-```
-
-
-## Depth Cues
-
-Traditional methods for handling ties often need more effective high-dimensional visualizations, such as parallel coordinate plots (PCPs), as overlapping lines obscure trends and connections. 
-Advanced visual techniques, such as Depth Cue Parallel Coordinates (DCPC), address this challenge by introducing depth perception cues to create a three-dimensional effect.
-
-As demonstrated in @johansson2007’s work, DCPC combines line transparency and brightness adjustments to layer information visually. 
-Temporal binning and perception-based coloring add further clarity, enabling users to distinguish overlapping trends effectively. 
-These techniques are designed to handle temporal data with high dimensionality, where conventional visualization methods struggle to reveal patterns.
-
-DCPC preserves the original dataset by ensuring each line remains identifiable, even in densely populated plots. 
-While this method significantly enhances clarity, it requires advanced rendering tools, which may only be available in some visualization settings. 
-The computational complexity of generating depth cues and transparency effects can pose challenges, especially for large datasets.
-
-Different techniques for handling ties excel in specific contexts, depending on the type of visualization and the nature of the data:
-
- - Jittering (random or deterministic): Ideal for scatterplots and similar two-dimensional visualizations, jittering separates tied values by adding small random or fixed displacements. 
- This approach effectively reveals hidden patterns and reduces visual clutter in dense datasets.
-
-- KDE and rank-based methods: are best suited for density plots and ordinal visualizations. 
-KDE spreads out tied values smoothly, preserving the overall distribution, while rank-based methods emphasize ordinal relationships without distorting the data.
-
-- DCPC and advanced PCP techniques: For multidimensional data, especially in PCPs, traditional methods often fail to address overlapping lines adequately. 
-DCPC introduces visual depth and transparency to resolve these issues, providing clarity in complex datasets.
-
-While existing methods improve clarity in specific visualization contexts, PCPs present unique challenges due to their high-dimensional nature and the tendency for lines to overlap extensively. 
-Traditional techniques like jittering and KDE, designed for two-dimensional visualizations, only sometimes scale effectively to PCPs.
-
-A promising solution involves systematically introducing spacing between tied values across multiple axes in PCPs. 
-This method would distribute tied observations more evenly, reducing overlaps and revealing otherwise obscured patterns.
-Researchers could uncover trends and connections by designing this approach to account for relationships across dimensions while preserving the dataset’s structure and integrity.
-
-Such a method could combine rank-based adjustments, deterministic jittering, and transparency techniques to create a more precise and insightful visualization of high-dimensional data. 
-Incorporating this approach into PCPs would significantly enhance their utility for exploring complex, multidimensional datasets.
-
-Each method for handling ties---whether jittering, KDE, rank-based adjustments, or depth cueing---has unique strengths tailored to specific visualization needs. 
-While jittering and KDE are effective for scatterplots and density plots, advanced techniques like DCPC are better suited for high-dimensional visualizations like PCPs. 
-Developing a dedicated method for handling ties in PCPs, such as planned spacing across axes, could further advance the field, enabling researchers to explore complex data more effectively while maintaining visual clarity and data integrity. 
-This innovation would provide a transformative step in high-dimensional data visualization, making uncovering trends and connections across diverse datasets easier.
 
 \newpage
-
 # References
