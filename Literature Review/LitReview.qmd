@@ -1,5 +1,5 @@
 ---
-title: "Lit Review for handling numerical ties in PCPs"
+title: "Breaking the Clutter: Strategies for Handling Numerical Ties in Generalized Parallel Coordinate Plots"
 author: "Denise Bradford"
 format: 
   pdf:
@@ -54,6 +54,25 @@ penguin_scale_fill <-   function(...) scale_fill_manual(
   )  
 ```
 
+# Abstract
+
+High-dimensional data visualization is a cornerstone of modern analytics and is critical for revealing complex relationships across numerous variables and observations. 
+Traditional visualization methods, such as scatterplots and Cartesian coordinate systems, struggle to manage datasets with more than three dimensions effectively, leading to challenges like overplotting, cognitive strain, and obscured patterns. 
+Parallel Coordinate Plots (PCPs) have emerged as a powerful alternative for visualizing multidimensional data by mapping variables to parallel axes and representing observations as intersecting polylines. 
+Despite their utility, PCPs face significant limitations, particularly in handling numerical ties, visual clutter, and mixed data types.
+
+This dissertation focuses on advancing the design and functionality of PCPs to address these challenges. 
+Key contributions include a novel approach to managing numerical ties by introducing visual spacing and jittering techniques, which preserve data integrity while enhancing interpretability. 
+Adaptive methods for axis reordering and flipping are explored to improve the readability of highly correlated dimensions and reveal hidden patterns. 
+Additionally, the integration of interactive features, such as dynamic filtering, brushing, and linking, is presented to facilitate real-time exploration and analysis of complex datasets.
+
+This research systematically evaluates the performance of these enhancements across diverse applications, including genomics, finance, and social sciences. 
+It demonstrates the potential of optimized PCPs to uncover clusters, trends, and outliers in large, multidimensional datasets. 
+The findings underscore the importance of balancing data accuracy with visual clarity and provide a framework for future innovations in high-dimensional data visualization. 
+These advancements establish PCPs as indispensable tools for exploratory analysis, supporting data-driven decision-making in an era of ever-growing complexity.
+
+\newpage{}
+
 # Introduction
 
 In modern data analysis, the complexity of datasets with large $n$ (number of observations) and large $p$ (number of variables) presents unique challenges. 
@@ -76,7 +95,6 @@ This study fixes the problems that regular PCPs have with finding numerical ties
 We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. 
 Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
 
-
 Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the $x$ and $y$ axis. 
 Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than $p = 3\: or \:4$ variables are shown (including the $x$ and $y$ coordinates). 
 When it is necessary to understand the relationship between more than four variables, visualizations on a 
@@ -85,7 +103,152 @@ Here, we examine parallel coordinate plots (PCPs) as a solution to $p \geq 4$ di
 We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N \geq 4$ dimensional data across different magnitudes of $N$ (observations) and $p$ (variables).
 
 
-# Parallel Coordinate Plots (PCPs)
+# Evolution of data visualization methodologies
+
+From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
+This section delves into the historical development and interconnections among several key visualization techniques—Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and various adaptations of Parallel Coordinate Plots. 
+These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges.
+
+## Early Foundations: Statistical Graphics in the 19th Century
+
+Statistical graphics of the 19th century—bar charts, pie charts, and flow maps—formed the groundwork for modern visualization techniques. 
+While these early tools primarily focused on small-scale, univariate datasets, they offered a glimpse into the potential of data relationships. 
+These methods demonstrated the power of visualizing data to uncover patterns, but with limited dimensionality and scope.
+@fig=pcp19 is a historical visualization of the rankings of the most populous cities in the United States at each census from 1790 to 1890.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-pcp19
+#| layout-valign: bottom
+#| fig-cap: "A 19th Century Parallel Coordinate Plot of U.S. cities"
+#| fig-width: 6
+#| fig-height: 6
+
+knitr::include_graphics("images/pcp19th.png")
+```
+
+
+## Emergence of Parallel Coordinate Plots in the Mid-20th Century
+
+The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data. 
+This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets. 
+Despite their utility for numerical data, early PCPs struggled with categorical and mixed data types. 
+Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-pcp20
+#| layout-valign: bottom
+#| fig-cap: "A 20th Century Parallel Coordinate Plot"
+#| fig-width: 8
+#| fig-height: 6
+
+knitr::include_graphics("images/pcp19th.png")
+```
+
+## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
+
+Flow-based visualization methods gained renewed attention in the late 20th century, building on the Sankey diagrams introduced by Matthew Sankey in the late 19th century. 
+Initially designed to illustrate energy flows, these diagrams evolved to depict proportional relationships within broader contexts, such as material flows and network analyses. 
+However, their rigid structure and limited interactivity spurred interest in more versatile approaches.
+@fig-sankeyhist is a Sankey diagram representing the thermal efficiency of steam engines, comparing an "actual steam plant" and an "idealized steam plant." 
+It visually depicts the flow and losses of energy (heat) within the system, with the width of the arrows proportional to the energy quantity.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-sankeyhist
+#| layout-valign: bottom
+#| fig-cap: "A historical Sankey diagram representing the thermal efficiency of steam engines created by civil engineer, Matthew Sankey."
+#| fig-width: 6
+#| fig-height: 6
+
+knitr::include_graphics("images/sankey_history.png")
+```
+
+
+## Hierarchical Data Visualization: Parallel Sets in the Early 2000s
+
+In 2001, Kosara, Bendix, and Hauser introduced Parallel Sets, a transformative adaptation of Parallel Coordinate Plots tailored for categorical data. 
+Parallel Sets addressed a critical gap in existing tools by grouping data points into categories and visualizing their relationships across dimensions. 
+This innovation facilitated the exploration of hierarchical and networked structures, paving the way for Hammock Plots to refine the depiction of complex hierarchical relationships further.
+@fig-parsets is a parallel sets visualization, a method used to display categorical data and relationships between multiple variables. 
+It segments categories such as "Family," "Type of Wash Agent," "Population," and "Income," with colored bands connecting these categories to show associations and distributions across the variables.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-parsets
+#| layout-valign: bottom
+#| fig-cap: "An Early 2000s example of a Parallel Sets Visualization"
+#| fig-width: 6
+#| fig-height: 6
+
+knitr::include_graphics("images/parsets_historic.png")
+```
+
+## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
+
+Concurrently, flow-based methods witnessed substantial evolution with the emergence of Alluvial Plots. 
+By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
+Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization.
+@fig-alluvialHist is an alluvial diagram, a type of flow visualization used to depict changes in categorical data over time. 
+It shows the transitions of topics or fields, such as "Neuroscience," "Medicine," and "Molecular & Cell Biology," between 2001 and 2007, with the width of the flows proportional to their significance or quantity.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-alluvialHist
+#| layout-valign: bottom
+#| fig-cap: "An Early 2000s example of an Alluvial Diagram"
+#| fig-width: 6
+#| fig-height: 6
+
+knitr::include_graphics("images/alluvial_historic.png")
+```
+
+## Mid-2000s: Enhancements in Parallel Coordinate Plots
+
+Advancements in Parallel Coordinate Plots during the mid-2000s expanded their functionality to accommodate mixed data types and interactive exploration. 
+Features such as brushing, filtering, and dynamic axis reordering enabled users to uncover hidden patterns and insights within datasets. 
+Generalized Parallel Coordinate Plots emerged during this era, offering robust solutions for visualizing mixed numerical and categorical datasets while maintaining scalability and clarity.
+@fig-enhan is a parallel coordinates plot visualizing a multivariate dataset, where each axis represents a variable such as "mpg," "cyl," "disp," and others.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-enhan
+#| layout-valign: bottom
+#| fig-cap: "Ann example from the Generalized Parallel Coordinate Plots `ggpcp` package in R written by Hofmann et al"
+#| fig-width: 6
+#| fig-height: 6
+
+knitr::include_graphics("images/enhance_example.png")
+```
+
+
+## Late 2000s: Specialized Visualization Techniques
+
+The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges. 
+Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively. 
+By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
+
+## Interconnected Pathways of Evolution
+
+The progression of these visualization techniques underscores a shared heritage of iterative improvement and cross-disciplinary inspiration. 
+For instance, Parallel Sets informed hierarchical visualizations, which subsequently influenced flow-based approaches like Sankey and Alluvial Plots. 
+Similarly, the iterative refinement of Parallel Coordinate Plots highlighted the necessity of integrating multiple data types while preserving clarity and scalability. 
+These interconnections exemplify the synergistic nature of advancements in data visualization.
+
+## Parallel Coordinate Plots (PCPs): A Foundation
 
 Parallel coordinate plots (PCPs) leverage a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg1985]. 
 The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp}
@@ -147,7 +310,6 @@ penguins %>%
 ```
 
 In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. 
-The Gentoo (blue) tends to have higher body mass and flipper length values, while the Adelie (red) tends to have lower values for these measurements. 
 [There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. ]{.svp}
 [Even in projection space, we can see Simpson's paradox at work; the second plot in the third row of @fig-ggpairs shows the same basic information.]{.svp} 
 [While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp} 
@@ -201,62 +363,8 @@ Although PCPs are sometimes criticized for overplotting and difficulty recognizi
 Studies show, however, that users adjust to PCPs relatively fast following appropriate introduction since interactive techniques and hierarchical approaches significantly increase their usability [@fua1999; @claessen2011].
 When combined with user training and interactive visualization techniques, PCPs remain beneficial for exploratory analysis of higher-dimensional data, even if scatterplots provide instantaneous interpretability and clarity—especially for two-dimensional relationships [@inselberg2009; @heinrich2013].
 
-# Multidimesnional Data Visualization Timeline
 
-From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
-This section delves into the historical development and interconnections among several key visualization techniques—Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and various adaptations of Parallel Coordinate Plots. 
-These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges.
 
-## Early Foundations: Statistical Graphics in the 19th Century
-
-Statistical graphics of the 19th century—bar charts, pie charts, and flow maps—formed the groundwork for modern visualization techniques. 
-While these early tools primarily focused on small-scale, univariate datasets, they offered a glimpse into the potential of data relationships. 
-These methods demonstrated the power of visualizing data to uncover patterns, albeit with limited dimensionality and scope.
-
-## Emergence of Parallel Coordinate Plots in the Mid-20th Century
-
-The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data. 
-This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets. 
-Despite their utility for numerical data, early PCPs struggled with categorical and mixed data types. 
-Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability.
-
-## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
-
-Flow-based visualization methods gained renewed attention in the late 20th century, building on the Sankey diagrams introduced by Matthew Sankey in the late 19th century. 
-Initially designed to illustrate energy flows, these diagrams evolved to depict proportional relationships within broader contexts, such as material flows and network analyses. 
-However, their rigid structure and limited interactivity spurred interest in more versatile approaches.
-
-## Hierarchical Data Visualization: Parallel Sets in the Early 2000s
-
-In 2001, Kosara, Bendix, and Hauser introduced Parallel Sets, a transformative adaptation of Parallel Coordinate Plots tailored for categorical data. 
-Parallel Sets addressed a critical gap in existing tools by grouping data points into categories and visualizing their relationships across dimensions. 
-This innovation facilitated the exploration of hierarchical and networked structures, paving the way for Hammock Plots to refine the depiction of complex hierarchical relationships further.
-
-## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
-
-Concurrently, flow-based methods witnessed substantial evolution with the emergence of Alluvial Plots. 
-By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
-Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization.
-
-## Mid-2000s: Enhancements in Parallel Coordinate Plots
-
-Advancements in Parallel Coordinate Plots during the mid-2000s expanded their functionality to accommodate mixed data types and interactive exploration. 
-Features such as brushing, filtering, and dynamic axis reordering enabled users to uncover hidden patterns and insights within datasets. 
-Generalized Parallel Coordinate Plots emerged during this era, offering robust solutions for visualizing mixed numerical and categorical datasets while maintaining scalability and clarity.
-
-## Late 2000s: Specialized Visualization Techniques
-
-The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges. 
-Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively. 
-By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
-
-## Interconnected Pathways of Evolution
-
-The progression of these visualization techniques underscores a shared heritage of iterative improvement and cross-disciplinary inspiration. 
-For instance, Parallel Sets informed hierarchical visualizations, which subsequently influenced flow-based approaches like Sankey and Alluvial Plots. 
-Similarly, the iterative refinement of Parallel Coordinate Plots highlighted the necessity of integrating multiple data types while preserving clarity and scalability. 
-These interconnections exemplify the synergistic nature of advancements in data visualization.
- 
 # Variations on Parallel Coordinate Plots
 
 Since @Inselberg1985 introduced parallel coordinate plots (PCPs) in 1985, considerable advances have been made to address the original method's framework and improve its capacity to depict high-dimensional data effectively.
@@ -1045,7 +1153,7 @@ The paper also underlines the need for visual inspection, in which visually dist
 Still, clarity is very arbitrary since it depends on thresholds selected for BCI and the interpretability of the produced visuals. 
 This method detects and assesses clusters by combining empirical visualization with quantitative measurements.
 
-# Interactivity 
+## Interactivity 
 
 The integration of interactive features has significantly improved the utility and flexibility of parallel coordinate plots (PCPs). 
 These enhancements allow users to dynamically reorder axes, filter data based on specified criteria, and invert axes to view data from different perspectives. 
