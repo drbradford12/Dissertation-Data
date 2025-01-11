@@ -52,6 +52,7 @@ penguin_scale_color <-   function(...) scale_color_manual(
 penguin_scale_fill <-   function(...) scale_fill_manual(
     "Species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000", ...)
   )  
+setwd("/Users/dbradford4/Documents/GitHub/Dissertation-Data/Literature Review")
 ```
 
 # Abstract
@@ -114,7 +115,7 @@ These innovations collectively chart a trajectory of creative solutions rooted i
 Statistical graphics of the 19th century—bar charts, pie charts, and flow maps—formed the groundwork for modern visualization techniques. 
 While these early tools primarily focused on small-scale, univariate datasets, they offered a glimpse into the potential of data relationships. 
 These methods demonstrated the power of visualizing data to uncover patterns, but with limited dimensionality and scope.
-@fig=pcp19 is a historical visualization of the rankings of the most populous cities in the United States at each census from 1790 to 1890.
+@fig-pcp19 is a historical visualization of the rankings of the most populous cities in the United States at each census from 1790 to 1890.
 
 ```{r}
 #| echo: false
@@ -126,7 +127,7 @@ These methods demonstrated the power of visualizing data to uncover patterns, bu
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics("images/pcp19th.png")
+knitr::include_graphics(here::here("Literature Review/images","pcp_hist.png"))
 ```
 
 
@@ -141,13 +142,14 @@ Nonetheless, these limitations underscored the technique’s significance as a f
 #| echo: false
 #| warning: false
 #| message: false
+#| eval: false
 #| label: fig-pcp20
 #| layout-valign: bottom
 #| fig-cap: "A 20th Century Parallel Coordinate Plot"
 #| fig-width: 8
 #| fig-height: 6
 
-knitr::include_graphics("images/pcp19th.png")
+knitr::include_graphics(here::here("Literature Review/images", "pcp19th.png"))
 ```
 
 ## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
@@ -165,10 +167,10 @@ It visually depicts the flow and losses of energy (heat) within the system, with
 #| label: fig-sankeyhist
 #| layout-valign: bottom
 #| fig-cap: "A historical Sankey diagram representing the thermal efficiency of steam engines created by civil engineer, Matthew Sankey."
-#| fig-width: 6
-#| fig-height: 6
+#| fig-width: 4
+#| fig-height: 4
 
-knitr::include_graphics("images/sankey_history.png")
+knitr::include_graphics(here::here("Literature Review/images", "sankey_history.png"))
 ```
 
 
@@ -190,7 +192,7 @@ It segments categories such as "Family," "Type of Wash Agent," "Population," and
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics("images/parsets_historic.png")
+knitr::include_graphics(here::here("Literature Review/images","parsets_historic.png"))
 ```
 
 ## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
@@ -198,8 +200,8 @@ knitr::include_graphics("images/parsets_historic.png")
 Concurrently, flow-based methods witnessed substantial evolution with the emergence of Alluvial Plots. 
 By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
 Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization.
-@fig-alluvialHist is an alluvial diagram, a type of flow visualization used to depict changes in categorical data over time. 
-It shows the transitions of topics or fields, such as "Neuroscience," "Medicine," and "Molecular & Cell Biology," between 2001 and 2007, with the width of the flows proportional to their significance or quantity.
+@fig-alluvialHist is a detailed alluvial diagram visualizing the top 100 historical figures based on metrics like Wikipedia page views. 
+It connects individuals to their professions (e.g., philosopher, politician, writer), countries of origin, and gender, illustrating relationships and distributions across these categories.
 
 ```{r}
 #| echo: false
@@ -207,11 +209,11 @@ It shows the transitions of topics or fields, such as "Neuroscience," "Medicine,
 #| message: false
 #| label: fig-alluvialHist
 #| layout-valign: bottom
-#| fig-cap: "An Early 2000s example of an Alluvial Diagram"
+#| fig-cap: "A Detailed Alluvial Diagram visualizing the top 100 historical figures"
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics("images/alluvial_historic.png")
+knitr::include_graphics(here::here("Literature Review/images","alluvial_historic.png"))
 ```
 
 ## Mid-2000s: Enhancements in Parallel Coordinate Plots
@@ -219,7 +221,7 @@ knitr::include_graphics("images/alluvial_historic.png")
 Advancements in Parallel Coordinate Plots during the mid-2000s expanded their functionality to accommodate mixed data types and interactive exploration. 
 Features such as brushing, filtering, and dynamic axis reordering enabled users to uncover hidden patterns and insights within datasets. 
 Generalized Parallel Coordinate Plots emerged during this era, offering robust solutions for visualizing mixed numerical and categorical datasets while maintaining scalability and clarity.
-@fig-enhan is a parallel coordinates plot visualizing a multivariate dataset, where each axis represents a variable such as "mpg," "cyl," "disp," and others.
+@fig-enhan is a parallel coordinates plot visualizing a multivariate, mixed-type dataset.
 
 ```{r}
 #| echo: false
@@ -227,11 +229,11 @@ Generalized Parallel Coordinate Plots emerged during this era, offering robust s
 #| message: false
 #| label: fig-enhan
 #| layout-valign: bottom
-#| fig-cap: "Ann example from the Generalized Parallel Coordinate Plots `ggpcp` package in R written by Hofmann et al"
+#| fig-cap: "An example from the Generalized Parallel Coordinate Plots `ggpcp` package in R written by Hofmann et al"
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics("images/enhance_example.png")
+knitr::include_graphics(here::here("Literature Review/images","enhance_example.png"))
 ```
 
 
@@ -240,6 +242,20 @@ knitr::include_graphics("images/enhance_example.png")
 The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges. 
 Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively. 
 By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
+@fig-capHist
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-capHist
+#| layout-valign: bottom
+#| fig-cap: ""
+#| fig-width: 6
+#| fig-height: 6
+
+knitr::include_graphics(here::here("Literature Review/images", "cap_historic.png"))
+```
 
 ## Interconnected Pathways of Evolution
 
@@ -624,6 +640,7 @@ These plots intuitively convey intricate categorical relationships, offering a v
 #| echo: false
 #| warning: false
 #| message: false
+#| eval: false
 #| label: fig-sankey
 #| layout-valign: bottom
 #| fig-cap: "A Sankey Diagram"
