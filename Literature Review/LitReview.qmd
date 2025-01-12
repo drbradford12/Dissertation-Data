@@ -137,19 +137,19 @@ The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985
 This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets. 
 Despite their utility for numerical data, early PCPs struggled with categorical and mixed data types. 
 Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability.
+@fig-pcpScatter illustrates the three extreme values of Pearson's correlation coefficient $r (r=-1,0,1)$ using two types of visualizations: scatterplots (top row) and parallel coordinate plots (bottom row).
 
 ```{r}
 #| echo: false
 #| warning: false
 #| message: false
-#| eval: false
-#| label: fig-pcp20
+#| label: fig-pcpScatter
 #| layout-valign: bottom
-#| fig-cap: "A 20th Century Parallel Coordinate Plot"
-#| fig-width: 8
+#| fig-cap: "An illustration of extreme values of Pearson's correlation cofficient using scatterplots (top row) and parallel coordinate plots (bottom row)."
+#| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images", "pcp19th.png"))
+knitr::include_graphics(here::here("Literature Review/images", "pcp_scatter.png"))
 ```
 
 ## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
@@ -166,7 +166,7 @@ It visually depicts the flow and losses of energy (heat) within the system, with
 #| message: false
 #| label: fig-sankeyhist
 #| layout-valign: bottom
-#| fig-cap: "A historical Sankey diagram representing the thermal efficiency of steam engines created by civil engineer, Matthew Sankey."
+#| fig-cap: "The original Sankey diagram representing the thermal efficiency of steam engines created by civil engineer, Matthew Sankey."
 #| fig-width: 4
 #| fig-height: 4
 
