@@ -192,6 +192,7 @@ It segments categories such as "Family," "Type of Wash Agent," "Population," and
 #| fig-cap: "An Early 2000s example of a Parallel Sets Visualization"
 #| fig-width: 6
 #| fig-height: 6
+#| out-width: 75%
 
 knitr::include_graphics("images/parsets_historic.jpg")
 ```
