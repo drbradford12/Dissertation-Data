@@ -39,6 +39,8 @@ library(ggridges)
 library(patchwork)
 library(ggparallel)
 library(ggalluvial)
+# install.packages("devtools")
+# devtools::install_github("davidsjoberg/ggsankey")
 library(ggsankey)
 library(ggforce)
 library(htmlwidgets)
@@ -52,7 +54,6 @@ penguin_scale_color <-   function(...) scale_color_manual(
 penguin_scale_fill <-   function(...) scale_fill_manual(
     "Species", values = c("Gentoo" = "#540D6E", "Adelie" = "#219B9D", "Chinstrap" = "#FF8000", ...)
   )  
-setwd("/Users/dbradford4/Documents/GitHub/Dissertation-Data/Literature Review")
 ```
 
 # Abstract
@@ -192,7 +193,7 @@ It segments categories such as "Family," "Type of Wash Agent," "Population," and
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images","parsets_historic.png"))
+knitr::include_graphics("images/parsets_historic.jpg")
 ```
 
 ## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
