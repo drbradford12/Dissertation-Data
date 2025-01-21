@@ -128,7 +128,7 @@ These methods demonstrated the power of visualizing data to uncover patterns, bu
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images","pcp_hist.png"))
+knitr::include_graphics("images/pcp_hist.png")
 ```
 
 
@@ -150,7 +150,7 @@ Nonetheless, these limitations underscored the technique’s significance as a f
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images", "pcp_scatter.png"))
+knitr::include_graphics("images/pcp_scatter.png")
 ```
 
 ## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
@@ -171,7 +171,7 @@ It visually depicts the flow and losses of energy (heat) within the system, with
 #| fig-width: 4
 #| fig-height: 4
 
-knitr::include_graphics(here::here("Literature Review/images", "sankey_history.png"))
+knitr::include_graphics("images/sankey_history.png")
 ```
 
 
@@ -215,7 +215,7 @@ It connects individuals to their professions (e.g., philosopher, politician, wri
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images","alluvial_historic.png"))
+knitr::include_graphics("images/alluvial_historic.png")
 ```
 
 ## Mid-2000s: Enhancements in Parallel Coordinate Plots
@@ -235,7 +235,7 @@ Generalized Parallel Coordinate Plots emerged during this era, offering robust s
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images","enhance_example.png"))
+knitr::include_graphics("images/enhance_example.png")
 ```
 
 
@@ -256,7 +256,7 @@ By overcoming the limitations of linear arrangements for periodic patterns, thes
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics(here::here("Literature Review/images", "cap_historic.png"))
+knitr::include_graphics("images/cap_historic.png")
 ```
 
 ## Interconnected Pathways of Evolution

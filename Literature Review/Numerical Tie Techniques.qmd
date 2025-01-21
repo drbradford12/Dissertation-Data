@@ -38,7 +38,7 @@ penguins <- na.omit(penguins)
 
 og_pcp <- penguins %>%
   mutate(year = as.factor(year)) %>%
-  pcp_select(species, 3:6, species) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
@@ -161,7 +161,7 @@ plot_parallel_with_spacing <- function(data, tie_spacing = 0.01) {
 
   # Create the parallel coordinate plot with adjusted spacing
   ggp <- data  %>%
-  pcp_select(species, 3:6, species) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method = "uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
@@ -183,6 +183,7 @@ grid.arrange(og_pcp, plot_parallel_with_spacing(penguins,tie_spacing = 0.1), nco
 
 ```
 
+<!-- The issue here is that the lines in the categorical variables are reorder. Not sure if that is what we want-->
 
 ## Attempt 2: Jitter Spacing (Numerical Tie Handling)
 
@@ -250,7 +251,7 @@ adjusted_penguins <- penguins %>%
 adjusted_data <- adjust_ties(adjusted_penguins, cols_to_adjust = names(adjusted_penguins)[3:6], epsilon = 0.1)
 
 p3 <- adjusted_data %>%
-  pcp_select(species, 3:6, species) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method = "uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
@@ -325,7 +326,7 @@ adjusted_data <- apply_tie_breaking(penguins, cols_to_adjust = names(penguins)[3
 
 p4 <- adjusted_data %>%
   mutate(year = as.factor(year)) %>%
-  pcp_select(species, 3:6, species) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method = "uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) +
@@ -342,7 +343,7 @@ p4 <- adjusted_data %>%
 
 grid.arrange(og_pcp, p4, ncol = 1)
 ```
-
+<!--This solution would be good for the numerical ties but for some reason the categorical data is reordered -->
 
 ## Attempt 4: "Cascade Rank Tie-Breaker" Method
 
@@ -476,8 +477,11 @@ cascade_tie_break <- function(data, method = c("range", "sd"), ties_method = "mi
 #| fig-width: 8
 #| fig-height: 8
 
+# Adding a dataset that will make the year categorical to make the og_pcp but not sure if we want to force the user to make that decision. It looks much better in the comparison graphic.
+cat_year_penguins <- penguins %>% mutate(year = as.character(year))
+
 # Apply tie-breaking to the numeric columns of iris
-ranked_penguins <- cascade_tie_break(penguins, method = "sd", ties_method = "average")
+ranked_penguins <- cascade_tie_break(cat_year_penguins, method = "sd", ties_method = "min")
 
 add_spacing <- function(ranked_data) {
   spaced_data <- ranked_data
@@ -500,7 +504,7 @@ add_spacing <- function(ranked_data) {
 spaced_penguins <- add_spacing(ranked_penguins)
 
 p5 <- spaced_penguins %>%
-  pcp_select(species, 3:6, species) %>%
+  pcp_select(species, 3:8, species) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
@@ -516,3 +520,102 @@ p5 <- spaced_penguins %>%
 
 grid.arrange(og_pcp, p5, ncol = 1)
 ```
+<!-- Something is wrong here in the year category for the reason that I think that the numerical ties, but if we ensure that the year is a categorical variable does this change the outcome of the graphic? Chang-->
+
+## Attempt 5: Tie Breaking the Band (Resolving Numerical Ties with Incremental Offset)
+
+*Equation*:
+
+The incremental offset technique for numerical tie-breaking is defined as:
+
+$$
+v'_{i} = v_{i} + \Delta*k
+$$
+Where:
+
+$v'_{i}$: Adjusted value for the $i$-th data point.
+$v_{i}$: Original value for the $i$-th data point.
+$\Delta$: A small incremental offset (e.g., 0.01).
+$k$: The relative position of the value within the tie group.
+
+*Advantages*:
+
+- Maintains Sequential Order: Ensures that the original order of tied values is preserved.
+
+- Simple and Deterministic: The adjustment is straightforward and avoids randomness.
+
+- Improves Visualization Clarity: Slight differences between tied values enhance the interpretability of parallel coordinate plots (PCPs).
+
+- Scalable: Handles large datasets efficiently, provided ties are reasonably distributed.
+
+*Disadvantages*:
+
+- Fixed Offset May Bias Results: Applying a uniform incremental offset could introduce a small, consistent bias in downstream analyses.
+
+- Less Effective for Dense Ties: When ties are highly frequent, offsets might still result in visual overlap or distortions in high-resolution plots.
+
+- Sequential Dependency: Adjustments depend on the sorted order of the data, which may not be ideal for certain applications.
+
+*Implementation*:
+
+```{r}
+numerical_tie_breaker <- function(values, tie_band = 0.1) {
+  # Sort the values
+  sorted_values <- sort(values)
+  
+  # Initialize the adjusted values
+  adjusted_values <- sorted_values
+  
+  # Loop through the values to add tie band for ties
+  for (i in seq_along(sorted_values)) {
+    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
+      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+    }
+  }
+  
+  # Return the adjusted values
+  return(adjusted_values)
+}
+```
+
+*PCP Implementation*
+
+```{r}
+#| echo: false
+#| warning: false
+#| layout-valign: bottom
+#| fig-width: 8
+#| fig-height: 8
+
+# Example usage with palmerpenguins dataset
+penguin_data <- penguins %>% 
+  na.omit() %>% 
+  mutate(
+    bill_length_mm = numerical_tie_breaker(bill_length_mm, tie_band = 0.02),
+    bill_depth_mm = numerical_tie_breaker(bill_depth_mm, tie_band = 0.02),
+    flipper_length_mm = numerical_tie_breaker(flipper_length_mm, tie_band = 0.5),
+    body_mass_g = numerical_tie_breaker(body_mass_g, tie_band = 5.5)
+  )
+
+# Parallel coordinate plot visualization
+p6 <- penguin_data %>% 
+  mutate(year = as.factor(year) ) %>%
+  pcp_select(species, bill_length_mm, bill_depth_mm,
+             flipper_length_mm, body_mass_g, sex, year, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes() + 
+  geom_pcp(aes(colour = species), overplot = "none", alpha = 0.5) + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  penguin_scale_color()  + 
+  guides(color = F)  + 
+  ggplot2::labs(title = "Incremental Tie-Breaking PCP of Palmer Penguins")
+  
+
+grid.arrange(og_pcp, p6, ncol = 1)
+
+
+```
+
