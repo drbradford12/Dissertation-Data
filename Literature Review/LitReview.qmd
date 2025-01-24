@@ -73,7 +73,7 @@ It demonstrates the potential of optimized PCPs to uncover clusters, trends, and
 The findings underscore the importance of balancing data accuracy with visual clarity and provide a framework for future innovations in high-dimensional data visualization. 
 These advancements establish PCPs as indispensable tools for exploratory analysis, supporting data-driven decision-making in an era of ever-growing complexity.
 
-\newpage{}
+\clearpage
 
 # Introduction
 
@@ -84,39 +84,66 @@ However, the scale of observations and variables can obscure meaningful patterns
 
 Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. 
 Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@velagala2020]. 
-Similarly, large $n$ datasets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. 
-These challenges require innovative visualization techniques that simplify complex data while preserving its structural integrity.
+Similarly, large $n$ data sets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. 
+These challenges require innovative visualization techniques[I don't think they have to be innovative... PCPs have been around for a while... tours, dimension reduction, etc. are also pretty straightforward. Aim less for a pretty sounding conclusion to the paragraph and more for simple and direct - we need ways to represent high $p$ data which facilitate EDA and understanding of the structure of the data.]{.svp} that simplify complex data while preserving its structural integrity.
 
-Parallel Coordinate Plots (PCPs) have become a powerful way to examine data with more than one dimension. 
-PCPs show each observation as a polyline on parallel axes, letting analysts follow specific data points in multiple directions [@Inselberg1985]. 
-By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets.
-These plots are especially good at showing relationships and trends between multiple factors. 
-However, seeing ties and overlapping data points can be hard when many numbers are the same or very close. 
-This can cause important information to be lost in the research. 
-This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap. 
-We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach. 
-Our suggested methods should make it easier to understand data, leading to more accurate research and decision-making in large, complex datasets.
+Parallel Coordinate Plots (PCPs) [are]{.svp} a powerful way to examine data with more than one dimension. 
+PCPs show each observation as a polyline on parallel axes, letting analysts follow data points [across multiple single-variable axes]{.svp} [@Inselberg1985]. 
+[While PCPs are less common than Cartesian graphs, with some training, it is possible to see correlations, identify clusters, and examine outliers in a multivariate dataset.]{.svp}
+<!-- By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets. -->
+These plots are especially good at showing relationships and trends between multiple [variables]{.svp}. 
+However, [as with most visualization methods, overplotting reduces the effectiveness of PCPs, disrupting the ability to trace a single observation across multiple axes]{.svp}.
+<!-- seeing ties and overlapping data points can be hard when many numbers are the same or very close.  -->
+This can [complicate the viewer's ability to diagnose and cluster information visually.]{.svp}
+<!-- cause important information to be lost in the research.  -->
+[We begin by considering a series of plots which share characteristics with PCPs: multiple variables, each displayed on a vertical axis, with connecting structures which show the connection between variables.]{.svp}
+[In Chapter ... we demonstrate the use of a parallel coordinate plot in an exploratory setting, evaluating its effectiveness for exploratory analysis of publicly available data about small towns when used by residents of those towns.]{.svp}
+[In Chapter ... we examine the problem of numerical ties and overplotting, proposing a method for breaking ties visually which preserves numerical scaling while also allowing viewers to follow single observations across the plot.]{.svp}
+[Chapter ... discusses the computational implementation of the new methodology and its integration into the `ggpcp` R package.]{.svp}
+[Finally, chapter ... presents an empirical evaluation of the transformations proposed in Chapter ..., along with the modifications to the display of categorical variables first presented in @vanderplas2023.]{.svp}
+<!-- This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap.  -->
+<!-- We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach.  -->
+[The combined contribution of these chapters will improve the representation of data in generalized parallel coordinate plots, which should improve the visualization of large, complex data sets.]{.svp}
+<!-- , leading to more accurate research and decision-making in large, complex datasets. -->
+
+## Coordinate Systems
 
 Most standard data visualizations work within the Cartesian coordinate system, with variables or functions of variables mapped to the $x$ and $y$ axis. 
 Additional variables can be mapped to different properties of the plotted points, bars, or lines, and analysts can also create small multiples that show subsets of the data; even with these additions, viewers quickly become overwhelmed by the amount of information when more than $p = 3\: or \:4$ variables are shown (including the $x$ and $y$ coordinates). 
+
 When it is necessary to understand the relationship between more than four variables, visualizations on a 
-Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@inselberg1997]. Other approaches are necessary when it is necessary to understand $p \geq 4$ dimensions of data. 
-Here, we examine parallel coordinate plots (PCPs) as a solution to $p \geq 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high $N$ and/or high $p$ dimensional data. 
-We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N \geq 4$ dimensional data across different magnitudes of $N$ (observations) and $p$ (variables).
+Cartesian grid no longer work as well; extensions to additional dimensions are also ineffective [@inselberg1997]. 
+
+Other approaches are necessary when it is necessary to understand $p \geq 4$ dimensions of data. 
+
+[Include a 2D and 3D Cartesian plot here, along with a corresponding PCP. e.g. Row 1: 2D, 3D Cart, Row 2: 2D, 3D PCP. Highlight one or two points in each of the Cartesian plots, and the corresponding lines in the PCPs. It's fine to just rnorm() the data and it doesn't necessarily matter that the points have a strong linear relationship.]{.svp}
+
+
+<!-- Here, we examine parallel coordinate plots (PCPs) as a solution to $p \geq 4$ dimensional data visualization and assess the impact of different modifications of PCPs on their effectiveness for visualizing high $N$ and/or high $p$ dimensional data.  -->
+<!-- We specifically evaluate the ability of each PCP version to facilitate the identification of overall trends, outliers, and clusters within $N \geq 4$ dimensional data across different magnitudes of $N$ (observations) and $p$ (variables). -->
 
 
 # Evolution of data visualization methodologies
 
 From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
-This section delves into the historical development and interconnections among several key visualization techniques—Parallel Sets, Hammock Plots, Alluvial Plots (or Sankey Diagrams), Common Angle Plots, and various adaptations of Parallel Coordinate Plots. 
-These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges.
+This section delves into the historical development and interconnections among several key visualization techniques: Sankey diagrams, Alluvial plots, Parallel Sets plots, Hammock plots, Common Angle plots, and other adaptations which are similar to Parallel Coordinate Plots. 
+[Need to define basic inclusion criteria. What plots are in and out?]{.svp}
+
+These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges. [This sentence says basically nothing -- write tight. ]{.svp}
 
 ## Early Foundations: Statistical Graphics in the 19th Century
 
-Statistical graphics of the 19th century—bar charts, pie charts, and flow maps—formed the groundwork for modern visualization techniques. 
-While these early tools primarily focused on small-scale, univariate datasets, they offered a glimpse into the potential of data relationships. 
+Statistical graphics of the 19th century - bar charts, pie charts, and flow maps - formed the groundwork for modern visualization techniques. 
+[Many of these early charts were based on industrial meters: pie charts share some connection to e.g. steam pressure gauges; early graphical innovators, like William Playfair, worked with such equipment during the industrial revolution [@berkowitzPlayfairTrueStory2018].]{.svp}
+While these early tools primarily focused on small-scale, univariate [or bivariate]{.svp} datasets, they offered a glimpse into the potential of data relationships. 
 These methods demonstrated the power of visualizing data to uncover patterns, but with limited dimensionality and scope.
-@fig-pcp19 is a historical visualization of the rankings of the most populous cities in the United States at each census from 1790 to 1890.
+
+[In addition, the period between the late 1700s and the late 1800s produced many different experiments in graphical representation. 
+Some were persistent; bar and pie charts are still in use, while others faded from popular consciousness.
+In some cases, the same graphical structures were re-invented and popularlized later. 
+
+@fig-pcp19 is [from the Statistical Atlas of the United States published in 1898, visualizing the results of the eleventh US census. This proto-parallel coordinate plot shows]{.svp} the rankings of the most populous cities in the United States at each census from 1790 to 1890.
+[Each axis in the plot represents a US census, and objects along the axes are cities, connected from census to census to show the relative rank of each urban area by population.]{.svp}
 
 ```{r}
 #| echo: false
@@ -124,13 +151,33 @@ These methods demonstrated the power of visualizing data to uncover patterns, bu
 #| message: false
 #| label: fig-pcp19
 #| layout-valign: bottom
-#| fig-cap: "A 19th Century Parallel Coordinate Plot of U.S. cities"
+#| out-width: 100%
+#| fig-cap: "A 19th Century Parallel Coordinate Plot of U.S. cities. [This plot shows the relative rank of each of the cities in the US over the course of each census which was conducted. This plot appeared in the Statistical Atlas created after the eleventh (1890) US Census [@unitedstatescensusofficeStatisticalAtlasUnited1898].]{.svp} [The charts in the statistical atlases were created using lithography, which limits the number of unique colors used. In addition to color variations, markers are patterned differently to indicate distinct cities and facilitate tracing the city across the decades. Adjacent census observations are connected with thin black lines. Occasionally, cities are absorbed into other populous cities (e.g. Spring Garden, PA, which became part of Philadelphia between the 7th and 8th census) or disappear from the list of most populous cities entirely (e.g. Wilmington, which only appears in the 6th census.)]{.svp}"
 #| fig-width: 6
 #| fig-height: 6
 
-knitr::include_graphics("images/pcp_hist.png")
+knitr::include_graphics("images/pcp_hist.jpg")
 ```
 
+[Around the same time period, Irish Captain Matthew Henry Phineas Riall Sankey published his diagram of energy efficiency in a steam engine. 
+While this diagram, shown in @fig-sankey-orig, does not conceptualize the energy flows shown as variables, this type of diagram became common in science and engineering; similar diagrams have been used to show the flow of heat and energy, but also the flow of items through a factory and, more recently, the life-cycle of products  [@schmidtSankeyDiagramEnergy2008].]{.svp}
+
+```{r}
+#| fig-cap: The original Sankey diagram of energy efficiency in a steam engine, reprinted from @kennedyThermalEfficiencySteam1898 (Work in the public domain). 
+#| label: sankey-orig
+#| out-width: 100%
+knitr::include_graphics("images/orig_sankey.png")
+```
+
+
+[Sankey diagrams are visually similar to PCP variants, including parallel sets and hammock plots, and in many of the ways they are used today, PCPs may indeed be a better choice, but fundamentally, the intent of Sankey diagrams was to show the flow of a conservable quantity through a physical process of some sort. 
+This is in contrast to PCPs, where the intent is to show a single entity's values across several variables. 
+The overlap is slight, but  present: one could examine a batch of 100 widgets, tracking their location or function at different time points; each repeated measurement would be a variable. 
+A plot of this data using parallel axes for time points would be an example of an alluvial plot; we will discuss these plots in the next section.]{.svp}
+
+[In addition, Sankey diagrams do not impose the traditional constraint of parallel axes (and while some modern variations use polar transformations, the basic principle of parallel axes is still maintained up until the final spatial transformation). 
+Sankey diagrams also allow for multiple "exit points" - at each stage of the industrial process, there may be waste, leakage, and other processes which result in the observed quantity exiting what is presumed to be a continuous and perhaps cyclical system. 
+While an important example, Sankey diagrams as they were originally conceived and used are different in both purpose and construction from parallel coordinate, parallel sets, and hammock plots.]{.svp}
 
 ## Emergence of Parallel Coordinate Plots in the Mid-20th Century
 
@@ -154,7 +201,7 @@ knitr::include_graphics("images/pcp_scatter.png")
 ```
 
 ## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
-
+[renewed?]{.svp}
 Flow-based visualization methods gained renewed attention in the late 20th century, building on the Sankey diagrams introduced by Matthew Sankey in the late 19th century. 
 Initially designed to illustrate energy flows, these diagrams evolved to depict proportional relationships within broader contexts, such as material flows and network analyses. 
 However, their rigid structure and limited interactivity spurred interest in more versatile approaches.
@@ -198,11 +245,11 @@ knitr::include_graphics("images/parsets_historic.jpg")
 ```
 
 ## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
-
-Concurrently, flow-based methods witnessed substantial evolution with the emergence of Alluvial Plots. 
+[What does "flow based methods" refer to? Please make sure your transitions are actually transitioning from something and not coming out of nowhere :)]{.svp}
+Concurrently, flow-based methods witnessed substantial evolution with the emergence of alluvial plots. 
 By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
 Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization.
-@fig-alluvialHist is a detailed alluvial diagram visualizing the top 100 historical figures based on metrics like Wikipedia page views. 
+@fig-alluvialHist is a detailed alluvial diagram visualizing the top 100 historical figures based on metrics like Wikipedia page views. \svp{Please provide a source for this image. Cite it appropriately, and place it in context.}
 It connects individuals to their professions (e.g., philosopher, politician, writer), countries of origin, and gender, illustrating relationships and distributions across these categories.
 
 ```{r}
