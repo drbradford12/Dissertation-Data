@@ -23,6 +23,8 @@ library(palmerpenguins)
 library(tidyverse)
 library(gridExtra)
 library(ggpcp)
+knitr::opts_chunk$set(fig.pos = "H", out.extra = "")
+
 data("penguins")
 theme_set(theme_bw())
 
@@ -53,6 +55,9 @@ og_pcp <- penguins %>%
 
 ```
 
+The paper outlines six methods to resolve numerical ties in datasets, enhancing data visualization and analysis. **Attempt 1: Incremental Offset** adds a small value to tied figures based on their placement within a group to maintain the original order. **Attempt 2: Jitter Spacing** randomly modifies tied values to break the ties while preserving the overall structure. **Attempt 3: Random Rank Shuffle** assigns random ranks to tied values, effectively functioning for both numbers and categories. **Attempt 4: Cascade Rank Tie-Breaker** utilizes previous rankings to resolve ties, ensuring the order is clear and comprehensible. **Attempt 5: Tie Breaking the Band** applies small offsets to distinguish tied values while retaining the original sequence. **Attempt 6: Tie Breaking the Band with Auto Fraction** involves automatic detection of data types, robust handling of unusual data values, and adjustments based on the data's distribution. Each method includes code examples that elucidate its advantages and disadvantages for various data types.
+
+
 ## Determine the numerical ties in the dataset
 
 Let's determine the number of numerical ties in the dataset.
@@ -60,8 +65,7 @@ Let's determine the number of numerical ties in the dataset.
 ```{r}
 #| echo: false
 #| warning: false
-#| tbl-pos: "h"
-#| results: 'asis'
+#| tbl-pos: "h!"
 
 detect_ties <- function(data) {
   # Identify numerical columns
@@ -84,19 +88,25 @@ numerical_ties <- detect_ties(penguins)
 tbl <- as.data.frame(numerical_ties$tie_count %>%
   bind_rows(numerical_ties$tie_percentage) )
 
+tbl <-round(tbl,1)
+
 row.names(tbl) <- c("Tie Counts", "Tie Percentages")
 
 tbl %>% 
   rownames_to_column('cat_name') %>% 
-  gt::gt() %>%
-  gt::fmt_number(
-    columns = c(bill_length_mm:year),
-    decimals = 1,
-    use_seps = FALSE
-  ) %>%
-  gt::as_latex()
+  knitr::kable() %>%
+  #knitr::kable(caption = "This is a test") %>%
+  kableExtra::kable_styling(latex_options = "hold_position")
+  # gt::gt() %>%
+  # gt::fmt_number(
+  #   columns = c(bill_length_mm:year),
+  #   decimals = 1,
+  #   use_seps = FALSE
+  # ) %>%
+  # gt::as_latex() 
 
 ```
+
 
 ## Attempt 1: Incremental Offset (Sequential Tie Handling)
 
@@ -149,8 +159,8 @@ add_space_to_ties <- function(data, tie_spacing = 0.01) {
 #| echo: false
 #| warning: false
 #| layout-valign: bottom
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 6
+#| fig-height: 6
 
 plot_parallel_with_spacing <- function(data, tie_spacing = 0.01) {
   # Remove rows with missing values
@@ -241,8 +251,8 @@ adjust_ties <- function(df, cols_to_adjust, epsilon = 1e-5) {
 #| echo: false
 #| warning: false
 #| layout-valign: bottom
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 6
+#| fig-height: 6
 
 adjusted_penguins <- penguins %>% 
   mutate(flipper_length_mm = as.double(flipper_length_mm),  
@@ -314,12 +324,12 @@ apply_tie_breaking <- function(df, cols_to_adjust) {
 
 *PCP Implementation*
 
-```{r, fig.pos="H"}
+```{r}
 #| echo: false
 #| warning: false
 #| layout-valign: bottom
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 6
+#| fig-height: 6
 
 # Apply tie-breaking to the numeric columns of iris
 adjusted_data <- apply_tie_breaking(penguins, cols_to_adjust = names(penguins)[3:6])
@@ -474,8 +484,8 @@ cascade_tie_break <- function(data, method = c("range", "sd"), ties_method = "mi
 #| echo: false
 #| warning: false
 #| layout-valign: bottom
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 6
+#| fig-height: 6
 
 # Adding a dataset that will make the year categorical to make the og_pcp but not sure if we want to force the user to make that decision. It looks much better in the comparison graphic.
 cat_year_penguins <- penguins %>% mutate(year = as.character(year))
@@ -559,6 +569,7 @@ $k$: The relative position of the value within the tie group.
 *Implementation*:
 
 ```{r}
+# This function takes a numerical vector and adds a small band around ties
 numerical_tie_breaker <- function(values, tie_band = 0.1) {
   # Sort the values
   sorted_values <- sort(values)
@@ -576,6 +587,7 @@ numerical_tie_breaker <- function(values, tie_band = 0.1) {
   # Return the adjusted values
   return(adjusted_values)
 }
+
 ```
 
 *PCP Implementation*
@@ -584,8 +596,8 @@ numerical_tie_breaker <- function(values, tie_band = 0.1) {
 #| echo: false
 #| warning: false
 #| layout-valign: bottom
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 6
+#| fig-height: 6
 
 # Example usage with palmerpenguins dataset
 penguin_data <- penguins %>% 
@@ -615,6 +627,184 @@ p6 <- penguin_data %>%
   
 
 grid.arrange(og_pcp, p6, ncol = 1)
+
+
+```
+
+
+## Attempt 6: Tie Breaking the Band with auto fraction (Resolving Numerical Ties with Incremental Offset)
+
+*Equation*:
+
+**Step 1 - Detect data type**:
+
+if $\forall x \in \mathbb{Z} \Longrightarrow$ use a small fixed increment (e.g., $\alpha$).
+
+else $\Longrightarrow$ continue to outlier check.
+
+
+**Step 2 - Outlier check ($1.5×IQR$ rule):**
+
+$IQR=Q3−Q1$; $Lower Bound=Q1−1.5×IQR$; $Upper Bound=Q3+1.5×IQR$
+
+$has_outliers=(min(values) < Lower Bound) \vee (max(values) > Upper Bound)$
+
+**Step 3 - Determine tie band (`tie_band`):**
+
+
+$$
+tieband =  \begin{cases}
+              \text{if no outliers:} & \alpha\text{ x SD (values)} \\
+              \text{if outliers:} & \alpha\text{ x IQR (values)} \\
+              \text{if whole-number:} & \alpha
+          \end{cases}
+$$
+
+**Step 4 - Increment duplicate sorted values by `tie_band` whenever ties are detected:**
+
+The incremental offset technique for numerical tie-breaking is defined as:
+
+$$
+v'_{i} = v_{i} + \Delta*k
+$$
+Where:
+
+$v'_{i}$: Adjusted value for the $i$-th data point.
+$v_{i}$: Original value for the $i$-th data point.
+$\Delta$: A small incremental offset (e.g., 0.01).
+$k$: The relative position of the value within the tie group.
+
+*Advantages*:
+
+- Automated data-type detection: Distinguishes whole-number from continuous data.
+
+- Normality check: Uses Shapiro-Wilk to detect Gaussian vs. non-Gaussian data (if the sample size permits).
+
+- Robust outlier consideration: Employs $1.5×IQR$ to switch to a robust measure of spread (IQR) when outliers exist or when data are non-Gaussian.
+
+*Disadvantages*:
+
+- Reliance on Shapiro-Wilk: The test can be sensitive for large samples and is invalid for very small samples (n < 3).
+
+- Cutoff choices are somewhat arbitrary: The 0.05 alpha in Shapiro-Wilk and 1.5×IQR threshold are common but not universal.
+
+- Potential instability for very small datasets: Both outlier detection and normality testing can be less reliable with limited data.
+
+*Implementation*:
+
+```{r}
+auto_fraction <- function(values, scale_factor = 0.1) {
+  unique_vals <- unique(sort(values))
+  diffs <- diff(unique_vals)
+  
+  # Keep only positive gaps
+  positive_diffs <- diffs[diffs > 0]
+  
+  # If everything is identical or only one unique value, return a small default
+  if (length(positive_diffs) == 0) {
+    return(scale_factor)
+  }
+  
+  # A robust choice: median of these positive gaps
+  typical_gap <- median(positive_diffs)
+  
+  # Return a fraction that is a multiple of the median gap
+  scale_factor * typical_gap
+}
+
+numerical_tie_breaker <- function(values, base_fraction = 0.1) {
+  # 1) Determine if all values are whole numbers
+  is_whole_number <- all(abs(values - round(values)) < .Machine$double.eps^0.5)
+  
+  # 2) If data are all whole numbers, use a small fraction increment
+  if (is_whole_number) {
+    tie_band <- base_fraction
+    
+  } else {
+    # For continuous data, attempt a normality check using Shapiro-Wilk if n >= 3
+    # (Shapiro test not valid for n < 3, so skip if too small)
+    is_normal <- FALSE
+    if (length(values) >= 3) {
+      shapiro_p <- shapiro.test(values)$p.value
+      is_normal <- (shapiro_p > 0.05)
+    }
+    
+    # Check for outliers using 1.5 * IQR rule
+    q <- stats::quantile(values, probs = c(0.25, 0.75))
+    iqr_value <- q[2] - q[1]
+    lower_bound <- q[1] - 1.5 * iqr_value
+    upper_bound <- q[2] + 1.5 * iqr_value
+    has_outliers <- any(values < lower_bound) || any(values > upper_bound)
+    
+    # Decide tie_band logic
+    # If data appear normal and have no outliers, use fraction * SD; otherwise use fraction * IQR
+    if (is_normal && !has_outliers) {
+      tie_band <- base_fraction * stats::sd(values)
+    } else {
+      tie_band <- base_fraction * iqr_value
+    }
+  }
+  
+  # Optionally, derive the fraction from actual gaps in data (robust approach)
+  # fraction <- auto_fraction(values, base_fraction)
+  # tie_band <- fraction * <sd or iqr or fixed increment>
+  
+  # 3) Sort the values
+  sorted_values <- sort(values)
+  
+  # 4) Adjust for ties by adding tie_band to each duplicate
+  adjusted_values <- sorted_values
+  for (i in seq_along(sorted_values)) {
+    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
+      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+    }
+  }
+  
+  return(adjusted_values)
+}
+```
+
+*PCP Implementation*
+
+```{r}
+#| echo: false
+#| warning: false
+#| layout-valign: bottom
+#| fig-width: 6
+#| fig-height: 6
+
+# Example usage with palmerpenguins dataset
+penguin_data <- penguins %>% 
+  na.omit() %>% 
+  mutate(
+    bill_length_mm = numerical_tie_breaker(bill_length_mm, 
+                                           base_fraction = auto_fraction(bill_length_mm)),
+    bill_depth_mm = numerical_tie_breaker(bill_depth_mm, 
+                                          base_fraction = auto_fraction(bill_depth_mm)),
+    flipper_length_mm = numerical_tie_breaker(flipper_length_mm, 
+                                              base_fraction = auto_fraction(flipper_length_mm)),
+    body_mass_g = numerical_tie_breaker(body_mass_g, 
+                                        base_fraction = auto_fraction(body_mass_g))
+  )
+
+# Parallel coordinate plot visualization
+p7 <- penguin_data %>% 
+  mutate(year = as.factor(year) ) %>%
+  pcp_select(species, bill_length_mm, bill_depth_mm,
+             flipper_length_mm, body_mass_g, sex, year, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes() + 
+  geom_pcp(aes(colour = species), overplot = "none", alpha = 0.5) + 
+  geom_pcp_labels() +
+  theme_pcp() +
+  penguin_scale_color()  + 
+  guides(color = F)  + 
+  ggplot2::labs(title = "Auto Fraction with Incremental Tie-Breaking PCP of Palmer Penguins")
+  
+
+grid.arrange(og_pcp, p7, ncol = 1)
 
 
 ```
