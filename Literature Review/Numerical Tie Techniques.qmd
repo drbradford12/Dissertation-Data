@@ -55,7 +55,14 @@ og_pcp <- penguins %>%
 
 ```
 
-The paper outlines six methods to resolve numerical ties in datasets, enhancing data visualization and analysis. **Attempt 1: Incremental Offset** adds a small value to tied figures based on their placement within a group to maintain the original order. **Attempt 2: Jitter Spacing** randomly modifies tied values to break the ties while preserving the overall structure. **Attempt 3: Random Rank Shuffle** assigns random ranks to tied values, effectively functioning for both numbers and categories. **Attempt 4: Cascade Rank Tie-Breaker** utilizes previous rankings to resolve ties, ensuring the order is clear and comprehensible. **Attempt 5: Tie Breaking the Band** applies small offsets to distinguish tied values while retaining the original sequence. **Attempt 6: Tie Breaking the Band with Auto Fraction** involves automatic detection of data types, robust handling of unusual data values, and adjustments based on the data's distribution. Each method includes code examples that elucidate its advantages and disadvantages for various data types.
+The paper outlines six methods to resolve numerical ties in datasets, enhancing data visualization and analysis. 
+**Attempt 1: Incremental Offset** adds a small value to tied figures based on their placement within a group to maintain the original order. 
+**Attempt 2: Jitter Spacing** randomly modifies tied values to break the ties while preserving the overall structure. 
+**Attempt 3: Random Rank Shuffle** assigns random ranks to tied values, effectively functioning for both numbers and categories. 
+**Attempt 4: Cascade Rank Tie-Breaker** utilizes previous rankings to resolve ties, ensuring the order is clear and comprehensible. 
+**Attempt 5: Tie Breaking the Band** applies small offsets to distinguish tied values while retaining the original sequence. 
+**Attempt 6: Tie Breaking the Band with Auto Fraction** involves automatic detection of data types, robust handling of unusual data values, and adjustments based on the data's distribution. 
+Each method includes code examples that elucidate its advantages and disadvantages for various data types.
 
 
 ## Determine the numerical ties in the dataset
@@ -122,7 +129,8 @@ Where:
 
 *Description*:
 
-Adds a small incremental offset to each tied value based on its relative position in the tie group. Ensures that ties are visually and numerically distinct while maintaining an order.
+Adds a small incremental offset to each tied value based on its relative position in the tie group. 
+Ensures that ties are visually and numerically distinct while maintaining an order.
 
 *Advantages*:
 
@@ -209,7 +217,8 @@ where:
 
 *Description*:
 
-This method breaks numerical ties by adding a tiny random value ($\epsilon$) within a specified range $(-\delta,\delta)$. It ensures that tied values are slightly separated, preserving the overall data structure while improving visualization clarity.
+This method breaks numerical ties by adding a tiny random value ($\epsilon$) within a specified range $(-\delta,\delta)$. 
+It ensures that tied values are slightly separated, preserving the overall data structure while improving visualization clarity.
 
 *Advantages*:
 
@@ -219,7 +228,8 @@ This method breaks numerical ties by adding a tiny random value ($\epsilon$) wit
 
 *Implementation*:
 
-Applied to numeric columns. This is typically done before visualizing parallel coordinate plots or when preparing data for algorithms sensitive to ties.
+Applied to numeric columns. 
+This is typically done before visualizing parallel coordinate plots or when preparing data for algorithms sensitive to ties.
 
 
 ```{r}
@@ -290,7 +300,8 @@ $$
 
 *Description*:
 
-Tied values are assigned random ranks, ensuring that the order of ties is resolved randomly while maintaining the distribution. For categorical data, this is applied to ordinal values derived from categories, which are then shuffled if tied.
+Tied values are assigned random ranks, ensuring that the order of ties is resolved randomly while maintaining the distribution. 
+For categorical data, this is applied to ordinal values derived from categories, which are then shuffled if tied.
 
 *Advantages*:
 
@@ -300,7 +311,8 @@ Tied values are assigned random ranks, ensuring that the order of ties is resolv
 
 *Implementation*:
 
-Useful for both numeric and categorical data before plotting or modeling to minimize ambiguity in ties. This method aligns well with the ranking logic used in ggpcp.
+Useful for both numeric and categorical data before plotting or modeling to minimize ambiguity in ties. 
+This method aligns well with the ranking logic used in ggpcp.
 
 ```{r}
 apply_tie_breaking <- function(df, cols_to_adjust) {
