@@ -16,20 +16,81 @@ The main objective is to assess if adding distance between numerical ties in par
 
    - Does artificial separation of ties improve viewers' ability to distinguish and interpret data accurately?
    - Does tie distancing reduce cognitive load and interpretation time?
+   
+*Objectives*:
+  1. Investigate the impact of numerical ties on data clarity in PCPs.
+
+  2. Evaluate the effectiveness of various tie-resolution techniques.
+
+  3. Provide recommendations for best practices in handling numerical ties.
 
 # Theoretical Background
 
-According to perceptual theory, effective data visualization requires “a high degree of legibility and interpretability” to minimize cognitive strain [@ware2008]. Tied values in parallel coordinate plots can create visual congestion, potentially leading to overlapping lines that obscure relationships among variables. Cleveland and McGill argue that “the ability to make perceptual judgments about relative positions is foundational to interpreting data visualizations,” [@cleveland1984]. By this reasoning, adding distance between tied values may reduce visual noise and improve data legibility.
+According to perceptual theory, effective data visualization requires “a high degree of legibility and interpretability” to minimize cognitive strain [@ware2008]. 
+Tied values in parallel coordinate plots can create visual congestion, potentially leading to overlapping lines that obscure relationships among variables. 
+Cleveland and McGill argue that “the ability to make perceptual judgments about relative positions is foundational to interpreting data visualizations,” [@cleveland1984]. 
+By this reasoning, adding distance between tied values may reduce visual noise and improve data legibility.
 
 # Hypothesis
 
    - **H1**: Participants will exhibit higher accuracy in interpreting data in Condition B (with tie distancing) compared to Condition A.
    - **H2**: Participants will have reduced cognitive load (e.g., faster interpretation times) in Condition B.
    - **H3**: User-reported satisfaction with data clarity will be higher in Condition B.
+   
+# Study Timeline
+
+The following timeline outlines the key stages of the study:
+
+## Phase 1: Problem Definition (Months 1-2)
+
+- Define the scope of the problem.
+
+- Review existing literature on numerical ties and PCPs.
+
+- Identify datasets with significant numerical ties for analysis.
+
+## Phase 2: Methodology Development (Months 3-4)
+
+- Develop techniques for tie resolution:
+
+  - Incremental Offset Method.
+
+  - Jitter Spacing Method.
+
+  - Random Rank Shuffle Method.
+
+  - Cascade Rank Tie-Breaker Method.
+
+  - Tie-Breaking Bands Method.
+
+- Validate methods using simulated datasets.
+
+## Phase 3: Implementation (Months 5-6)
+
+- Apply the developed techniques to real-world datasets.
+
+- Visualize results in PCPs.
+
+- Analyze the effectiveness of each technique.
+
+## Phase 4: Evaluation and Comparison (Months 7-8)
+
+- Compare the performance of tie-resolution techniques.
+
+- Assess improvements in visualization clarity and interpretability.
+
+## Phase 5: Reporting and Dissemination (Months 9-10)
+
+- Compile findings into a comprehensive report.
+
+- Submit findings to journals and conferences.
+
+- Develop guidelines for practitioners.
 
 # Methodology
 
 ## Participants
+
 Recruit 50-100 participants with a basic understanding of data interpretation and visualization (e.g., university students, data analysts).
 
 ## Experimental Design
@@ -40,6 +101,7 @@ Recruit 50-100 participants with a basic understanding of data interpretation an
        - Subjective clarity (self-reported on a Likert scale).
 
 ## Data Design
+
 We will create two sets of synthetic data with and without ties, respectively, for comparability across visual conditions.
 
    - **Dataset with Ties**: Each parallel coordinate plot will contain variables with deliberately tied values.

@@ -85,7 +85,7 @@ However, the scale of observations and variables can obscure meaningful patterns
 Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. 
 Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@velagala2020]. 
 Similarly, large $n$ data sets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. 
-These challenges require innovative visualization techniques[I don't think they have to be innovative... PCPs have been around for a while... tours, dimension reduction, etc. are also pretty straightforward. Aim less for a pretty sounding conclusion to the paragraph and more for simple and direct - we need ways to represent high $p$ data which facilitate EDA and understanding of the structure of the data.]{.svp} that simplify complex data while preserving its structural integrity.
+These challenges require innovative visualization techniques [I don't think they have to be innovative... PCPs have been around for a while... tours, dimension reduction, etc. are also pretty straightforward. Aim less for a pretty sounding conclusion to the paragraph and more for simple and direct - we need ways to represent high $p$ data which facilitate EDA and understanding of the structure of the data.]{.svp} that simplify complex data while preserving its structural integrity.
 
 Parallel Coordinate Plots (PCPs) [are]{.svp} a powerful way to examine data with more than one dimension. 
 PCPs show each observation as a polyline on parallel axes, letting analysts follow data points [across multiple single-variable axes]{.svp} [@Inselberg1985]. 
@@ -138,7 +138,7 @@ Statistical graphics of the 19th century - bar charts, pie charts, and flow maps
 While these early tools primarily focused on small-scale, univariate [or bivariate]{.svp} datasets, they offered a glimpse into the potential of data relationships. 
 These methods demonstrated the power of visualizing data to uncover patterns, but with limited dimensionality and scope.
 
-[In addition, the period between the late 1700s and the late 1800s produced many different experiments in graphical representation. 
+In addition, the period between the late 1700s and the late 1800s produced many different experiments in graphical representation. 
 Some were persistent; bar and pie charts are still in use, while others faded from popular consciousness.
 In some cases, the same graphical structures were re-invented and popularlized later. 
 
