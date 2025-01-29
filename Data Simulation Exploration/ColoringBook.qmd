@@ -1,5 +1,5 @@
 ---
-title: "Simulating the bins: Determine the distribution layouts"
+title: "Simulating the bins: Analysis of Histogram Layout Differences Across Binwidths"
 editor: source
 format: 
   pdf:
@@ -15,11 +15,37 @@ format:
         - right=1.75cm
 ---
 
-Each section contains a histogram grid displaying the impact of different bin sizes (0.5, 1, 2, 5, 10) on the distribution's appearance.
 
-- Small Binwidths: Highlight fine-grained details, preserve discreteness (where applicable), and maintain visible gaps in the data.
+Each distribution in the document is visualized using faceted histograms with different bin sizes (0.5, 1, 2, 5, 10). 
+The differences between the histograms provide insights into how binwidth affects the appearance of data distributions. Below, I describe the key differences in layout across bin sizes for each distribution.
 
-- Large Binwidths: Smooth the histogram, reduce detail, merge gaps, and provide a more generalized view of the data distribution.
+- **Discrete Distributions (Poisson, Binomial, Negative Binomial)**: Large bins can obscure their count-based nature.
+
+- **Continuous Distributions (Normal, Gamma, Log-Normal, Beta, etc.)**: Larger bins help in smoothing but might remove finer shape details.
+
+- **Heavy-Tailed Distributions (Cauchy, Log-Normal)**: Large binwidths underrepresent extreme values.
+
+- **Symmetric vs. Skewed Distributions**: Symmetric ones (Normal, Uniform) maintain their shape better across binwidths, while skewed ones (Exponential, Chi-Square) lose more information.
+
+**General Insights Across All Distributions**
+
+*Small Binwidths (0.5, 1)*
+
+- Provide more detail but can make histograms look noisy.
+
+
+- More suited for fine-grained analysis of distributions.
+
+- Best for discrete distributions where individual values matter.
+
+*Larger Binwidths (2, 5, 10)*
+
+- Smooth out the data, reducing visible fluctuations.
+
+- Best for understanding overall trends rather than fine details.
+
+- Risk of oversimplifying discrete distributions by merging distinct values.
+
 
 ```{r include_packages, include = FALSE}
 library(tidyverse)
@@ -65,9 +91,9 @@ set.seed(42) # Set seed for reproducibility
 n <- 10000
 
 # Define binwidths for faceting
-binwidths <- c(0.5, 1, 2, 5, 10)
+binwidths <- c(0.2, 0.5, 1:10)
 
-point_mass_data <- simulate_point_mass(n, 5)
+point_mass_data <- simulate_point_mass(n, round(n/12, 0))
 
 plot_histogram_facet(point_mass_data, binwidths, "Point Mass Distribution")
 
@@ -85,7 +111,7 @@ simulate_exponential <- function(n, rate) {
   rexp(n, rate = rate)
 }
 
-exponential_data <- simulate_exponential(n, rate = 0.5)
+exponential_data <- simulate_exponential(n, rate = .33)
 
 plot_histogram_facet(exponential_data, binwidths, "Exponential Distribution")
 
@@ -103,7 +129,7 @@ simulate_normal <- function(n, mean, sd) {
   rnorm(n, mean = mean, sd = sd)
 }
 
-normal_data <- simulate_normal(n, mean = 10, sd = 2)
+normal_data <- simulate_normal(n, mean = 10, sd = 3)
 
 plot_histogram_facet(normal_data, binwidths, "Normal Distribution")
 ```
