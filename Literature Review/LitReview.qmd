@@ -179,7 +179,7 @@ A plot of this data using parallel axes for time points would be an example of a
 Sankey diagrams also allow for multiple "exit points" - at each stage of the industrial process, there may be waste, leakage, and other processes which result in the observed quantity exiting what is presumed to be a continuous and perhaps cyclical system. 
 While an important example, Sankey diagrams as they were originally conceived and used are different in both purpose and construction from parallel coordinate, parallel sets, and hammock plots.]{.svp}
 
-## Parallel Coordinate plots
+## Parallel Coordinate Plots
 
 [@Inselberg1985 introduced parallel coordinate plots as a solution to visualization of multidimensional numerical data.]{.svp}
 <!-- The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data.  -->
@@ -188,7 +188,8 @@ Parallel coordinate plots use the projection space, rather than Cartesian space,
 Despite their utility for numerical data, early PCPs [could not effectively represent categorical or mixed-type data.]{.svp}
 <!-- struggled with categorical and mixed data types.  -->
 <!-- Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability. -->
-@fig-pcpScatter illustrates the three extreme values of Pearson's correlation coefficient $r (r=-1,0,1)$ using two types of visualizations: scatterplots (top row) and parallel coordinate plots (bottom row).
+@fig-pcpScatter [demonstrates the difference in the appearance of linear relationships in Cartesian and projective space for]{.svp} Pearson's correlation coefficient $r = \{-1,0,1\}$. 
+[When variables are negatively correlated, a 'knot', or inversion appears in projection space; when variables are positively correlated, the two axes are connected by a series of parallel lines. When no correlation is present, the lines are jumbled, with no clear patterns.]{.svp}
 
 ```{r}
 #| echo: false
@@ -230,39 +231,90 @@ p2 <- df |>
 p1 / p2 + plot_layout(nrow = 2, heights = c(1,1))
 ```
 
-[In effect, the parallel coordinate plot shows the calculation of Kendall's $\tau$, a robust version of Pearson's correlation coefficient which works with ranks.]{.svp}
+[In effect, the parallel coordinate plot shows the visual equivalent of Kendall's $\tau$, a robust version of Pearson's correlation coefficient which is calculated using ranks. The re-scaling of the vertical axes is equivalent to a ranking procedure.]{.svp}
 
-## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
-[renewed?]{.svp}
-Flow-based visualization methods gained renewed attention in the late 20th century, building on the Sankey diagrams introduced by Matthew Sankey in the late 19th century. 
-Initially designed to illustrate energy flows, these diagrams evolved to depict proportional relationships within broader contexts, such as material flows and network analyses. 
-However, their rigid structure and limited interactivity spurred interest in more versatile approaches.
-@fig-sankeyhist is a Sankey diagram representing the thermal efficiency of steam engines, comparing an "actual steam plant" and an "idealized steam plant." 
-It visually depicts the flow and losses of energy (heat) within the system, with the width of the arrows proportional to the energy quantity.
+## Handling Categorical Variables
+
+[The transition to projection space from Cartesian space seems to have independently arisen several times, and in some cases, the origins of the practice are not entirely clear. 
+Sankey diagrams, for instance, were not initially designed to leverage projection space; they were intended to visualize industrial processes, rather than variables, with axes that were often not parallel. 
+That is, in mathematical terms, Sankey diagrams are a visual representation of flow through a directed, weighted graph. 
+Alluvial diagrams, which are visually similar to Sankey diagrams as well as parallel sets plots, are often considered to be a subset of Sankey diagrams; typically, alluvial diagrams visualize the change in weights in a graph over time - that is, the vertical axes are different time points, and the nodes are a set of categories which are consistent across time points.
+There is considerable confusion between alluvial diagrams and Sankey diagrams, as briefly mentioned in  @holtzSankeyDiagram2024. This confusion is compounded by different implementations of e.g. parallel sets plots, such as the `geom_parallel_sets` implementation in the `ggforce` R package [@pedersenCreateParallelSets2024], which describes itself this way:
+]{.svp}
+
+>  If the variables has an intrinsic order the representation can be thought of as a Sankey Diagram. If each variable is a point in time it will resemble an alluvial diagram.
+
+
+[One obvious solution to the problem of how to visualize categorical variables using parallel axes is to convert the categorical variables into numeric variables and to use a standard parallel coordinate plot. This solution is not optimal even for ordered categorical variables, but for unordered variables, it is particularly unintuitive. In addition, of course, any information about the category frequency is lost in the numeric transformation.]{.svp}
+
+[Hammock plots and parallel sets plots arose independently in the early 2000s [@schonlauVisualizingCategoricalData2003;@bendix2005parallel], though both plots represent categorical data on parallel axes. 
+Parallel sets plots (@fig-parallel-sets-hammock a) were initially developed as part of an interactive environment for exploring crosstab data. 
+Hammock plots (@fig-parallel-sets-hammock b) grew out of a desire to represent both numerical and categorical data effectively using parallel axes; in addition, these plots included support for visualizing missing data from the start. 
+Parallel sets plots were one facet of a series of linked representations of categorical data, and included histograms as subplots within the parallel sets plot design.]{.svp}
+
+[There are some notable differences between the plots in construction: hammock plots do not divide up the full space of the vertical axis between categories; instead, the lines between adjacent axes are sized relative to the size of the intersection between categories on adjacent axes. 
+In addition, hammock plots center all lines leaving a node, so the lines overlap.
+In parallel sets plots, the full axis length is divided up proportional to the marginal composition of the variable, and groups of observations which connect to different categories on the adjacent axis are not aligned. This facilitates part-to-whole comparisons of the joint probability values.]{.svp}
+
+<!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. We'll get into why parsets suck in a bit. -->
+
+```{r penguin-cat-data}
+#| echo: false
+#| include: false
+library(ggparallel)
+penguin_cat <- select(penguins, species, island, year) |> na.omit() |> as.data.frame() |>
+  mutate(species = factor(species, levels = c("Chinstrap", "Adelie", "Gentoo"), ordered = T))
+```
+
+```{python hammock-plot-py}
+#| echo: false
+#| message: false
+#| warning: false
+#| include: false
+# %pip install hammock_plot
+import hammock_plot
+import pandas as pd
+import matplotlib.pyplot as plt
+
+penguin_cat = r.penguin_cat
+penguin_cat['species'] = pd.Categorical(penguin_cat.species, categories = [ 'Chinstrap', 'Gentoo','Adelie'], ordered = True)
+penguin_cat['island'] = pd.Categorical(penguin_cat.island)
+penguin_cat['year'] = pd.Categorical(penguin_cat.year)
+
+hammock = hammock_plot.Hammock(penguin_cat)
+ax = hammock.plot(var = ['species','island',  'year'], missing = True, space = 1, value_order = {"species": {3:'Chinstrap', 5:'Gentoo', 4:'Adelie'}, "island": {0:'Dream', 1:'Torgersen', 2:'Biscoe'}})
+plt.show()
+```
 
 ```{r}
+#| label: fig-parallel-sets-hammock
+#| fig-cap: "Hammock [@yangHammockplotHammockVisualization2023] and parallel sets [@ggparallel] plots of categorical variables in the palmerpenguins [@palmerpenguins] data. "
+#| fig-subcap: 
+#|   - "Parallel sets plot "
+#|   - "Hammock plot "
 #| echo: false
-#| warning: false
 #| message: false
-#| label: fig-sankeyhist
-#| layout-valign: bottom
-#| fig-cap: "The original Sankey diagram representing the thermal efficiency of steam engines created by civil engineer, Matthew Sankey."
-#| fig-width: 4
-#| fig-height: 4
+#| warning: false
+#| layout: [[50, 50],[100]]
+ggparallel(list("species", "island", "year"), data = penguin_cat, method = "parset") + theme(axis.title.y = element_blank())
 
-knitr::include_graphics("images/sankey_history.png")
+knitr::include_graphics("LitReview_files/figure-pdf/hammock-plot-py-1.pdf")
 ```
 
 
 ## Hierarchical Data Visualization: Parallel Sets in the Early 2000s
 
-In 2001, Kosara, Bendix, and Hauser introduced Parallel Sets, a transformative adaptation of Parallel Coordinate Plots tailored for categorical data. 
-Parallel Sets addressed a critical gap in existing tools by grouping data points into categories and visualizing their relationships across dimensions. 
-This innovation facilitated the exploration of hierarchical and networked structures, paving the way for Hammock Plots to refine the depiction of complex hierarchical relationships further.
-@fig-parsets is a parallel sets visualization, a method used to display categorical data and relationships between multiple variables. 
-It segments categories such as "Family," "Type of Wash Agent," "Population," and "Income," with colored bands connecting these categories to show associations and distributions across the variables.
+<!-- In 2001, Kosara, Bendix, and Hauser introduced Parallel Sets, a transformative adaptation of Parallel Coordinate Plots tailored for categorical data.  -->
+<!-- Ok, so not transformative (as hammock plots predate them), and I'm not even sure they realized until later that the parsets were quite as useful as they were...  -->
+<!-- Parallel Sets addressed a critical gap in existing tools by grouping data points into categories and visualizing their relationships across dimensions.  -->
+<!-- This innovation facilitated the exploration of hierarchical and networked structures, paving the way for Hammock Plots to refine the depiction of complex hierarchical relationships further. -->
+<!-- No. For one thing, hammock plots predate parsets. For another, they arose independently. Don't imply that hammock plots were inspired by parsets. -->
+<!-- @fig-parsets is a parallel sets visualization, a method used to display categorical data and relationships between multiple variables.  -->
+<!-- It segments categories such as "Family," "Type of Wash Agent," "Population," and "Income," with colored bands connecting these categories to show associations and distributions across the variables. -->
+<!-- In general, you should be creating your own plots to show different methods. -->
 
 ```{r}
+#| include: False
 #| echo: false
 #| warning: false
 #| message: false
@@ -322,6 +374,7 @@ knitr::include_graphics("images/enhance_example.png")
 
 The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges. 
 Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively. 
+[THIS IS TOTALLY FALSE!!! I have no idea where this is coming from. Please fact-check everything you're saying and back it up with an accurate reference.]{.svp}
 By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
 @fig-capHist
 
