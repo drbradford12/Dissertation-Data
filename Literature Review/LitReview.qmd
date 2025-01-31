@@ -179,12 +179,15 @@ A plot of this data using parallel axes for time points would be an example of a
 Sankey diagrams also allow for multiple "exit points" - at each stage of the industrial process, there may be waste, leakage, and other processes which result in the observed quantity exiting what is presumed to be a continuous and perhaps cyclical system. 
 While an important example, Sankey diagrams as they were originally conceived and used are different in both purpose and construction from parallel coordinate, parallel sets, and hammock plots.]{.svp}
 
-## Emergence of Parallel Coordinate Plots in the Mid-20th Century
+## Parallel Coordinate plots
 
-The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data. 
-This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets. 
-Despite their utility for numerical data, early PCPs struggled with categorical and mixed data types. 
-Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability.
+[@Inselberg1985 introduced parallel coordinate plots as a solution to visualization of multidimensional numerical data.]{.svp}
+<!-- The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data.  -->
+Parallel coordinate plots use the projection space, rather than Cartesian space, in order to show relationships between variables; a point in Cartesian space is represented by a line between vertical, parallel axes in projection space.]{.svp}
+<!-- This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets.  -->
+Despite their utility for numerical data, early PCPs [could not effectively represent categorical or mixed-type data.]{.svp}
+<!-- struggled with categorical and mixed data types.  -->
+<!-- Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability. -->
 @fig-pcpScatter illustrates the three extreme values of Pearson's correlation coefficient $r (r=-1,0,1)$ using two types of visualizations: scatterplots (top row) and parallel coordinate plots (bottom row).
 
 ```{r}
@@ -193,12 +196,41 @@ Nonetheless, these limitations underscored the technique’s significance as a f
 #| message: false
 #| label: fig-pcpScatter
 #| layout-valign: bottom
-#| fig-cap: "An illustration of extreme values of Pearson's correlation cofficient using scatterplots (top row) and parallel coordinate plots (bottom row)."
+#| fig-cap: "An illustration of extreme values of Pearson's correlation cofficient using scatterplots, which are created in Cartesian space (top row) and parallel coordinate plots, which utilize projection space (bottom row)."
 #| fig-width: 6
-#| fig-height: 6
+#| fig-height: 4.5
 
-knitr::include_graphics("images/pcp_scatter.png")
+# knitr::include_graphics("images/pcp_scatter.png")
+
+# Construct the data
+
+library(tibble)
+library(ggplot2)
+set.seed(3420394)
+n <- 40
+df <- tibble(r = paste0("r ==", rep(c(-1, 0, 1), each = n)), x = rnorm(3*n), y = c(-x[1:n], rnorm(n), x[(2*n+1):(3*n)]))
+
+p1 <- df |>
+  mutate(type = "Cartesian") |>
+  ggplot(aes(x = x, y = y)) + 
+  geom_point() + 
+  facet_grid(type~r, labeller = label_parsed) +  
+  theme(axis.title = element_blank()) + xlim(c(-3, 3)) + ylim(c(-3, 3))
+
+p2 <- df |>
+  mutate(type = "Projection") |>
+  pcp_select(x, y) |>
+  group_by(r) |>
+  pcp_scale() |>
+  pcp_arrange() |>
+  ggplot(aes_pcp()) + geom_pcp() + 
+  facet_grid(type~r, labeller = "label_parsed") + 
+  theme_pcp() 
+
+p1 / p2 + plot_layout(nrow = 2, heights = c(1,1))
 ```
+
+[In effect, the parallel coordinate plot shows the calculation of Kendall's $\tau$, a robust version of Pearson's correlation coefficient which works with ranks.]{.svp}
 
 ## Flow-Based Visualizations: Sankey Diagrams in the Late 20th Century
 [renewed?]{.svp}
