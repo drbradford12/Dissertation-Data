@@ -165,7 +165,7 @@ return(
   geom_pcp(aes(colour = group), overplot = "none", alpha = 0.5) +  # Add lines for each data point, colored by Type
   geom_pcp_labels() +  # Add labels for each variable
   theme_pcp() +  # Use the default theme for PCP
-  geom_point(aes(colour = group), position = position_dodge(dodge_value)) +
+  geom_point(aes(colour = group), size = 0.75, position = position_dodge(dodge_value)) +
   labs(
     title = paste("Parallel Coordinate Plot: Original vs Adjusted Data (Simulated", data_type,  "Data)", sep = ' '),
     x = "Variables",
