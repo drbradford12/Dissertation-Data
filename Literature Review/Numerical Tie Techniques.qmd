@@ -402,7 +402,7 @@ R'_{i,j} =  \begin{cases}
               R'_{i,j} + \epsilon \times NormPrev_{i,j-1} & \text{ if } j > 1
           \end{cases}
 $$
-- $\epsilon$: A small constant (e.g., 0.01) to control the influence of the previouse rank.
+- $\epsilon$: A small constant (e.g., 0.01) to control the influence of the previous rank.
 
 4. Final Data Arrangement for Visualization
 

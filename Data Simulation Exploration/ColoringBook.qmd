@@ -15,40 +15,13 @@ format:
         - right=1.75cm
 ---
 
-
-Each distribution in the document is visualized using faceted histograms with different bin sizes (0.5, 1, 2, 5, 10). 
-The differences between the histograms provide insights into how binwidth affects the appearance of data distributions. Below, I describe the key differences in layout across bin sizes for each distribution.
-
-- **Discrete Distributions (Poisson, Binomial, Negative Binomial)**: Large bins can obscure their count-based nature.
-
-- **Continuous Distributions (Normal, Gamma, Log-Normal, Beta, etc.)**: Larger bins help in smoothing but might remove finer shape details.
-
-- **Heavy-Tailed Distributions (Cauchy, Log-Normal)**: Large binwidths underrepresent extreme values.
-
-- **Symmetric vs. Skewed Distributions**: Symmetric ones (Normal, Uniform) maintain their shape better across binwidths, while skewed ones (Exponential, Chi-Square) lose more information.
-
-**General Insights Across All Distributions**
-
-*Small Binwidths (0.5, 1)*
-
-- Provide more detail but can make histograms look noisy.
-
-
-- More suited for fine-grained analysis of distributions.
-
-- Best for discrete distributions where individual values matter.
-
-*Larger Binwidths (2, 5, 10)*
-
-- Smooth out the data, reducing visible fluctuations.
-
-- Best for understanding overall trends rather than fine details.
-
-- Risk of oversimplifying discrete distributions by merging distinct values.
-
-
 ```{r include_packages, include = FALSE}
+library(GGally)
+library(palmerpenguins)
 library(tidyverse)
+library(gridExtra)
+library(ggpcp)
+knitr::opts_chunk$set(fig.pos = "H", out.extra = "")
 
 # Function to create a data frame for plotting with multiple binwidths
 prepare_histogram_data <- function(data, binwidths) {
@@ -73,29 +46,157 @@ plot_histogram_facet <- function(data, binwidths, title) {
     labs(title = title, x = "Values", y = "Frequency") +
     theme_minimal() + coord_flip()
 }
+
+group_scale_color <-   function(...) scale_color_manual(
+  "group", values = c("group1" = "#540D6E", "group2" = "#219B9D", "group3" = "#FF8000", ...)
+)  
+
+# Solution #1
+numerical_tie_breaker_solution1 <- function(values, tie_band = 0.1) {
+  # Sort the values
+  sorted_values <- sort(values)
+  
+  # Initialize the adjusted values
+  adjusted_values <- sorted_values
+  
+  # Loop through the values to add tie band for ties
+  for (i in seq_along(sorted_values)) {
+    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
+      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+    }
+  }
+  
+  # Return the adjusted values
+  return(adjusted_values)
+}
+
+# Solution #2: Dynamic tie band based on data properties
+auto_fraction <- function(values, scale_factor = 0.1) {
+  unique_vals <- unique(sort(values))
+  diffs <- diff(unique_vals)
+  
+  # Keep only positive gaps
+  positive_diffs <- diffs[diffs > 0]
+  
+  # If everything is identical or only one unique value, return a small default
+  if (length(positive_diffs) == 0) {
+    return(scale_factor)
+  }
+  
+  # A robust choice: median of these positive gaps
+  typical_gap <- median(positive_diffs)
+  
+  # Return a fraction that is a multiple of the median gap
+  scale_factor * typical_gap
+}
+
+numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.1) {
+  # 1) Determine if all values are whole numbers
+  is_whole_number <- all(abs(values - round(values)) < .Machine$double.eps^0.5)
+  
+  # 2) If data are all whole numbers, use a small fraction increment
+  if (is_whole_number) {
+    tie_band <- base_fraction
+    
+  } else {
+    # For continuous data, attempt a normality check using Shapiro-Wilk if n >= 3
+    # (Shapiro test not valid for n < 3, so skip if too small)
+    is_normal <- FALSE
+    if (length(values) >= 3) {
+      shapiro_p <- shapiro.test(values)$p.value
+      is_normal <- (shapiro_p > 0.05)
+    }
+    
+    # Check for outliers using 1.5 * IQR rule
+    q <- stats::quantile(values, probs = c(0.25, 0.75))
+    iqr_value <- q[2] - q[1]
+    lower_bound <- q[1] - 1.5 * iqr_value
+    upper_bound <- q[2] + 1.5 * iqr_value
+    has_outliers <- any(values < lower_bound) || any(values > upper_bound)
+    
+    # Decide tie_band logic
+    # If data appear normal and have no outliers, use fraction * SD; otherwise use fraction * IQR
+    if (is_normal && !has_outliers) {
+      tie_band <- base_fraction * stats::sd(values)
+    } else {
+      tie_band <- base_fraction * iqr_value
+    }
+  }
+  
+  # 3) Sort the values
+  sorted_values <- sort(values)
+  
+  # 4) Adjust for ties by adding tie_band to each duplicate
+  adjusted_values <- sorted_values
+  for (i in seq_along(sorted_values)) {
+    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
+      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+    }
+  }
+  
+  return(adjusted_values)
+}
+
+create_simulated_data_test <- function(data, data_type, tie_band_value = 0.01, dodge_value = 0.01, scale_factor = 0.1){
+  
+
+# Create a data frame for visualization
+df <- data.frame(
+  ID = 1:n,
+  original_whole = sort(round(data, 0)), 
+  original_dec1 = sort(round(data, 1)), 
+  original_dec2 = sort(round(data, 2)),
+  # Original data with ties
+  manual_tie_band = sort(numerical_tie_breaker_solution1(data, tie_band = tie_band_value)),
+  auto_tie_band = sort(numerical_tie_breaker_solution2(data, 
+                                                       base_fraction = auto_fraction(data, scale_factor = scale_factor))),
+  group = sort(sample(c('group1', 'group2', 'group3'), n, replace=TRUE))
+)
+
+df_pcp <- df %>%
+  pcp_select(original_dec1, manual_tie_band, group, original_dec1, auto_tie_band) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left")
+
+# Create the parallel coordinate plot using ggpcp
+return(
+  ggplot(df_pcp, aes_pcp()) +
+  geom_pcp_boxes() +  # Add boxes for each variable
+  geom_pcp(aes(colour = group), overplot = "none", alpha = 0.5) +  # Add lines for each data point, colored by Type
+  geom_pcp_labels() +  # Add labels for each variable
+  theme_pcp() +  # Use the default theme for PCP
+  geom_point(aes(colour = group), position = position_dodge(dodge_value)) +
+  labs(
+    title = paste("Parallel Coordinate Plot: Original vs Adjusted Data (Simulated", data_type,  "Data)", sep = ' '),
+    x = "Variables",
+    y = "Scaled Values"
+  ) + theme(legend.position = "none") + 
+  #guides(color = F) + 
+  group_scale_color() + 
+  guides(color = guide_legend(title = "Data Type"))  # Add a legend for the Type variable
+)
+
+}
+
 ```
+
 
 # Point Mass Distribution:
 
-- A single value is repeated (5 in this case) for all data points.
-
-- Multiple histograms are shown, faceted by binwidth (0.5, 1, 2, 5, 10), illustrating how bin size affects the visualization.
 
 ```{r point_mass}
+#| out-width: 100%
 simulate_point_mass <- function(n, value) {
   rep(value, n)
 }
 
 # Simulate data
 set.seed(42) # Set seed for reproducibility
-n <- 10000
-
-# Define binwidths for faceting
-binwidths <- c(0.2, 0.5, 1:10)
+n <- 100
 
 point_mass_data <- simulate_point_mass(n, round(n/12, 0))
 
-plot_histogram_facet(point_mass_data, binwidths, "Point Mass Distribution")
+create_simulated_data_test(point_mass_data, "Point Mass")
 
 ```
 
@@ -103,9 +204,9 @@ plot_histogram_facet(point_mass_data, binwidths, "Point Mass Distribution")
 
 - Simulated data follows an exponential decay pattern.
 
-- Histograms for different binwidths are included, highlighting the rapid decay near lower values and the impact of bin size.
 
 ```{r exponential}
+#| out-width: 100%
 # Function to simulate exponential distribution
 simulate_exponential <- function(n, rate) {
   rexp(n, rate = rate)
@@ -113,17 +214,17 @@ simulate_exponential <- function(n, rate) {
 
 exponential_data <- simulate_exponential(n, rate = .33)
 
-plot_histogram_facet(exponential_data, binwidths, "Exponential Distribution")
+create_simulated_data_test(exponential_data, "Exponnential")
 
 ```
 
 # Normal Distribution:
 
-- Simulated data is centered around a mean (10) with a specified standard deviation (2).
+- Simulated data is centered around a mean (10) with a specified standard deviation (3).
 
-- Histograms are displayed for various binwidths, showing the characteristic bell-shaped curve of the normal distribution.
 
 ```{r normal}
+#| out-width: 100%
 # Function to simulate normal distribution
 simulate_normal <- function(n, mean, sd) {
   rnorm(n, mean = mean, sd = sd)
@@ -131,16 +232,16 @@ simulate_normal <- function(n, mean, sd) {
 
 normal_data <- simulate_normal(n, mean = 10, sd = 3)
 
-plot_histogram_facet(normal_data, binwidths, "Normal Distribution")
+create_simulated_data_test(normal_data, "Normal")
 ```
 
 # Poisson Distribution:
 
 - Simulated count data with a mean occurrence (lambda = 3).
 
-- Histograms display discrete peaks, varying by binwidth, illustrating the distribution of counts.
 
 ```{r poisson}
+#| out-width: 100%
 # Function to simulate Poisson distribution
 simulate_poisson <- function(n, lambda) {
   rpois(n, lambda = lambda)
@@ -148,17 +249,16 @@ simulate_poisson <- function(n, lambda) {
 
 poisson_data <- simulate_poisson(n, lambda = 3)
 
-plot_histogram_facet(poisson_data, binwidths, "Poisson Distribution")
+create_simulated_data_test(poisson_data, "Poisson")
 ```
 
 # Uniform Distribution:
 
 - Simulated data is evenly distributed between a minimum (0) and maximum (1).
 
-- Histograms reflect the flat, even distribution across the range for different binwidths.
-
 
 ```{r uniform}
+#| out-width: 100%
 # Function to simulate Uniform distribution
 simulate_uniform <- function(n, min, max) {
   runif(n, min = min, max = max)
@@ -166,24 +266,23 @@ simulate_uniform <- function(n, min, max) {
 
 uniform_data <- simulate_uniform(n, min = 0, max = 1)
 
-plot_histogram_facet(uniform_data, binwidths, "Uniform Distribution")
+create_simulated_data_test(uniform_data, "Uniform")
 ```
 
 # Binomial Distribution:
 
 - Models the number of successes in a fixed number of trials (size = 10, prob = 0.5).
 
-- Histograms show the discrete nature of the data and its dependency on binwidth.
-
 ```{r binomial}
+#| out-width: 100%
 # Function to simulate binomial distribution
 simulate_binomial <- function(n, size, prob) {
   rbinom(n, size = size, prob = prob)
 }
 
-binomial_data <- simulate_binomial(n, size = 10, prob = 0.5)
+binomial_data <- simulate_binomial(n, size = 20, prob = 0.5)
 
-plot_histogram_facet(binomial_data, binwidths, "Binomial Distribution")
+create_simulated_data_test(binomial_data, "Binomial")
 
 ```
 
@@ -191,9 +290,8 @@ plot_histogram_facet(binomial_data, binwidths, "Binomial Distribution")
 
 - Continuous data bounded between 0 and 1, modeled with shape parameters (shape1 = 2, shape2 = 5).
 
-- Histograms for different binwidths reveal the skewed shape of the beta distribution.
-
 ```{r beta}
+#| out-width: 100%
 # Function to simulate beta distribution
 simulate_beta <- function(n, shape1, shape2) {
   rbeta(n, shape1 = shape1, shape2 = shape2)
@@ -201,7 +299,7 @@ simulate_beta <- function(n, shape1, shape2) {
 
 beta_data <- simulate_beta(n, shape1 = 2, shape2 = 5)
 
-plot_histogram_facet(beta_data, binwidths, "Beta Distribution")
+create_simulated_data_test(beta_data, "Beta")
 
 ```
 
@@ -209,9 +307,8 @@ plot_histogram_facet(beta_data, binwidths, "Beta Distribution")
 
 - Models waiting times with shape and rate parameters (shape = 2, rate = 1).
 
-- Histograms demonstrate the positively skewed nature of the distribution.
-
 ```{r gamma}
+#| out-width: 100%
 # Function to simulate gamma distribution
 simulate_gamma <- function(n, shape, rate) {
   rgamma(n, shape = shape, rate = rate)
@@ -219,7 +316,7 @@ simulate_gamma <- function(n, shape, rate) {
 
 gamma_data <- simulate_gamma(n, shape = 2, rate = 1)
 
-plot_histogram_facet(gamma_data, binwidths, "Gamma Distribution")
+create_simulated_data_test(gamma_data, "Gamma")
 
 ```
 
@@ -227,9 +324,8 @@ plot_histogram_facet(gamma_data, binwidths, "Gamma Distribution")
 
 - Data follows a chi-square distribution with degrees of freedom (df = 3).
 
-- Histograms illustrate the skewed nature of the chi-square distribution.
-
 ```{r chi_square}
+#| out-width: 100%
 # Function to simulate chi-square distribution
 simulate_chisquare <- function(n, df) {
   rchisq(n, df = df)
@@ -237,7 +333,7 @@ simulate_chisquare <- function(n, df) {
 
 chisquare_data <- simulate_chisquare(n, df = 3)
 
-plot_histogram_facet(chisquare_data, binwidths, "Chi-Square Distribution")
+create_simulated_data_test(chisquare_data, "Chi-Square")
 
 ```
 
@@ -245,9 +341,8 @@ plot_histogram_facet(chisquare_data, binwidths, "Chi-Square Distribution")
 
 - Models the number of failures before achieving a set number of successes.
 
-- Histograms display the count data and its dependence on binwidth.
-
 ```{r negative_bin}
+#| out-width: 100%
 # Function to simulate negative binomial distribution
 simulate_negative_binomial <- function(n, size, prob) {
   rnbinom(n, size = size, prob = prob)
@@ -255,7 +350,7 @@ simulate_negative_binomial <- function(n, size, prob) {
 
 negative_binomial_data <- simulate_negative_binomial(n, size = 10, prob = 0.3)
 
-plot_histogram_facet(negative_binomial_data, binwidths, "Negative Binomial Distribution")
+create_simulated_data_test(negative_binomial_data, "Negative Binomial")
 
 ```
 
@@ -263,9 +358,8 @@ plot_histogram_facet(negative_binomial_data, binwidths, "Negative Binomial Distr
 
 - Data is distributed such that the logarithm of the values follows a normal distribution (meanlog = 0, sdlog = 1).
 
-- Histograms reveal the heavy tail characteristic of log-normal data.
-
 ```{r lognormal}
+#| out-width: 100%
 # Function to simulate log-normal distribution
 simulate_lognormal <- function(n, meanlog, sdlog) {
   rlnorm(n, meanlog = meanlog, sdlog = sdlog)
@@ -273,25 +367,25 @@ simulate_lognormal <- function(n, meanlog, sdlog) {
 
 lognormal_data <- simulate_lognormal(n, meanlog = 0, sdlog = 1)
 
-plot_histogram_facet(lognormal_data, binwidths, "Log-normal Distribution")
+create_simulated_data_test(lognormal_data, "Log-normal")
 
 ```
 
-# Cauchy Distribution:
+<!-- # Cauchy Distribution: -->
 
-- A heavy-tailed distribution (location = 0, scale = 1).
+<!-- - A heavy-tailed distribution (location = 0, scale = 1). -->
 
-- Histograms demonstrate extreme variability, with very large positive and negative values for different binwidths.
+<!-- - Histograms demonstrate extreme variability, with very large positive and negative values for different binwidths. -->
 
-```{r cauchy}
-# Function to simulate Cauchy distribution
-simulate_cauchy <- function(n, location, scale) {
-  rcauchy(n, location = location, scale = scale)
-}
+<!-- ```{r cauchy} -->
+<!-- # Function to simulate Cauchy distribution -->
+<!-- simulate_cauchy <- function(n, location, scale) { -->
+<!--   rcauchy(n, location = location, scale = scale) -->
+<!-- } -->
 
-cauchy_data <- simulate_cauchy(n, location = 0, scale = 1)
+<!-- cauchy_data <- simulate_cauchy(n, location = 0, scale = 1) -->
 
-plot_histogram_facet(cauchy_data, binwidths, "Cauchy Distribution")
+<!-- plot_histogram_facet(cauchy_data, binwidths, "Cauchy Distribution") -->
 
-```
+<!-- ``` -->
 

@@ -116,6 +116,23 @@ Cartesian grid no longer work as well; extensions to additional dimensions are a
 
 Other approaches are necessary when it is necessary to understand $p \geq 4$ dimensions of data. 
 
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-cartestian
+#| layout-valign: bottom
+#| fig-subcap: 
+#|   - "2D Cartesian Plot"
+#|   - "3D Cartesian Plot"
+#| fig-width: 8
+#| fig-height: 4
+#| layout-ncol: 1
+
+
+
+```
+
+
 [Include a 2D and 3D Cartesian plot here, along with a corresponding PCP. e.g. Row 1: 2D, 3D Cart, Row 2: 2D, 3D PCP. Highlight one or two points in each of the Cartesian plots, and the corresponding lines in the PCPs. It's fine to just rnorm() the data and it doesn't necessarily matter that the points have a strong linear relationship.]{.svp}
 
 
@@ -256,7 +273,10 @@ Parallel sets plots were one facet of a series of linked representations of cate
 In addition, hammock plots center all lines leaving a node, so the lines overlap.
 In parallel sets plots, the full axis length is divided up proportional to the marginal composition of the variable, and groups of observations which connect to different categories on the adjacent axis are not aligned. This facilitates part-to-whole comparisons of the joint probability values.]{.svp}
 
-<!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. We'll get into why parsets suck in a bit. -->
+<!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. 
+We'll get into why parsets suck in a bit. -->
+
+[]{.db}
 
 ```{r penguin-cat-data}
 #| echo: false
@@ -329,6 +349,7 @@ knitr::include_graphics("images/parsets_historic.jpg")
 ```
 
 ## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
+
 [What does "flow based methods" refer to? Please make sure your transitions are actually transitioning from something and not coming out of nowhere :)]{.svp}
 Concurrently, flow-based methods witnessed substantial evolution with the emergence of alluvial plots. 
 By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
