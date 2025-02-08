@@ -255,14 +255,40 @@ p1 / p2 + plot_layout(nrow = 2, heights = c(1,1))
 [The transition to projection space from Cartesian space seems to have independently arisen several times, and in some cases, the origins of the practice are not entirely clear. 
 Sankey diagrams, for instance, were not initially designed to leverage projection space; they were intended to visualize industrial processes, rather than variables, with axes that were often not parallel. 
 That is, in mathematical terms, Sankey diagrams are a visual representation of flow through a directed, weighted graph. 
-Alluvial diagrams, which are visually similar to Sankey diagrams as well as parallel sets plots, are often considered to be a subset of Sankey diagrams; typically, alluvial diagrams visualize the change in weights in a graph over time - that is, the vertical axes are different time points, and the nodes are a set of categories which are consistent across time points.
-There is considerable confusion between alluvial diagrams and Sankey diagrams, as briefly mentioned in  @holtzSankeyDiagram2024. This confusion is compounded by different implementations of e.g. parallel sets plots, such as the `geom_parallel_sets` implementation in the `ggforce` R package [@pedersenCreateParallelSets2024], which describes itself this way:
+Alluvial diagrams, which are visually similar to both Sankey diagrams and parallel sets plots, are often considered to be a subset of Sankey diagrams; typically, alluvial diagrams visualize the change in weights in a graph over time - that is, the vertical axes are different time points, and the nodes are a set of categories which are consistent across time points.
+There is considerable confusion between alluvial diagrams and Sankey diagrams, as briefly mentioned in  @holtzSankeyDiagram2024. 
+This confusion is compounded by different implementations of e.g. parallel sets plots, such as the `geom_parallel_sets` implementation in the `ggforce` R package [@pedersenCreateParallelSets2024], which describes itself this way:
 ]{.svp}
 
 >  If the variables has an intrinsic order the representation can be thought of as a Sankey Diagram. If each variable is a point in time it will resemble an alluvial diagram.
 
 
-[One obvious solution to the problem of how to visualize categorical variables using parallel axes is to convert the categorical variables into numeric variables and to use a standard parallel coordinate plot. This solution is not optimal even for ordered categorical variables, but for unordered variables, it is particularly unintuitive. In addition, of course, any information about the category frequency is lost in the numeric transformation.]{.svp}
+<!-- ## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s -->
+
+<!-- [What does "flow based methods" refer to? Please make sure your transitions are actually transitioning from something and not coming out of nowhere :)]{.svp} -->
+<!-- Concurrently, flow-based methods witnessed substantial evolution with the emergence of alluvial plots.  -->
+<!-- By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams.  -->
+<!-- Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization. -->
+<!-- @fig-alluvialHist is a detailed alluvial diagram visualizing the top 100 historical figures based on metrics like Wikipedia page views. \svp{Please provide a source for this image. Cite it appropriately, and place it in context.} -->
+<!-- It connects individuals to their professions (e.g., philosopher, politician, writer), countries of origin, and gender, illustrating relationships and distributions across these categories. -->
+
+<!-- ```{r} -->
+<!-- #| echo: false -->
+<!-- #| warning: false -->
+<!-- #| message: false -->
+<!-- #| label: fig-alluvialHist -->
+<!-- #| layout-valign: bottom -->
+<!-- #| fig-cap: "A Detailed Alluvial Diagram visualizing the top 100 historical figures" -->
+<!-- #| fig-width: 6 -->
+<!-- #| fig-height: 6 -->
+
+<!-- knitr::include_graphics("images/alluvial_historic.png") -->
+<!-- ``` -->
+
+
+[One obvious solution to the problem of how to visualize categorical variables using parallel axes is to convert the categorical variables into numeric variables and to use a standard parallel coordinate plot. 
+This solution is not optimal even for ordered categorical variables, but for unordered variables, it is particularly unintuitive. 
+In addition, of course, any information about the category frequency is lost in the numeric transformation.]{.svp}
 
 [Hammock plots and parallel sets plots arose independently in the early 2000s [@schonlauVisualizingCategoricalData2003;@bendix2005parallel], though both plots represent categorical data on parallel axes. 
 Parallel sets plots (@fig-parallel-sets-hammock a) were initially developed as part of an interactive environment for exploring crosstab data. 
@@ -291,6 +317,7 @@ penguin_cat <- select(penguins, species, island, year) |> na.omit() |> as.data.f
 #| message: false
 #| warning: false
 #| include: false
+
 # %pip install hammock_plot
 import hammock_plot
 import pandas as pd
@@ -308,7 +335,7 @@ plt.show()
 
 ```{r}
 #| label: fig-parallel-sets-hammock
-#| fig-cap: "Hammock [@yangHammockplotHammockVisualization2023] and parallel sets [@ggparallel] plots of categorical variables in the palmerpenguins [@palmerpenguins] data. "
+#| fig-cap: "Hammock [@yangHammockplotHammockVisualization2023] and parallel sets [@bendix2005parallel], [implementation][@ggparallel] plots of categorical variables in the palmerpenguins [@palmerpenguins] data. "
 #| fig-subcap: 
 #|   - "Parallel sets plot "
 #|   - "Hammock plot "
@@ -346,28 +373,6 @@ knitr::include_graphics("LitReview_files/figure-pdf/hammock-plot-py-1.pdf")
 #| out-width: 75%
 
 knitr::include_graphics("images/parsets_historic.jpg")
-```
-
-## Expanding Flow-Based Techniques: Alluvial Plots in the Early 2000s
-
-[What does "flow based methods" refer to? Please make sure your transitions are actually transitioning from something and not coming out of nowhere :)]{.svp}
-Concurrently, flow-based methods witnessed substantial evolution with the emergence of alluvial plots. 
-By integrating temporal dynamics and category transitions, these visualizations extended the utility of traditional Sankey diagrams. 
-Their ability to capture changes over time enhanced their relevance in fields ranging from corporate analytics to environmental science, signaling a paradigm shift in flow-based visualization.
-@fig-alluvialHist is a detailed alluvial diagram visualizing the top 100 historical figures based on metrics like Wikipedia page views. \svp{Please provide a source for this image. Cite it appropriately, and place it in context.}
-It connects individuals to their professions (e.g., philosopher, politician, writer), countries of origin, and gender, illustrating relationships and distributions across these categories.
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-#| label: fig-alluvialHist
-#| layout-valign: bottom
-#| fig-cap: "A Detailed Alluvial Diagram visualizing the top 100 historical figures"
-#| fig-width: 6
-#| fig-height: 6
-
-knitr::include_graphics("images/alluvial_historic.png")
 ```
 
 ## Mid-2000s: Enhancements in Parallel Coordinate Plots
