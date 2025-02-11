@@ -302,12 +302,13 @@ Parallel sets plots (@fig-parallel-sets-hammock a) were initially developed as p
 Hammock plots (@fig-parallel-sets-hammock b) grew out of a desire to represent both numerical and categorical data effectively using parallel axes; in addition, these plots included support for visualizing missing data from the start. 
 Parallel sets plots were one facet of a series of linked representations of categorical data, and included histograms as subplots within the parallel sets plot design.]{.svp}
 
+<!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. 
+We'll get into why parsets suck in a bit. -->
+
 [There are some notable differences between the plots in construction: hammock plots do not divide up the full space of the vertical axis between categories; instead, the lines between adjacent axes are sized relative to the size of the intersection between categories on adjacent axes. 
 In addition, hammock plots center all lines leaving a node, so the lines overlap.
 In parallel sets plots, the full axis length is divided up proportional to the marginal composition of the variable, and groups of observations which connect to different categories on the adjacent axis are not aligned. This facilitates part-to-whole comparisons of the joint probability values.]{.svp}
 
-<!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. 
-We'll get into why parsets suck in a bit. -->
 
 
 ```{r penguin-cat-data}
