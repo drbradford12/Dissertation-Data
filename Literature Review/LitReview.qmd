@@ -9,8 +9,8 @@ format:
         - inner=2.5cm
         - outer=3.8cm
         - bindingoffset=.5cm
-        - top=1.75cm
-        - bottom=1.75cm
+        - top=1.5cm
+        - bottom=1.5cm
     include-in-header:
       text: |
         \usepackage{soul}
@@ -33,7 +33,6 @@ library(palmerpenguins)
 library(tidyverse)
 library(ggpcp)
 library(stats)
-options(warn=-1)
 require(gridExtra)
 library(ggridges)
 library(patchwork)
@@ -46,6 +45,9 @@ library(ggforce)
 library(htmlwidgets)
 library(webshot2)
 library(networkD3)
+library(reticulate)
+
+options(warn=-1)
 theme_set(theme_bw())
 
 penguin_scale_color <-   function(...) scale_color_manual(
@@ -144,9 +146,12 @@ Other approaches are necessary when it is necessary to understand $p \geq 4$ dim
 
 From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
 This section delves into the historical development and interconnections among several key visualization techniques: Sankey diagrams, Alluvial plots, Parallel Sets plots, Hammock plots, Common Angle plots, and other adaptations which are similar to Parallel Coordinate Plots. 
-[Need to define basic inclusion criteria. What plots are in and out?]{.svp}
+The visualization techniques must have address challenges related to multidimensional, hierarchical, or mixed data.
+Conversely, plots that are excluded from this section are those that do not address multidimensional, hierarchical, or mixed data challenges. 
+Techniques that lack historical development or interconnections with the mentioned plots are also excluded.
+<!--[Need to define basic inclusion criteria. What plots are in and out?]{.svp}-->
 
-These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges. [This sentence says basically nothing -- write tight. ]{.svp}
+<!--These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges. [This sentence says basically nothing -- write tight. ]{.svp}-->
 
 ## Early Foundations: Statistical Graphics in the 19th Century
 
@@ -183,6 +188,8 @@ While this diagram, shown in @fig-sankey-orig, does not conceptualize the energy
 #| fig-cap: The original Sankey diagram of energy efficiency in a steam engine, reprinted from @kennedyThermalEfficiencySteam1898 (Work in the public domain). 
 #| label: sankey-orig
 #| out-width: 100%
+#| echo: false
+
 knitr::include_graphics("images/orig_sankey.png")
 ```
 
@@ -302,7 +309,6 @@ In parallel sets plots, the full axis length is divided up proportional to the m
 <!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. 
 We'll get into why parsets suck in a bit. -->
 
-[]{.db}
 
 ```{r penguin-cat-data}
 #| echo: false
@@ -367,7 +373,7 @@ knitr::include_graphics("LitReview_files/figure-pdf/hammock-plot-py-1.pdf")
 #| message: false
 #| label: fig-parsets
 #| layout-valign: bottom
-#| fig-cap: "An Early 2000s example of a Parallel Sets Visualization"
+#| fig-cap: "An Early 2000s example of a Parallel Sets Visualization. @kosara2006parallel demostrates a Parallel Sets method is particularly useful for analyzing complex categorical data by providing a rich set of interactions and automatic procedures for common tasks like building the cross product of dimensions. The visualization facilitates the exploration of relationships and frequencies across multiple dimensions, making it a powerful tool for data analysis."
 #| fig-width: 6
 #| fig-height: 6
 #| out-width: 75%
@@ -398,8 +404,10 @@ knitr::include_graphics("images/enhance_example.png")
 
 ## Late 2000s: Specialized Visualization Techniques
 
-The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges. 
-Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively. 
+The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges.
+@hofmannCommonAnglePlots2013 further examined the implications of the line-width illusion in categorical data visualizations. 
+Their findings revealed that inconsistencies in line widths and unsuitable geometric representations exacerbated perceptual inaccuracies, complicating the interpretation of overlapping or closely related dimensions. 
+[\st{Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively.}]{.db} 
 [THIS IS TOTALLY FALSE!!! I have no idea where this is coming from. Please fact-check everything you're saying and back it up with an accurate reference.]{.svp}
 By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
 @fig-capHist

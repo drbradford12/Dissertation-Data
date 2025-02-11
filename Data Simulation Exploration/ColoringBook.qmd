@@ -137,7 +137,8 @@ numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.1) {
   return(adjusted_values)
 }
 
-create_simulated_data_test <- function(data, data_type, tie_band_value = 0.01, dodge_value = 0.01, scale_factor = 0.1){
+create_simulated_data_test <- function(data, data_type, tie_band_value = 0.01, 
+                                       dodge_value = 0.01, scale_factor = 0.1){
   
 
 # Create a data frame for visualization
