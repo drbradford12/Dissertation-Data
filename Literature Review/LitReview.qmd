@@ -795,6 +795,7 @@ ggplot(alluvial_data, aes(
 
 ```
 
+
 Alluvial plots provide a compelling framework for visualizing flows and transitions within categorical data, capturing changes across dimensions or over time. 
 Inspired by stratified data representations, these plots evoke the imagery of sedimentation patterns in geology, reflecting layered and interconnected structures. 
 Since their popularization in the early 2000s, alluvial plots have gained widespread application across fields such as sociology and genomics, where understanding transitions and relationships within datasets is essential [@rosvall2008maps].
@@ -912,11 +913,12 @@ By emphasizing the historical significance of statistical graphics in multivaria
 @hurley2004clustering made a pivotal contribution by introducing the end-link algorithm, which optimizes variable ordering in parallel plots to enhance the clarity and interpretability of multidimensional datasets. 
 This foundational work has since informed modern parallel axis plots, enabling better cluster recognition and visual analytics.
 
-### Application-Driven Advancements
+<!--### Application-Driven Advancements
 
 @sartorio2004influence utilized parallel plots to examine the relationships between BMI, age, and muscular power output, demonstrating the relevance of PCPs in biomedical studies. 
 @hemming2004heinrich employed parallel plotting methods to analyze geological and climate data, offering a practical application of Hurley’s clustering principles in environmental datasets. 
 These studies underscore the versatility of PCPs across domains, from healthcare to environmental science.
+-->
 
 ### Mixed-Type PCPs: Expanding Dimensions
 
@@ -937,7 +939,7 @@ These works extend the capabilities of PCPs to manage high-dimensional data, par
 By extending Hurley’s clustering techniques, Dimlift enabled dynamic adjustments to visualizations, fostering deeper analytical engagement. 
 @tortora2024fpdclustering introduced probabilistic clustering methods for PCPs, blending probabilistic models with deterministic visualization approaches to handle hybrid datasets effectively.
 
-### Practical Applications and Broader Contexts
+<!--### Practical Applications and Broader Contexts
 
 @jones2004renal applied statistical visualizations akin to Hurley’s principles to diagnose renal obstructions, illustrating the role of PCPs in healthcare analytics. 
 @markwick2004palaeo utilized parallel axis methods to model elevation and climate data for simulation experiments, demonstrating their utility in palaeoenvironmental research. 
@@ -951,6 +953,7 @@ These contributions collectively showcase Parallel Coordinate Plots' versatility
 By incorporating principles of clustering, optimization, and interactivity, researchers have enhanced the utility of PCPs across diverse domains, from biomedical diagnostics to geospatial analysis. 
 Integrating probabilistic and generative models further underscores the potential for future advancements, paving the way for more intuitive and powerful visualization tools. 
 These innovations build upon Hurley’s foundational work, reinforcing PCPs as indispensable instruments for exploring multidimensional data and uncovering hidden insights.
+-->
 
 # Perceptual Challenges with PCPs
 

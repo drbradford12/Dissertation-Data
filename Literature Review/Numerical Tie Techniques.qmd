@@ -10,8 +10,8 @@ format:
         - bindingoffset=.5cm
         - top=0.75cm
         - bottom=0.75cm
-        - left=1.5cm
-        - right=1.5cm
+        - left=1.0cm
+        - right=1.0cm
     include-in-header:
       text: |
         \usepackage{float}
@@ -208,7 +208,7 @@ tbl %>%
 
 <!-- ``` -->
 
-<!-- <!-- The issue here is that the lines in the categorical variables are reorder. Not sure if that is what we want--> -->
+<!-- <!-- The issue here is that the lines in the categorical variables are reorder. Not sure if that is what we want--> 
 
 <!-- ## Attempt 2: Jitter Spacing (Numerical Tie Handling) -->
 
