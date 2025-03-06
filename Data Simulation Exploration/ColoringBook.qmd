@@ -51,26 +51,25 @@ group_scale_color <-   function(...) scale_color_manual(
   "group", values = c("group1" = "#540D6E", "group2" = "#219B9D", "group3" = "#FF8000", ...)
 )  
 
-# Solution #1
-numerical_tie_breaker_solution1 <- function(values, tie_band = 0.1) {
-  # Sort the values
-  sorted_values <- sort(values)
+# Updated Solution #1
+numerical_tie_breaker_solution1 <- function(values, tie_band = 0.05) {
+  sorted_idx <- order(values)
+  sorted_values <- values[sorted_idx]
   
-  # Initialize the adjusted values
-  adjusted_values <- sorted_values
-  
-  # Loop through the values to add tie band for ties
+  adjusted_sorted <- sorted_values
   for (i in seq_along(sorted_values)) {
     if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
-      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+      adjusted_sorted[i] <- adjusted_sorted[i - 1] + tie_band
     }
   }
   
-  # Return the adjusted values
+  adjusted_values <- numeric(length(values))
+  adjusted_values[sorted_idx] <- adjusted_sorted
   return(adjusted_values)
 }
 
-# Solution #2: Dynamic tie band based on data properties
+
+# Updated Solution #2: Dynamic tie band based on data properties
 auto_fraction <- function(values, scale_factor = 0.1) {
   unique_vals <- unique(sort(values))
   diffs <- diff(unique_vals)
@@ -90,32 +89,25 @@ auto_fraction <- function(values, scale_factor = 0.1) {
   scale_factor * typical_gap
 }
 
-numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.1) {
-  # 1) Determine if all values are whole numbers
+
+numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.05) {
   is_whole_number <- all(abs(values - round(values)) < .Machine$double.eps^0.5)
   
-  # 2) If data are all whole numbers, use a small fraction increment
   if (is_whole_number) {
     tie_band <- base_fraction
-    
   } else {
-    # For continuous data, attempt a normality check using Shapiro-Wilk if n >= 3
-    # (Shapiro test not valid for n < 3, so skip if too small)
     is_normal <- FALSE
     if (length(values) >= 3) {
       shapiro_p <- shapiro.test(values)$p.value
       is_normal <- (shapiro_p > 0.05)
     }
     
-    # Check for outliers using 1.5 * IQR rule
     q <- stats::quantile(values, probs = c(0.25, 0.75))
     iqr_value <- q[2] - q[1]
     lower_bound <- q[1] - 1.5 * iqr_value
     upper_bound <- q[2] + 1.5 * iqr_value
     has_outliers <- any(values < lower_bound) || any(values > upper_bound)
     
-    # Decide tie_band logic
-    # If data appear normal and have no outliers, use fraction * SD; otherwise use fraction * IQR
     if (is_normal && !has_outliers) {
       tie_band <- base_fraction * stats::sd(values)
     } else {
@@ -123,22 +115,24 @@ numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.1) {
     }
   }
   
-  # 3) Sort the values
-  sorted_values <- sort(values)
+  sorted_idx <- order(values)
+  sorted_values <- values[sorted_idx]
   
-  # 4) Adjust for ties by adding tie_band to each duplicate
-  adjusted_values <- sorted_values
+  adjusted_sorted <- sorted_values
   for (i in seq_along(sorted_values)) {
     if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
-      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+      adjusted_sorted[i] <- adjusted_sorted[i - 1] + tie_band
     }
   }
   
+  adjusted_values <- numeric(length(values))
+  adjusted_values[sorted_idx] <- adjusted_sorted
   return(adjusted_values)
 }
 
-create_simulated_data_test <- function(data, data_type, tie_band_value = 0.01, 
-                                       dodge_value = 0.01, scale_factor = 0.1){
+
+create_simulated_data_test <- function(data, data_type, tie_band_value = 0.05, 
+                                       dodge_value = 0.01, scale_factor = 0.05){
   
 
 # Create a data frame for visualization
@@ -154,28 +148,52 @@ df <- data.frame(
   group = sort(sample(c('group1', 'group2', 'group3'), n, replace=TRUE))
 )
 
-df_pcp <- df %>%
-  pcp_select(original_dec1, manual_tie_band, group, original_dec1, auto_tie_band) %>%
-  pcp_scale(method = "uniminmax") %>%
-  pcp_arrange(method = "from-left")
+# df_pcp <- df %>%
+#   pcp_select( group, original_dec1, manual_tie_band, group, original_dec1, auto_tie_band) %>%
+#   pcp_scale() %>%
+#   pcp_arrange(method = "from-both")
 
 # Create the parallel coordinate plot using ggpcp
-return(
-  ggplot(df_pcp, aes_pcp()) +
+p1 <- df %>%
+  pcp_select(group, original_dec1, group, manual_tie_band, group) %>%
+  pcp_scale() %>%
+  pcp_arrange(method = "from-both") %>%
+  ggplot(aes_pcp()) +
   geom_pcp_boxes() +  # Add boxes for each variable
   geom_pcp(aes(colour = group), overplot = "none", alpha = 0.5) +  # Add lines for each data point, colored by Type
   geom_pcp_labels() +  # Add labels for each variable
   theme_pcp() +  # Use the default theme for PCP
   geom_point(aes(colour = group), size = 0.75, position = position_dodge(dodge_value)) +
   labs(
-    title = paste("Parallel Coordinate Plot: Original vs Adjusted Data (Simulated", data_type,  "Data)", sep = ' '),
+    title = "PCP: Original vs Manual Tie-band Adjusted",
+    subtitle = paste("(Simulated", data_type,  "Data)", sep = ' '),
     x = "Variables",
     y = "Scaled Values"
   ) + theme(legend.position = "none") + 
   #guides(color = F) + 
   group_scale_color() + 
   guides(color = guide_legend(title = "Data Type"))  # Add a legend for the Type variable
-)
+
+p2 <- df %>%
+  pcp_select(group, original_dec1, group, auto_tie_band, group) %>%
+  pcp_scale() %>%
+  pcp_arrange(method = "from-both") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_boxes() +  # Add boxes for each variable
+  geom_pcp(aes(colour = group), overplot = "none", alpha = 0.5) +  # Add lines for each data point, colored by Type
+  geom_pcp_labels() +  # Add labels for each variable
+  theme_pcp() +  # Use the default theme for PCP
+  geom_point(aes(colour = group), size = 0.75, position = position_dodge(dodge_value)) +
+  labs(
+    title = "PCP: Original vs Auto Tie-band Adjusted",
+    subtitle = paste("(Simulated", data_type,  "Data)", sep = ' '),
+    x = "Variables",
+    y = "Scaled Values"
+  ) + theme(legend.position = "none") + 
+  #guides(color = F) + 
+  group_scale_color() + 
+  guides(color = guide_legend(title = "Data Type"))  # Add a legend for the Type variable
+return(grid.arrange(p1, p2, ncol = 2))
 
 }
 
@@ -215,7 +233,7 @@ simulate_exponential <- function(n, rate) {
 
 exponential_data <- simulate_exponential(n, rate = .33)
 
-create_simulated_data_test(exponential_data, "Exponnential")
+create_simulated_data_test(exponential_data, "Exponential")
 
 ```
 
@@ -252,6 +270,7 @@ poisson_data <- simulate_poisson(n, lambda = 3)
 
 create_simulated_data_test(poisson_data, "Poisson")
 ```
+
 
 # Uniform Distribution:
 

@@ -589,21 +589,19 @@ $k$: The relative position of the value within the tie group.
 
 ```{r}
 # This function takes a numerical vector and adds a small band around ties
-numerical_tie_breaker <- function(values, tie_band = 0.1) {
-  # Sort the values
-  sorted_values <- sort(values)
+numerical_tie_breaker <- function(values, tie_band = 0.05) {
+  sorted_idx <- order(values)
+  sorted_values <- values[sorted_idx]
   
-  # Initialize the adjusted values
-  adjusted_values <- sorted_values
-  
-  # Loop through the values to add tie band for ties
+  adjusted_sorted <- sorted_values
   for (i in seq_along(sorted_values)) {
     if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
-      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+      adjusted_sorted[i] <- adjusted_sorted[i - 1] + tie_band
     }
   }
   
-  # Return the adjusted values
+  adjusted_values <- numeric(length(values))
+  adjusted_values[sorted_idx] <- adjusted_sorted
   return(adjusted_values)
 }
 
@@ -622,10 +620,10 @@ numerical_tie_breaker <- function(values, tie_band = 0.1) {
 penguin_data <- penguins %>% 
   na.omit() %>% 
   mutate(
-    bill_length_mm = numerical_tie_breaker(bill_length_mm, tie_band = 0.02),
-    bill_depth_mm = numerical_tie_breaker(bill_depth_mm, tie_band = 0.02),
-    flipper_length_mm = numerical_tie_breaker(flipper_length_mm, tie_band = 0.5),
-    body_mass_g = numerical_tie_breaker(body_mass_g, tie_band = 5.5)
+    bill_length_mm = numerical_tie_breaker(bill_length_mm),
+    bill_depth_mm = numerical_tie_breaker(bill_depth_mm),
+    flipper_length_mm = numerical_tie_breaker(flipper_length_mm),
+    body_mass_g = numerical_tie_breaker(body_mass_g)
   )
 
 # Parallel coordinate plot visualization
@@ -731,32 +729,24 @@ auto_fraction <- function(values, scale_factor = 0.1) {
   scale_factor * typical_gap
 }
 
-numerical_tie_breaker <- function(values, base_fraction = 0.1) {
-  # 1) Determine if all values are whole numbers
+numerical_tie_breaker <- function(values, base_fraction = 0.05) {
   is_whole_number <- all(abs(values - round(values)) < .Machine$double.eps^0.5)
   
-  # 2) If data are all whole numbers, use a small fraction increment
   if (is_whole_number) {
     tie_band <- base_fraction
-    
   } else {
-    # For continuous data, attempt a normality check using Shapiro-Wilk if n >= 3
-    # (Shapiro test not valid for n < 3, so skip if too small)
     is_normal <- FALSE
     if (length(values) >= 3) {
       shapiro_p <- shapiro.test(values)$p.value
       is_normal <- (shapiro_p > 0.05)
     }
     
-    # Check for outliers using 1.5 * IQR rule
     q <- stats::quantile(values, probs = c(0.25, 0.75))
     iqr_value <- q[2] - q[1]
     lower_bound <- q[1] - 1.5 * iqr_value
     upper_bound <- q[2] + 1.5 * iqr_value
     has_outliers <- any(values < lower_bound) || any(values > upper_bound)
     
-    # Decide tie_band logic
-    # If data appear normal and have no outliers, use fraction * SD; otherwise use fraction * IQR
     if (is_normal && !has_outliers) {
       tie_band <- base_fraction * stats::sd(values)
     } else {
@@ -764,23 +754,21 @@ numerical_tie_breaker <- function(values, base_fraction = 0.1) {
     }
   }
   
-  # Optionally, derive the fraction from actual gaps in data (robust approach)
-  # fraction <- auto_fraction(values, base_fraction)
-  # tie_band <- fraction * <sd or iqr or fixed increment>
+  sorted_idx <- order(values)
+  sorted_values <- values[sorted_idx]
   
-  # 3) Sort the values
-  sorted_values <- sort(values)
-  
-  # 4) Adjust for ties by adding tie_band to each duplicate
-  adjusted_values <- sorted_values
+  adjusted_sorted <- sorted_values
   for (i in seq_along(sorted_values)) {
     if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
-      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+      adjusted_sorted[i] <- adjusted_sorted[i - 1] + tie_band
     }
   }
   
+  adjusted_values <- numeric(length(values))
+  adjusted_values[sorted_idx] <- adjusted_sorted
   return(adjusted_values)
 }
+
 ```
 
 *PCP Implementation*
