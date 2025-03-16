@@ -145,10 +145,9 @@ Other approaches are necessary when it is necessary to understand $p \geq 4$ dim
 # Evolution of data visualization methodologies
 
 From its origins in the 19th century to the computational advances of today, visualization techniques have undergone significant transformations to address multidimensional, hierarchical, and mixed data challenges. 
-This section delves into the historical development and interconnections among several key visualization techniques: Sankey diagrams, Alluvial plots, Parallel Sets plots, Hammock plots, Common Angle plots, and other adaptations which are similar to Parallel Coordinate Plots. 
-The visualization techniques must have address challenges related to multidimensional, hierarchical, or mixed data.
-Conversely, plots that are excluded from this section are those that do not address multidimensional, hierarchical, or mixed data challenges. 
-Techniques that lack historical development or interconnections with the mentioned plots are also excluded.
+This section explores the historical development and interrelationships among several influential multidimensional visualization techniques: Sankey diagrams, Alluvial plots, Parallel Sets plots, Hammock plots, Common Angle plots, and related adaptations suggestive of Parallel Coordinate Plots. 
+Above all, these visualization methods have effectively addressed complex challenges posed by multidimensional, hierarchical, and mixed data. 
+Techniques excluded from this discussion are those without significant historical evolution, clear connections to the above plots, or relevance to multidimensional, hierarchical, or mixed data contexts.
 <!--[Need to define basic inclusion criteria. What plots are in and out?]{.svp}-->
 
 <!--These innovations collectively chart a trajectory of creative solutions rooted in foundational principles to meet evolving challenges. [This sentence says basically nothing -- write tight. ]{.svp}-->
