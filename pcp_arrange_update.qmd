@@ -74,37 +74,42 @@ where $n$ is the size of the group.
 #| fig-width: 7.5
 #| fig-height: 5
 
-p1 <- iris %>% 
+p1 <- iris %>%
+  mutate(Sepal.Length = factor(round(Sepal.Length, 1))) %>%
   pcp_select(1:5) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = Species), alpha = 0.5) + 
-  geom_pcp_boxes(boxwidth = 0.2) +
-  geom_pcp_labels() +
+  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
+  ggpcp::geom_pcp_labels() +
   theme_pcp() + 
   geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
   theme(legend.position = "none") +
-  iris_scale_color()+ 
+  iris_scale_color() + 
   ggplot2::labs(title = "Iris Data no adjustment")
 
 
 
-p2 <- iris %>% 
+p2 <- iris %>%
+  mutate(Sepal.Length = factor(round(Sepal.Length, 1))) %>%
   pcp_select(1:5) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange_with_ties(method = "from-left") %>%
+  mutate(cluster_label = ifelse(is.na(tie_box_label), as.character(pcp_level), tie_box_label)) %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = Species),  alpha = 0.5) + 
-  geom_pcp_boxes() +
-  geom_pcp_labels() + 
+  geom_pcp_boxes(aes(group = cluster_label, level = cluster_label), boxwidth = 0.2) +
+  geom_pcp_labels(aes(label = cluster_label)) + 
   theme_pcp() +  
   geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
   theme(legend.position = "none") +
   iris_scale_color() + 
   ggplot2::labs(title = "Iris Data with adjustment")
+
+
 
 grid.arrange(p1, p2, ncol = 2)
 

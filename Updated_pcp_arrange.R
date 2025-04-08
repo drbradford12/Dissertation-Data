@@ -27,7 +27,7 @@ numerical_tie_breaker <- function(values, alpha = 1, default_delta = 1e-8) {
   cum_lengths <- cumsum(rle_vals$lengths)
   start_indices <- c(1, head(cum_lengths, -1) + 1)
 
-  # For each tied group, assign symmetric offsets with maximum offset of α·(delta/2)
+  # For each tied group, assign symmetric offsets with max offset = α*(delta/2)
   for (j in seq_along(rle_vals$lengths)) {
     len <- rle_vals$lengths[j]
     if (len > 1) {
@@ -44,7 +44,8 @@ numerical_tie_breaker <- function(values, alpha = 1, default_delta = 1e-8) {
 }
 
 adjusted_numerical_tie_breaker <- function(values, alpha = 1) {
-  if (!any(duplicated(values))) return(values)  # no ties: return original values
+  # Only apply offsets if there are ties
+  if (!any(duplicated(values))) return(values)
   idx <- order(values, seq_along(values))
   adjusted_sorted <- numerical_tie_breaker(values[idx], alpha = alpha)
   result <- numeric(length(values))
@@ -86,7 +87,8 @@ pcp_arrange_with_ties <- function(data, method = "from-right", space = 0.05, .by
   }
 
   vars <- data %>% group_by(pcp_x, .add = FALSE) %>%
-    summarize(pcp_class = pcp_class[1]) %>% mutate(pcp_x = as.character(pcp_x))
+    summarize(pcp_class = pcp_class[1]) %>%
+    mutate(pcp_x = as.character(pcp_x))
   factor_targets <- which(vars$pcp_class == "factor")
   numvars <- nrow(vars)
   selects <- unique(c(groups, "pcp_id", "pcp_x", "pcp_y"))
@@ -204,28 +206,34 @@ pcp_arrange_with_ties <- function(data, method = "from-right", space = 0.05, .by
     })
   }
 
+  # If not "from-both", copy pcp_y into pcp_yend so lines remain consistent
   if (method != "from-both")
     data$pcp_yend <- data$pcp_y
 
-  # Process numerical variables with tie groups for box drawing.
-  # Each tied group is now labeled with its own tie_box_label.
+  # --- Tie adjustment logic only: if numeric vars have ties, offset them. ---
   numeric_vars <- vars %>% filter(pcp_class == "numeric") %>% pull(pcp_x)
   if (length(numeric_vars) > 0) {
-    data <- data %>% group_by(pcp_x) %>%
-      mutate(
-        tied_flag = duplicated(pcp_y) | duplicated(pcp_y, fromLast = TRUE),
-        tie_group = ifelse(tied_flag, as.integer(factor(pcp_y)), NA_integer_)
-      ) %>% ungroup() %>%
+    data <- data %>%
       group_by(pcp_x) %>%
       mutate(
+        # Mark ties for each numeric variable
+        tied_flag = duplicated(pcp_y) | duplicated(pcp_y, fromLast = TRUE),
+        tie_group = ifelse(tied_flag, as.integer(factor(pcp_y)), NA_integer_)
+      ) %>%
+      ungroup() %>%
+      group_by(pcp_x) %>%
+      mutate(
+        # Only apply offset if the variable is numeric and has ties
         pcp_y = if (unique(pcp_x) %in% numeric_vars)
           adjusted_numerical_tie_breaker(pcp_y, alpha = alpha)
         else pcp_y,
         pcp_yend = if (unique(pcp_x) %in% numeric_vars)
           adjusted_numerical_tie_breaker(pcp_yend, alpha = alpha)
         else pcp_yend
-      ) %>% ungroup() %>%
+      ) %>%
+      ungroup() %>%
       mutate(
+        # Mark these as 'factor' for box drawing if they have tie groups
         class = ifelse(!is.na(tie_group), "factor", "numeric"),
         level = tie_group,
         tie_box_label = ifelse(!is.na(tie_group),
@@ -233,6 +241,23 @@ pcp_arrange_with_ties <- function(data, method = "from-right", space = 0.05, .by
                                NA_character_)
       )
   }
+
+  # --- New section: Ensure adjusted coordinates are within (0,1) ---
+  # Rescale vertical coordinates (pcp_y and pcp_yend) within each axis
+  data <- data %>% group_by(pcp_x) %>%
+    mutate(
+      pcp_y = (pcp_y - min(pcp_y, na.rm = TRUE)) / (max(pcp_y, na.rm = TRUE) - min(pcp_y, na.rm = TRUE)),
+      pcp_yend = (pcp_yend - min(pcp_yend, na.rm = TRUE)) / (max(pcp_yend, na.rm = TRUE) - min(pcp_yend, na.rm = TRUE))
+    ) %>% ungroup()
+
+  # Convert pcp_x from a factor to numeric positions scaled between 0 and 1
+  # axes <- unique(data$pcp_x)
+  # axes <- sort(axes)
+  # data <- data %>% mutate(
+  #   pcp_x = as.numeric(factor(pcp_x, levels = axes)),
+  #   pcp_x = (pcp_x - 1) / (length(axes) - 1)
+  # )
+  # --- End new section ---
 
   data
 }
