@@ -1,5 +1,5 @@
 ---
-title: "Candidacy Proposal for Handling Ties Using Parallel Coordinate Plots in the ggpcp Package (R)"
+title: "Visualizing Ambiguity: A Grammar of Graphics Approach to Resolving Numerical Ties in Parallel Coordinate Plots"
 author: "Denise Bradford"
 format: 
   pdf:
@@ -28,172 +28,22 @@ commands: [db,svp,hh]
 ---
 
 
-## 1. Introduction
+## The Challenge of High-Dimensional Data
 
-This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs). 
-Parallel coordinates, first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes simultaneously [@inselberg2009]. 
-However, when datasets contain exact numerical ties, the resulting overlapping lines in PCPs can obscure critical distinctions. 
-To address this, we propose a method for introducing controlled spacing to tied values. 
-This functionality will be integrated into the **ggpcp** package in R, ensuring a streamlined workflow for users seeking enhanced clarity in their parallel coordinate visualizations.
+Making sense of complex, multidimensional data is a fundamental challenge in science and industry.
 
-Importantly, our approach complements recent work on **generalized parallel coordinate plots (GPCPs)**—an extension of PCPs that supports categorical variables [@vanderplas2023]. 
-The *ggpcp* package for R implements these GPCPs using a *grammar of graphics* framework, which seamlessly incorporates both continuous and categorical variables in a single parallel coordinate plot. 
-One of the key contributions of that work is a robust tie-breaking mechanism for categorical variables, ensuring that individual observations can be traced across multiple dimensions, even when categories induce identical or “tied” values. 
-By adding a numerical tie-breaking technique for continuous data as proposed here, we further refine GPCPs’ capacity to handle the visualization of real-world datasets exhibiting many types of ties.
+::: {.panel-tabset}
+#### The Goal
 
----
+We want to find patterns, identify clusters, and detect outliers.
 
-## 2. Background and Motivation
-
-### 2.1 Parallel Coordinate Plots
-
-Parallel coordinate plots assign each dimension of an n-dimensional dataset to a vertical axis arranged in parallel [@Wegman:1990]. 
-Each observation is drawn as a polyline connecting its values on these axes, providing a visual representation that can illuminate underlying data structures.
-
-### 2.2 Numerical Ties and Visual Overlap
-
-When multiple observations share the same value in a given dimension, their polylines perfectly overlap, creating “visual collisions.” 
-This masks information about distribution, density, or potential outliers. 
-Introducing a small offset (“jitter”) to these tied values can mitigate overlap without distorting the overall relationships in the data [@peng2004clutter]. 
-In the context of generalized parallel coordinate plots, careful tie-handling is equally essential for both continuous and categorical variables [@vanderplas2023].
-
----
-
-## 3. Proposed Method for Tie Spacing in `ggpcp`
-
-### 3.1 Overview
-
-To handle overlapping polylines caused by numerical ties, we propose integrating **two R functions** into the ggpcp package. 
-Both functions introduce minimal, controlled spacing before the parallel coordinates are drawn. 
-Users can select either a straightforward, fixed tie-band approach (**Solution #1**) or a more adaptive method based on data properties (**Solution #2**). 
-These solutions dovetail with ggpcp’s built-in handling of categorical ties [@vanderplas2023], ensuring that *all* forms of ties—categorical or continuous—are resolved before rendering the PCP.
-
-Below are the core functions that implement these approaches:
-
-```{r}
-# Solution #1
-numerical_tie_breaker_solution1 <- function(values, tie_band = 0.05) {
-  # Sort the values
-  sorted_values <- sort(values)
-  
-  # Initialize the adjusted values
-  adjusted_values <- sorted_values
-  
-  # Loop through the values to add tie band for ties
-  for (i in seq_along(sorted_values)) {
-    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
-      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
-    }
-  }
-  
-  # Return the adjusted values
-  return(adjusted_values)
-}
-
-# Solution #2: Dynamic tie band based on data properties
-auto_fraction <- function(values, scale_factor = 0.05) {
-  unique_vals <- unique(sort(values))
-  diffs <- diff(unique_vals)
-  
-  # Keep only positive gaps
-  positive_diffs <- diffs[diffs > 0]
-  
-  # If everything is identical or only one unique value, return a small default
-  if (length(positive_diffs) == 0) {
-    return(scale_factor)
-  }
-  
-  # A robust choice: median of these positive gaps
-  typical_gap <- median(positive_diffs)
-  
-  # Return a fraction that is a multiple of the median gap
-  scale_factor * typical_gap
-}
-
-numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.05) {
-  # 1) Determine if all values are whole numbers
-  is_whole_number <- all(abs(values - round(values)) < .Machine$double.eps^0.5)
-  
-  # 2) If data are all whole numbers, use a small fraction increment
-  if (is_whole_number) {
-    tie_band <- base_fraction
-    
-  } else {
-    # For continuous data, attempt a normality check using Shapiro-Wilk if n >= 3
-    is_normal <- FALSE
-    if (length(values) >= 3) {
-      shapiro_p <- shapiro.test(values)$p.value
-      is_normal <- (shapiro_p > 0.05)
-    }
-    
-    # Check for outliers using 1.5 * IQR rule
-    q <- stats::quantile(values, probs = c(0.25, 0.75))
-    iqr_value <- q[2] - q[1]
-    lower_bound <- q[1] - 1.5 * iqr_value
-    upper_bound <- q[2] + 1.5 * iqr_value
-    has_outliers <- any(values < lower_bound) || any(values > upper_bound)
-    
-    # Decide tie_band logic
-    # If data appear normal and have no outliers, use fraction * SD; otherwise use fraction * IQR
-    if (is_normal && !has_outliers) {
-      tie_band <- base_fraction * stats::sd(values)
-    } else {
-      tie_band <- base_fraction * iqr_value
-    }
-  }
-  
-  # 3) Sort the values
-  sorted_values <- sort(values)
-  
-  # 4) Adjust for ties by adding tie_band to each duplicate
-  adjusted_values <- sorted_values
-  for (i in seq_along(sorted_values)) {
-    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
-      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
-    }
-  }
-  
-  return(adjusted_values)
-}
-```
-
-
-#### Key Features of Each Approach
-
-1. **Solution #1** – *Static Tie Band*  
-
-   - Relies on a user-defined `tie_band` to offset tied values.  
-   
-   - Offers simplicity and predictable increments in spacing.
-
-2. **Solution #2** – *Dynamic Tie Band*  
-
-   - Adjusts tie spacing based on data properties (e.g., normality checks, IQR, and outlier detection).
-   
-   - More adaptive, especially useful for heterogeneous or continuous data with varying scales.
-
-### 3.2 Integration into `ggpcp`
-
-When integrated into ggpcp, users can preprocess their numeric columns with either function prior to plotting. 
-The parallel coordinate plot (via `geom_parallel()` or similar functionality in ggpcp) then operates on the adjusted (tie-spaced) data, preventing line overlap. 
-This mirrors how ggpcp already handles ties in categorical data [@vanderplas2023], thereby providing a unified tie-breaking solution for both numeric and factor variables.
-
-For instance:
-
-```{r}
+```{r goal-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(ggpcp)
 library(tidyverse)
 data(flea, package = "GGally")
-# Example usage
-
-# Apply static tie spacing to column 'tars1' only
-flea$tars1_tie_fixed <- numerical_tie_breaker_solution1(flea$tars1, tie_band = 0.01)
-
-# Apply dynamic tie spacing to column 'tars2'
-flea$tars2_tie_dynamic <- numerical_tie_breaker_solution2(flea$tars2)
 
 flea %>%
-  pcp_select(species, c(2,8,3, 9), species) %>%
+  pcp_select(species, c(2:7), species) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange() %>%
   ggplot(aes_pcp()) + 
@@ -201,85 +51,209 @@ flea %>%
     geom_pcp(aes(colour = species))
 
 ```
+#### The Reality
 
+Real-world data is often messy, leading to visualizations that hide more than they reveal.
+
+```{r reality-plot, echo=FALSE, message=FALSE, warning=FALSE}
+# Placeholder for a messy, overplotted graph
+library(GGally)
+data(penguins, package = "palmerpenguins")
+
+penguins %>%
+  pcp_select(species, c(3, 4, 5, 6), species) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) + 
+    geom_pcp_axes() + 
+    geom_pcp(aes(colour = species)) 
+
+```
+:::
+---
+
+## A Powerful Tool: Parallel Coordinate Plots (PCPs)
+
+PCPs are designed for this challenge, mapping each data point to a line that traverses parallel axes.
+
+```{r pcp-example, echo=FALSE, fig.align='center', out.width='80%', fig.cap="A clean PCP showing clear separation between groups."}
+# A good, clean example of a PCP
+# ggparcoord(iris, columns = 1:4, groupColumn = "Species")
+knitr::include_graphics("[https://i.imgur.com/y1vJb2F.png](https://i.imgur.com/y1vJb2F.png)") # Placeholder image
+```
 
 ---
 
-## 4. Implementation Roadmap
+## The Problem: When Data Isn't Unique
 
-1. **Data Preparation**  
+PCPs break down with **numerical ties**, which are common with:
+-   Categorical variables (e.g., 'low', 'medium', 'high')
+-   Integer-based or discretized continuous data
 
-   - Ensure data are in a tidy format compatible with ggpcp.
-   
-   - Normalize or standardize dimensions if necessary, so the offset remains meaningful and does not distort the scale.
+The result is overplotting that completely obscures patterns.
 
-2. **Integration into ggpcp**  
+```{r pcp-problem, echo=FALSE, fig.align='center', out.width='80%', fig.cap="An unusable PCP where ties create an uninformative mesh of lines."}
+# An example PCP showing the tying/overplotting problem
 
-   - Incorporate both tie-breaker functions as user-facing options within ggpcp.  
-   
-   - Expose parameters (e.g., `tie_band`, `base_fraction`) through well-documented function arguments and vignettes.
-
-3. **Rendering Parallel Coordinates**
-
-   - Use ggpcp’s parallel coordinate functions on the tie-spaced data.
-   
-   - Provide relevant axis annotations, legends, and tooltips for interactive capabilities.
-
-4. **Testing and Validation**  
-
-   - Assess the impact of tie spacing by comparing plots with and without offsets.  
-   
-   - Gather feedback from early adopters to fine-tune default parameters and ensure user-friendliness.
+```
 
 ---
 
-## 5. Historical Context of Multidimensional Data Visualization
+## State of the Art: A Grammatical Debate
 
-### 5.1 Early Developments
+The **Grammar of Graphics** (Wilkinson, 2005; Wickham, 2010) provides a framework for graphics, but how to handle ties within it is an open question.
 
-The concept of parallel coordinates dates back to Maurice d’Ocagne’s work on “coordinate parallelism” [@dOcagne:1885]. 
-While his contributions did not see immediate mainstream adoption, they formed the conceptual foundation for later multidimensional plotting.
+:::{.columns}
+::::{.column width="50%"}
+**The Minimalist View**
 
-### 5.2 Alfred Inselberg’s Contributions
+-   A graphic is a direct map of data.
+-   Overlapping lines *are* the "truth" of the data.
+-   Any separation is an artificial manipulation.
+-   The burden is on the analyst to know their data.
+::::
 
-Alfred Inselberg developed the mathematical underpinnings of parallel coordinates for analyzing high-dimensional data, demonstrating the approach’s strength in various domains [@Inselberg1985; @inselberg2009].
+::::{.column width="50%"}
+**The Pragmatic View**
 
-### 5.3 Wegman’s Statistical Insights
-
-@Wegman:1990 further popularized parallel coordinates by integrating statistical perspectives, showing how PCPs can be leveraged in exploratory data analysis. 
-Subsequent advances in interactive visualization have enabled real-time manipulation of axes, brushing, and filtering, allowing users to distill meaningful insights from large datasets.
-
-### 5.4 Generalized Parallel Coordinates
-
-More recently, @vanderplas2023 extended PCPs to handle both categorical and continuous variables within a single framework, implemented via the R package ggpcp. 
-Their work, *Penguins Go Parallel*, details a grammar-of-graphics approach that accommodates a mix of variable types by applying tie-breaking and ordering strategies on categorical data to preserve the continuity of observation trajectories. 
-Our proposed numerical tie-breaker further complements ggpcp’s existing functionalities by addressing ties among continuous variables, ensuring that PCPs and GPCPs can highlight subtle distinctions within both categorical and numeric domains.
-
----
-
-## 6. Expected Outcomes
-
-1. **Improved Visual Clarity**  
-   - The introduction of tie spacing in ggpcp will ensure that overlaid lines become distinguishable, unveiling patterns and anomalies otherwise hidden by overlap.
-
-2. **Enhanced Data Interpretation**  
-   - Researchers and data analysts will be able to more accurately interpret subtle differences in high-dimensional datasets, especially in domains like bioinformatics, finance, and engineering.
-
-3. **Comprehensive Tie-Handling**  
-   - By integrating both numeric and categorical tie-breaking, ggpcp users enjoy a complete solution for parallel coordinate visualization, building upon recent advancements in generalized parallel coordinate plots [@vanderplas2023].
-
-4. **Easy Integration with R Ecosystem**  
-   - Users of ggpcp will have a ready-to-use, integrated solution for tie handling without resorting to external data preprocessing or manual jittering methods.
+-   The goal of a graphic is *insight*.
+-   Overlapping lines destroy insight.
+-   The grammar should be flexible enough to resolve visual ambiguity.
+-   This view is supported by recent work (VanderPlas et al., 2023).
+::::
+:::
 
 ---
 
-## 7. Conclusion
+## The Research Gap
 
-Parallel coordinates have evolved from early geometric solutions [@dOcagne:1885] to a robust, interactive technique for visualizing high-dimensional data [@Inselberg1985; @Wegman:1990]. 
-However, numerical ties remain a persistent challenge, causing overlapping lines that diminish interpretability. 
-By integrating minimal offset mechanisms (both static and dynamic) directly into the ggpcp package, this proposal ensures a streamlined approach that balances the preservation of data fidelity with the need for visual clarity. 
-In tandem with recent developments in generalized parallel coordinate plots [@vanderplas2023], the resulting enhancement will aid analysts in effectively discerning underlying structures and relationships across multiple dimensions.
+While solutions exist (e.g., the `ggpcp` package), significant gaps remain:
+
+. . .
+
+1.  **No Formalism:** How should tie-breaking be formally integrated into the Grammar of Graphics? Is it a new `stat`, `position`, or `scale`?
+
+. . .
+
+2.  **Lack of Perceptual Validation:** We don't know how these modified plots affect human perception and analytical accuracy. Do they help, or do they mislead?
+
+. . .
+
+3.  **Limited Algorithmic Exploration:** Are simple spreading or jittering techniques optimal? Can we design better algorithms that preserve data density?
+
+. . .
+
+4.  **No Practical Guidance:** Practitioners have no evidence-based heuristics to choose the best method for their specific dataset.
 
 ---
 
-## References
+## My Proposed Research
+
+### Primary Research Question
+
+**How can the formal structure of the Grammar of Graphics be extended to systematically incorporate and evaluate methods for resolving numerical ties in parallel coordinate plots, and what is the quantifiable impact of these methods on the accuracy and efficiency of visual data analysis?**
+
+---
+
+## Secondary Question 1: Theory
+
+**How can the management of numerical ties be most effectively and coherently formalized within the layered grammar of graphics?**
+
+* **Methodology:** Theoretical analysis, literature synthesis, and specification of a new or extended grammatical element.
+
+---
+
+## Secondary Question 2: Methodology
+
+**What are the optimal algorithmic criteria for ordering and spacing tied data points to maximize visual clarity while preserving underlying data properties?**
+
+* **Methodology:** Algorithm design and implementation in R. Develop a novel method that balances separation and density preservation.
+
+---
+
+## Secondary Question 3: Perception
+
+**How do different visualization strategies for ties affect an analyst's ability to perform key visual tasks (cluster identification, outlier detection)?**
+
+* **Methodology:** Controlled user studies with human subjects. Measure task accuracy and completion time across different visualization conditions.
+
+---
+
+## Secondary Question 4: Practice
+
+**Can a set of evidence-based heuristics be developed to guide practitioners in selecting the most appropriate visualization method for their specific data context?**
+
+* **Methodology:** Synthesize findings from RQ1-3 into a practical framework. Validate with case studies on real-world datasets from different domains.
+
+---
+
+## Research Plan & Methodology
+
+A multi-stage approach connecting theory to practice.
+
+```{r mermaid-flowchart, echo=FALSE}
+# Using Mermaid for a simple flowchart
+library(DiagrammeR)
+mermaid("
+graph TD
+    A[RQ1: Formalize in GoG] --> B(RQ2: Design New Algorithm);
+    B --> C{RQ3: Perceptual User Study};
+    A --> C;
+    C --> D[RQ4: Develop Practical Heuristics];
+")
+```
+
+The core of the validation will be a **within-subjects user study** comparing task performance across:
+1.  **Control:** Traditional PCP with overplotting.
+2.  **Baseline:** Standard jittering/spreading (`ggpcp`).
+3.  **Proposed:** My novel algorithm from RQ2.
+
+---
+
+## Expected Contributions
+
+This dissertation will contribute new knowledge at four levels:
+
+. . .
+
+1.  **Theoretical:** A formal extension to the Grammar of Graphics for handling data ambiguity.
+
+. . .
+
+2.  **Methodological:** A new, open-source algorithm for visualizing ties in high-dimensional data.
+
+. . .
+
+3.  **Empirical:** The first quantitative evidence of how different tie-breaking methods affect user perception and analytical accuracy.
+
+. . .
+
+4.  **Practical:** Evidence-based guidelines that help researchers and analysts create more effective and honest data visualizations.
+
+---
+
+## Proposed Timeline
+
+A 3-year plan to complete the proposed research.
+
+| Year | Sem 1 | Sem 2 |
+| :--- | :--- | :--- |
+| **1**| RQ1: Lit Review & Theory | RQ2: Algorithm Prototyping |
+| **2**| RQ3: User Study Design & IRB | RQ3: Run Study & Analyze Data |
+| **3**| RQ4: Case Studies & Write-up | Dissertation Defense |
+
+---
+
+## Summary
+
+-   **Problem:** Numerical ties make Parallel Coordinate Plots ineffective, hiding critical patterns in data.
+-   **Gap:** Existing solutions lack formal grammatical integration, perceptual validation, and practical guidance.
+-   **Proposal:** A multi-part research plan to formalize, implement, and evaluate a novel approach to visualizing ties within the Grammar of Graphics.
+-   **Impact:** More powerful, reliable, and perceptually-validated tools for high-dimensional data analysis.
+
+---
+
+## Thank You
+
+### Questions?
+

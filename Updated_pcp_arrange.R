@@ -1,6 +1,7 @@
 library(tidyverse)
 library(tidyselect)
 
+# This function was used to get the automatic values of each of the numerical variables. This may no longer needed for this work.
 auto_fraction <- function(values, scale_factor = 0.01) {
   unique_vals <- unique(sort(values))
   diffs <- diff(unique_vals)
@@ -222,6 +223,7 @@ pcp_arrange_with_ties <- function(data, method = "from-right", space = 0.05, .by
       ) %>%
       ungroup() %>%
       group_by(pcp_x) %>%
+      arrange(pcp_y, pcp_id) %>%
       mutate(
         # Only apply offset if the variable is numeric and has ties
         pcp_y = if (unique(pcp_x) %in% numeric_vars)

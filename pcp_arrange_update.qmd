@@ -75,7 +75,9 @@ where $n$ is the size of the group.
 #| fig-height: 5
 
 p1 <- iris %>%
-  mutate(Sepal.Length = factor(round(Sepal.Length, 1))) %>%
+  mutate(Sepal.Length = factor(round(Sepal.Length, 1)),
+         Sepal.Width = factor(round(Sepal.Width, 1)),
+         Petal.Length  = factor(round(Petal.Length, 1))) %>%
   pcp_select(1:5) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange(method = "from-left") %>%
@@ -93,7 +95,9 @@ p1 <- iris %>%
 
 
 p2 <- iris %>%
-  mutate(Sepal.Length = factor(round(Sepal.Length, 1))) %>%
+  mutate(Sepal.Length = factor(round(Sepal.Length, 1)),
+         Sepal.Width = factor(round(Sepal.Width, 1)),
+         Petal.Length  = factor(round(Petal.Length, 1))) %>%
   pcp_select(1:5) %>%
   pcp_scale(method="uniminmax") %>%
   pcp_arrange_with_ties(method = "from-left") %>%
@@ -112,6 +116,7 @@ p2 <- iris %>%
 
 
 grid.arrange(p1, p2, ncol = 2)
+
 
 ```
 

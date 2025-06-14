@@ -87,25 +87,25 @@ However, the scale of observations and variables can obscure meaningful patterns
 Large $p$ datasets are particularly challenging because visualizing relationships across multiple dimensions often leads to information overload, occlusion, and cognitive strain [@keim2002]. 
 Visual representations struggle to maintain clarity when $p \geq 4$, as patterns become increasingly difficult to discern in higher-dimensional spaces [@velagala2020]. 
 Similarly, large $n$ data sets exacerbate these issues by introducing visual clutter, making it harder to track individual observations [@heer2010]. 
-These challenges require innovative visualization techniques [I don't think they have to be innovative... PCPs have been around for a while... tours, dimension reduction, etc. are also pretty straightforward. Aim less for a pretty sounding conclusion to the paragraph and more for simple and direct - we need ways to represent high $p$ data which facilitate EDA and understanding of the structure of the data.]{.svp} that simplify complex data while preserving its structural integrity.
+These challenges requirevisualization techniques complex data while preserving its structural integrity. <!--I don't think they have to be innovative... PCPs have been around for a while... tours, dimension reduction, etc. are also pretty straightforward. Aim less for a pretty sounding conclusion to the paragraph and more for simple and direct - we need ways to represent high $p$ data which facilitate EDA and understanding of the structure of the data.]{.svp}--> that simplify 
 
-Parallel Coordinate Plots (PCPs) [are]{.svp} a powerful way to examine data with more than one dimension. 
-PCPs show each observation as a polyline on parallel axes, letting analysts follow data points [across multiple single-variable axes]{.svp} [@Inselberg1985]. 
-[While PCPs are less common than Cartesian graphs, with some training, it is possible to see correlations, identify clusters, and examine outliers in a multivariate dataset.]{.svp}
+Parallel Coordinate Plots (PCPs) are a powerful way to examine data with more than one dimension. 
+PCPs show each observation as a polyline on parallel axes, letting analysts follow data points across multiple single-variable axes [@Inselberg1985]. 
+While PCPs are less common than Cartesian graphs, with some training, it is possible to see correlations, identify clusters, and examine outliers in a multivariate dataset.
 <!-- By setting factors up as parallel vertical axes, PCPs make it easier to find patterns, trends, and outliers in large datasets. -->
-These plots are especially good at showing relationships and trends between multiple [variables]{.svp}. 
-However, [as with most visualization methods, overplotting reduces the effectiveness of PCPs, disrupting the ability to trace a single observation across multiple axes]{.svp}.
+These plots are especially good at showing relationships and trends between multiple variables. 
+However, as with most visualization methods, overplotting reduces the effectiveness of PCPs, disrupting the ability to trace a single observation across multiple axes.
 <!-- seeing ties and overlapping data points can be hard when many numbers are the same or very close.  -->
-This can [complicate the viewer's ability to diagnose and cluster information visually.]{.svp}
+This can complicate the viewer's ability to diagnose and cluster information visually.
 <!-- cause important information to be lost in the research.  -->
-[We begin by considering a series of plots which share characteristics with PCPs: multiple variables, each displayed on a vertical axis, with connecting structures which show the connection between variables.]{.svp}
-[In Chapter ... we demonstrate the use of a parallel coordinate plot in an exploratory setting, evaluating its effectiveness for exploratory analysis of publicly available data about small towns when used by residents of those towns.]{.svp}
-[In Chapter ... we examine the problem of numerical ties and overplotting, proposing a method for breaking ties visually which preserves numerical scaling while also allowing viewers to follow single observations across the plot.]{.svp}
-[Chapter ... discusses the computational implementation of the new methodology and its integration into the `ggpcp` R package.]{.svp}
-[Finally, chapter ... presents an empirical evaluation of the transformations proposed in Chapter ..., along with the modifications to the display of categorical variables first presented in @vanderplas2023.]{.svp}
+We begin by considering a series of plots which share characteristics with PCPs: multiple variables, each displayed on a vertical axis, with connecting structures which show the connection between variables.
+[In Chapter ...]{.svp} we demonstrate the use of a parallel coordinate plot in an exploratory setting, evaluating its effectiveness for exploratory analysis of publicly available data about small towns when used by residents of those towns.
+[In Chapter ...]{.svp} we examine the problem of numerical ties and overplotting, proposing a method for breaking ties visually which preserves numerical scaling while also allowing viewers to follow single observations across the plot.
+[Chapter ...]{.svp} discusses the computational implementation of the new methodology and its integration into the `ggpcp` R package.
+[Finally, chapter ...]{.svp} presents an empirical evaluation of the transformations proposed in Chapter ..., along with the modifications to the display of categorical variables first presented in @vanderplas2023.
 <!-- This study fixes the problems that regular PCPs have with finding numerical ties by adding a new method that makes it easier to tell the difference between data sets that overlap.  -->
 <!-- We want to create a methodology that makes it easier to tell the difference between ties by using a standard delta difference approach.  -->
-[The combined contribution of these chapters will improve the representation of data in generalized parallel coordinate plots, which should improve the visualization of large, complex data sets.]{.svp}
+The combined contribution of these chapters will improve the representation of data in generalized parallel coordinate plots, which should improve the visualization of large, complex data sets.
 <!-- , leading to more accurate research and decision-making in large, complex datasets. -->
 
 ## Coordinate Systems
@@ -155,16 +155,16 @@ Techniques excluded from this discussion are those without significant historica
 ## Early Foundations: Statistical Graphics in the 19th Century
 
 Statistical graphics of the 19th century - bar charts, pie charts, and flow maps - formed the groundwork for modern visualization techniques. 
-[Many of these early charts were based on industrial meters: pie charts share some connection to e.g. steam pressure gauges; early graphical innovators, like William Playfair, worked with such equipment during the industrial revolution [@berkowitzPlayfairTrueStory2018].]{.svp}
-While these early tools primarily focused on small-scale, univariate [or bivariate]{.svp} datasets, they offered a glimpse into the potential of data relationships. 
+Many of these early charts were based on industrial meters: pie charts share some connection to e.g. steam pressure gauges; early graphical innovators, like William Playfair, worked with such equipment during the industrial revolution [@berkowitzPlayfairTrueStory2018].
+While these early tools primarily focused on small-scale, univariate or bivariate datasets, they offered a glimpse into the potential of data relationships. 
 These methods demonstrated the power of visualizing data to uncover patterns, but with limited dimensionality and scope.
 
 In addition, the period between the late 1700s and the late 1800s produced many different experiments in graphical representation. 
 Some were persistent; bar and pie charts are still in use, while others faded from popular consciousness.
 In some cases, the same graphical structures were re-invented and popularlized later. 
 
-@fig-pcp19 is [from the Statistical Atlas of the United States published in 1898, visualizing the results of the eleventh US census. This proto-parallel coordinate plot shows]{.svp} the rankings of the most populous cities in the United States at each census from 1790 to 1890.
-[Each axis in the plot represents a US census, and objects along the axes are cities, connected from census to census to show the relative rank of each urban area by population.]{.svp}
+@fig-pcp19 is from the Statistical Atlas of the United States published in 1898, visualizing the results of the eleventh US census. This proto-parallel coordinate plot shows the rankings of the most populous cities in the United States at each census from 1790 to 1890.
+Each axis in the plot represents a US census, and objects along the axes are cities, connected from census to census to show the relative rank of each urban area by population.
 
 ```{r}
 #| echo: false
@@ -180,8 +180,8 @@ In some cases, the same graphical structures were re-invented and popularlized l
 knitr::include_graphics("images/pcp_hist.jpg")
 ```
 
-[Around the same time period, Irish Captain Matthew Henry Phineas Riall Sankey published his diagram of energy efficiency in a steam engine. 
-While this diagram, shown in @fig-sankey-orig, does not conceptualize the energy flows shown as variables, this type of diagram became common in science and engineering; similar diagrams have been used to show the flow of heat and energy, but also the flow of items through a factory and, more recently, the life-cycle of products  [@schmidtSankeyDiagramEnergy2008].]{.svp}
+Around the same time period, Irish Captain Matthew Henry Phineas Riall Sankey published his diagram of energy efficiency in a steam engine. 
+While this diagram, shown in @fig-sankey-orig, does not conceptualize the energy flows shown as variables, this type of diagram became common in science and engineering; similar diagrams have been used to show the flow of heat and energy, but also the flow of items through a factory and, more recently, the life-cycle of products  [@schmidtSankeyDiagramEnergy2008].
 
 ```{r}
 #| fig-cap: The original Sankey diagram of energy efficiency in a steam engine, reprinted from @kennedyThermalEfficiencySteam1898 (Work in the public domain). 
@@ -193,26 +193,26 @@ knitr::include_graphics("images/orig_sankey.png")
 ```
 
 
-[Sankey diagrams are visually similar to PCP variants, including parallel sets and hammock plots, and in many of the ways they are used today, PCPs may indeed be a better choice, but fundamentally, the intent of Sankey diagrams was to show the flow of a conservable quantity through a physical process of some sort. 
+Sankey diagrams are visually similar to PCP variants, including parallel sets and hammock plots, and in many of the ways they are used today, PCPs may indeed be a better choice, but fundamentally, the intent of Sankey diagrams was to show the flow of a conservable quantity through a physical process of some sort. 
 This is in contrast to PCPs, where the intent is to show a single entity's values across several variables. 
 The overlap is slight, but  present: one could examine a batch of 100 widgets, tracking their location or function at different time points; each repeated measurement would be a variable. 
-A plot of this data using parallel axes for time points would be an example of an alluvial plot; we will discuss these plots in the next section.]{.svp}
+A plot of this data using parallel axes for time points would be an example of an alluvial plot; we will discuss these plots in the next section.
 
-[In addition, Sankey diagrams do not impose the traditional constraint of parallel axes (and while some modern variations use polar transformations, the basic principle of parallel axes is still maintained up until the final spatial transformation). 
+In addition, Sankey diagrams do not impose the traditional constraint of parallel axes (and while some modern variations use polar transformations, the basic principle of parallel axes is still maintained up until the final spatial transformation). 
 Sankey diagrams also allow for multiple "exit points" - at each stage of the industrial process, there may be waste, leakage, and other processes which result in the observed quantity exiting what is presumed to be a continuous and perhaps cyclical system. 
-While an important example, Sankey diagrams as they were originally conceived and used are different in both purpose and construction from parallel coordinate, parallel sets, and hammock plots.]{.svp}
+While an important example, Sankey diagrams as they were originally conceived and used are different in both purpose and construction from parallel coordinate, parallel sets, and hammock plots.
 
 ## Parallel Coordinate Plots
 
-[@Inselberg1985 introduced parallel coordinate plots as a solution to visualization of multidimensional numerical data.]{.svp}
+@Inselberg1985 introduced parallel coordinate plots as a solution to visualization of multidimensional numerical data.
 <!-- The introduction of Parallel Coordinate Plots (PCPs) by Alfred Inselberg in 1985 marked a pivotal advancement in visualizing high-dimensional numerical data.  -->
-Parallel coordinate plots use the projection space, rather than Cartesian space, in order to show relationships between variables; a point in Cartesian space is represented by a line between vertical, parallel axes in projection space.]{.svp}
+Parallel coordinate plots use the projection space, rather than Cartesian space, in order to show relationships between variables; a point in Cartesian space is represented by a line between vertical, parallel axes in projection space.
 <!-- This approach mapped data points onto parallel axes, addressing the challenge of representing complex multidimensional datasets.  -->
-Despite their utility for numerical data, early PCPs [could not effectively represent categorical or mixed-type data.]{.svp}
+Despite their utility for numerical data, early PCPs could not effectively represent categorical or mixed-type data.
 <!-- struggled with categorical and mixed data types.  -->
 <!-- Nonetheless, these limitations underscored the technique’s significance as a foundation for future adaptations to enhance its flexibility and applicability. -->
-@fig-pcpScatter [demonstrates the difference in the appearance of linear relationships in Cartesian and projective space for]{.svp} Pearson's correlation coefficient $r = \{-1,0,1\}$. 
-[When variables are negatively correlated, a 'knot', or inversion appears in projection space; when variables are positively correlated, the two axes are connected by a series of parallel lines. When no correlation is present, the lines are jumbled, with no clear patterns.]{.svp}
+@fig-pcpScatter demonstrates the difference in the appearance of linear relationships in Cartesian and projective space for Pearson's correlation coefficient $r = \{-1,0,1\}$. 
+When variables are negatively correlated, a 'knot', or inversion appears in projection space; when variables are positively correlated, the two axes are connected by a series of parallel lines. When no correlation is present, the lines are jumbled, with no clear patterns.
 
 ```{r}
 #| echo: false
@@ -254,17 +254,17 @@ p2 <- df |>
 p1 / p2 + plot_layout(nrow = 2, heights = c(1,1))
 ```
 
-[In effect, the parallel coordinate plot shows the visual equivalent of Kendall's $\tau$, a robust version of Pearson's correlation coefficient which is calculated using ranks. The re-scaling of the vertical axes is equivalent to a ranking procedure.]{.svp}
+In effect, the parallel coordinate plot shows the visual equivalent of Kendall's $\tau$, a robust version of Pearson's correlation coefficient which is calculated using ranks. The re-scaling of the vertical axes is equivalent to a ranking procedure.
 
 ## Handling Categorical Variables
 
-[The transition to projection space from Cartesian space seems to have independently arisen several times, and in some cases, the origins of the practice are not entirely clear. 
+The transition to projection space from Cartesian space seems to have independently arisen several times, and in some cases, the origins of the practice are not entirely clear. 
 Sankey diagrams, for instance, were not initially designed to leverage projection space; they were intended to visualize industrial processes, rather than variables, with axes that were often not parallel. 
 That is, in mathematical terms, Sankey diagrams are a visual representation of flow through a directed, weighted graph. 
 Alluvial diagrams, which are visually similar to both Sankey diagrams and parallel sets plots, are often considered to be a subset of Sankey diagrams; typically, alluvial diagrams visualize the change in weights in a graph over time - that is, the vertical axes are different time points, and the nodes are a set of categories which are consistent across time points.
 There is considerable confusion between alluvial diagrams and Sankey diagrams, as briefly mentioned in  @holtzSankeyDiagram2024. 
 This confusion is compounded by different implementations of e.g. parallel sets plots, such as the `geom_parallel_sets` implementation in the `ggforce` R package [@pedersenCreateParallelSets2024], which describes itself this way:
-]{.svp}
+
 
 >  If the variables has an intrinsic order the representation can be thought of as a Sankey Diagram. If each variable is a point in time it will resemble an alluvial diagram.
 
@@ -292,22 +292,21 @@ This confusion is compounded by different implementations of e.g. parallel sets 
 <!-- ``` -->
 
 
-[One obvious solution to the problem of how to visualize categorical variables using parallel axes is to convert the categorical variables into numeric variables and to use a standard parallel coordinate plot. 
+One obvious solution to the problem of how to visualize categorical variables using parallel axes is to convert the categorical variables into numeric variables and to use a standard parallel coordinate plot. 
 This solution is not optimal even for ordered categorical variables, but for unordered variables, it is particularly unintuitive. 
-In addition, of course, any information about the category frequency is lost in the numeric transformation.]{.svp}
+In addition, of course, any information about the category frequency is lost in the numeric transformation.
 
-[Hammock plots and parallel sets plots arose independently in the early 2000s [@schonlauVisualizingCategoricalData2003;@bendix2005parallel], though both plots represent categorical data on parallel axes. 
+Hammock plots and parallel sets plots arose independently in the early 2000s [@schonlauVisualizingCategoricalData2003;@bendix2005parallel], though both plots represent categorical data on parallel axes. 
 Parallel sets plots (@fig-parallel-sets-hammock a) were initially developed as part of an interactive environment for exploring crosstab data. 
 Hammock plots (@fig-parallel-sets-hammock b) grew out of a desire to represent both numerical and categorical data effectively using parallel axes; in addition, these plots included support for visualizing missing data from the start. 
-Parallel sets plots were one facet of a series of linked representations of categorical data, and included histograms as subplots within the parallel sets plot design.]{.svp}
+Parallel sets plots were one facet of a series of linked representations of categorical data, and included histograms as subplots within the parallel sets plot design.
 
 <!-- Need some explanation of parsets vs. hammock plots and how they differ, verbally -- specifically, in why hammock plots suck relative to parsets. 
 We'll get into why parsets suck in a bit. -->
 
-[There are some notable differences between the plots in construction: hammock plots do not divide up the full space of the vertical axis between categories; instead, the lines between adjacent axes are sized relative to the size of the intersection between categories on adjacent axes. 
+There are some notable differences between the plots in construction: hammock plots do not divide up the full space of the vertical axis between categories; instead, the lines between adjacent axes are sized relative to the size of the intersection between categories on adjacent axes. 
 In addition, hammock plots center all lines leaving a node, so the lines overlap.
-In parallel sets plots, the full axis length is divided up proportional to the marginal composition of the variable, and groups of observations which connect to different categories on the adjacent axis are not aligned. This facilitates part-to-whole comparisons of the joint probability values.]{.svp}
-
+In parallel sets plots, the full axis length is divided up proportional to the marginal composition of the variable, and groups of observations which connect to different categories on the adjacent axis are not aligned. This facilitates part-to-whole comparisons of the joint probability values.
 
 
 ```{r penguin-cat-data}
@@ -406,9 +405,10 @@ knitr::include_graphics("images/enhance_example.png")
 
 The late 2000s saw the development of specialized visualization techniques to address domain-specific challenges.
 @hofmannCommonAnglePlots2013 further examined the implications of the line-width illusion in categorical data visualizations. 
-Their findings revealed that inconsistencies in line widths and unsuitable geometric representations exacerbated perceptual inaccuracies, complicating the interpretation of overlapping or closely related dimensions. 
-[\st{Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively.}]{.db} 
-[THIS IS TOTALLY FALSE!!! I have no idea where this is coming from. Please fact-check everything you're saying and back it up with an accurate reference.]{.svp}
+Their findings revealed that inconsistencies in line widths and unsuitable geometric representations exacerbated perceptual inaccuracies, complicating the interpretation of overlapping or closely related dimensions.
+Empirical studies demonstrated that common angle plots significantly improve accuracy in interpreting categorical data compared to parallel sets and hammock plots, making them a robust tool for perceptually true visualizations.
+<!--[\st{Common Angle Plots, for instance, employed radial layouts to visualize cyclic data, such as temporal trends, effectively.}]{.db} 
+[THIS IS TOTALLY FALSE!!! I have no idea where this is coming from. Please fact-check everything you're saying and back it up with an accurate reference.]{.svp} -->
 By overcoming the limitations of linear arrangements for periodic patterns, these plots enhanced the interpretability and usability of such datasets.
 @fig-capHist
 
@@ -434,8 +434,8 @@ These interconnections exemplify the synergistic nature of advancements in data 
 
 ## Parallel Coordinate Plots (PCPs): A Foundation
 
-Parallel coordinate plots (PCPs) leverage a projective coordinate [system, instead of a]{.svp} Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg1985]. 
-The result is that a single data point is [represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.]{.svp}
+Parallel coordinate plots (PCPs) leverage a projective coordinate system, instead of a Cartesian coordinate system: each line in Cartesian space is a set of points in projective space, and each point in Cartesian space can be represented as a line in projection space [@Inselberg1985]. 
+The result is that a single data point is represented as a line that crosses each parallel axis representing a variable; clusters, then, appear as a group of lines which have similar paths.
 
 ```{r}
 #| echo: false
@@ -464,12 +464,12 @@ suppressWarnings(
 )
 ```
 
-@fig-ggpairs is a [**scatterplot matrix**, which shows pairwise relationships between variables in Cartesian space]{.svp}. 
+@fig-ggpairs is a **scatterplot matrix**, which shows pairwise relationships between variables in Cartesian space. 
 It shows how the variables for three kinds of penguins (Adelie, Chinstrap, and Gentoo) are distributed and how they are related.
 
-[While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.]{.svp} 
+While some of the information is obscured due to overplotting, the overall relationship between variables is relatively clear and is reinforced by the numerical values displayed in the corresponding pair of variables across the diagonal.
 Overall, the matrix-style plot does an excellent job of showing the links within and between variables. 
-[The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.]{.svp}
+The major downside to scatterplot matrices is that it is not possible to easily connect a point in one scatterplot to a corresponding point in another; the data representation makes it difficult to get a sense of the multivariate relationships beyond any combination of $p=2$ variables.
 
 ```{r}
 #| echo: false
@@ -494,15 +494,15 @@ penguins %>%
 ```
 
 In @fig-pcp, each line shows a different penguin, and the colors of the lines show the species. 
-[There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. ]{.svp}
-[Even in projection space, we can see Simpson's paradox at work; the second plot in the third row of @fig-ggpairs shows the same basic information.]{.svp} 
-[While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.]{.svp} 
-[At each vertical axis, the plot resembles a rug plot,]{.svp}[@cleveland1993]{.db} [which can provide some information about the distribution of the variable, but is less direct than a continuous density plot.]{.svp} 
+There is an overall negative relationship between flipper length and bill depth, indicated by the "X" shape of the lines, but within each species, the overall relationship between flipper length and bill depth is positive, as indicated by the largely parallel block of lines of each color. 
+Even in projection space, we can see Simpson's paradox at work; the second plot in the third row of @fig-ggpairs shows the same basic information.
+While there is a significant amount of information obscured due to overplotting, it is easier to connect observations across $p>2$ vertical axes, providing a greater ability to visualize more than two dimensions.
+At each vertical axis, the plot resembles a rug plot, @cleveland1993 which can provide some information about the distribution of the variable, but is less direct than a continuous density plot.
 
-[As originally proposed,]{.svp} PCPs [could]{.svp} be difficult to interpret[, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from]{.svp} overplotting [, as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis]{.svp}.
-[The `ggpcp` package @vanderplas2023 introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot.]{.svp} 
-[A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.]{.svp} 
-[In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs[@density-pcp], bundling of similar points, and other modifications such as interactivity [@johansson2015] may support identification of clusters and outliers in multidimensional space.]{.svp}
+As originally proposed, PCPs could be difficult to interpret, in part because PCPs were initially defined only for numeric variables; extensions which treated categorical variables as numeric suffered from overplotting , as different lines converge on a single point and then diverge again, destroying the ability to trace a single observation through the categorical-turned-numerical axis.
+The `ggpcp` package @vanderplas2023 introduced a new way to handle categorical variables, dividing the axis up into "boxes" and ordering observations within those boxes; for relatively small $n$, this preserves the ability to follow single observations across the plot, and for larger $n$, a series of lines moving together converge to form an approximate hammock plot. 
+A demonstration in @fig-ggpcp replicates @fig-pcp with the addition of a categorical species axis on each side of the plot.
+In the InfoVis community, other modifications to parallel coordinate plots have been proposed: smoothed lines, density-based PCPs [@density-pcp], bundling of similar points, and other modifications such as interactivity [@johansson2015] may support identification of clusters and outliers in multidimensional space.
 
 ```{r}
 #| echo: false
@@ -528,10 +528,10 @@ penguins %>%
 
 ## Why?
 
-[Plots using]{.svp} Cartesian coordinates are straightforward, in part because they are [commonly encountered and taught in grade school]{.svp}. 
-[Unfortunately, plots using Cartesian coordinates, such as scatterplots, are limited to two variables displayed using spatial dimensions, which are perceived more accurately than other aesthetic mappings such as color and shape [@cleveland1984].]{.svp}
-[Projections of three-dimensional scatterplots can be created, but these charts can be difficult to read and interpret; interactive 3D scatterplots still suffer from the loss of information inherent to 2D projection on a screen, but allow for some sense of the full shape of the data.]{.svp}
-[Data sets with more than three numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne;@abdiPrincipalComponentAnalysis2010], or plotting bivariate relationships between variables in order to visualize these data sets.]{.svp}
+Plots using Cartesian coordinates are straightforward, in part because they are [commonly encountered and taught in grade school.
+Unfortunately, plots using Cartesian coordinates, such as scatterplots, are limited to two variables displayed using spatial dimensions, which are perceived more accurately than other aesthetic mappings such as color and shape [@cleveland1984].
+Projections of three-dimensional scatterplots can be created, but these charts can be difficult to read and interpret; interactive 3D scatterplots still suffer from the loss of information inherent to 2D projection on a screen, but allow for some sense of the full shape of the data.
+Data sets with more than three numerical dimensions are extremely common, but cannot be easily shown using Cartesian coordinates; analysts must resort to strategies like tours [@tourr], dimension reduction [@tsne;@abdiPrincipalComponentAnalysis2010], or plotting bivariate relationships between variables in order to visualize these data sets.
 They make it easier to tell the difference between different information points and their exact values by displaying data points in an easily understood manner. 
 Cartesian coordinates are an excellent method to present data clearly because they can handle up to three dimensions. 
 They also need help with growth because adding more dimensions requires a lot of subplots or complicated three-dimensional plots, which can get boring and challenging to follow. 
@@ -539,14 +539,13 @@ Cartesian graphs additionally can take up a lot of room, and for data with more 
 
 Parallel coordinate plots (PCPs) are an excellent way to show data with many dimensions since each is shown on its plane. 
 PCPs are useful for drawing attention to trends, clusters, and outliers and efficiently show many variables in a small area. 
-However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting, [becoming]{.svp} difficult to read [and]{.svp} interpret when N is large. 
-[In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in [Fig @fig-features] ]{.svp}. 
+However, as with their Cartesian equivalents, PCPs are vulnerable to overplotting, becoming difficult to read and interpret when N is large. 
+In addition, PCPs are a much less familiar form of visualization than scatterplots; there is an initial adjustment period required in order to understand which features of a PCP correspond to familiar features of a scatterplot, as shown in [Fig @fig-features]. 
 Comparisons show that whilst PCPs are more suited for exploratory research when dimensions surpass reasonable limits for scatterplot matrices [@munzner2014; @inselberg2009], scatterplot matrices clearly show a depiction of interdimensional interactions for small to medium-scale data.
 
 Although PCPs are sometimes criticized for overplotting and difficulty recognizing patterns, such as clusters or non-linear correlations, which scatterplots more efficiently disclose, PCPs provide a compact depiction of high-dimensional data [@johansson2005; @qu2007]. 
 Studies show, however, that users adjust to PCPs relatively fast following appropriate introduction since interactive techniques and hierarchical approaches significantly increase their usability [@fua1999; @claessen2011].
 When combined with user training and interactive visualization techniques, PCPs remain beneficial for exploratory analysis of higher-dimensional data, even if scatterplots provide instantaneous interpretability and clarity—especially for two-dimensional relationships [@inselberg2009; @heinrich2013].
-
 
 
 # Variations on Parallel Coordinate Plots
@@ -735,14 +734,14 @@ By alleviating the cognitive load on observers, these visualizations surpass tra
 
 <!--[Do they provide a metric for identifying such datasets? How clear is clear?]{.svp}.-->
 The integration of Hammock Plots into grammar-based visualization frameworks further expanded their applicability. 
-hofmannCommonAnglePlots2013 incorporated Hammock Plots into the `ggparallel` package, providing a grammar-driven interface for visualizing multivariate categorical data. 
+@hofmannCommonAnglePlots2013 incorporated Hammock Plots into the `ggparallel` package, providing a grammar-driven interface for visualizing multivariate categorical data. 
 This implementation preserved the foundational principles of parallel categorical displays while introducing capabilities for addressing edge cases, such as managing categorical ties and combining numerical and categorical data. 
 schonlau2024 built on these advancements, adapting Hammock Plots to generalize Parallel Coordinate Plots by replacing lines with box elements. 
 This modification leveraged box widths to represent the number of observations, enhancing their utility for both categorical and mixed data types. 
 Schonlau’s approach also tackled perceptual issues, such as the reverse line width illusion, by refining traditional Hammock Plot designs.
 
 Hammock Plots and Common Angle Plots address similar visualization challenges but through distinct methodologies. 
-Hofmann’s Common Angle Plots (2013) introduced a constant angular structure to mitigate the line width illusion while maintaining visual continuity between categories. 
+@hofmannCommonAnglePlots2013 introduced a constant angular structure to mitigate the line width illusion while maintaining visual continuity between categories. 
 By ensuring consistent angular connections, this method preserved marginal proportions and provided perceptually robust visualizations.
 
 Schonlau’s adaptations, on the other hand, emphasized flexibility across diverse data types. 
@@ -912,12 +911,6 @@ By emphasizing the historical significance of statistical graphics in multivaria
 @hurley2004clustering made a pivotal contribution by introducing the end-link algorithm, which optimizes variable ordering in parallel plots to enhance the clarity and interpretability of multidimensional datasets. 
 This foundational work has since informed modern parallel axis plots, enabling better cluster recognition and visual analytics.
 
-<!--### Application-Driven Advancements
-
-@sartorio2004influence utilized parallel plots to examine the relationships between BMI, age, and muscular power output, demonstrating the relevance of PCPs in biomedical studies. 
-@hemming2004heinrich employed parallel plotting methods to analyze geological and climate data, offering a practical application of Hurley’s clustering principles in environmental datasets. 
-These studies underscore the versatility of PCPs across domains, from healthcare to environmental science.
--->
 
 ### Mixed-Type PCPs: Expanding Dimensions
 
