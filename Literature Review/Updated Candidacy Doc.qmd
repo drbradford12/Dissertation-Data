@@ -210,26 +210,104 @@ This mirrors how `ggpcp` already handles ties in categorical data (VanderPlas et
 For example:
 
 ```{r example, echo=FALSE, message=FALSE, warning=FALSE}
-library(ggpcp)
+library(GGally)
+library(palmerpenguins)
 library(tidyverse)
+library(gridExtra)
+library(ggpcp)
+library(datasets)
 
-data(flea, package = "GGally")
+theme_set(theme_bw())
 
-# Example usage with all three methods
-flea$tars1_static <- numerical_tie_breaker_solution1(flea$tars1, tie_band = 0.01)
-flea$tars1_dynamic <- numerical_tie_breaker_solution2(flea$tars1)
-flea$tars1_vogel <- numerical_tie_breaker_vogel(flea$tars1, displacement_factor = 0.03)
+iris_scale_color <-   function(...) scale_color_manual(
+  "Species", values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000", ...))  
+iris_scale_fill <-   function(...) scale_fill_manual(
+  "Species", values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000", ...))
 
-# Visualize with Vogel-enhanced spacing
-flea %>%
-  pcp_select(species, c("tars1", "tars1_vogel", "tars1_dynamic", "tars1_static"), species) %>%
+iris <- iris %>% 
+  na.omit() 
+
+
+p1 <- iris %>%
+  pcp_select(c(1:5)) %>%
   pcp_scale(method="uniminmax") %>%
-  pcp_arrange() %>%
+  pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
-  geom_pcp(aes(colour = species)) +
-  labs(title = "Parallel Coordinates with Vogel-Inspired Tie Breaking",
+  geom_pcp(aes(colour = Species), alpha = 0.5) + 
+  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
+  ggpcp::geom_pcp_labels() +
+  theme_pcp() + 
+  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  theme(legend.position = "none") +
+  iris_scale_color() + 
+  ggplot2::labs(title = "Iris Data no adjustment")
+
+
+p2 <- iris %>%
+  mutate(Petal.Width = numerical_tie_breaker_solution1(Petal.Width)) %>%
+  pcp_select(c(1:5)) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = Species), alpha = 0.5) +
+  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
+  ggpcp::geom_pcp_labels()+
+  theme_pcp() +
+  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  theme(legend.position = "none") +
+  iris_scale_color() +
+  labs(title = "Parallel Coordinates with Static Tie Breaking (Solution #1)",
        subtitle = "Natural distribution patterns reduce visual overlap")
+
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+```{r example2, echo=FALSE, message=FALSE, warning=FALSE}
+p3 <- iris %>%
+  mutate(Petal.Width = numerical_tie_breaker_solution2(Petal.Width)) %>%
+  pcp_select(c(1:5)) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = Species), alpha = 0.5) +
+  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
+  ggpcp::geom_pcp_labels()+
+  theme_pcp() +
+  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  theme(legend.position = "none") +
+  iris_scale_color() +
+  labs(title = "Parallel Coordinates with Dynamic Tie Breaking (Solution #2)",
+       subtitle = "Natural distribution patterns reduce visual overlap")
+
+
+grid.arrange(p1, p3, ncol = 2)
+```
+
+
+```{r example3, echo=FALSE, message=FALSE, warning=FALSE}
+p4 <- iris %>%
+  mutate(Petal.Width = numerical_tie_breaker_vogel(Petal.Width), displacement_factor = 0.02) %>%
+  pcp_select(c(1:5)) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = Species), alpha = 0.5) +
+  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
+  ggpcp::geom_pcp_labels()+
+  theme_pcp() +
+  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  theme(legend.position = "none") +
+  iris_scale_color() +
+  labs(title = "Parallel Coordinates with Vogel-Inspired Tie Breaking (Solution #3)",
+       subtitle = "Natural distribution patterns reduce visual overlap")
+
+
+grid.arrange(p1, p4, ncol = 2)
 ```
 
 ### 3.3 Theoretical Foundation and Grammar of Graphics Integration
