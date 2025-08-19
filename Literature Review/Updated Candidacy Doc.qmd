@@ -1,0 +1,384 @@
+---
+title: "Visualizing Ambiguity: A Grammar of Graphics Approach to Resolving Numerical Ties in Parallel Coordinate Plots"
+author: "Denise Bradford"
+format: 
+  pdf:
+    classoption: ["11pt", "english", "singlespacing", "headsepline"]
+    geometry:
+        - paper=letterpaper
+        - inner=2.5cm
+        - outer=3.8cm
+        - bindingoffset=.5cm
+        - top=1.5cm
+        - bottom=1.5cm
+    include-in-header:
+      text: |
+        \usepackage{soul}
+        \usepackage[dvipsnames]{xcolor} % colors
+        \newcommand{\db}[1]{{\textcolor{Green}{#1}}}
+        \newcommand{\svp}[1]{{\textcolor{RedOrange}{#1}}}
+        \newcommand{\hh}[1]{{\textcolor{blue}{#1}}}
+  html:
+    css: edits.css
+bibliography: thesis.bib
+bibliographystyle: apa
+filters:
+   - latex-environment
+commands: [db,svp,hh]
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+## 1. Introduction
+
+This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs).
+Parallel coordinates, first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes simultaneously (Inselberg 2009).
+However, when datasets contain exact numerical ties, the resulting overlapping lines in PCPs can obscure critical distinctions.
+To address this, we propose a method for introducing controlled spacing to tied values using both traditional jittering techniques and a novel Vogel-inspired distribution algorithm that leverages principles from natural phyllotaxis patterns.
+This functionality will be integrated into the ggpcp package in R, ensuring a streamlined workflow for users seeking enhanced clarity in their parallel coordinate visualizations.
+
+Importantly, our approach complements recent work on generalized parallel coordinate plots (GPCPs) — an extension of PCPs that supports categorical variables (VanderPlas et al. 2023).
+The `ggpcp` package for R implements these GPCPs using a grammar of graphics framework, which seamlessly incorporates both continuous and categorical variables in a single parallel coordinate plot.
+One of the key contributions of that work is a robust tie-breaking mechanism for categorical variables, ensuring that individual observations can be traced across multiple dimensions, even when categories induce identical or "tied" values.
+By adding multiple numerical tie-breaking techniques for continuous data—including our innovative Vogel-based approach—we further refine GPCPs' capacity to handle the visualization of real-world datasets exhibiting many types of ties.
+
+## 2. Background and Motivation
+
+### 2.1 Parallel Coordinate Plots
+
+Parallel coordinate plots assign each dimension of an n-dimensional dataset to a vertical axis arranged in parallel (Wegman 1990).
+Each observation is drawn as a polyline connecting its values on these axes, providing a visual representation that can illuminate underlying data structures.
+
+### 2.2 Numerical Ties and Visual Overlap
+
+When multiple observations share the same value in a given dimension, their polylines perfectly overlap, creating "visual collisions." This masks information about distribution, density, or potential outliers.
+Introducing a small offset ("jitter") to these tied values can mitigate overlap without distorting the overall relationships in the data (Peng, Ward, and Rundensteiner 2004).
+In the context of generalized parallel coordinate plots, careful tie-handling is equally essential for both continuous and categorical variables (VanderPlas et al. 2023).
+
+### 2.3 Nature-Inspired Solutions: Vogel's Sunflower Model
+
+Recent advances in visualization theory suggest that natural phenomena can provide optimal solutions to common visualization challenges.
+Vogel's model (1979) demonstrates how sunflower seeds achieve near-optimal packing through a simple algorithm using the golden angle $(θ = 2π/φ² ≈ 137.508°)$ and radial positioning $(r = c\sqrt{n})$.
+This produces visually harmonious, near-uniform distributions that avoid clustering artifacts common in random displacement methods.
+We propose adapting this principle to create a theoretically grounded alternative to traditional jittering that maintains aesthetic appeal while preserving data relationships.
+
+## 3. Proposed Method for Tie Spacing in `ggpcp`
+
+### 3.1 Overview
+
+To handle overlapping polylines caused by numerical ties, we propose integrating potentially three R functions into the `ggpcp` package. 
+These functions introduce minimal, controlled spacing before the parallel coordinates are drawn. 
+Users can select from: a straightforward fixed tie-band approach (Solution #1), an adaptive method based on data properties (Solution #2), or our novel Vogel-inspired distribution method (Solution #3). 
+These solutions dovetail with ggpcp's built-in handling of categorical ties (VanderPlas et al. 2023), ensuring that all forms of ties—categorical or continuous—are resolved before rendering the PCP.
+
+Below are the core functions that implement these approaches:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Solution #1: Static Tie Band
+
+numerical_tie_breaker_solution1 <- function(values, tie_band = 0.05) {
+  sorted_values <- sort(values)
+  adjusted_values <- sorted_values
+  
+  for (i in seq_along(sorted_values)) {
+    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
+      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+    }
+  }
+  return(adjusted_values)
+}
+
+# Solution #2: Dynamic Tie Band
+
+auto_fraction <- function(values, scale_factor = 0.05) {
+  unique_vals <- unique(sort(values))
+  diffs <- diff(unique_vals)
+  positive_diffs <- diffs[diffs > 0]
+  
+  if (length(positive_diffs) == 0) {
+    return(scale_factor)
+  }
+  
+  typical_gap <- median(positive_diffs)
+  scale_factor * typical_gap
+}
+
+numerical_tie_breaker_solution2 <- function(values, base_fraction = 0.05) {
+  is_whole_number <- all(abs(values - round(values)) < .Machine$double.eps^0.5)
+  
+  if (is_whole_number) {
+    tie_band <- base_fraction
+  } else {
+    is_normal <- FALSE
+    if (length(values) >= 3) {
+      shapiro_p <- shapiro.test(values)$p.value
+      is_normal <- (shapiro_p > 0.05)
+    }
+    
+    q <- stats::quantile(values, probs = c(0.25, 0.75))
+    iqr_value <- q[2] - q[1]
+    lower_bound <- q[1] - 1.5 * iqr_value
+    upper_bound <- q[2] + 1.5 * iqr_value
+    has_outliers <- any(values < lower_bound) || any(values > upper_bound)
+    
+    if (is_normal && !has_outliers) {
+      tie_band <- base_fraction * stats::sd(values)
+    } else {
+      tie_band <- base_fraction * iqr_value
+    }
+  }
+  
+  sorted_values <- sort(values)
+  adjusted_values <- sorted_values
+  
+  for (i in seq_along(sorted_values)) {
+    if (i > 1 && sorted_values[i] == sorted_values[i - 1]) {
+      adjusted_values[i] <- adjusted_values[i - 1] + tie_band
+    }
+  }
+  return(adjusted_values)
+}
+
+# Solution #3: Vogel-Inspired Distribution
+
+numerical_tie_breaker_vogel <- function(values, displacement_factor = 0.02) {
+  phi <- (1 + sqrt(5)) / 2  
+  golden_angle <- 2 * pi / (phi^2)  
+  
+  # Find tied groups
+  tie_groups <- split(seq_along(values), values)
+  tie_groups <- tie_groups[lengths(tie_groups) > 1]
+  
+  adjusted_values <- values
+  axis_range <- max(values) - min(values)
+  
+  for (tie_group in tie_groups) {
+    base_value <- values[tie_group[1]]
+    n_tied <- length(tie_group)
+    max_displacement <- displacement_factor * axis_range
+    
+    for (i in seq_along(tie_group)) {
+      idx <- tie_group[i]
+      if (i == 1) {
+        adjusted_values[idx] <- base_value  # Keep first at original position
+      } else {
+        # Apply Vogel's spiral distribution
+        theta <- i * golden_angle
+        radius <- max_displacement * sqrt(i / n_tied)
+        displacement <- radius * sin(theta)
+        adjusted_values[idx] <- base_value + displacement
+      }
+    }
+  }
+  
+  return(adjusted_values)
+}
+```
+
+
+#### Key Features of Each Approach
+
+1. **Solution #1 – Static Tie Band**
+
+   - Relies on a user-defined tie_band to offset tied values.
+   
+   - Offers simplicity and predictable increments in spacing.
+
+2. **Solution #2 – Dynamic Tie Band**
+
+   - Adjusts tie spacing based on data properties (e.g., normality checks, IQR, and outlier detection).
+   
+   - More adaptive, especially useful for heterogeneous or continuous data with varying scales.
+
+3. **Solution #3 – Vogel-Inspired Distribution**
+   - Applies the golden angle principle from sunflower seed arrangements to achieve optimal point distribution.
+   
+   - Produces aesthetically pleasing, near-uniform spacing that scales naturally with the number of tied observations.
+   
+   - Deterministic and reproducible, unlike random jittering methods.
+   
+   - Maintains visual harmony while preserving data relationships through mathematically principled displacement.
+
+### 3.2 Integration into ggpcp
+
+When integrated into `ggpcp`, users can preprocess their numeric columns with any of the three functions prior to plotting. 
+The parallel coordinate plot (via `geom_parallel()` or similar functionality in `ggpcp`) then operates on the adjusted (tie-spaced) data, preventing line overlap. 
+This mirrors how `ggpcp` already handles ties in categorical data (VanderPlas et al. 2023), thereby providing a unified tie-breaking solution for both numeric and factor variables.
+
+For example:
+
+```{r example, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggpcp)
+library(tidyverse)
+
+data(flea, package = "GGally")
+
+# Example usage with all three methods
+flea$tars1_static <- numerical_tie_breaker_solution1(flea$tars1, tie_band = 0.01)
+flea$tars1_dynamic <- numerical_tie_breaker_solution2(flea$tars1)
+flea$tars1_vogel <- numerical_tie_breaker_vogel(flea$tars1, displacement_factor = 0.03)
+
+# Visualize with Vogel-enhanced spacing
+flea %>%
+  pcp_select(species, c("tars1", "tars1_vogel", "tars1_dynamic", "tars1_static"), species) %>%
+  pcp_scale(method="uniminmax") %>%
+  pcp_arrange() %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = species)) +
+  labs(title = "Parallel Coordinates with Vogel-Inspired Tie Breaking",
+       subtitle = "Natural distribution patterns reduce visual overlap")
+```
+
+### 3.3 Theoretical Foundation and Grammar of Graphics Integration
+
+The Vogel approach represents a significant advancement in the theoretical foundation of position adjustments within the Grammar of Graphics framework. 
+Unlike ad hoc random jittering, the Vogel transformation provides a mathematically principled solution that:
+
+- **Preserves topological relationships** between distinct data values
+
+- **Reflects data density naturally** through spiral tightness
+
+- **Maintains aesthetic consistency** across all scales through the golden angle property
+
+- **Ensures reproducibility** through deterministic calculations
+
+Within Wilkinson's Grammar of Graphics, this becomes a new category of biomimetic transformations that leverage evolutionary optimization principles to solve visualization challenges.
+
+## 4. Proposed Research
+
+### 4.1 Primary Research Question
+
+How can the formal structure of the Grammar of Graphics be extended to systematically incorporate and evaluate methods for resolving numerical ties in parallel coordinate plots, and what is the quantifiable impact of these methods on the accuracy and efficiency of visual data analysis?
+
+
+### 4.2 Secondary Question 1: Theory
+
+**How can the management of numerical ties be most effectively and coherently formalized within the layered grammar of graphics?**
+
+**Methodology:** Theoretical analysis, literature synthesis, and specification of a new or extended grammatical element.
+
+
+### 4.3 Secondary Question 2: Methodology
+
+**What are the optimal algorithmic criteria for ordering and spacing tied data points to maximize visual clarity while preserving underlying data properties?**
+
+**Methodology:** Algorithm design and implementation in R. Develop a novel method that balances separation and density preservation.
+
+
+### 4.4 Secondary Question 3: Perception
+
+**How do different visualization strategies for ties affect an analyst's ability to perform key visual tasks (cluster identification, outlier detection)?**
+
+**Methodology:** Controlled user studies with human subjects. Measure task accuracy and completion time across different visualization conditions.
+
+
+### 4.5 Secondary Question 4: Practice
+
+**Can a set of evidence-based heuristics be developed to guide practitioners in selecting the most appropriate visualization method for their specific data context?**
+
+**Methodology:** Synthesize findings from RQ1-3 into a practical framework. Validate with case studies on real-world datasets from different domains.
+
+## 5. Implementation Roadmap
+
+1. **Data Preparation**
+   - Ensure data are in a tidy format compatible with ggpcp.
+   
+   - Normalize or standardize dimensions if necessary, so the offset remains meaningful and does not distort the scale.
+
+2. **Integration into ggpcp**
+   - Incorporate all three tie-breaker functions as user-facing options within ggpcp.
+   
+   - **Provide grammar-based syntax:** `position = position_vogel(scale = 0.02)`
+   
+   - Expose parameters (e.g., tie_band, base_fraction, displacement_factor) through well-documented function arguments and vignettes.
+
+3. **Rendering Parallel Coordinates**
+   - Use ggpcp's parallel coordinate functions on the tie-spaced data.
+   
+   - Provide relevant axis annotations, legends, and tooltips for interactive capabilities.
+   
+   - **Add visual indicators** to show which axes have been Vogel-adjusted.
+
+4. **Testing and Validation**
+   - Assess the impact of tie spacing by comparing plots with and without offsets.
+   
+   - **Conduct user studies** comparing visual clarity and pattern recognition between random jittering and Vogel distribution.
+   
+   - Gather feedback from early adopters to fine-tune default parameters and ensure user-friendliness.
+
+## 6. Historical Context of Multidimensional Data Visualization
+
+### 6.1 Early Developments
+
+The concept of parallel coordinates dates back to Maurice d'Ocagne's work on "coordinate parallelism" (d'Ocagne 1885). 
+While his contributions did not see immediate mainstream adoption, they formed the conceptual foundation for later multidimensional plotting.
+
+### 6.2 Alfred Inselberg's Contributions
+
+Alfred Inselberg developed the mathematical underpinnings of parallel coordinates for analyzing high-dimensional data, demonstrating the approach's strength in various domains (Inselberg 1985, 2009).
+
+### 6.3 Wegman's Statistical Insights
+
+Wegman (1990) further popularized parallel coordinates by integrating statistical perspectives, showing how PCPs can be leveraged in exploratory data analysis. 
+Subsequent advances in interactive visualization have enabled real-time manipulation of axes, brushing, and filtering, allowing users to distill meaningful insights from large datasets.
+
+### 6.4 Generalized Parallel Coordinates
+
+More recently, VanderPlas et al. (2023) extended PCPs to handle both categorical and continuous variables within a single framework, implemented via the R package ggpcp. 
+Their work, Penguins Go Parallel, details a grammar-of-graphics approach that accommodates a mix of variable types by applying tie-breaking and ordering strategies on categorical data to preserve the continuity of observation trajectories.
+
+### 6.5 Nature-Inspired Visualization Methods
+
+Our work builds upon emerging research in biomimetic visualization techniques that apply natural optimization principles to data presentation challenges. 
+Vogel's sunflower model (1979) represents one of the earliest mathematical formalizations of natural packing efficiency, demonstrating how the golden angle $(137.508°)$ produces optimal point distributions. 
+By adapting this principle to parallel coordinate visualization, we contribute to a growing body of work that recognizes nature as a source of elegant solutions to complex visualization problems.
+
+## 7. Expected Outcomes
+
+1. **Improved Visual Clarity**
+   - The introduction of tie spacing in ggpcp will ensure that overlaid lines become distinguishable, unveiling patterns and anomalies otherwise hidden by overlap.
+   
+   - The Vogel method will provide superior aesthetic appeal and consistent spacing compared to random jittering.
+
+2. **Enhanced Data Interpretation**
+   - Researchers and data analysts will be able to more accurately interpret subtle differences in high-dimensional datasets, especially in domains like bioinformatics, finance, and engineering.
+   
+   - The natural distribution patterns will improve pattern recognition and reduce cognitive load.
+
+3. **Comprehensive Tie-Handling**: By integrating numeric tie-breaking (including the novel Vogel approach) with categorical tie-breaking, ggpcp users enjoy a complete solution for parallel coordinate visualization, building upon recent advancements in generalized parallel coordinate plots (VanderPlas et al. 2023).
+
+4. **Easy Integration with R Ecosystem**: Users of ggpcp will have ready-to-use, integrated solutions for tie handling without resorting to external data preprocessing or manual jittering methods.
+
+5. **Theoretical Contribution**: The Vogel approach establishes a new paradigm for biomimetic transformations within the Grammar of Graphics, opening avenues for other nature-inspired visualization techniques.
+
+## 8. Conclusion
+
+Parallel coordinates have evolved from early geometric solutions (d'Ocagne 1885) to a robust, interactive technique for visualizing high-dimensional data (Inselberg 1985; Wegman 1990). 
+However, numerical ties remain a persistent challenge, causing overlapping lines that diminish interpretability. 
+By integrating minimal offset mechanisms—including both traditional methods and our novel Vogel-inspired distribution algorithm—directly into the ggpcp package, this proposal ensures a streamlined approach that balances the preservation of data fidelity with the need for visual clarity.
+
+The incorporation of Vogel's sunflower model represents a significant theoretical advancement, introducing nature-inspired optimization principles to the Grammar of Graphics framework. 
+This biomimetic approach not only solves the practical problem of visual overlap but also establishes a foundation for future research into natural pattern applications in data visualization.
+
+In tandem with recent developments in generalized parallel coordinate plots (VanderPlas et al. 2023), the resulting enhancement will aid analysts in effectively discerning underlying structures and relationships across multiple dimensions, while providing theoretically grounded, aesthetically pleasing, and reproducible visualizations.
+
+## References
+
+d'Ocagne, Maurice. 1885. "Coordonnées parallèles et axiales : Méthode de transformation géométrique et procédé nouveau de calcul graphique déduits de la considération des coordonnées parallèles." Gauthier-Villars, 112. https://archive.org/details/coordonnesparal00ocaggoog/page/n10.
+
+Inselberg, Alfred. 1985. "The plane with parallel coordinates." The Visual Computer 1 (2): 69–91. https://doi.org/10.1007/BF01898350.
+
+Inselberg, Alfred. 2009. "Parallel Coordinates: Interactive Visualisation for High Dimensions." Trends in Interactive Visualization: State-of-the-Art Survey, 49–78.
+
+Peng, Wei, Matthew O Ward, and Elke A Rundensteiner. 2004. "Clutter Reduction in Multi-Dimensional Data Visualization Using Dimension Reordering." In IEEE Symposium on Information Visualization, 89–96. IEEE.
+
+Vogel, H. 1979. "A better way to construct the sunflower head." Mathematical Biosciences 44(1): 179-189.
+
+VanderPlas, Susan, Yawei Ge, Antony Unwin, and Heike Hofmann. 2023. "Penguins Go Parallel: A Grammar of Graphics Framework for Generalized Parallel Coordinate Plots." Journal of Computational and Graphical Statistics 32 (4): 1572–87.
+
+Wegman, Edward J. 1990. "Hyperdimensional data analysis using parallel coordinates." Journal of the American Statistical Association 85: 664–75.
+
+Wilkinson, Leland. 2005. The Grammar of Graphics. 2nd ed. Springer-Verlag.
