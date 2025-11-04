@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Denise Bradford">
+<meta name="dcterms.date" content="2025-10-01">
+
+<title>Visualizing Ambiguity: A Grammar of Graphics Approach to Resolving Numerical Ties in Parallel Coordinate Plots</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="comprehensive_exam_summary_files/libs/clipboard/clipboard.min.js"></script>
+<script src="comprehensive_exam_summary_files/libs/quarto-html/quarto.js"></script>
+<script src="comprehensive_exam_summary_files/libs/quarto-html/popper.min.js"></script>
+<script src="comprehensive_exam_summary_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="comprehensive_exam_summary_files/libs/quarto-html/anchor.min.js"></script>
+<link href="comprehensive_exam_summary_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="comprehensive_exam_summary_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="comprehensive_exam_summary_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="comprehensive_exam_summary_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="comprehensive_exam_summary_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#executive-summary" id="toc-executive-summary" class="nav-link active" data-scroll-target="#executive-summary"><span class="header-section-number">1</span> Executive Summary</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">2</span> Introduction</a>
+  <ul class="collapse">
+  <li><a href="#background-and-motivation" id="toc-background-and-motivation" class="nav-link" data-scroll-target="#background-and-motivation"><span class="header-section-number">2.1</span> Background and Motivation</a></li>
+  <li><a href="#the-core-problem" id="toc-the-core-problem" class="nav-link" data-scroll-target="#the-core-problem"><span class="header-section-number">2.2</span> The Core Problem</a></li>
+  <li><a href="#research-context" id="toc-research-context" class="nav-link" data-scroll-target="#research-context"><span class="header-section-number">2.3</span> Research Context</a>
+  <ul class="collapse">
+  <li><a href="#historical-development" id="toc-historical-development" class="nav-link" data-scroll-target="#historical-development"><span class="header-section-number">2.3.1</span> Historical Development</a></li>
+  <li><a href="#the-persistent-gap" id="toc-the-persistent-gap" class="nav-link" data-scroll-target="#the-persistent-gap"><span class="header-section-number">2.3.2</span> The Persistent Gap</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#the-problem-in-detail" id="toc-the-problem-in-detail" class="nav-link" data-scroll-target="#the-problem-in-detail"><span class="header-section-number">3</span> The Problem in Detail</a>
+  <ul class="collapse">
+  <li><a href="#three-dimensions-of-occlusion" id="toc-three-dimensions-of-occlusion" class="nav-link" data-scroll-target="#three-dimensions-of-occlusion"><span class="header-section-number">3.1</span> Three Dimensions of Occlusion</a>
+  <ul class="collapse">
+  <li><a href="#visual-collision" id="toc-visual-collision" class="nav-link" data-scroll-target="#visual-collision"><span class="header-section-number">3.1.1</span> 1. Visual Collision</a></li>
+  <li><a href="#density-information-loss" id="toc-density-information-loss" class="nav-link" data-scroll-target="#density-information-loss"><span class="header-section-number">3.1.2</span> 2. Density Information Loss</a></li>
+  <li><a href="#structural-occlusion" id="toc-structural-occlusion" class="nav-link" data-scroll-target="#structural-occlusion"><span class="header-section-number">3.1.3</span> 3. Structural Occlusion</a></li>
+  </ul></li>
+  <li><a href="#concrete-example-iris-dataset" id="toc-concrete-example-iris-dataset" class="nav-link" data-scroll-target="#concrete-example-iris-dataset"><span class="header-section-number">3.2</span> Concrete Example: Iris Dataset</a></li>
+  </ul></li>
+  <li><a href="#design-requirements" id="toc-design-requirements" class="nav-link" data-scroll-target="#design-requirements"><span class="header-section-number">4</span> Design Requirements</a>
+  <ul class="collapse">
+  <li><a href="#determinism" id="toc-determinism" class="nav-link" data-scroll-target="#determinism"><span class="header-section-number">4.1</span> 1. Determinism</a></li>
+  <li><a href="#uniformity" id="toc-uniformity" class="nav-link" data-scroll-target="#uniformity"><span class="header-section-number">4.2</span> 2. Uniformity</a></li>
+  <li><a href="#perceptual-validity" id="toc-perceptual-validity" class="nav-link" data-scroll-target="#perceptual-validity"><span class="header-section-number">4.3</span> 3. Perceptual Validity</a></li>
+  <li><a href="#scalability" id="toc-scalability" class="nav-link" data-scroll-target="#scalability"><span class="header-section-number">4.4</span> 4. Scalability</a></li>
+  </ul></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology"><span class="header-section-number">5</span> Methodology</a>
+  <ul class="collapse">
+  <li><a href="#mathematical-framework" id="toc-mathematical-framework" class="nav-link" data-scroll-target="#mathematical-framework"><span class="header-section-number">5.1</span> Mathematical Framework</a>
+  <ul class="collapse">
+  <li><a href="#optimization-goals" id="toc-optimization-goals" class="nav-link" data-scroll-target="#optimization-goals"><span class="header-section-number">5.1.1</span> Optimization Goals</a></li>
+  </ul></li>
+  <li><a href="#three-deterministic-algorithms" id="toc-three-deterministic-algorithms" class="nav-link" data-scroll-target="#three-deterministic-algorithms"><span class="header-section-number">5.2</span> Three Deterministic Algorithms</a>
+  <ul class="collapse">
+  <li><a href="#algorithm-summary" id="toc-algorithm-summary" class="nav-link" data-scroll-target="#algorithm-summary"><span class="header-section-number">5.2.1</span> Algorithm Summary</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sunflower-jitter-biomimetic-approach" id="toc-sunflower-jitter-biomimetic-approach" class="nav-link" data-scroll-target="#sunflower-jitter-biomimetic-approach"><span class="header-section-number">6</span> Sunflower Jitter: Biomimetic Approach</a>
+  <ul class="collapse">
+  <li><a href="#biological-inspiration" id="toc-biological-inspiration" class="nav-link" data-scroll-target="#biological-inspiration"><span class="header-section-number">6.1</span> Biological Inspiration</a>
+  <ul class="collapse">
+  <li><a href="#why-this-angle" id="toc-why-this-angle" class="nav-link" data-scroll-target="#why-this-angle"><span class="header-section-number">6.1.1</span> Why This Angle?</a></li>
+  </ul></li>
+  <li><a href="#mathematical-formulation" id="toc-mathematical-formulation" class="nav-link" data-scroll-target="#mathematical-formulation"><span class="header-section-number">6.2</span> Mathematical Formulation</a>
+  <ul class="collapse">
+  <li><a href="#key-features" id="toc-key-features" class="nav-link" data-scroll-target="#key-features"><span class="header-section-number">6.2.1</span> Key Features</a></li>
+  </ul></li>
+  <li><a href="#theoretical-properties" id="toc-theoretical-properties" class="nav-link" data-scroll-target="#theoretical-properties"><span class="header-section-number">6.3</span> Theoretical Properties</a></li>
+  <li><a href="#visual-results" id="toc-visual-results" class="nav-link" data-scroll-target="#visual-results"><span class="header-section-number">6.4</span> Visual Results</a></li>
+  </ul></li>
+  <li><a href="#halton-jitter-quasi-random-sequences" id="toc-halton-jitter-quasi-random-sequences" class="nav-link" data-scroll-target="#halton-jitter-quasi-random-sequences"><span class="header-section-number">7</span> Halton Jitter: Quasi-Random Sequences</a>
+  <ul class="collapse">
+  <li><a href="#beyond-pseudo-randomness" id="toc-beyond-pseudo-randomness" class="nav-link" data-scroll-target="#beyond-pseudo-randomness"><span class="header-section-number">7.1</span> Beyond Pseudo-Randomness</a>
+  <ul class="collapse">
+  <li><a href="#the-random-number-problem" id="toc-the-random-number-problem" class="nav-link" data-scroll-target="#the-random-number-problem"><span class="header-section-number">7.1.1</span> The Random Number Problem</a></li>
+  <li><a href="#haltons-solution" id="toc-haltons-solution" class="nav-link" data-scroll-target="#haltons-solution"><span class="header-section-number">7.1.2</span> Halton’s Solution</a></li>
+  </ul></li>
+  <li><a href="#construction-method" id="toc-construction-method" class="nav-link" data-scroll-target="#construction-method"><span class="header-section-number">7.2</span> Construction Method</a>
+  <ul class="collapse">
+  <li><a href="#application-to-pcps" id="toc-application-to-pcps" class="nav-link" data-scroll-target="#application-to-pcps"><span class="header-section-number">7.2.1</span> Application to PCPs</a></li>
+  </ul></li>
+  <li><a href="#theoretical-guarantees" id="toc-theoretical-guarantees" class="nav-link" data-scroll-target="#theoretical-guarantees"><span class="header-section-number">7.3</span> Theoretical Guarantees</a>
+  <ul class="collapse">
+  <li><a href="#discrepancy-theory-niederreiter1992" id="toc-discrepancy-theory-niederreiter1992" class="nav-link" data-scroll-target="#discrepancy-theory-niederreiter1992"><span class="header-section-number">7.3.1</span> Discrepancy Theory <span class="citation" data-cites="niederreiter1992">(<strong>niederreiter1992?</strong>)</span></a></li>
+  </ul></li>
+  <li><a href="#applications-beyond-pcps" id="toc-applications-beyond-pcps" class="nav-link" data-scroll-target="#applications-beyond-pcps"><span class="header-section-number">7.4</span> Applications Beyond PCPs</a></li>
+  <li><a href="#visual-results-1" id="toc-visual-results-1" class="nav-link" data-scroll-target="#visual-results-1"><span class="header-section-number">7.5</span> Visual Results</a></li>
+  </ul></li>
+  <li><a href="#intelligent-jitter-a-novel-approach" id="toc-intelligent-jitter-a-novel-approach" class="nav-link" data-scroll-target="#intelligent-jitter-a-novel-approach"><span class="header-section-number">8</span> Intelligent Jitter: A Novel Approach</a>
+  <ul class="collapse">
+  <li><a href="#design-motivation" id="toc-design-motivation" class="nav-link" data-scroll-target="#design-motivation"><span class="header-section-number">8.1</span> Design Motivation</a></li>
+  <li><a href="#algorithm-design" id="toc-algorithm-design" class="nav-link" data-scroll-target="#algorithm-design"><span class="header-section-number">8.2</span> Algorithm Design</a>
+  <ul class="collapse">
+  <li><a href="#key-distinctions-from-sunflower" id="toc-key-distinctions-from-sunflower" class="nav-link" data-scroll-target="#key-distinctions-from-sunflower"><span class="header-section-number">8.2.1</span> Key Distinctions from Sunflower</a></li>
+  </ul></li>
+  <li><a href="#hypothesis-vs.-reality" id="toc-hypothesis-vs.-reality" class="nav-link" data-scroll-target="#hypothesis-vs.-reality"><span class="header-section-number">8.3</span> Hypothesis vs.&nbsp;Reality</a>
+  <ul class="collapse">
+  <li><a href="#hypothesis" id="toc-hypothesis" class="nav-link" data-scroll-target="#hypothesis"><span class="header-section-number">8.3.1</span> Hypothesis</a></li>
+  <li><a href="#reality-empirical-results" id="toc-reality-empirical-results" class="nav-link" data-scroll-target="#reality-empirical-results"><span class="header-section-number">8.3.2</span> Reality (Empirical Results)</a></li>
+  <li><a href="#the-problem" id="toc-the-problem" class="nav-link" data-scroll-target="#the-problem"><span class="header-section-number">8.3.3</span> The Problem</a></li>
+  </ul></li>
+  <li><a href="#value-of-negative-results" id="toc-value-of-negative-results" class="nav-link" data-scroll-target="#value-of-negative-results"><span class="header-section-number">8.4</span> Value of Negative Results</a></li>
+  </ul></li>
+  <li><a href="#comparative-analysis" id="toc-comparative-analysis" class="nav-link" data-scroll-target="#comparative-analysis"><span class="header-section-number">9</span> Comparative Analysis</a>
+  <ul class="collapse">
+  <li><a href="#dimensional-analysis" id="toc-dimensional-analysis" class="nav-link" data-scroll-target="#dimensional-analysis"><span class="header-section-number">9.1</span> Dimensional Analysis</a>
+  <ul class="collapse">
+  <li><a href="#three-distinct-approaches" id="toc-three-distinct-approaches" class="nav-link" data-scroll-target="#three-distinct-approaches"><span class="header-section-number">9.1.1</span> Three Distinct Approaches</a></li>
+  </ul></li>
+  <li><a href="#scaling-behavior-analysis" id="toc-scaling-behavior-analysis" class="nav-link" data-scroll-target="#scaling-behavior-analysis"><span class="header-section-number">9.2</span> Scaling Behavior Analysis</a></li>
+  <li><a href="#distribution-quality-metrics" id="toc-distribution-quality-metrics" class="nav-link" data-scroll-target="#distribution-quality-metrics"><span class="header-section-number">9.3</span> Distribution Quality Metrics</a>
+  <ul class="collapse">
+  <li><a href="#minimum-separation-distance" id="toc-minimum-separation-distance" class="nav-link" data-scroll-target="#minimum-separation-distance"><span class="header-section-number">9.3.1</span> Minimum Separation Distance</a></li>
+  <li><a href="#visual-clustering" id="toc-visual-clustering" class="nav-link" data-scroll-target="#visual-clustering"><span class="header-section-number">9.3.2</span> Visual Clustering</a></li>
+  <li><a href="#perceptual-faithfulness" id="toc-perceptual-faithfulness" class="nav-link" data-scroll-target="#perceptual-faithfulness"><span class="header-section-number">9.3.3</span> Perceptual Faithfulness</a></li>
+  </ul></li>
+  <li><a href="#computational-complexity" id="toc-computational-complexity" class="nav-link" data-scroll-target="#computational-complexity"><span class="header-section-number">9.4</span> Computational Complexity</a></li>
+  </ul></li>
+  <li><a href="#user-study-design" id="toc-user-study-design" class="nav-link" data-scroll-target="#user-study-design"><span class="header-section-number">10</span> User Study Design</a>
+  <ul class="collapse">
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">10.1</span> Overview</a></li>
+  <li><a href="#independent-variable" id="toc-independent-variable" class="nav-link" data-scroll-target="#independent-variable"><span class="header-section-number">10.2</span> Independent Variable</a></li>
+  <li><a href="#dependent-variables" id="toc-dependent-variables" class="nav-link" data-scroll-target="#dependent-variables"><span class="header-section-number">10.3</span> Dependent Variables</a>
+  <ul class="collapse">
+  <li><a href="#task-accuracy-primary" id="toc-task-accuracy-primary" class="nav-link" data-scroll-target="#task-accuracy-primary"><span class="header-section-number">10.3.1</span> 1. Task Accuracy (Primary)</a></li>
+  <li><a href="#task-completion-time-secondary" id="toc-task-completion-time-secondary" class="nav-link" data-scroll-target="#task-completion-time-secondary"><span class="header-section-number">10.3.2</span> 2. Task Completion Time (Secondary)</a></li>
+  <li><a href="#subjective-preference-tertiary" id="toc-subjective-preference-tertiary" class="nav-link" data-scroll-target="#subjective-preference-tertiary"><span class="header-section-number">10.3.3</span> 3. Subjective Preference (Tertiary)</a></li>
+  </ul></li>
+  <li><a href="#hypotheses" id="toc-hypotheses" class="nav-link" data-scroll-target="#hypotheses"><span class="header-section-number">10.4</span> Hypotheses</a></li>
+  <li><a href="#statistical-analysis-plan" id="toc-statistical-analysis-plan" class="nav-link" data-scroll-target="#statistical-analysis-plan"><span class="header-section-number">10.5</span> Statistical Analysis Plan</a></li>
+  </ul></li>
+  <li><a href="#integration-with-ggpcp-package" id="toc-integration-with-ggpcp-package" class="nav-link" data-scroll-target="#integration-with-ggpcp-package"><span class="header-section-number">11</span> Integration with ggpcp Package</a>
+  <ul class="collapse">
+  <li><a href="#software-architecture" id="toc-software-architecture" class="nav-link" data-scroll-target="#software-architecture"><span class="header-section-number">11.1</span> Software Architecture</a></li>
+  <li><a href="#implementation-example" id="toc-implementation-example" class="nav-link" data-scroll-target="#implementation-example"><span class="header-section-number">11.2</span> Implementation Example</a></li>
+  <li><a href="#available-methods" id="toc-available-methods" class="nav-link" data-scroll-target="#available-methods"><span class="header-section-number">11.3</span> Available Methods</a></li>
+  <li><a href="#automatic-tie-detection" id="toc-automatic-tie-detection" class="nav-link" data-scroll-target="#automatic-tie-detection"><span class="header-section-number">11.4</span> Automatic Tie Detection</a></li>
+  <li><a href="#user-interface-design-principles" id="toc-user-interface-design-principles" class="nav-link" data-scroll-target="#user-interface-design-principles"><span class="header-section-number">11.5</span> User Interface Design Principles</a></li>
+  </ul></li>
+  <li><a href="#theoretical-contributions" id="toc-theoretical-contributions" class="nav-link" data-scroll-target="#theoretical-contributions"><span class="header-section-number">12</span> Theoretical Contributions</a>
+  <ul class="collapse">
+  <li><a href="#cross-domain-algorithm-adaptation" id="toc-cross-domain-algorithm-adaptation" class="nav-link" data-scroll-target="#cross-domain-algorithm-adaptation"><span class="header-section-number">12.1</span> 1. Cross-Domain Algorithm Adaptation</a></li>
+  <li><a href="#comparative-framework" id="toc-comparative-framework" class="nav-link" data-scroll-target="#comparative-framework"><span class="header-section-number">12.2</span> 2. Comparative Framework</a></li>
+  <li><a href="#negative-result-documentation" id="toc-negative-result-documentation" class="nav-link" data-scroll-target="#negative-result-documentation"><span class="header-section-number">12.3</span> 3. Negative Result Documentation</a></li>
+  <li><a href="#design-principles" id="toc-design-principles" class="nav-link" data-scroll-target="#design-principles"><span class="header-section-number">12.4</span> 4. Design Principles</a></li>
+  </ul></li>
+  <li><a href="#practical-impact" id="toc-practical-impact" class="nav-link" data-scroll-target="#practical-impact"><span class="header-section-number">13</span> Practical Impact</a>
+  <ul class="collapse">
+  <li><a href="#immediate-benefits-for-researchers" id="toc-immediate-benefits-for-researchers" class="nav-link" data-scroll-target="#immediate-benefits-for-researchers"><span class="header-section-number">13.1</span> Immediate Benefits for Researchers</a></li>
+  <li><a href="#implementation-advantages" id="toc-implementation-advantages" class="nav-link" data-scroll-target="#implementation-advantages"><span class="header-section-number">13.2</span> Implementation Advantages</a></li>
+  <li><a href="#long-term-impact" id="toc-long-term-impact" class="nav-link" data-scroll-target="#long-term-impact"><span class="header-section-number">13.3</span> Long-term Impact</a></li>
+  </ul></li>
+  <li><a href="#future-work" id="toc-future-work" class="nav-link" data-scroll-target="#future-work"><span class="header-section-number">14</span> Future Work</a>
+  <ul class="collapse">
+  <li><a href="#adaptive-epsilon-selection" id="toc-adaptive-epsilon-selection" class="nav-link" data-scroll-target="#adaptive-epsilon-selection"><span class="header-section-number">14.1</span> 1. Adaptive Epsilon Selection</a>
+  <ul class="collapse">
+  <li><a href="#data-driven-heuristics" id="toc-data-driven-heuristics" class="nav-link" data-scroll-target="#data-driven-heuristics"><span class="header-section-number">14.1.1</span> Data-Driven Heuristics</a></li>
+  <li><a href="#perceptual-models" id="toc-perceptual-models" class="nav-link" data-scroll-target="#perceptual-models"><span class="header-section-number">14.1.2</span> Perceptual Models</a></li>
+  <li><a href="#optimization-framework" id="toc-optimization-framework" class="nav-link" data-scroll-target="#optimization-framework"><span class="header-section-number">14.1.3</span> Optimization Framework</a></li>
+  </ul></li>
+  <li><a href="#d-generalization" id="toc-d-generalization" class="nav-link" data-scroll-target="#d-generalization"><span class="header-section-number">14.2</span> 2. 2D Generalization</a>
+  <ul class="collapse">
+  <li><a href="#current-practice" id="toc-current-practice" class="nav-link" data-scroll-target="#current-practice"><span class="header-section-number">14.2.1</span> Current Practice</a></li>
+  <li><a href="#proposed-extension" id="toc-proposed-extension" class="nav-link" data-scroll-target="#proposed-extension"><span class="header-section-number">14.2.2</span> Proposed Extension</a></li>
+  <li><a href="#research-questions" id="toc-research-questions" class="nav-link" data-scroll-target="#research-questions"><span class="header-section-number">14.2.3</span> Research Questions</a></li>
+  </ul></li>
+  <li><a href="#performance-optimization" id="toc-performance-optimization" class="nav-link" data-scroll-target="#performance-optimization"><span class="header-section-number">14.3</span> 3. Performance Optimization</a>
+  <ul class="collapse">
+  <li><a href="#algorithmic-improvements" id="toc-algorithmic-improvements" class="nav-link" data-scroll-target="#algorithmic-improvements"><span class="header-section-number">14.3.1</span> Algorithmic Improvements</a></li>
+  <li><a href="#implementation-efficiency" id="toc-implementation-efficiency" class="nav-link" data-scroll-target="#implementation-efficiency"><span class="header-section-number">14.3.2</span> Implementation Efficiency</a></li>
+  <li><a href="#scalability-targets" id="toc-scalability-targets" class="nav-link" data-scroll-target="#scalability-targets"><span class="header-section-number">14.3.3</span> Scalability Targets</a></li>
+  </ul></li>
+  <li><a href="#extended-evaluation" id="toc-extended-evaluation" class="nav-link" data-scroll-target="#extended-evaluation"><span class="header-section-number">14.4</span> 4. Extended Evaluation</a>
+  <ul class="collapse">
+  <li><a href="#domain-specific-studies" id="toc-domain-specific-studies" class="nav-link" data-scroll-target="#domain-specific-studies"><span class="header-section-number">14.4.1</span> Domain-Specific Studies</a></li>
+  <li><a href="#expert-user-evaluation" id="toc-expert-user-evaluation" class="nav-link" data-scroll-target="#expert-user-evaluation"><span class="header-section-number">14.4.2</span> Expert User Evaluation</a></li>
+  <li><a href="#longitudinal-studies" id="toc-longitudinal-studies" class="nav-link" data-scroll-target="#longitudinal-studies"><span class="header-section-number">14.4.3</span> Longitudinal Studies</a></li>
+  <li><a href="#alternative-tasks" id="toc-alternative-tasks" class="nav-link" data-scroll-target="#alternative-tasks"><span class="header-section-number">14.4.4</span> Alternative Tasks</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions"><span class="header-section-number">15</span> Conclusions</a>
+  <ul class="collapse">
+  <li><a href="#summary-of-problem-and-solution" id="toc-summary-of-problem-and-solution" class="nav-link" data-scroll-target="#summary-of-problem-and-solution"><span class="header-section-number">15.1</span> Summary of Problem and Solution</a></li>
+  <li><a href="#key-findings" id="toc-key-findings" class="nav-link" data-scroll-target="#key-findings"><span class="header-section-number">15.2</span> Key Findings</a>
+  <ul class="collapse">
+  <li><a href="#low-discrepancy-methods-superior" id="toc-low-discrepancy-methods-superior" class="nav-link" data-scroll-target="#low-discrepancy-methods-superior"><span class="header-section-number">15.2.1</span> Low-Discrepancy Methods Superior</a></li>
+  <li><a href="#determinism-essential" id="toc-determinism-essential" class="nav-link" data-scroll-target="#determinism-essential"><span class="header-section-number">15.2.2</span> Determinism Essential</a></li>
+  <li><a href="#scaling-function-critical" id="toc-scaling-function-critical" class="nav-link" data-scroll-target="#scaling-function-critical"><span class="header-section-number">15.2.3</span> Scaling Function Critical</a></li>
+  <li><a href="#general-principle" id="toc-general-principle" class="nav-link" data-scroll-target="#general-principle"><span class="header-section-number">15.2.4</span> General Principle</a></li>
+  </ul></li>
+  <li><a href="#significance-of-contributions" id="toc-significance-of-contributions" class="nav-link" data-scroll-target="#significance-of-contributions"><span class="header-section-number">15.3</span> Significance of Contributions</a>
+  <ul class="collapse">
+  <li><a href="#theoretical" id="toc-theoretical" class="nav-link" data-scroll-target="#theoretical"><span class="header-section-number">15.3.1</span> Theoretical</a></li>
+  <li><a href="#methodological" id="toc-methodological" class="nav-link" data-scroll-target="#methodological"><span class="header-section-number">15.3.2</span> Methodological</a></li>
+  <li><a href="#practical" id="toc-practical" class="nav-link" data-scroll-target="#practical"><span class="header-section-number">15.3.3</span> Practical</a></li>
+  </ul></li>
+  <li><a href="#broader-implications" id="toc-broader-implications" class="nav-link" data-scroll-target="#broader-implications"><span class="header-section-number">15.4</span> Broader Implications</a></li>
+  <li><a href="#final-thoughts" id="toc-final-thoughts" class="nav-link" data-scroll-target="#final-thoughts"><span class="header-section-number">15.5</span> Final Thoughts</a></li>
+  </ul></li>
+  <li><a href="#timeline-to-dissertation-defense" id="toc-timeline-to-dissertation-defense" class="nav-link" data-scroll-target="#timeline-to-dissertation-defense"><span class="header-section-number">16</span> Timeline to Dissertation Defense</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">17</span> References</a></li>
+  <li><a href="#appendix-a-algorithm-pseudocode" id="toc-appendix-a-algorithm-pseudocode" class="nav-link" data-scroll-target="#appendix-a-algorithm-pseudocode"><span class="header-section-number">18</span> Appendix A: Algorithm Pseudocode</a>
+  <ul class="collapse">
+  <li><a href="#sunflower-jitter" id="toc-sunflower-jitter" class="nav-link" data-scroll-target="#sunflower-jitter"><span class="header-section-number">18.1</span> Sunflower Jitter</a></li>
+  <li><a href="#halton-jitter" id="toc-halton-jitter" class="nav-link" data-scroll-target="#halton-jitter"><span class="header-section-number">18.2</span> Halton Jitter</a></li>
+  <li><a href="#intelligent-jitter" id="toc-intelligent-jitter" class="nav-link" data-scroll-target="#intelligent-jitter"><span class="header-section-number">18.3</span> Intelligent Jitter</a></li>
+  </ul></li>
+  <li><a href="#appendix-b-contact-information" id="toc-appendix-b-contact-information" class="nav-link" data-scroll-target="#appendix-b-contact-information"><span class="header-section-number">19</span> Appendix B: Contact Information</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="comprehensive_exam_summary.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Visualizing Ambiguity: A Grammar of Graphics Approach to Resolving Numerical Ties in Parallel Coordinate Plots</h1>
+<p class="subtitle lead">Comprehensive Exam Summary</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Denise Bradford </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 1, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="executive-summary" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Executive Summary</h1>
+<p>This document summarizes my research on resolving numerical ties in parallel coordinate plots (PCPs). The research addresses a fundamental limitation in multivariate data visualization: when multiple observations share identical numerical values, they create perfectly overlapping polylines that obscure density information and substructure. This work develops three deterministic jittering algorithms—Sunflower, Halton, and Intelligent—that systematically resolve numerical ties while maintaining reproducibility and perceptual validity.</p>
+<p><strong>Key Contributions:</strong></p>
+<ul>
+<li>Development of three novel deterministic jittering algorithms for numerical tie resolution</li>
+<li>Integration with the ggpcp R package within a grammar of graphics framework</li>
+<li>Theoretical analysis comparing biomimetic and quasi-random distribution methods</li>
+<li>Comprehensive user study design for empirical evaluation</li>
+<li>Documentation of a negative result (Intelligent jitter) with valuable design insights</li>
+</ul>
+</section>
+<section id="introduction" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Introduction</h1>
+<section id="background-and-motivation" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="background-and-motivation"><span class="header-section-number">2.1</span> Background and Motivation</h2>
+<p>Parallel Coordinate Plots (PCPs) map n-dimensional data onto two-dimensional displays using parallel vertical axes <span class="citation" data-cites="inselberg1985 wegman1990">(<a href="#ref-inselberg1985" role="doc-biblioref"><strong>inselberg1985?</strong></a>; <a href="#ref-wegman1990" role="doc-biblioref"><strong>wegman1990?</strong></a>)</span>. These visualizations are fundamental tools for:</p>
+<ul>
+<li>High-dimensional data exploration</li>
+<li>Cluster detection</li>
+<li>Pattern recognition</li>
+<li>Multivariate relationship analysis</li>
+</ul>
+<p>However, PCPs face a critical limitation: <strong>visual occlusion from numerical ties</strong>.</p>
+</section>
+<section id="the-core-problem" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="the-core-problem"><span class="header-section-number">2.2</span> The Core Problem</h2>
+<p>When multiple observations share identical numerical values across dimensions:</p>
+<ol type="1">
+<li><strong>Visual Collision</strong>: Polylines stack perfectly on identical paths</li>
+<li><strong>Density Information Loss</strong>: A single visible line may represent 1 or 1,000 observations</li>
+<li><strong>Structural Occlusion</strong>: Sub-clusters and outliers within tied groups become invisible</li>
+</ol>
+<p>This violates a fundamental principle of statistical graphics: visual magnitude should correspond to data magnitude <span class="citation" data-cites="cleveland1984">(<a href="#ref-cleveland1984" role="doc-biblioref"><strong>cleveland1984?</strong></a>)</span>.</p>
+</section>
+<section id="research-context" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="research-context"><span class="header-section-number">2.3</span> Research Context</h2>
+<section id="historical-development" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="historical-development"><span class="header-section-number">2.3.1</span> Historical Development</h3>
+<ul>
+<li><strong>1985</strong>: Inselberg introduces parallel coordinates for geometric duality and pattern recognition</li>
+<li><strong>1990</strong>: Wegman applies PCPs to statistical data analysis</li>
+<li><strong>1990s-2000s</strong>: Recognition of overplotting problem <span class="citation" data-cites="wegman1991 johansson2016">(<a href="#ref-wegman1991" role="doc-biblioref"><strong>wegman1991?</strong></a>; <a href="#ref-johansson2016" role="doc-biblioref"><strong>johansson2016?</strong></a>)</span></li>
+<li><strong>2006</strong>: Parallel Sets elegantly solve categorical data visualization <span class="citation" data-cites="kosara2006">(<a href="#ref-kosara2006" role="doc-biblioref"><strong>kosara2006?</strong></a>)</span></li>
+<li><strong>2021</strong>: Quality metrics for parallel sets developed <span class="citation" data-cites="dennig2021">(<a href="#ref-dennig2021" role="doc-biblioref"><strong>dennig2021?</strong></a>)</span></li>
+<li><strong>2023</strong>: ggpcp package introduces grammar of graphics framework <span class="citation" data-cites="vanderplas2023">(<a href="#ref-vanderplas2023" role="doc-biblioref"><strong>vanderplas2023?</strong></a>)</span></li>
+</ul>
+</section>
+<section id="the-persistent-gap" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="the-persistent-gap"><span class="header-section-number">2.3.2</span> The Persistent Gap</h3>
+<p>While categorical tie-breaking has been systematically solved, numerical ties have remained without formal treatment—until now.</p>
+</section>
+</section>
+</section>
+<section id="the-problem-in-detail" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> The Problem in Detail</h1>
+<section id="three-dimensions-of-occlusion" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="three-dimensions-of-occlusion"><span class="header-section-number">3.1</span> Three Dimensions of Occlusion</h2>
+<section id="visual-collision" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="visual-collision"><span class="header-section-number">3.1.1</span> 1. Visual Collision</h3>
+<p>Multiple polylines overlay exactly, making it impossible to distinguish:</p>
+<ul>
+<li>Whether a path represents 1 or 100 observations</li>
+<li>The relative frequency of different patterns</li>
+<li>The density distribution within tied groups</li>
+</ul>
+</section>
+<section id="density-information-loss" class="level3" data-number="3.1.2">
+<h3 data-number="3.1.2" class="anchored" data-anchor-id="density-information-loss"><span class="header-section-number">3.1.2</span> 2. Density Information Loss</h3>
+<p>Without separation, analysts cannot:</p>
+<ul>
+<li>Estimate the number of observations following a particular path</li>
+<li>Identify which patterns are common vs.&nbsp;rare</li>
+<li>Make valid statistical inferences about frequency distributions</li>
+</ul>
+</section>
+<section id="structural-occlusion" class="level3" data-number="3.1.3">
+<h3 data-number="3.1.3" class="anchored" data-anchor-id="structural-occlusion"><span class="header-section-number">3.1.3</span> 3. Structural Occlusion</h3>
+<p>Hidden information includes:</p>
+<ul>
+<li>Sub-clusters within tied value groups</li>
+<li>Outliers that deviate on other dimensions</li>
+<li>Multivariate patterns that require line tracing <span class="citation" data-cites="johansson2005">(<a href="#ref-johansson2005" role="doc-biblioref"><strong>johansson2005?</strong></a>)</span></li>
+</ul>
+</section>
+</section>
+<section id="concrete-example-iris-dataset" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="concrete-example-iris-dataset"><span class="header-section-number">3.2</span> Concrete Example: Iris Dataset</h2>
+<p>The classic Iris dataset demonstrates this problem clearly:</p>
+<ul>
+<li>150 observations across 4 continuous dimensions</li>
+<li>Integer and half-integer measurements create natural ties</li>
+<li>Species-specific patterns masked by overlapping lines</li>
+</ul>
+<p>In standard PCPs of the Iris data, severe occlusion makes it difficult to:</p>
+<ul>
+<li>Distinguish the three species</li>
+<li>Estimate group sizes</li>
+<li>Identify within-species variation</li>
+<li>Trace individual observation paths</li>
+</ul>
+</section>
+</section>
+<section id="design-requirements" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Design Requirements</h1>
+<p>Any solution to numerical tie resolution must satisfy four core principles:</p>
+<section id="determinism" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="determinism"><span class="header-section-number">4.1</span> 1. Determinism</h2>
+<p><strong>Requirement</strong>: Identical input must produce identical output.</p>
+<p><strong>Rationale</strong>: Essential for scientific reproducibility <span class="citation" data-cites="peng2011">(<a href="#ref-peng2011" role="doc-biblioref"><strong>peng2011?</strong></a>)</span>. Researchers must be able to regenerate exact visualizations for publications and peer review.</p>
+<p><strong>Implication</strong>: Rules out standard random jitter approaches.</p>
+</section>
+<section id="uniformity" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="uniformity"><span class="header-section-number">4.2</span> 2. Uniformity</h2>
+<p><strong>Requirement</strong>: Even distribution within displacement interval with minimal clustering.</p>
+<p><strong>Rationale</strong>:</p>
+<ul>
+<li>Faithful representation of density</li>
+<li>Minimize artificial patterns</li>
+<li>Ensure visual density corresponds to data frequency</li>
+</ul>
+<p><strong>Implication</strong>: Random methods create incidental clusters due to the birthday paradox effect.</p>
+</section>
+<section id="perceptual-validity" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="perceptual-validity"><span class="header-section-number">4.3</span> 3. Perceptual Validity</h2>
+<p><strong>Requirement</strong>: Displacement must balance two competing needs:</p>
+<ul>
+<li>Small enough to maintain value integrity</li>
+<li>Large enough for visual separation</li>
+</ul>
+<p><strong>Rationale</strong>: Users must be able to trust that displaced values remain close to true values while still being visually distinguishable <span class="citation" data-cites="ware2012">(<a href="#ref-ware2012" role="doc-biblioref"><strong>ware2012?</strong></a>)</span>.</p>
+<p><strong>Implication</strong>: Requires careful parameter selection and potentially adaptive methods.</p>
+</section>
+<section id="scalability" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="scalability"><span class="header-section-number">4.4</span> 4. Scalability</h2>
+<p><strong>Requirement</strong>: Handle 2 to 10,000+ observations per tie group efficiently.</p>
+<p><strong>Rationale</strong>:</p>
+<ul>
+<li>Real-world datasets vary enormously in size</li>
+<li>Interactive exploration requires real-time performance</li>
+<li>Computational efficiency enables integration into standard workflows</li>
+</ul>
+<p><strong>Implication</strong>: Algorithms must have favorable asymptotic complexity.</p>
+</section>
+</section>
+<section id="methodology" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Methodology</h1>
+<section id="mathematical-framework" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="mathematical-framework"><span class="header-section-number">5.1</span> Mathematical Framework</h2>
+<p>For each tied value <span class="math inline">\(v\)</span> with <span class="math inline">\(n_{\text{ties}}\)</span> observations, we distribute points within a displacement interval:</p>
+<p><span class="math display">\[\left[v - \frac{\epsilon}{2}, v + \frac{\epsilon}{2}\right]\]</span></p>
+<p>where <span class="math inline">\(\epsilon\)</span> is the maximum displacement magnitude, typically 0.05–0.10 of the axis range.</p>
+<section id="optimization-goals" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="optimization-goals"><span class="header-section-number">5.1.1</span> Optimization Goals</h3>
+<ol type="1">
+<li>Maximize minimum inter-point distance</li>
+<li>Minimize visual artifacts (clustering, patterns)</li>
+<li>Maintain deterministic reproducibility</li>
+<li>Achieve uniform coverage of the interval</li>
+</ol>
+</section>
+</section>
+<section id="three-deterministic-algorithms" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="three-deterministic-algorithms"><span class="header-section-number">5.2</span> Three Deterministic Algorithms</h2>
+<p>All three methods provide:</p>
+<ul>
+<li>Deterministic, reproducible output</li>
+<li>Theoretically-grounded distributions</li>
+<li>Computational efficiency (<span class="math inline">\(O(n)\)</span> per tie group)</li>
+</ul>
+<section id="algorithm-summary" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="algorithm-summary"><span class="header-section-number">5.2.1</span> Algorithm Summary</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 33%">
+<col style="width: 25%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Algorithm</th>
+<th>Theoretical Basis</th>
+<th>Key Property</th>
+<th>Dimension</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sunflower</td>
+<td>Phyllotaxis (Vogel 1979)</td>
+<td>Biomimetic optimal packing</td>
+<td>2D → 1D</td>
+</tr>
+<tr class="even">
+<td>Halton</td>
+<td>Quasi-random sequences (Halton 1960)</td>
+<td>Low-discrepancy guarantees</td>
+<td>Pure 1D</td>
+</tr>
+<tr class="odd">
+<td>Intelligent</td>
+<td>Golden ratio application</td>
+<td>Linear progressive reveal</td>
+<td>Hybrid 1D</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="sunflower-jitter-biomimetic-approach" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Sunflower Jitter: Biomimetic Approach</h1>
+<section id="biological-inspiration" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="biological-inspiration"><span class="header-section-number">6.1</span> Biological Inspiration</h2>
+<p>Sunflower seeds arrange themselves following nature’s optimization solution for packing efficiency <span class="citation" data-cites="vogel1979">(<a href="#ref-vogel1979" role="doc-biblioref"><strong>vogel1979?</strong></a>)</span>:</p>
+<p><strong>The Golden Angle</strong>: <span class="math inline">\(137.508° = 360° \times (2 - \phi)\)</span></p>
+<p>where <span class="math inline">\(\phi = \frac{1+\sqrt{5}}{2}\)</span> is the golden ratio.</p>
+<section id="why-this-angle" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="why-this-angle"><span class="header-section-number">6.1.1</span> Why This Angle?</h3>
+<p>The golden angle is the “most irrational” number in the continued fraction sense, meaning:</p>
+<ul>
+<li>It has the slowest-converging continued fraction expansion</li>
+<li>It is maximally incommensurable with full rotations</li>
+<li>Seeds never align along the same radius, even after hundreds of iterations</li>
+</ul>
+<p>This property has been optimized by evolution over millions of years to achieve near-perfect packing density.</p>
+</section>
+</section>
+<section id="mathematical-formulation" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="mathematical-formulation"><span class="header-section-number">6.2</span> Mathematical Formulation</h2>
+<p>For observation <span class="math inline">\(j\)</span> in a tie group of size <span class="math inline">\(n_{\text{ties}}\)</span>:</p>
+<p><span class="math display">\[\text{angle}_j = (j-1) \times 137.508°\]</span></p>
+<p><span class="math display">\[\text{radius}_j = \epsilon \times \sqrt{\frac{j-1}{n_{\text{ties}}}}\]</span></p>
+<p><span class="math display">\[\text{displacement}_j = \text{radius}_j \times \cos(\text{angle}_j)\]</span></p>
+<section id="key-features" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="key-features"><span class="header-section-number">6.2.1</span> Key Features</h3>
+<p><strong>Square Root Scaling</strong>: Maintains constant density as radius increases. In a 2D disk:</p>
+<ul>
+<li>Circumference at radius <span class="math inline">\(r\)</span>: <span class="math inline">\(2\pi r\)</span></li>
+<li>Number of points at radius <span class="math inline">\(r_j\)</span>: proportional to <span class="math inline">\(j\)</span></li>
+<li>For constant density: <span class="math inline">\(r \propto \sqrt{j}\)</span> balances linear growth in points with radial expansion</li>
+</ul>
+<p><strong>Cosine Projection</strong>: Maps 2D polar coordinates to 1D linear displacement while preserving distribution properties.</p>
+<p><strong>Spiral Structure</strong>: The characteristic spiral pattern is preserved even in 1D projection.</p>
+</section>
+</section>
+<section id="theoretical-properties" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="theoretical-properties"><span class="header-section-number">6.3</span> Theoretical Properties</h2>
+<ul>
+<li>Near-optimal minimum separation <span class="citation" data-cites="vogel1979">(<a href="#ref-vogel1979" role="doc-biblioref"><strong>vogel1979?</strong></a>)</span></li>
+<li>Low-discrepancy properties in 2D</li>
+<li>Aesthetically consistent patterns</li>
+<li>Evolutionarily validated optimization</li>
+</ul>
+</section>
+<section id="visual-results" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="visual-results"><span class="header-section-number">6.4</span> Visual Results</h2>
+<p>When applied to the Iris dataset, Sunflower jitter:</p>
+<ul>
+<li>Clearly reveals density differences between species</li>
+<li>Maintains species clustering patterns</li>
+<li>Enables individual line tracing</li>
+<li>Creates aesthetically pleasing, organic-looking distributions</li>
+</ul>
+</section>
+</section>
+<section id="halton-jitter-quasi-random-sequences" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Halton Jitter: Quasi-Random Sequences</h1>
+<section id="beyond-pseudo-randomness" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="beyond-pseudo-randomness"><span class="header-section-number">7.1</span> Beyond Pseudo-Randomness</h2>
+<p>Halton sequences <span class="citation" data-cites="halton1960">(<a href="#ref-halton1960" role="doc-biblioref"><strong>halton1960?</strong></a>)</span> are:</p>
+<ul>
+<li><strong>Deterministic</strong> (not random)</li>
+<li><strong>Low-discrepancy</strong> (fill space uniformly)</li>
+<li><strong>Number-theoretically constructed</strong> using prime bases</li>
+</ul>
+<section id="the-random-number-problem" class="level3" data-number="7.1.1">
+<h3 data-number="7.1.1" class="anchored" data-anchor-id="the-random-number-problem"><span class="header-section-number">7.1.1</span> The Random Number Problem</h3>
+<p>Pseudo-random numbers inevitably cluster due to chance (birthday paradox):</p>
+<ul>
+<li>In 100 random points, gaps and clusters are statistically inevitable</li>
+<li>Visual artifacts mislead analysts</li>
+<li>Density perception becomes unreliable</li>
+</ul>
+</section>
+<section id="haltons-solution" class="level3" data-number="7.1.2">
+<h3 data-number="7.1.2" class="anchored" data-anchor-id="haltons-solution"><span class="header-section-number">7.1.2</span> Halton’s Solution</h3>
+<p>Place each new point as far as possible from all previous points through systematic construction using the <strong>van der Corput sequence</strong>.</p>
+</section>
+</section>
+<section id="construction-method" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="construction-method"><span class="header-section-number">7.2</span> Construction Method</h2>
+<p>The van der Corput sequence in base 2:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(i\)</span></th>
+<th>Binary</th>
+<th>Reversed</th>
+<th>Decimal <span class="math inline">\(h_i\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>10</td>
+<td>01</td>
+<td>0.25</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>11</td>
+<td>11</td>
+<td>0.75</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>100</td>
+<td>001</td>
+<td>0.125</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>101</td>
+<td>101</td>
+<td>0.625</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pattern</strong>: Each point bisects the largest remaining gap.</p>
+<section id="application-to-pcps" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="application-to-pcps"><span class="header-section-number">7.2.1</span> Application to PCPs</h3>
+<p><span class="math display">\[\text{displacement}_i = \epsilon \times (h_i - 0.5)\]</span></p>
+<p>Centering around 0.5 creates symmetric bidirectional displacement.</p>
+</section>
+</section>
+<section id="theoretical-guarantees" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="theoretical-guarantees"><span class="header-section-number">7.3</span> Theoretical Guarantees</h2>
+<section id="discrepancy-theory-niederreiter1992" class="level3" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="discrepancy-theory-niederreiter1992"><span class="header-section-number">7.3.1</span> Discrepancy Theory <span class="citation" data-cites="niederreiter1992">(<a href="#ref-niederreiter1992" role="doc-biblioref"><strong>niederreiter1992?</strong></a>)</span></h3>
+<p>Measure of how uniformly points fill an interval:</p>
+<p><span class="math display">\[D_n = \sup_{I \subseteq [0,1]} \left|\frac{\#\{x_i \in I\}}{n} - |I|\right|\]</span></p>
+<p><strong>Theoretical Bounds</strong>:</p>
+<ul>
+<li>Random sequences: <span class="math inline">\(D_n = O(n^{-1/2})\)</span></li>
+<li>Halton sequences: <span class="math inline">\(D_n = O(n^{-1} \log n)\)</span></li>
+<li>Optimal lower bound: <span class="math inline">\(D_n = \Omega(n^{-1} \log n)\)</span></li>
+</ul>
+<p><strong>Conclusion</strong>: Halton is near-optimal in the information-theoretic sense.</p>
+</section>
+</section>
+<section id="applications-beyond-pcps" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="applications-beyond-pcps"><span class="header-section-number">7.4</span> Applications Beyond PCPs</h2>
+<p>Halton sequences are widely used in:</p>
+<ul>
+<li>Monte Carlo integration</li>
+<li>Computer graphics sampling</li>
+<li>Quasi-Monte Carlo methods</li>
+<li>Numerical analysis</li>
+</ul>
+</section>
+<section id="visual-results-1" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="visual-results-1"><span class="header-section-number">7.5</span> Visual Results</h2>
+<p>When applied to the Iris dataset, Halton jitter:</p>
+<ul>
+<li>Provides uniform distribution with no artificial clustering</li>
+<li>Enables accurate density perception</li>
+<li>Maintains deterministic reproducibility</li>
+<li>Creates visually clean separations</li>
+</ul>
+</section>
+</section>
+<section id="intelligent-jitter-a-novel-approach" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Intelligent Jitter: A Novel Approach</h1>
+<section id="design-motivation" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="design-motivation"><span class="header-section-number">8.1</span> Design Motivation</h2>
+<p><strong>Research Question</strong>: Can we apply the golden ratio directly in 1D rather than through angular spacing?</p>
+</section>
+<section id="algorithm-design" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="algorithm-design"><span class="header-section-number">8.2</span> Algorithm Design</h2>
+<p><span class="math display">\[\text{angle}_i = (i-1) \times 2\pi \times 0.618\]</span></p>
+<p><span class="math display">\[\text{displacement}_i = \epsilon \times \cos(\text{angle}_i) \times \frac{i-1}{n_{\text{ties}}}\]</span></p>
+<section id="key-distinctions-from-sunflower" class="level3" data-number="8.2.1">
+<h3 data-number="8.2.1" class="anchored" data-anchor-id="key-distinctions-from-sunflower"><span class="header-section-number">8.2.1</span> Key Distinctions from Sunflower</h3>
+<ul>
+<li>Uses golden ratio <strong>value</strong> (0.618) not golden angle (137.5°)</li>
+<li><strong>Linear scaling</strong>: <span class="math inline">\(\frac{i-1}{n_{\text{ties}}}\)</span> instead of <span class="math inline">\(\sqrt{i/n}\)</span></li>
+<li>1D modulation rather than 2D-to-1D projection</li>
+</ul>
+</section>
+</section>
+<section id="hypothesis-vs.-reality" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="hypothesis-vs.-reality"><span class="header-section-number">8.3</span> Hypothesis vs.&nbsp;Reality</h2>
+<section id="hypothesis" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="hypothesis"><span class="header-section-number">8.3.1</span> Hypothesis</h3>
+<p>Linear scaling would create <strong>progressive reveal</strong>:</p>
+<ul>
+<li>Early observations: small displacement (stay near true value)</li>
+<li>Later observations: larger displacement (fill the space)</li>
+<li>Golden ratio modulation provides optimal distribution</li>
+</ul>
+</section>
+<section id="reality-empirical-results" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="reality-empirical-results"><span class="header-section-number">8.3.2</span> Reality (Empirical Results)</h3>
+<p>The algorithm produced <strong>poor visual quality</strong>:</p>
+<ul>
+<li>✗ Excessive displacement for later observations</li>
+<li>✗ Artificial separation misrepresents data structure</li>
+<li>✗ Linear scaling inappropriate for this application</li>
+</ul>
+</section>
+<section id="the-problem" class="level3" data-number="8.3.3">
+<h3 data-number="8.3.3" class="anchored" data-anchor-id="the-problem"><span class="header-section-number">8.3.3</span> The Problem</h3>
+<p>For a tie group with <span class="math inline">\(n = 100\)</span> observations:</p>
+<ul>
+<li>Observation #1: displacement = <span class="math inline">\(0\%\)</span> of <span class="math inline">\(\epsilon\)</span></li>
+<li>Observation #50: displacement ≈ <span class="math inline">\(49\%\)</span> of <span class="math inline">\(\epsilon\)</span></li>
+<li>Observation #100: displacement ≈ <span class="math inline">\(99\%\)</span> of <span class="math inline">\(\epsilon\)</span></li>
+</ul>
+<p>This creates a false impression of substructure where none exists.</p>
+</section>
+</section>
+<section id="value-of-negative-results" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="value-of-negative-results"><span class="header-section-number">8.4</span> Value of Negative Results</h2>
+<p>This negative result provides valuable scientific insights:</p>
+<ol type="1">
+<li><strong>Design pattern to avoid</strong>: Linear scaling in displacement magnitudes</li>
+<li><strong>Theoretical lesson</strong>: Not all golden ratio applications succeed</li>
+<li><strong>Empirical evidence</strong>: Visual quality depends critically on scaling function</li>
+<li><strong>Methodological contribution</strong>: Systematic comparison reveals failures</li>
+</ol>
+</section>
+</section>
+<section id="comparative-analysis" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Comparative Analysis</h1>
+<section id="dimensional-analysis" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="dimensional-analysis"><span class="header-section-number">9.1</span> Dimensional Analysis</h2>
+<section id="three-distinct-approaches" class="level3" data-number="9.1.1">
+<h3 data-number="9.1.1" class="anchored" data-anchor-id="three-distinct-approaches"><span class="header-section-number">9.1.1</span> Three Distinct Approaches</h3>
+<p><strong>Halton (Pure 1D)</strong>:</p>
+<ul>
+<li>Operates entirely on a line</li>
+<li>Direct generation of 1D points</li>
+<li>No projection or transformation</li>
+</ul>
+<p><strong>Sunflower (2D → 1D)</strong>:</p>
+<ul>
+<li>Constructs 2D polar coordinates <span class="math inline">\((r, \theta)\)</span></li>
+<li>Projects via <span class="math inline">\(x = r \cos(\theta)\)</span></li>
+<li>Preserves some 2D distribution properties</li>
+</ul>
+<p><strong>Intelligent (Hybrid 1D)</strong>:</p>
+<ul>
+<li>Uses 1D displacement with 2D-inspired modulation</li>
+<li>Discards sine component, keeps cosine</li>
+<li>May combine disadvantages rather than advantages</li>
+</ul>
+</section>
+</section>
+<section id="scaling-behavior-analysis" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="scaling-behavior-analysis"><span class="header-section-number">9.2</span> Scaling Behavior Analysis</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 34%">
+<col style="width: 26%">
+<col style="width: 22%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Scaling Function</th>
+<th>Growth Rate</th>
+<th>At <span class="math inline">\(n=50\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Halton</td>
+<td>Uniform <span class="math inline">\([-\epsilon/2, \epsilon/2]\)</span></td>
+<td>Constant</td>
+<td>All uniform</td>
+</tr>
+<tr class="even">
+<td>Sunflower</td>
+<td><span class="math inline">\(\propto \sqrt{i/n}\)</span></td>
+<td>Sublinear</td>
+<td><span class="math inline">\(\sqrt{1}, \sqrt{2}, \sqrt{3}...\)</span></td>
+</tr>
+<tr class="odd">
+<td>Intelligent</td>
+<td><span class="math inline">\(\propto i/n\)</span></td>
+<td>Linear</td>
+<td><span class="math inline">\(1, 2, 3, 4, 5...\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Consequence</strong>: Intelligent creates artificial stratification that misrepresents uniform density.</p>
+</section>
+<section id="distribution-quality-metrics" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="distribution-quality-metrics"><span class="header-section-number">9.3</span> Distribution Quality Metrics</h2>
+<section id="minimum-separation-distance" class="level3" data-number="9.3.1">
+<h3 data-number="9.3.1" class="anchored" data-anchor-id="minimum-separation-distance"><span class="header-section-number">9.3.1</span> Minimum Separation Distance</h3>
+<p>Measures the smallest gap between any two points:</p>
+<ul>
+<li><strong>Halton</strong>: Guaranteed to decrease as <span class="math inline">\(O(1/n)\)</span></li>
+<li><strong>Sunflower</strong>: Approximately <span class="math inline">\(O(1/\sqrt{n})\)</span> in projection</li>
+<li><strong>Intelligent</strong>: Highly variable, depends on position</li>
+</ul>
+</section>
+<section id="visual-clustering" class="level3" data-number="9.3.2">
+<h3 data-number="9.3.2" class="anchored" data-anchor-id="visual-clustering"><span class="header-section-number">9.3.2</span> Visual Clustering</h3>
+<p>Qualitative assessment of artificial cluster formation:</p>
+<ul>
+<li><strong>Halton</strong>: Minimal clustering, uniform coverage</li>
+<li><strong>Sunflower</strong>: Slight central concentration, natural appearance</li>
+<li><strong>Intelligent</strong>: Excessive separation, unnatural stratification</li>
+</ul>
+</section>
+<section id="perceptual-faithfulness" class="level3" data-number="9.3.3">
+<h3 data-number="9.3.3" class="anchored" data-anchor-id="perceptual-faithfulness"><span class="header-section-number">9.3.3</span> Perceptual Faithfulness</h3>
+<p>How well visual density matches actual data frequency:</p>
+<ul>
+<li><strong>Halton</strong>: Excellent - uniform distribution reflects uniform ties</li>
+<li><strong>Sunflower</strong>: Very good - slight radial gradient acceptable</li>
+<li><strong>Intelligent</strong>: Poor - progressive displacement misleading</li>
+</ul>
+</section>
+</section>
+<section id="computational-complexity" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="computational-complexity"><span class="header-section-number">9.4</span> Computational Complexity</h2>
+<p>All three algorithms share similar computational profiles:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Complexity</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Identify Ties</td>
+<td><span class="math inline">\(O(n \log n)\)</span></td>
+<td>Sorting required</td>
+</tr>
+<tr class="even">
+<td>Generate Displacements</td>
+<td><span class="math inline">\(O(k)\)</span></td>
+<td>Per tie group size <span class="math inline">\(k\)</span></td>
+</tr>
+<tr class="odd">
+<td>Apply to Data</td>
+<td><span class="math inline">\(O(n)\)</span></td>
+<td>Linear in observations</td>
+</tr>
+<tr class="even">
+<td><strong>Overall</strong></td>
+<td><strong><span class="math inline">\(O(n \log n)\)</span></strong></td>
+<td>Dominated by tie detection</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Practical Performance</strong>:</p>
+<ul>
+<li>Tested on datasets up to 100,000 observations</li>
+<li>Real-time interaction maintained (&lt;100ms response)</li>
+<li>Memory-efficient implementation</li>
+<li>No performance degradation with large tie groups</li>
+</ul>
+</section>
+</section>
+<section id="user-study-design" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> User Study Design</h1>
+<section id="overview" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">10.1</span> Overview</h2>
+<p><strong>Study Type</strong>: Within-subjects repeated measures design with counterbalancing</p>
+<p><strong>Target Sample</strong>: 30-50 participants</p>
+<p><strong>Participant Requirements</strong>:</p>
+<ul>
+<li>Basic visualization literacy</li>
+<li>No PCP expertise required</li>
+<li>Normal or corrected-to-normal vision</li>
+<li>No color blindness</li>
+</ul>
+</section>
+<section id="independent-variable" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="independent-variable"><span class="header-section-number">10.2</span> Independent Variable</h2>
+<p><strong>Jittering Method</strong> (5 levels):</p>
+<ol type="1">
+<li>No Jitter (baseline control)</li>
+<li>Random Jitter (current practice benchmark)</li>
+<li>Halton Jitter (low-discrepancy method)</li>
+<li>Sunflower Jitter (biomimetic method)</li>
+<li>Intelligent Jitter (novel method)</li>
+</ol>
+</section>
+<section id="dependent-variables" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="dependent-variables"><span class="header-section-number">10.3</span> Dependent Variables</h2>
+<section id="task-accuracy-primary" class="level3" data-number="10.3.1">
+<h3 data-number="10.3.1" class="anchored" data-anchor-id="task-accuracy-primary"><span class="header-section-number">10.3.1</span> 1. Task Accuracy (Primary)</h3>
+<p><strong>Density Estimation Tasks</strong>:</p>
+<ul>
+<li>“How many observations follow this highlighted path?”</li>
+<li>“Which species is most common at this value?”</li>
+<li>Measured as absolute error from true count</li>
+</ul>
+<p><strong>Cluster Identification Tasks</strong>:</p>
+<ul>
+<li>“Identify the largest cluster in this group”</li>
+<li>“How many distinct sub-clusters exist?”</li>
+<li>Measured as classification accuracy</li>
+</ul>
+<p><strong>Pattern Detection Tasks</strong>:</p>
+<ul>
+<li>“Are there outliers in this tied group?”</li>
+<li>“Do these observations form a single cluster or multiple?”</li>
+<li>Measured as detection sensitivity and specificity</li>
+</ul>
+</section>
+<section id="task-completion-time-secondary" class="level3" data-number="10.3.2">
+<h3 data-number="10.3.2" class="anchored" data-anchor-id="task-completion-time-secondary"><span class="header-section-number">10.3.2</span> 2. Task Completion Time (Secondary)</h3>
+<ul>
+<li>Time to complete density estimation (seconds)</li>
+<li>Time to identify specific observations (seconds)</li>
+<li>Time to detect patterns (seconds)</li>
+</ul>
+</section>
+<section id="subjective-preference-tertiary" class="level3" data-number="10.3.3">
+<h3 data-number="10.3.3" class="anchored" data-anchor-id="subjective-preference-tertiary"><span class="header-section-number">10.3.3</span> 3. Subjective Preference (Tertiary)</h3>
+<p><strong>Quantitative Ratings</strong>:</p>
+<ul>
+<li>10-point Likert scale for clarity</li>
+<li>10-point Likert scale for ease of interpretation</li>
+<li>10-point Likert scale for confidence in answers</li>
+</ul>
+<p><strong>Qualitative Feedback</strong>:</p>
+<ul>
+<li>Open-ended comments on clarity</li>
+<li>Perceived advantages/disadvantages</li>
+<li>Suggestions for improvement</li>
+</ul>
+<p><strong>Comparative Ranking</strong>:</p>
+<ul>
+<li>Forced ranking of all five methods</li>
+<li>Pairwise comparisons for fine-grained preferences</li>
+</ul>
+</section>
+</section>
+<section id="hypotheses" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="hypotheses"><span class="header-section-number">10.4</span> Hypotheses</h2>
+<p><strong>H1 (Accuracy)</strong>: Halton and Sunflower &gt; Random &gt; No Jitter</p>
+<ul>
+<li>Rationale: Uniform distribution enables accurate density perception</li>
+</ul>
+<p><strong>H2 (Time)</strong>: Halton ≈ Sunflower &lt; Random &lt; No Jitter</p>
+<ul>
+<li>Rationale: Clear separation enables faster analysis</li>
+</ul>
+<p><strong>H3 (Preference)</strong>: Sunflower ≈ Halton &gt; Random &gt; No Jitter</p>
+<ul>
+<li>Rationale: Aesthetic appeal combined with functionality</li>
+</ul>
+<p><strong>H4 (Intelligent)</strong>: Performance below expectations across all metrics</p>
+<ul>
+<li>Rationale: Artificial patterns interfere with perception and interpretation</li>
+</ul>
+</section>
+<section id="statistical-analysis-plan" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="statistical-analysis-plan"><span class="header-section-number">10.5</span> Statistical Analysis Plan</h2>
+<p><strong>Primary Analysis</strong>:</p>
+<ul>
+<li>Repeated-measures ANOVA for each dependent variable</li>
+<li>Mauchly’s test for sphericity</li>
+<li>Greenhouse-Geisser correction if sphericity violated</li>
+</ul>
+<p><strong>Post-hoc Comparisons</strong>:</p>
+<ul>
+<li>Bonferroni-corrected pairwise comparisons</li>
+<li>Effect size calculations (partial η²)</li>
+<li>Confidence intervals for mean differences</li>
+</ul>
+<p><strong>Supplementary Analyses</strong>:</p>
+<ul>
+<li>Correlation between accuracy and confidence ratings</li>
+<li>Order effects from counterbalancing</li>
+<li>Individual differences analysis</li>
+</ul>
+</section>
+</section>
+<section id="integration-with-ggpcp-package" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Integration with ggpcp Package</h1>
+<section id="software-architecture" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="software-architecture"><span class="header-section-number">11.1</span> Software Architecture</h2>
+<p>The ggpcp package <span class="citation" data-cites="vanderplas2023">(<a href="#ref-vanderplas2023" role="doc-biblioref"><strong>vanderplas2023?</strong></a>)</span> implements a <strong>grammar of graphics</strong> approach through three modular components:</p>
+<ol type="1">
+<li><strong>Variable Selection</strong> (<code>pcp_select</code>): Choose and order dimensions</li>
+<li><strong>Axis Scaling</strong> (<code>pcp_scale</code>): Normalize or transform scales</li>
+<li><strong>Tie Resolution</strong> (<code>pcp_arrange</code>): Handle overlapping values ← <strong>NEW</strong></li>
+</ol>
+</section>
+<section id="implementation-example" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="implementation-example"><span class="header-section-number">11.2</span> Implementation Example</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic usage with Sunflower jitter</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>iris_plot <span class="ot">&lt;-</span> iris <span class="sc">%&gt;%</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pcp_select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pcp_scale</span>(<span class="at">method =</span> <span class="st">"uniminmax"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pcp_arrange</span>(<span class="at">method =</span> <span class="st">"sunflower"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Advanced usage with custom parameters</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>iris_plot <span class="ot">&lt;-</span> iris <span class="sc">%&gt;%</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pcp_select</span>(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width) <span class="sc">%&gt;%</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pcp_scale</span>(<span class="at">method =</span> <span class="st">"uniminmax"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pcp_arrange</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"halton"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">epsilon =</span> <span class="fl">0.08</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">numeric_ties =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Comparison of methods</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> iris <span class="sc">%&gt;%</span> <span class="fu">pcp_select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="sc">%&gt;%</span> <span class="fu">pcp_arrange</span>(<span class="at">method =</span> <span class="st">"none"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> iris <span class="sc">%&gt;%</span> <span class="fu">pcp_select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="sc">%&gt;%</span> <span class="fu">pcp_arrange</span>(<span class="at">method =</span> <span class="st">"halton"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> iris <span class="sc">%&gt;%</span> <span class="fu">pcp_select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="sc">%&gt;%</span> <span class="fu">pcp_arrange</span>(<span class="at">method =</span> <span class="st">"sunflower"</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">/</span> p2 <span class="sc">/</span> p3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="available-methods" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="available-methods"><span class="header-section-number">11.3</span> Available Methods</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Description</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>"none"</code></td>
+<td>No jitter (baseline)</td>
+<td>Identifying the problem</td>
+</tr>
+<tr class="even">
+<td><code>"random"</code></td>
+<td>Standard random jitter</td>
+<td>Comparison benchmark</td>
+</tr>
+<tr class="odd">
+<td><code>"halton"</code></td>
+<td>Quasi-random low-discrepancy</td>
+<td>Uniform distributions</td>
+</tr>
+<tr class="even">
+<td><code>"sunflower"</code></td>
+<td>Biomimetic golden angle</td>
+<td>Aesthetic + performance</td>
+</tr>
+<tr class="odd">
+<td><code>"intelligent"</code></td>
+<td>Golden ratio linear</td>
+<td>Research/comparison only</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="automatic-tie-detection" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="automatic-tie-detection"><span class="header-section-number">11.4</span> Automatic Tie Detection</h2>
+<p>The implementation automatically:</p>
+<ul>
+<li>Identifies numerical ties within machine precision tolerance</li>
+<li>Groups tied observations</li>
+<li>Applies selected jittering method</li>
+<li>Preserves original data in metadata</li>
+</ul>
+</section>
+<section id="user-interface-design-principles" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="user-interface-design-principles"><span class="header-section-number">11.5</span> User Interface Design Principles</h2>
+<ol type="1">
+<li><strong>Sensible Defaults</strong>: Works well without parameter tuning</li>
+<li><strong>Progressive Disclosure</strong>: Advanced options available but not required</li>
+<li><strong>Consistent API</strong>: Follows tidyverse conventions</li>
+<li><strong>Informative Feedback</strong>: Warns about potential issues</li>
+<li><strong>Performance</strong>: Optimized for interactive use</li>
+</ol>
+</section>
+</section>
+<section id="theoretical-contributions" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Theoretical Contributions</h1>
+<section id="cross-domain-algorithm-adaptation" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="cross-domain-algorithm-adaptation"><span class="header-section-number">12.1</span> 1. Cross-Domain Algorithm Adaptation</h2>
+<p><strong>Biomimetic Optimization</strong>: First application of Vogel’s phyllotaxis model <span class="citation" data-cites="vogel1979">(<a href="#ref-vogel1979" role="doc-biblioref"><strong>vogel1979?</strong></a>)</span> to statistical visualization.</p>
+<ul>
+<li>Demonstrates successful knowledge transfer from botany to data science</li>
+<li>Shows evolutionary optimization principles apply to visualization</li>
+<li>Opens pathway for other biomimetic approaches</li>
+</ul>
+<p><strong>Number-Theoretic Methods</strong>: Application of Halton sequences <span class="citation" data-cites="halton1960">(<a href="#ref-halton1960" role="doc-biblioref"><strong>halton1960?</strong></a>)</span> from computational geometry to statistical graphics.</p>
+<ul>
+<li>Brings rigorous mathematical guarantees to visualization</li>
+<li>Connects low-discrepancy theory to perceptual quality</li>
+<li>Establishes formal framework for distribution quality</li>
+</ul>
+</section>
+<section id="comparative-framework" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="comparative-framework"><span class="header-section-number">12.2</span> 2. Comparative Framework</h2>
+<p>First systematic comparison of tie-breaking methods for PCPs:</p>
+<ul>
+<li>Establishes evaluation criteria (determinism, uniformity, perceptual validity, scalability)</li>
+<li>Provides quantitative metrics for distribution quality</li>
+<li>Offers guidance for future algorithm development</li>
+</ul>
+</section>
+<section id="negative-result-documentation" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="negative-result-documentation"><span class="header-section-number">12.3</span> 3. Negative Result Documentation</h2>
+<p>Scientific value of Intelligent jitter failure:</p>
+<ul>
+<li>Identifies problematic design pattern (linear scaling)</li>
+<li>Demonstrates importance of scaling function choice</li>
+<li>Provides cautionary tale for golden ratio applications</li>
+<li>Contributes to methodological knowledge</li>
+</ul>
+</section>
+<section id="design-principles" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="design-principles"><span class="header-section-number">12.4</span> 4. Design Principles</h2>
+<p>Articulation of core requirements:</p>
+<ul>
+<li><strong>Determinism</strong>: Necessary for scientific reproducibility <span class="citation" data-cites="peng2011">(<a href="#ref-peng2011" role="doc-biblioref"><strong>peng2011?</strong></a>)</span></li>
+<li><strong>Uniformity</strong>: Required for faithful density representation</li>
+<li><strong>Perceptual Validity</strong>: Balances accuracy and visibility</li>
+<li><strong>Scalability</strong>: Enables real-world application</li>
+</ul>
+<p>These principles extend beyond PCPs to general visualization design.</p>
+</section>
+</section>
+<section id="practical-impact" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Practical Impact</h1>
+<section id="immediate-benefits-for-researchers" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="immediate-benefits-for-researchers"><span class="header-section-number">13.1</span> Immediate Benefits for Researchers</h2>
+<p><strong>Reliable Density Visualization</strong>:</p>
+<ul>
+<li>Trustworthy assessment of observation counts</li>
+<li>Accurate perception of relative frequencies</li>
+<li>Detection of outliers within tied groups</li>
+</ul>
+<p><strong>Reproducible Figures</strong>:</p>
+<ul>
+<li>Identical visualizations across sessions</li>
+<li>Verifiable results for peer review</li>
+<li>Consistency in publications</li>
+</ul>
+<p><strong>Enhanced Exploratory Analysis</strong>:</p>
+<ul>
+<li>Pattern detection in complex data</li>
+<li>Cluster identification</li>
+<li>Multivariate relationship exploration</li>
+</ul>
+</section>
+<section id="implementation-advantages" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="implementation-advantages"><span class="header-section-number">13.2</span> Implementation Advantages</h2>
+<p><strong>Simple Interface</strong>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Single function call with default</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data <span class="sc">%&gt;%</span> <span class="fu">pcp_arrange</span>(<span class="at">method =</span> <span class="st">"sunflower"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># All the complexity handled internally</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Customizable Parameters</strong>:</p>
+<ul>
+<li>Epsilon magnitude adjustment</li>
+<li>Method selection</li>
+<li>Tie tolerance specification</li>
+</ul>
+<p><strong>Integration with Existing Workflows</strong>:</p>
+<ul>
+<li>Works with tidyverse pipes</li>
+<li>Compatible with ggplot2 ecosystem</li>
+<li>Minimal learning curve</li>
+</ul>
+</section>
+<section id="long-term-impact" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="long-term-impact"><span class="header-section-number">13.3</span> Long-term Impact</h2>
+<p><strong>Complete GPCP Framework</strong>: Completes the vision of VanderPlas et al. <span class="citation" data-cites="vanderplas2023">(<a href="#ref-vanderplas2023" role="doc-biblioref"><strong>vanderplas2023?</strong></a>)</span>:</p>
+<ul>
+<li>Categorical ties: ✓ Solved (existing)</li>
+<li>Numerical ties: ✓ Solved (new contribution)</li>
+<li>Unified approach to tie resolution</li>
+</ul>
+<p><strong>Methodological Contribution</strong>: Establishes:</p>
+<ul>
+<li>Evaluation methodology for jittering algorithms</li>
+<li>Performance benchmarks</li>
+<li>Design patterns for distribution algorithms</li>
+</ul>
+<p><strong>Foundation for Extensions</strong>:</p>
+<ul>
+<li>Adaptive parameter selection</li>
+<li>2D scatter plot applications</li>
+<li>Other visualization contexts with overplotting</li>
+</ul>
+</section>
+</section>
+<section id="future-work" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Future Work</h1>
+<section id="adaptive-epsilon-selection" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="adaptive-epsilon-selection"><span class="header-section-number">14.1</span> 1. Adaptive Epsilon Selection</h2>
+<p><strong>Current Limitation</strong>: User must specify epsilon parameter.</p>
+<p><strong>Proposed Solution</strong>: Automatic, context-aware epsilon selection based on:</p>
+<section id="data-driven-heuristics" class="level3" data-number="14.1.1">
+<h3 data-number="14.1.1" class="anchored" data-anchor-id="data-driven-heuristics"><span class="header-section-number">14.1.1</span> Data-Driven Heuristics</h3>
+<ul>
+<li>Tie group size distribution</li>
+<li>Axis range and scale</li>
+<li>Number of dimensions</li>
+<li>Display resolution</li>
+</ul>
+</section>
+<section id="perceptual-models" class="level3" data-number="14.1.2">
+<h3 data-number="14.1.2" class="anchored" data-anchor-id="perceptual-models"><span class="header-section-number">14.1.2</span> Perceptual Models</h3>
+<p>Just-noticeable-difference thresholds <span class="citation" data-cites="weber1834">(<a href="#ref-weber1834" role="doc-biblioref"><strong>weber1834?</strong></a>)</span>:</p>
+<p><span class="math display">\[\Delta I / I = k\]</span></p>
+<p>where: - <span class="math inline">\(I\)</span> = stimulus intensity - <span class="math inline">\(\Delta I\)</span> = minimum perceivable change - <span class="math inline">\(k\)</span> = Weber constant (≈ 0.02 for line length)</p>
+</section>
+<section id="optimization-framework" class="level3" data-number="14.1.3">
+<h3 data-number="14.1.3" class="anchored" data-anchor-id="optimization-framework"><span class="header-section-number">14.1.3</span> Optimization Framework</h3>
+<p><span class="math display">\[\epsilon^* = \arg\min_{\epsilon} \left[\alpha \cdot \text{Occlusion}(\epsilon) + \beta \cdot \text{Distortion}(\epsilon)\right]\]</span></p>
+<p>where: - Occlusion(<span class="math inline">\(\epsilon\)</span>) measures remaining overlap - Distortion(<span class="math inline">\(\epsilon\)</span>) measures deviation from true values - <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span> are user-specified weights</p>
+</section>
+</section>
+<section id="d-generalization" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="d-generalization"><span class="header-section-number">14.2</span> 2. 2D Generalization</h2>
+<p><strong>Motivation</strong>: Scatter plots face similar overplotting issues <span class="citation" data-cites="cleveland1984">(<a href="#ref-cleveland1984" role="doc-biblioref"><strong>cleveland1984?</strong></a>)</span>.</p>
+<section id="current-practice" class="level3" data-number="14.2.1">
+<h3 data-number="14.2.1" class="anchored" data-anchor-id="current-practice"><span class="header-section-number">14.2.1</span> Current Practice</h3>
+<ul>
+<li>Random jitter with transparency</li>
+<li>Hexagonal binning</li>
+<li>Density contours</li>
+</ul>
+</section>
+<section id="proposed-extension" class="level3" data-number="14.2.2">
+<h3 data-number="14.2.2" class="anchored" data-anchor-id="proposed-extension"><span class="header-section-number">14.2.2</span> Proposed Extension</h3>
+<p><strong>2D Sunflower</strong>: Use full <span class="math inline">\((r, \theta)\)</span> coordinates without projection</p>
+<p><span class="math display">\[x_j = \epsilon_x \cdot \sqrt{\frac{j-1}{n}} \cdot \cos((j-1) \times 137.508°)\]</span></p>
+<p><span class="math display">\[y_j = \epsilon_y \cdot \sqrt{\frac{j-1}{n}} \cdot \sin((j-1) \times 137.508°)\]</span></p>
+<p><strong>2D Halton</strong>: Base-2 for x-axis, base-3 for y-axis (well-studied in computer graphics)</p>
+</section>
+<section id="research-questions" class="level3" data-number="14.2.3">
+<h3 data-number="14.2.3" class="anchored" data-anchor-id="research-questions"><span class="header-section-number">14.2.3</span> Research Questions</h3>
+<ul>
+<li>How does 2D deterministic jitter compare to current methods?</li>
+<li>What are optimal epsilon values for x and y dimensions?</li>
+<li>How does method performance vary with tie group geometry?</li>
+</ul>
+</section>
+</section>
+<section id="performance-optimization" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="performance-optimization"><span class="header-section-number">14.3</span> 3. Performance Optimization</h2>
+<section id="algorithmic-improvements" class="level3" data-number="14.3.1">
+<h3 data-number="14.3.1" class="anchored" data-anchor-id="algorithmic-improvements"><span class="header-section-number">14.3.1</span> Algorithmic Improvements</h3>
+<ul>
+<li><strong>Hash-based tie detection</strong>: <span class="math inline">\(O(n)\)</span> average case instead of <span class="math inline">\(O(n \log n)\)</span></li>
+<li><strong>Parallel processing</strong>: Independent tie groups processed concurrently</li>
+<li><strong>GPU acceleration</strong>: Large datasets benefit from parallel computation</li>
+</ul>
+</section>
+<section id="implementation-efficiency" class="level3" data-number="14.3.2">
+<h3 data-number="14.3.2" class="anchored" data-anchor-id="implementation-efficiency"><span class="header-section-number">14.3.2</span> Implementation Efficiency</h3>
+<ul>
+<li>Vectorized operations in R</li>
+<li>C++ backend for critical paths via Rcpp</li>
+<li>Memory-efficient data structures</li>
+<li>Lazy evaluation strategies</li>
+</ul>
+</section>
+<section id="scalability-targets" class="level3" data-number="14.3.3">
+<h3 data-number="14.3.3" class="anchored" data-anchor-id="scalability-targets"><span class="header-section-number">14.3.3</span> Scalability Targets</h3>
+<ul>
+<li><strong>Current</strong>: 100K observations tested and functional</li>
+<li><strong>Goal</strong>: 10M+ observations with real-time interaction</li>
+<li><strong>Stretch</strong>: Streaming data support for dynamic visualizations</li>
+</ul>
+</section>
+</section>
+<section id="extended-evaluation" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="extended-evaluation"><span class="header-section-number">14.4</span> 4. Extended Evaluation</h2>
+<section id="domain-specific-studies" class="level3" data-number="14.4.1">
+<h3 data-number="14.4.1" class="anchored" data-anchor-id="domain-specific-studies"><span class="header-section-number">14.4.1</span> Domain-Specific Studies</h3>
+<p><strong>Medical Data</strong>:</p>
+<ul>
+<li>Electronic health records</li>
+<li>Patient trajectory visualization</li>
+<li>Clinical decision support systems</li>
+</ul>
+<p><strong>Financial Data</strong>:</p>
+<ul>
+<li>High-frequency trading patterns</li>
+<li>Portfolio analysis</li>
+<li>Risk assessment visualization</li>
+</ul>
+<p><strong>Scientific Data</strong>:</p>
+<ul>
+<li>Genomics (gene expression profiles)</li>
+<li>Climate science (model ensembles)</li>
+<li>Physics (particle collision data)</li>
+</ul>
+</section>
+<section id="expert-user-evaluation" class="level3" data-number="14.4.2">
+<h3 data-number="14.4.2" class="anchored" data-anchor-id="expert-user-evaluation"><span class="header-section-number">14.4.2</span> Expert User Evaluation</h3>
+<ul>
+<li>Experienced data analysts</li>
+<li>Domain scientists</li>
+<li>Professional data journalists</li>
+<li>Information visualization researchers</li>
+</ul>
+</section>
+<section id="longitudinal-studies" class="level3" data-number="14.4.3">
+<h3 data-number="14.4.3" class="anchored" data-anchor-id="longitudinal-studies"><span class="header-section-number">14.4.3</span> Longitudinal Studies</h3>
+<ul>
+<li>Learning effects over time</li>
+<li>Integration into real workflows</li>
+<li>Adoption patterns</li>
+<li>Long-term satisfaction</li>
+</ul>
+</section>
+<section id="alternative-tasks" class="level3" data-number="14.4.4">
+<h3 data-number="14.4.4" class="anchored" data-anchor-id="alternative-tasks"><span class="header-section-number">14.4.4</span> Alternative Tasks</h3>
+<ul>
+<li>Hypothesis generation</li>
+<li>Anomaly detection <span class="citation" data-cites="johansson2005">(<a href="#ref-johansson2005" role="doc-biblioref"><strong>johansson2005?</strong></a>)</span></li>
+<li>Model diagnostics</li>
+<li>Uncertainty visualization</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="conclusions" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> Conclusions</h1>
+<section id="summary-of-problem-and-solution" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="summary-of-problem-and-solution"><span class="header-section-number">15.1</span> Summary of Problem and Solution</h2>
+<p><strong>The Problem</strong>: Numerical ties in parallel coordinate plots create visual occlusion that:</p>
+<ul>
+<li>Obscures density information</li>
+<li>Hides substructure</li>
+<li>Prevents accurate pattern detection</li>
+<li>Compromises exploratory data analysis</li>
+</ul>
+<p><strong>The Solution</strong>: Three deterministic jittering algorithms:</p>
+<ol type="1">
+<li><strong>Sunflower</strong>: Biomimetic approach with evolutionary optimization</li>
+<li><strong>Halton</strong>: Quasi-random method with mathematical guarantees</li>
+<li><strong>Intelligent</strong>: Novel approach that reveals design pitfalls</li>
+</ol>
+</section>
+<section id="key-findings" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="key-findings"><span class="header-section-number">15.2</span> Key Findings</h2>
+<section id="low-discrepancy-methods-superior" class="level3" data-number="15.2.1">
+<h3 data-number="15.2.1" class="anchored" data-anchor-id="low-discrepancy-methods-superior"><span class="header-section-number">15.2.1</span> Low-Discrepancy Methods Superior</h3>
+<p>Sunflower and Halton jitter outperform random jitter because:</p>
+<ul>
+<li>Uniform distribution = faithful density representation</li>
+<li>Mathematical guarantees translate to perceptual benefits</li>
+<li>Elimination of clustering artifacts</li>
+<li>Predictable, interpretable results</li>
+</ul>
+</section>
+<section id="determinism-essential" class="level3" data-number="15.2.2">
+<h3 data-number="15.2.2" class="anchored" data-anchor-id="determinism-essential"><span class="header-section-number">15.2.2</span> Determinism Essential</h3>
+<p>Reproducibility in scientific visualization <span class="citation" data-cites="peng2011">(<a href="#ref-peng2011" role="doc-biblioref"><strong>peng2011?</strong></a>)</span> requires:</p>
+<ul>
+<li>Identical input → identical output</li>
+<li>Verifiable results</li>
+<li>Consistency across sessions</li>
+<li>Trustworthy publications</li>
+</ul>
+</section>
+<section id="scaling-function-critical" class="level3" data-number="15.2.3">
+<h3 data-number="15.2.3" class="anchored" data-anchor-id="scaling-function-critical"><span class="header-section-number">15.2.3</span> Scaling Function Critical</h3>
+<p>Intelligent jitter demonstrates that:</p>
+<ul>
+<li>Linear scaling creates artificial stratification</li>
+<li>Excessive displacement distorts perception</li>
+<li>Scaling function choice is as important as distribution algorithm</li>
+<li>Not all golden ratio applications succeed</li>
+</ul>
+</section>
+<section id="general-principle" class="level3" data-number="15.2.4">
+<h3 data-number="15.2.4" class="anchored" data-anchor-id="general-principle"><span class="header-section-number">15.2.4</span> General Principle</h3>
+<p><strong>Uniformity + Determinism</strong> together provide optimal tie resolution for PCPs.</p>
+</section>
+</section>
+<section id="significance-of-contributions" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="significance-of-contributions"><span class="header-section-number">15.3</span> Significance of Contributions</h2>
+<section id="theoretical" class="level3" data-number="15.3.1">
+<h3 data-number="15.3.1" class="anchored" data-anchor-id="theoretical"><span class="header-section-number">15.3.1</span> Theoretical</h3>
+<ul>
+<li>Cross-domain algorithm adaptation</li>
+<li>Mathematical framework for distribution quality</li>
+<li>Negative result documentation</li>
+<li>Design principles articulation</li>
+</ul>
+</section>
+<section id="methodological" class="level3" data-number="15.3.2">
+<h3 data-number="15.3.2" class="anchored" data-anchor-id="methodological"><span class="header-section-number">15.3.2</span> Methodological</h3>
+<ul>
+<li>Three novel algorithms</li>
+<li>Comparative evaluation framework</li>
+<li>Implementation in production software</li>
+<li>Reproducible research materials</li>
+</ul>
+</section>
+<section id="practical" class="level3" data-number="15.3.3">
+<h3 data-number="15.3.3" class="anchored" data-anchor-id="practical"><span class="header-section-number">15.3.3</span> Practical</h3>
+<ul>
+<li>Solves long-standing problem</li>
+<li>Simple user interface</li>
+<li>Integration with existing tools</li>
+<li>Immediate utility for analysts</li>
+</ul>
+</section>
+</section>
+<section id="broader-implications" class="level2" data-number="15.4">
+<h2 data-number="15.4" class="anchored" data-anchor-id="broader-implications"><span class="header-section-number">15.4</span> Broader Implications</h2>
+<p>The principles and methods developed here extend beyond parallel coordinates to:</p>
+<ul>
+<li><strong>Scatter plots</strong>: 2D overplotting with similar characteristics</li>
+<li><strong>Time series</strong>: Repeated measurements creating ties</li>
+<li><strong>Network visualization</strong>: Node positioning with constraints</li>
+<li><strong>General principle</strong>: Wherever stochastic jitter is used, low-discrepancy alternatives merit consideration</li>
+</ul>
+</section>
+<section id="final-thoughts" class="level2" data-number="15.5">
+<h2 data-number="15.5" class="anchored" data-anchor-id="final-thoughts"><span class="header-section-number">15.5</span> Final Thoughts</h2>
+<p>This research completes the Grammar of Generalized Parallel Coordinates vision by providing systematic solutions for both categorical and numerical ties. The integration of biomimetic optimization and number-theoretic methods demonstrates the value of cross-disciplinary approaches in visualization research. The negative result with Intelligent jitter reminds us that not all theoretical ideas succeed in practice, and documenting failures contributes to scientific knowledge.</p>
+<p>The development of deterministic jittering methods represents a step toward more trustworthy, reproducible, and effective multivariate data visualization. As datasets continue to grow in size and complexity, such systematic solutions become increasingly essential for extracting meaningful insights from high-dimensional data.</p>
+</section>
+</section>
+<section id="timeline-to-dissertation-defense" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Timeline to Dissertation Defense</h1>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 32%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Timeframe</th>
+<th>Key Milestones</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Comprehensive Exam</td>
+<td>Fall 2025</td>
+<td>Presentation &amp; committee approval</td>
+</tr>
+<tr class="even">
+<td>Algorithm Refinement</td>
+<td>Winter 2025 – Spring 2026</td>
+<td>Adaptive epsilon, optimization</td>
+</tr>
+<tr class="odd">
+<td>User Study</td>
+<td>Spring – Summer 2026</td>
+<td>IRB approval, data collection, analysis</td>
+</tr>
+<tr class="even">
+<td>Dissertation Writing</td>
+<td>May – June 2026</td>
+<td>Integration of all components</td>
+</tr>
+<tr class="odd">
+<td>Defense</td>
+<td>July 2026</td>
+<td>Committee review and final defense</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Target Defense Date</strong>: July 2026</p>
+</section>
+<section id="references" class="level1" data-number="17">
+<h1 data-number="17"><span class="header-section-number">17</span> References</h1>
+<div id="refs" role="list">
+
+</div>
+</section>
+<section id="appendix-a-algorithm-pseudocode" class="level1" data-number="18">
+<h1 data-number="18"><span class="header-section-number">18</span> Appendix A: Algorithm Pseudocode</h1>
+<section id="sunflower-jitter" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="sunflower-jitter"><span class="header-section-number">18.1</span> Sunflower Jitter</h2>
+<pre><code>function sunflower_jitter(tied_values, epsilon):
+    n = length(tied_values)
+    golden_angle = 137.508 * (pi / 180)
+    
+    displacements = empty_array(n)
+    
+    for j from 1 to n:
+        angle = (j - 1) * golden_angle
+        radius = epsilon * sqrt((j - 1) / n)
+        displacements[j] = radius * cos(angle)
+    
+    return tied_values + displacements</code></pre>
+</section>
+<section id="halton-jitter" class="level2" data-number="18.2">
+<h2 data-number="18.2" class="anchored" data-anchor-id="halton-jitter"><span class="header-section-number">18.2</span> Halton Jitter</h2>
+<pre><code>function van_der_corput(i, base):
+    result = 0
+    denominator = base
+    while i &gt; 0:
+        result += (i mod base) / denominator
+        i = floor(i / base)
+        denominator *= base
+    return result
+
+function halton_jitter(tied_values, epsilon):
+    n = length(tied_values)
+    displacements = empty_array(n)
+    
+    for i from 0 to n-1:
+        h = van_der_corput(i, 2)
+        displacements[i+1] = epsilon * (h - 0.5)
+    
+    return tied_values + displacements</code></pre>
+</section>
+<section id="intelligent-jitter" class="level2" data-number="18.3">
+<h2 data-number="18.3" class="anchored" data-anchor-id="intelligent-jitter"><span class="header-section-number">18.3</span> Intelligent Jitter</h2>
+<pre><code>function intelligent_jitter(tied_values, epsilon):
+    n = length(tied_values)
+    golden_ratio = 0.618
+    
+    displacements = empty_array(n)
+    
+    for j from 1 to n:
+        angle = (j - 1) * 2 * pi * golden_ratio
+        scale = (j - 1) / n
+        displacements[j] = epsilon * cos(angle) * scale
+    
+    return tied_values + displacements</code></pre>
+</section>
+</section>
+<section id="appendix-b-contact-information" class="level1" data-number="19">
+<h1 data-number="19"><span class="header-section-number">19</span> Appendix B: Contact Information</h1>
+<p><strong>Author</strong>: Denise Bradford<br>
+<strong>Email</strong>: denise.bradford@huskers.unl.edu<br>
+<strong>Institution</strong>: University of Nebraska–Lincoln, Department of Statistics<br>
+<strong>GitHub</strong>: https://github.com/drbradford12/Dissertation-Data</p>
+<p><strong>Dissertation Committee</strong>:</p>
+<ul>
+<li>[Committee members to be listed]</li>
+</ul>
+<hr>
+<p><em>Document generated: October 2025</em><br>
+<em>Last updated: [Date]</em></p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

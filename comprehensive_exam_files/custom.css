@@ -1,0 +1,354 @@
+/* Custom CSS for Comprehensive Exam Presentation */
+
+:root {
+  --unl-red: #D00000;
+  --unl-cream: #FEFDFA;
+  --dark-gray: #333333;
+  --light-gray: #F5F5F5;
+  --accent-blue: #005A9C;
+}
+
+/* Overall presentation styling */
+.reveal {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: normal;
+  color: var(--dark-gray);
+}
+
+/* Slide backgrounds */
+.reveal .slides {
+  background-color: var(--unl-cream);
+}
+
+/* Headings */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4 {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--unl-red);
+  text-transform: none;
+  font-weight: bold;
+}
+
+.reveal h1 {
+  font-size: 2.5em;
+  margin-bottom: 0.5em;
+}
+
+.reveal h2 {
+  font-size: 1.8em;
+  margin-bottom: 0.3em;
+  border-bottom: 3px solid var(--unl-red);
+  padding-bottom: 0.2em;
+}
+
+.reveal h3 {
+  font-size: 1.3em;
+  margin-bottom: 0.2em;
+  color: var(--accent-blue);
+}
+
+/* Text styling */
+.reveal p {
+  margin: 0.5em 0;
+  line-height: 1.4;
+}
+
+.reveal strong {
+  color: var(--unl-red);
+  font-weight: bold;
+}
+
+.reveal em {
+  font-style: italic;
+  color: var(--accent-blue);
+}
+
+/* Lists */
+.reveal ul,
+.reveal ol {
+  margin-left: 1em;
+}
+
+.reveal ul li,
+.reveal ol li {
+  margin-bottom: 0.5em;
+}
+
+/* Code blocks */
+.reveal pre {
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3);
+  background-color: var(--light-gray);
+  border-radius: 5px;
+  padding: 1em;
+  font-size: 0.7em;
+  margin: 1em 0;
+}
+
+.reveal code {
+  font-family: 'Courier New', monospace;
+  color: var(--accent-blue);
+  background-color: var(--light-gray);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+/* Tables */
+.reveal table {
+  margin: auto;
+  border-collapse: collapse;
+  font-size: 0.8em;
+}
+
+.reveal table thead {
+  background-color: var(--unl-red);
+  color: white;
+}
+
+.reveal table th,
+.reveal table td {
+  padding: 0.5em 1em;
+  border: 1px solid #ddd;
+}
+
+.reveal table tbody tr:nth-child(even) {
+  background-color: var(--light-gray);
+}
+
+/* Mathematical expressions */
+.reveal .math {
+  font-size: 0.9em;
+}
+
+/* Blockquotes */
+.reveal blockquote {
+  background-color: var(--light-gray);
+  border-left: 5px solid var(--unl-red);
+  padding: 1em;
+  margin: 1em 0;
+  font-style: italic;
+}
+
+/* Images and figures */
+.reveal img {
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  max-width: 90%;
+  height: auto;
+}
+
+.reveal figure {
+  margin: 1em 0;
+}
+
+.reveal figcaption {
+  font-size: 0.7em;
+  font-style: italic;
+  color: #666;
+  margin-top: 0.5em;
+}
+
+/* Links */
+.reveal a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+.reveal a:hover {
+  color: var(--unl-red);
+  text-decoration: underline;
+}
+
+/* Progress bar */
+.reveal .progress {
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--unl-red);
+}
+
+.reveal .progress span {
+  background: var(--unl-red);
+}
+
+/* Slide numbers */
+.reveal .slide-number {
+  color: var(--dark-gray);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+  border-radius: 3px;
+}
+
+/* Title slide */
+.reveal .title-slide h1 {
+  color: var(--unl-red);
+  font-size: 2.5em;
+  margin-bottom: 0.3em;
+}
+
+.reveal .title-slide h2 {
+  color: var(--dark-gray);
+  font-size: 1.2em;
+  border-bottom: none;
+  font-weight: normal;
+}
+
+.reveal .title-slide h3 {
+  color: var(--accent-blue);
+  font-size: 1em;
+  font-weight: normal;
+}
+
+/* Section headers */
+.reveal .section-title {
+  background-color: var(--unl-red);
+  color: white;
+  padding: 2em;
+  text-align: center;
+}
+
+/* Columns */
+.reveal .column {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.reveal .column.left {
+  width: 48%;
+  margin-right: 2%;
+}
+
+.reveal .column.right {
+  width: 48%;
+  margin-left: 2%;
+}
+
+/* Callout boxes */
+.reveal .callout {
+  background-color: var(--light-gray);
+  border-left: 5px solid var(--accent-blue);
+  padding: 1em;
+  margin: 1em 0;
+}
+
+.reveal .callout.warning {
+  border-left-color: #ff9800;
+}
+
+.reveal .callout.error {
+  border-left-color: var(--unl-red);
+}
+
+.reveal .callout.success {
+  border-left-color: #4caf50;
+}
+
+/* Checkmarks and crosses */
+.reveal .checkmark {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.reveal .crossmark {
+  color: var(--unl-red);
+  font-weight: bold;
+}
+
+/* Footnotes */
+.reveal .footnote {
+  font-size: 0.6em;
+  color: #666;
+  margin-top: 2em;
+  border-top: 1px solid #ccc;
+  padding-top: 0.5em;
+}
+
+/* Algorithm boxes */
+.reveal .algorithm {
+  background-color: #f9f9f9;
+  border: 2px solid var(--accent-blue);
+  border-radius: 5px;
+  padding: 1em;
+  margin: 1em 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8em;
+}
+
+/* Emphasis boxes */
+.reveal .emphasis {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 5px;
+  padding: 1em;
+  margin: 1em 0;
+  font-weight: bold;
+}
+
+/* Timeline styling */
+.reveal .timeline {
+  position: relative;
+  padding-left: 2em;
+}
+
+.reveal .timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--unl-red);
+}
+
+.reveal .timeline-item {
+  position: relative;
+  margin-bottom: 1em;
+  padding-left: 1em;
+}
+
+.reveal .timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2.3em;
+  top: 0.5em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent-blue);
+  border: 2px solid white;
+}
+
+/* Custom bullet points */
+.reveal ul.custom-bullets li::marker {
+  color: var(--unl-red);
+  font-size: 1.2em;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .reveal {
+    font-size: 24px;
+  }
+
+  .reveal .column.left,
+  .reveal .column.right {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* Print styles */
+@media print {
+  .reveal {
+    background-color: white;
+  }
+
+  .reveal h2 {
+    page-break-after: avoid;
+  }
+
+  .reveal img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+}

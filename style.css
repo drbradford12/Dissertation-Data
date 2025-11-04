@@ -1,0 +1,121 @@
+/* UNL slide styling — Quarto/reveal.js + xaringan/remark */
+
+/* 1) Brand tokens */
+:root{
+  --unl-scarlet:#d00000;      /* Scarlet (PMS 186CP) */
+  --unl-cream:#f5f1e7;        /* Cream (PMS 4545CP 25%) */
+  --unl-gray:#c7c8ca;         /* Cool Gray 3CP */
+  --unl-cream-light:#fefdfa;  /* Digital-only lighter cream */
+  --unl-navy:#001226;         /* Secondary navy (for accents) */
+  --unl-cerulean:#249ab5;     /* Secondary accent */
+  --unl-white:#FFFFFF;
+  --text:#111;                /* body text */
+}
+
+/* 2) Web fonts (UNL marketing/digital set) */
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Oswald:wght@500;600;700&display=swap');
+
+/* 3) Reveal.js scope */
+.reveal{
+  font-family:"Work Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+}
+.reveal .slides{
+  background:var(--unl-white);
+}
+.reveal h1,.reveal h2,.reveal h3{
+  font-family:"Oswald","Work Sans",system-ui, sans-serif;
+  color:var(--unl-scarlet);
+  letter-spacing:0.2px;
+}
+.reveal h1{ font-weight:700; }
+.reveal h2{ font-weight:600; }
+.reveal h3{ font-weight:600; }
+
+.reveal p, .reveal li{
+  font-family:"Source Serif 4","Work Sans",Georgia,serif;
+  line-height:1.35;
+}
+
+/* Title slide band */
+.reveal .slides section:first-of-type{
+  border-top:12px solid var(--unl-scarlet);
+  padding-top:1.2rem;
+}
+
+/* Links */
+.reveal a{ color:var(--unl-cerulean); }
+.reveal a:hover{ color:var(--unl-scarlet); }
+
+/* Code */
+.reveal code, .reveal pre code{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+}
+.reveal pre{
+  background:#fff;
+  border-left:4px solid var(--unl-scarlet);
+  box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+
+/* Tables */
+.reveal table{
+  width:100%;
+  border-collapse:collapse;
+  margin:0.6rem 0;
+  font-size:.9em;
+}
+.reveal th{
+  background:var(--unl-scarlet);
+  color:#fff;
+  text-align:left;
+  padding:.5rem .6rem;
+}
+.reveal td{
+  border-top:1px solid var(--unl-gray);
+  padding:.45rem .6rem;
+}
+.reveal tr:nth-child(even) td{
+  background:var(--unl-cream);
+}
+
+/* Accent callout */
+.reveal .callout{
+  border-left:6px solid var(--unl-scarlet);
+  background:#fff;
+  padding:.8rem 1rem;
+  margin:1rem 0;
+}
+
+/* Color utilities */
+.text-scarlet{ color:var(--unl-scarlet) !important; }
+.text-cream{ color:var(--unl-cream) !important; }
+.bg-scarlet{ background:var(--unl-scarlet) !important; color:#fff !important; }
+.bg-cream{ background:var(--unl-cream) !important; }
+
+/* 4) remark.js (xaringan) scope */
+.remark-slide-content{
+  font-family:"Work Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background:var(--unl-white);
+}
+.remark-slide-content h1,
+.remark-slide-content h2,
+.remark-slide-content h3{
+  font-family:"Oswald","Work Sans",system-ui, sans-serif;
+  color:var(--unl-scarlet);
+}
+.remark-slide-number{ color:#666; }
+
+/* Title slide band (remark) */
+.remark-slide-content.title-slide{
+  border-top:12px solid var(--unl-scarlet);
+}
+
+/* Footers / small meta */
+.footer, .remark-slide-content .footer{
+  font-size:.8em;
+  color:#555;
+  border-top:1px solid var(--unl-gray);
+  padding-top:.4rem;
+  margin-top:1rem;
+}

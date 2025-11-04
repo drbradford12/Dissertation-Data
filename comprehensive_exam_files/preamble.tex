@@ -1,0 +1,230 @@
+% LaTeX preamble for Comprehensive Exam Presentation
+
+% Additional packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{bbding}
+\usetikzlibrary{shapes,arrows,positioning}
+
+% UNL color definitions
+\definecolor{unlred}{RGB}{208,0,0}
+\definecolor{unlcream}{RGB}{254,253,250}
+\definecolor{darkgray}{RGB}{51,51,51}
+\definecolor{accentblue}{RGB}{0,90,156}
+\definecolor{lightgray}{RGB}{245,245,245}
+
+% Set colors for various elements
+\setbeamercolor{structure}{fg=unlred}
+\setbeamercolor{frametitle}{bg=unlred,fg=white}
+\setbeamercolor{title}{fg=unlred}
+\setbeamercolor{subtitle}{fg=darkgray}
+\setbeamercolor{author}{fg=accentblue}
+\setbeamercolor{institute}{fg=darkgray}
+\setbeamercolor{date}{fg=darkgray}
+
+% Set fonts
+\setbeamerfont{title}{size=\huge,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\normalsize}
+\setbeamerfont{author}{size=\normalsize}
+\setbeamerfont{institute}{size=\small}
+\setbeamerfont{date}{size=\small}
+
+% Custom commands for mathematical notation
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\mat}[1]{\bm{#1}}
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\Natural}{\mathbb{N}}
+\newcommand{\argmin}{\operatorname{argmin}}
+\newcommand{\argmax}{\operatorname{argmax}}
+
+% Custom command for epsilon
+\newcommand{\eps}{\varepsilon}
+
+% Custom command for the golden ratio
+\newcommand{\goldenratio}{\varphi}
+
+% Custom environment for algorithms
+\newenvironment{algorithm}[1][]{%
+  \begin{block}{#1}
+  \small
+}{%
+  \end{block}
+}
+
+% Custom environment for definitions
+% \newenvironment{definition}[1][]{%
+%   \begin{block}{Definition: #1}
+% }{%
+%   \end{block}
+% }
+
+% Custom environment for theorems
+% \newenvironment{theorem}[1][]{%s
+%   \begin{block}{Theorem: #1}
+% }{%
+%   \end{block}
+% }
+
+% Custom environment for examples
+% \newenvironment{example}[1][]{%
+%   \begin{exampleblock}{Example: #1}
+% }{%
+%   \end{exampleblock}
+% }
+
+% Custom environment for warnings/important notes
+\newenvironment{important}[1][]{%
+  \begin{alertblock}{Important: #1}
+}{%
+  \end{alertblock}
+}
+
+% Better table spacing
+\renewcommand{\arraystretch}{1.2}
+
+% Custom itemize symbols
+\setbeamertemplate{itemize item}{\color{unlred}$\blacksquare$}
+\setbeamertemplate{itemize subitem}{\color{accentblue}$\circ$}
+\setbeamertemplate{itemize subsubitem}{\color{darkgray}--}
+
+% Custom enumerate style
+\setbeamertemplate{enumerate items}[default]
+\setbeamercolor{item projected}{bg=unlred,fg=white}
+
+% Remove navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+% Add slide numbers
+\setbeamertemplate{footline}[frame number]
+
+% Section page template
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+% Custom checkmark and cross commands
+\newcommand{\cmark}{\textcolor{green}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{red}{\ding{55}}}
+
+% Better citation formatting
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+\setbeamerfont{bibliography item}{size=\tiny}
+\setbeamerfont{bibliography entry author}{size=\tiny}
+\setbeamerfont{bibliography entry title}{size=\tiny}
+\setbeamerfont{bibliography entry location}{size=\tiny}
+\setbeamerfont{bibliography entry note}{size=\tiny}
+
+% TikZ styles for diagrams
+\tikzstyle{block} = [rectangle, draw, fill=lightgray,
+    text width=5em, text centered, rounded corners, minimum height=3em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=lightgray,
+    minimum height=2em]
+
+% Highlighting command
+\newcommand{\highlight}[1]{\textcolor{unlred}{\textbf{#1}}}
+
+% Command for algorithm steps
+\newcounter{algostep}
+\newcommand{\algostep}{\stepcounter{algostep}\textbf{Step \thealgostep:} }
+\newcommand{\resetalgostep}{\setcounter{algostep}{0}}
+
+% Better spacing for equations
+\setlength{\abovedisplayskip}{10pt}
+\setlength{\belowdisplayskip}{10pt}
+\setlength{\abovedisplayshortskip}{5pt}
+\setlength{\belowdisplayshortskip}{5pt}
+
+% Caption formatting
+\setbeamerfont{caption}{size=\scriptsize}
+\setbeamertemplate{caption}[numbered]
+
+% Hyperlink colors
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accentblue,
+    citecolor=unlred,
+    filecolor=accentblue,
+    urlcolor=accentblue
+}
+
+% Custom frame title separator
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+
+% Better spacing in lists
+\setlength{\leftmargini}{1.5em}
+\setlength{\leftmarginii}{1.2em}
+\setlength{\leftmarginiii}{1em}
+
+% Code listing style
+\usepackage{listings}
+\lstset{
+  language=R,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{accentblue}\bfseries,
+  commentstyle=\color{darkgray}\itshape,
+  stringstyle=\color{unlred},
+  numbers=left,
+  numberstyle=\tiny\color{darkgray},
+  stepnumber=1,
+  numbersep=5pt,
+  backgroundcolor=\color{lightgray},
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  frame=single,
+  rulecolor=\color{darkgray},
+  tabsize=2,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=flexible
+}
+
+% Title page customization
+\setbeamertemplate{title page}{
+  \vbox{}
+  \vfill
+  \begingroup
+    \centering
+    \begin{beamercolorbox}[sep=8pt,center]{title}
+      \usebeamerfont{title}\inserttitle\par%
+      \ifx\insertsubtitle\@empty%
+      \else%
+        \vskip0.25em%
+        {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+      \fi%
+    \end{beamercolorbox}%
+    \vskip1em\par
+    \begin{beamercolorbox}[sep=8pt,center]{author}
+      \usebeamerfont{author}\insertauthor
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[sep=8pt,center]{institute}
+      \usebeamerfont{institute}\insertinstitute
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[sep=8pt,center]{date}
+      \usebeamerfont{date}\insertdate
+    \end{beamercolorbox}\vskip0.5em
+  \endgroup
+  \vfill
+}
+
+% Reduce spacing between items
+\setlength{\itemsep}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
