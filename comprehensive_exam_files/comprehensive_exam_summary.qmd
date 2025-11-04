@@ -1,132 +1,157 @@
 ---
 title: "Visualizing Ambiguity: A Grammar of Graphics Approach to Resolving Numerical Ties in Parallel Coordinate Plots"
-subtitle: "Comprehensive Exam Summary"
 author: "Denise Bradford"
-date: "November 2025"
-affiliation: "University of Nebraska–Lincoln"
+date: "Updated November 2025"
 format:
-  html:
-    toc: true
-    toc-depth: 3
-    number-sections: true
-    theme: cosmo
-    code-fold: true
   pdf:
     toc: true
     number-sections: true
     colorlinks: true
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    include-in-header:
+      text: |
+        \usepackage{soul}
+        \usepackage[dvipsnames]{xcolor} % colors
+        \newcommand{\db}[1]{{\textcolor{Green}{#1}}}
+        \newcommand{\svp}[1]{{\textcolor{RedOrange}{#1}}}
+        \newcommand{\hh}[1]{{\textcolor{blue}{#1}}}
+    html:
+      css: edits.css
 bibliography: references_summary.bib
+bibliographystyle: apa
+filters:
+   - latex-environment
+commands: [db,svp,hh]
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 5,
+  dpi = 300
+)
 
-# Executive Summary
+# Load required packages
+library(GGally)
+library(palmerpenguins)
+library(tidyverse)
+library(gridExtra)
+library(ggpcp)
+library(datasets)
+library(knitr)
+library(kableExtra)
 
-This document summarizes my research on resolving numerical ties in parallel coordinate plots (PCPs). 
-The research addresses a fundamental limitation in multivariate data visualization: when multiple observations share identical numerical values, they create perfectly overlapping polylines that obscure density information and substructure. 
-This work develops three deterministic jittering algorithms—Sunflower, Halton, and Intelligent—that systematically resolve numerical ties while maintaining reproducibility and perceptual validity.
+source(here::here("Numerical_ties_pcp.R"))
 
-**Key Contributions:**
 
-- Development of three novel deterministic jittering algorithms for numerical tie resolution
-- Integration with the ggpcp R package within a grammar of graphics framework
-- Theoretical analysis comparing biomimetic and quasi-random distribution methods
-- Comprehensive user study design for empirical evaluation
-- Documentation of a negative result (Intelligent jitter) with valuable design insights
+# Set theme
+theme_set(theme_bw(base_size = 12))
+
+# Color scales for iris
+iris_scale_color <- function(...) {
+  scale_color_manual(
+    "Species", 
+    values = c("setosa" = "#540D6E", 
+               "versicolor" = "#219B9D", 
+               "virginica" = "#FF8000"), 
+    ...
+  )
+}
+
+iris_scale_fill <- function(...) {
+  scale_fill_manual(
+    "Species", 
+    values = c("setosa" = "#540D6E", 
+               "versicolor" = "#219B9D", 
+               "virginica" = "#FF8000"), 
+    ...
+  )
+}
+
+# Clean iris data
+iris_clean <- iris %>% na.omit()
+```
 
 # Introduction
 
-## Background and Motivation
+This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs). 
+Parallel coordinates, first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes simultaneously [@inselberg2009]. 
+However, when datasets contain exact numerical ties, the resulting overlapping lines in PCPs can obscure critical distinctions. 
 
-Parallel Coordinate Plots (PCPs) map n-dimensional data onto two-dimensional displays using parallel vertical axes [@inselberg1985; @wegman1990]. 
-These visualizations are fundamental tools for:
+To address this, we propose three deterministic methods for introducing controlled spacing to tied values: **Halton jitter** (quasi-random sequences), **Sunflower jitter** (biomimetic distribution), and **Intelligent jitter** (golden ratio application). 
+These methods will be integrated into the `ggpcp` package in R, ensuring a streamlined workflow for users seeking enhanced clarity in their parallel coordinate visualizations.
 
-- High-dimensional data exploration
-- Cluster detection
-- Pattern recognition
-- Multivariate relationship analysis
+Importantly, our approach complements recent work on generalized parallel coordinate plots (GPCPs), an extension of PCPs that supports categorical variables [@vanderplas2023]. 
+The `ggpcp` package for R implements these GPCPs using a grammar of graphics framework, which seamlessly incorporates both continuous and categorical variables in a single parallel coordinate plot. 
+One of the key contributions of that work is a robust tie-breaking mechanism for categorical variables, implemented through the `pcp_arrange()` function with methods including "from-left" and "from-right" hierarchical sorting. 
+This ensures that individual observations can be traced across multiple dimensions, even when categories induce identical or "tied" values. 
 
-However, PCPs face a critical limitation: **visual occlusion from numerical ties**.
+By adding multiple numerical tie-breaking techniques for continuous data—including our three deterministic approaches—we further refine GPCPs' capacity to handle the visualization of real-world datasets exhibiting many types of ties.
 
-## The Core Problem
+# Background and Motivation
 
-When multiple observations share identical numerical values across dimensions:
+## Parallel Coordinate Plots
 
-1. **Visual Collision**: Polylines stack perfectly on identical paths
-2. **Density Information Loss**: A single visible line may represent 1 or 1,000 observations
-3. **Structural Occlusion**: Sub-clusters and outliers within tied groups become invisible
+Parallel coordinate plots assign each dimension of an $n$-dimensional dataset to a vertical axis arranged in parallel [@wegman1990]. 
+Each observation is drawn as a polyline connecting its values on these axes, providing a visual representation that can illuminate underlying data structures.
 
-This violates a fundamental principle of statistical graphics: visual magnitude should correspond to data magnitude [@cleveland1984].
+## Numerical Ties and Visual Overlap
 
-## Research Context
+When multiple observations share the same value in a given dimension, their polylines perfectly overlap, creating "visual collisions." 
+This masks information about distribution, density, or potential outliers. 
+The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
+However, the `ggpcp` implementation has demonstrated that careful tie-handling is essential for both continuous and categorical variables.
 
-### Historical Development
+Introducing a small offset ("jitter") to these tied values can mitigate overlap without distorting the overall relationships in the data [@peng2004]. 
+In the context of generalized parallel coordinate plots, the `ggpcp` package separates data management from visual rendering into three distinct components: variable selection and reshaping, scaling of axes, and treatment of ties in categorical axes [@vanderplas2023].
 
-- **1985**: Inselberg introduces parallel coordinates for geometric duality and pattern recognition
-- **1990**: Wegman applies PCPs to statistical data analysis
-- **1990s-2000s**: Recognition of overplotting problem [@wegman1991; @johansson2016]
-- **2006**: Parallel Sets elegantly solve categorical data visualization [@kosara2006]
-- **2021**: Quality metrics for parallel sets developed [@dennig2021]
-- **2023**: ggpcp package introduces grammar of graphics framework [@vanderplas2023]
+```{r ggpcp-workflow, fig.cap="ggpcp data wrangling workflow", out.width="70%"}
+p1
+```
 
-### The Persistent Gap
+## Existing Solutions for Categorical Ties in ggpcp
 
-While categorical tie-breaking has been systematically solved, numerical ties have remained without formal treatment—until now.
+The `ggpcp` package currently addresses categorical ties through sophisticated tie-breaking algorithms. 
+The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, with two primary methods: "from-left" and "from-right", meaning that tie breaks are determined hierarchically by variables' values from the specified direction. 
+The parameter `space` specifies the amount of the y-axis to use for spacing between levels of categorical variables, with a default of 5% of the axis used for spacing.
 
-# The Problem in Detail
+This hierarchical sorting approach serves as "external cognition"—the additional computational processing reduces the cognitive load required to untangle overlapping lines in the parallel coordinate plot. 
+The categorical tie-breaking creates equispaced tie-breaking that reduces line crossings and allows users to follow individual observations from left to right through the plot even for categorical variables.
 
-## Three Dimensions of Occlusion
+## The Gap: Numerical Ties Remain Unsolved
 
-### 1. Visual Collision
+While categorical ties have been elegantly solved in `ggpcp`, numerical ties present distinct challenges:
 
-Multiple polylines overlay exactly, making it impossible to distinguish:
+- **Continuous nature**: Unlike discrete categories, numerical values exist on a continuum
+- **Density information**: The number of tied observations carries important statistical meaning
+- **Perceptual requirements**: Displacement must be small enough to maintain value integrity yet large enough for visual separation
+- **Reproducibility**: Scientific visualization requires deterministic, reproducible results
 
-- Whether a path represents 1 or 100 observations
-- The relative frequency of different patterns
-- The density distribution within tied groups
+Standard random jittering, while commonly used, suffers from:
 
-### 2. Density Information Loss
+1. **Non-reproducibility**: Different runs produce different visualizations
+2. **Clustering artifacts**: Random placement creates incidental clusters (birthday paradox effect)
+3. **Uneven distribution**: Large gaps and dense regions appear by chance
+4. **Misleading density**: Visual patterns don't faithfully represent data frequency
 
-Without separation, analysts cannot:
-
-- Estimate the number of observations following a particular path
-- Identify which patterns are common vs. rare
-- Make valid statistical inferences about frequency distributions
-
-### 3. Structural Occlusion
-
-Hidden information includes:
-
-- Sub-clusters within tied value groups
-- Outliers that deviate on other dimensions
-- Multivariate patterns that require line tracing [@johansson2005]
-
-## Concrete Example: Iris Dataset
-
-The classic Iris dataset demonstrates this problem clearly:
-
-- 150 observations across 4 continuous dimensions
-- Integer and half-integer measurements create natural ties
-- Species-specific patterns masked by overlapping lines
-
-In standard PCPs of the Iris data, severe occlusion makes it difficult to:
-
-- Distinguish the three species
-- Estimate group sizes
-- Identify within-species variation
-- Trace individual observation paths
-
-# Design Requirements
+# Design Requirements for Numerical Tie Resolution
 
 Any solution to numerical tie resolution must satisfy four core principles:
 
-## 1. Determinism
+## Determinism
 
 **Requirement**: Identical input must produce identical output.
 
-**Rationale**: Essential for scientific reproducibility [@peng2011]. Researchers must be able to regenerate exact visualizations for publications and peer review.
+**Rationale**: Essential for scientific reproducibility [@peng2011]. 
+Researchers must be able to regenerate exact visualizations for publications and peer review.
 
 **Implication**: Rules out standard random jitter approaches.
 
-## 2. Uniformity
+## Uniformity
 
 **Requirement**: Even distribution within displacement interval with minimal clustering.
 
@@ -136,9 +161,9 @@ Any solution to numerical tie resolution must satisfy four core principles:
 - Minimize artificial patterns
 - Ensure visual density corresponds to data frequency
 
-**Implication**: Random methods create incidental clusters due to the birthday paradox effect.
+**Implication**: Random methods create incidental clusters; deterministic methods can guarantee uniform coverage.
 
-## 3. Perceptual Validity
+## Perceptual Validity
 
 **Requirement**: Displacement must balance two competing needs:
 
@@ -147,9 +172,9 @@ Any solution to numerical tie resolution must satisfy four core principles:
 
 **Rationale**: Users must be able to trust that displaced values remain close to true values while still being visually distinguishable [@ware2012].
 
-**Implication**: Requires careful parameter selection and potentially adaptive methods.
+**Implication**: Requires careful parameter selection ($\epsilon$) and potentially adaptive methods.
 
-## 4. Scalability
+## Scalability
 
 **Requirement**: Handle 2 to 10,000+ observations per tie group efficiently.
 
@@ -159,11 +184,9 @@ Any solution to numerical tie resolution must satisfy four core principles:
 - Interactive exploration requires real-time performance
 - Computational efficiency enables integration into standard workflows
 
-**Implication**: Algorithms must have favorable asymptotic complexity.
+**Implication**: Algorithms must have favorable asymptotic complexity ($O(n)$ per tie group).
 
-# Methodology
-
-## Mathematical Framework
+# Mathematical Framework
 
 For each tied value $v$ with $n_{\text{ties}}$ observations, we distribute points within a displacement interval:
 
@@ -171,48 +194,64 @@ $$\left[v - \frac{\epsilon}{2}, v + \frac{\epsilon}{2}\right]$$
 
 where $\epsilon$ is the maximum displacement magnitude, typically 0.05–0.10 of the axis range.
 
-### Optimization Goals
+## Optimization Goals
 
-1. Maximize minimum inter-point distance
-2. Minimize visual artifacts (clustering, patterns)
-3. Maintain deterministic reproducibility
-4. Achieve uniform coverage of the interval
+1. **Maximize minimum inter-point distance**: Prevent visual collision
+2. **Minimize visual artifacts**: Avoid clustering and false patterns
+3. **Maintain deterministic reproducibility**: Enable verification
+4. **Achieve uniform coverage**: Faithfully represent density
 
-## Three Deterministic Algorithms
+# Three Deterministic Jittering Methods
 
-All three methods provide:
+We propose three methods, each with distinct theoretical foundations and characteristics:
 
-- Deterministic, reproducible output
-- Theoretically-grounded distributions
-- Computational efficiency ($O(n)$ per tie group)
+| Method | Theoretical Basis | Dimension | Scaling | Best For |
+|--------|------------------|-----------|---------|----------|
+| Halton | Quasi-random sequences [@halton1960] | Pure 1D | Constant | Uniform distributions |
+| Sunflower | Phyllotaxis [@vogel1979] | 2D → 1D | Sublinear ($\sqrt{n}$) | Aesthetic + performance |
+| Intelligent | Golden ratio direct application | Hybrid 1D | Linear | Research comparison |
 
-### Algorithm Summary
+# Method 1: Sunflower Jitter (Biomimetic Approach)
 
-| Algorithm | Theoretical Basis | Key Property | Dimension |
-|-----------|------------------|--------------|-----------|
-| Sunflower | Phyllotaxis (Vogel 1979) | Biomimetic optimal packing | 2D → 1D |
-| Halton | Quasi-random sequences (Halton 1960) | Low-discrepancy guarantees | Pure 1D |
-| Intelligent | Golden ratio application | Linear progressive reveal | Hybrid 1D |
+```{r sunflower-demo, fig.cap="Sunflower jittering resolves ties with biomimetic distribution", fig.width=10, fig.height=5}
+# Demonstration of sunflower jitter
 
-# Sunflower Jitter: Biomimetic Approach
+p3 +
+  iris_scale_color() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(title = "Sunflower Jitter: Clear Density Visualization",
+       x = NULL, y = "Value")
+
+```
 
 ## Biological Inspiration
 
-Sunflower seeds arrange themselves following nature's optimization solution for packing efficiency [@vogel1979]:
+Sunflower seeds arrange themselves following nature's optimization solution for packing efficiency [@vogel1979]. This pattern appears throughout nature in:
 
-**The Golden Angle**: $137.508° = 360° \times (2 - \phi)$
+- Sunflower seed heads
+- Pine cone spirals
+- Romanesco broccoli
+- Succulent leaf arrangements
+- Daisy florets
 
-where $\phi = \frac{1+\sqrt{5}}{2}$ is the golden ratio.
+The mathematical principle: **The Golden Angle** = $137.508° = 360° \times (2 - \phi)$
 
-### Why This Angle?
+where $\phi = \frac{1+\sqrt{5}}{2} \approx 1.618$ is the golden ratio.
 
-The golden angle is the "most irrational" number in the continued fraction sense, meaning:
+## Why This Angle Works
 
-- It has the slowest-converging continued fraction expansion
-- It is maximally incommensurable with full rotations
-- Seeds never align along the same radius, even after hundreds of iterations
+The golden angle is the "most irrational" number in the continued fraction sense:
 
-This property has been optimized by evolution over millions of years to achieve near-perfect packing density.
+$$\phi = 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1 + \cdots}}}$$
+
+This property ensures:
+
+- **No alignment**: Seeds never align along the same radius, even after hundreds of iterations
+- **Optimal packing**: Maximum density with minimum gaps
+- **Self-similar structure**: Pattern looks similar at all scales
+- **Progressive optimization**: Refined over millions of years
 
 ## Mathematical Formulation
 
@@ -226,764 +265,31 @@ $$\text{displacement}_j = \text{radius}_j \times \cos(\text{angle}_j)$$
 
 ### Key Features
 
-**Square Root Scaling**: Maintains constant density as radius increases. In a 2D disk:
+**Square Root Scaling**: Maintains constant density as radius increases.
 
+In a 2D disk:
 - Circumference at radius $r$: $2\pi r$
 - Number of points at radius $r_j$: proportional to $j$
 - For constant density: $r \propto \sqrt{j}$ balances linear growth in points with radial expansion
 
 **Cosine Projection**: Maps 2D polar coordinates to 1D linear displacement while preserving distribution properties.
 
-**Spiral Structure**: The characteristic spiral pattern is preserved even in 1D projection.
+**Spiral Structure**: The characteristic spiral pattern is preserved even in 1D projection, creating aesthetically pleasing distributions.
 
 ## Theoretical Properties
 
-- Near-optimal minimum separation [@vogel1979]
-- Low-discrepancy properties in 2D
-- Aesthetically consistent patterns
-- Evolutionarily validated optimization
-
-## Visual Results
-
-When applied to the Iris dataset, Sunflower jitter:
-
-- Clearly reveals density differences between species
-- Maintains species clustering patterns
-- Enables individual line tracing
-- Creates aesthetically pleasing, organic-looking distributions
-
-# Halton Jitter: Quasi-Random Sequences
-
-## Beyond Pseudo-Randomness
-
-Halton sequences [@halton1960] are:
-
-- **Deterministic** (not random)
-- **Low-discrepancy** (fill space uniformly)
-- **Number-theoretically constructed** using prime bases
-
-### The Random Number Problem
-
-Pseudo-random numbers inevitably cluster due to chance (birthday paradox):
-
-- In 100 random points, gaps and clusters are statistically inevitable
-- Visual artifacts mislead analysts
-- Density perception becomes unreliable
-
-### Halton's Solution
-
-Place each new point as far as possible from all previous points through systematic construction using the **van der Corput sequence**.
-
-## Construction Method
-
-The van der Corput sequence in base 2:
-
-| $i$ | Binary | Reversed | Decimal $h_i$ |
-|-----|--------|----------|---------------|
-| 0   | 0      | 0        | 0.0           |
-| 1   | 1      | 1        | 0.5           |
-| 2   | 10     | 01       | 0.25          |
-| 3   | 11     | 11       | 0.75          |
-| 4   | 100    | 001      | 0.125         |
-| 5   | 101    | 101      | 0.625         |
-
-**Pattern**: Each point bisects the largest remaining gap.
-
-### Application to PCPs
-
-$$\text{displacement}_i = \epsilon \times (h_i - 0.5)$$
-
-Centering around 0.5 creates symmetric bidirectional displacement.
-
-## Theoretical Guarantees
-
-### Discrepancy Theory [@niederreiter1992]
-
-Measure of how uniformly points fill an interval:
-
-$$D_n = \sup_{I \subseteq [0,1]} \left|\frac{\#\{x_i \in I\}}{n} - |I|\right|$$
-
-**Theoretical Bounds**:
-
-- Random sequences: $D_n = O(n^{-1/2})$
-- Halton sequences: $D_n = O(n^{-1} \log n)$
-- Optimal lower bound: $D_n = \Omega(n^{-1} \log n)$
-
-**Conclusion**: Halton is near-optimal in the information-theoretic sense.
-
-## Applications Beyond PCPs
-
-Halton sequences are widely used in:
-
-- Monte Carlo integration
-- Computer graphics sampling
-- Quasi-Monte Carlo methods
-- Numerical analysis
-
-## Visual Results
-
-When applied to the Iris dataset, Halton jitter:
-
-- Provides uniform distribution with no artificial clustering
-- Enables accurate density perception
-- Maintains deterministic reproducibility
-- Creates visually clean separations
-
-# Intelligent Jitter: A Novel Approach
-
-## Design Motivation
-
-**Research Question**: Can we apply the golden ratio directly in 1D rather than through angular spacing?
-
-## Algorithm Design
-
-$$\text{angle}_i = (i-1) \times 2\pi \times 0.618$$
-
-$$\text{displacement}_i = \epsilon \times \cos(\text{angle}_i) \times \frac{i-1}{n_{\text{ties}}}$$
-
-### Key Distinctions from Sunflower
-
-- Uses golden ratio **value** (0.618) not golden angle (137.5°)
-- **Linear scaling**: $\frac{i-1}{n_{\text{ties}}}$ instead of $\sqrt{i/n}$
-- 1D modulation rather than 2D-to-1D projection
-
-## Hypothesis vs. Reality
-
-### Hypothesis
-
-Linear scaling would create **progressive reveal**:
-
-- Early observations: small displacement (stay near true value)
-- Later observations: larger displacement (fill the space)
-- Golden ratio modulation provides optimal distribution
-
-### Reality (Empirical Results)
-
-The algorithm produced **poor visual quality**:
-
-- ✗ Excessive displacement for later observations
-- ✗ Artificial separation misrepresents data structure
-- ✗ Linear scaling inappropriate for this application
-
-### The Problem
-
-For a tie group with $n = 100$ observations:
-
-- Observation #1: displacement = $0\%$ of $\epsilon$
-- Observation #50: displacement ≈ $49\%$ of $\epsilon$
-- Observation #100: displacement ≈ $99\%$ of $\epsilon$
-
-This creates a false impression of substructure where none exists.
-
-## Value of Negative Results
-
-This negative result provides valuable scientific insights:
-
-1. **Design pattern to avoid**: Linear scaling in displacement magnitudes
-2. **Theoretical lesson**: Not all golden ratio applications succeed
-3. **Empirical evidence**: Visual quality depends critically on scaling function
-4. **Methodological contribution**: Systematic comparison reveals failures
-
-# Comparative Analysis
-
-## Dimensional Analysis
-
-### Three Distinct Approaches
-
-**Halton (Pure 1D)**:
-
-- Operates entirely on a line
-- Direct generation of 1D points
-- No projection or transformation
-
-**Sunflower (2D → 1D)**:
-
-- Constructs 2D polar coordinates $(r, \theta)$
-- Projects via $x = r \cos(\theta)$
-- Preserves some 2D distribution properties
-
-**Intelligent (Hybrid 1D)**:
-
-- Uses 1D displacement with 2D-inspired modulation
-- Discards sine component, keeps cosine
-- May combine disadvantages rather than advantages
-
-## Scaling Behavior Analysis
-
-| Method | Scaling Function | Growth Rate | At $n=50$ |
-|--------|-----------------|-------------|-----------|
-| Halton | Uniform $[-\epsilon/2, \epsilon/2]$ | Constant | All uniform |
-| Sunflower | $\propto \sqrt{i/n}$ | Sublinear | $\sqrt{1}, \sqrt{2}, \sqrt{3}...$ |
-| Intelligent | $\propto i/n$ | Linear | $1, 2, 3, 4, 5...$ |
-
-**Consequence**: Intelligent creates artificial stratification that misrepresents uniform density.
-
-## Distribution Quality Metrics
-
-### Minimum Separation Distance
-
-Measures the smallest gap between any two points:
-
-- **Halton**: Guaranteed to decrease as $O(1/n)$
-- **Sunflower**: Approximately $O(1/\sqrt{n})$ in projection
-- **Intelligent**: Highly variable, depends on position
-
-### Visual Clustering
-
-Qualitative assessment of artificial cluster formation:
-
-- **Halton**: Minimal clustering, uniform coverage
-- **Sunflower**: Slight central concentration, natural appearance
-- **Intelligent**: Excessive separation, unnatural stratification
-
-### Perceptual Faithfulness
-
-How well visual density matches actual data frequency:
-
-- **Halton**: Excellent - uniform distribution reflects uniform ties
-- **Sunflower**: Very good - slight radial gradient acceptable
-- **Intelligent**: Poor - progressive displacement misleading
-
-## Computational Complexity
-
-All three algorithms share similar computational profiles:
-
-| Operation | Complexity | Notes |
-|-----------|-----------|--------|
-| Identify Ties | $O(n \log n)$ | Sorting required |
-| Generate Displacements | $O(k)$ | Per tie group size $k$ |
-| Apply to Data | $O(n)$ | Linear in observations |
-| **Overall** | **$O(n \log n)$** | Dominated by tie detection |
-
-**Practical Performance**:
-
-- Tested on datasets up to 100,000 observations
-- Real-time interaction maintained (<100ms response)
-- Memory-efficient implementation
-- No performance degradation with large tie groups
-
-# User Study Design
-
-## Overview
-
-**Study Type**: Within-subjects repeated measures design with counterbalancing
-
-**Target Sample**: 30-50 participants
-
-**Participant Requirements**:
-
-- Basic visualization literacy
-- No PCP expertise required
-- Normal or corrected-to-normal vision
-- No color blindness
-
-## Independent Variable
-
-**Jittering Method** (5 levels):
-
-1. No Jitter (baseline control)
-2. Random Jitter (current practice benchmark)
-3. Halton Jitter (low-discrepancy method)
-4. Sunflower Jitter (biomimetic method)
-5. Intelligent Jitter (novel method)
-
-## Dependent Variables
-
-### 1. Task Accuracy (Primary)
-
-**Density Estimation Tasks**:
-
-- "How many observations follow this highlighted path?"
-- "Which species is most common at this value?"
-- Measured as absolute error from true count
-
-**Cluster Identification Tasks**:
-
-- "Identify the largest cluster in this group"
-- "How many distinct sub-clusters exist?"
-- Measured as classification accuracy
-
-**Pattern Detection Tasks**:
-
-- "Are there outliers in this tied group?"
-- "Do these observations form a single cluster or multiple?"
-- Measured as detection sensitivity and specificity
-
-### 2. Task Completion Time (Secondary)
-
-- Time to complete density estimation (seconds)
-- Time to identify specific observations (seconds)
-- Time to detect patterns (seconds)
-
-### 3. Subjective Preference (Tertiary)
-
-**Quantitative Ratings**:
-
-- 10-point Likert scale for clarity
-- 10-point Likert scale for ease of interpretation
-- 10-point Likert scale for confidence in answers
-
-**Qualitative Feedback**:
-
-- Open-ended comments on clarity
-- Perceived advantages/disadvantages
-- Suggestions for improvement
-
-**Comparative Ranking**:
-
-- Forced ranking of all five methods
-- Pairwise comparisons for fine-grained preferences
-
-## Hypotheses
-
-**H1 (Accuracy)**: Halton and Sunflower > Random > No Jitter
-
-- Rationale: Uniform distribution enables accurate density perception
-
-**H2 (Time)**: Halton ≈ Sunflower < Random < No Jitter
-
-- Rationale: Clear separation enables faster analysis
-
-**H3 (Preference)**: Sunflower ≈ Halton > Random > No Jitter
-
-- Rationale: Aesthetic appeal combined with functionality
-
-**H4 (Intelligent)**: Performance below expectations across all metrics
-
-- Rationale: Artificial patterns interfere with perception and interpretation
-
-## Statistical Analysis Plan
-
-**Primary Analysis**:
-
-- Repeated-measures ANOVA for each dependent variable
-- Mauchly's test for sphericity
-- Greenhouse-Geisser correction if sphericity violated
-
-**Post-hoc Comparisons**:
-
-- Bonferroni-corrected pairwise comparisons
-- Effect size calculations (partial η²)
-- Confidence intervals for mean differences
-
-**Supplementary Analyses**:
-
-- Correlation between accuracy and confidence ratings
-- Order effects from counterbalancing
-- Individual differences analysis
-
-# Integration with ggpcp Package
-
-## Software Architecture
-
-The ggpcp package [@vanderplas2023] implements a **grammar of graphics** approach through three modular components:
-
-1. **Variable Selection** (`pcp_select`): Choose and order dimensions
-2. **Axis Scaling** (`pcp_scale`): Normalize or transform scales
-3. **Tie Resolution** (`pcp_arrange`): Handle overlapping values ← **NEW**
-
-## Implementation Example
-
-```r
-# Basic usage with Sunflower jitter
-iris_plot <- iris %>%
-  pcp_select(1:4) %>%
-  pcp_scale(method = "uniminmax") %>%
-  pcp_arrange(method = "sunflower")
-
-# Advanced usage with custom parameters
-iris_plot <- iris %>%
-  pcp_select(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width) %>%
-  pcp_scale(method = "uniminmax") %>%
-  pcp_arrange(
-    method = "halton",
-    epsilon = 0.08,
-    numeric_ties = TRUE
-  )
-
-# Comparison of methods
-library(patchwork)
-p1 <- iris %>% pcp_select(1:4) %>% pcp_arrange(method = "none")
-p2 <- iris %>% pcp_select(1:4) %>% pcp_arrange(method = "halton")
-p3 <- iris %>% pcp_select(1:4) %>% pcp_arrange(method = "sunflower")
-
-p1 / p2 / p3
-```
-
-## Available Methods
-
-| Method | Description | Best For |
-|--------|-------------|----------|
-| `"none"` | No jitter (baseline) | Identifying the problem |
-| `"random"` | Standard random jitter | Comparison benchmark |
-| `"halton"` | Quasi-random low-discrepancy | Uniform distributions |
-| `"sunflower"` | Biomimetic golden angle | Aesthetic + performance |
-| `"intelligent"` | Golden ratio linear | Research/comparison only |
-
-## Automatic Tie Detection
-
-The implementation automatically:
-
-- Identifies numerical ties within machine precision tolerance
-- Groups tied observations
-- Applies selected jittering method
-- Preserves original data in metadata
-
-## User Interface Design Principles
-
-1. **Sensible Defaults**: Works well without parameter tuning
-2. **Progressive Disclosure**: Advanced options available but not required
-3. **Consistent API**: Follows tidyverse conventions
-4. **Informative Feedback**: Warns about potential issues
-5. **Performance**: Optimized for interactive use
-
-# Theoretical Contributions
-
-## 1. Cross-Domain Algorithm Adaptation
-
-**Biomimetic Optimization**: First application of Vogel's phyllotaxis model [@vogel1979] to statistical visualization.
-
-- Demonstrates successful knowledge transfer from botany to data science
-- Shows evolutionary optimization principles apply to visualization
-- Opens pathway for other biomimetic approaches
-
-**Number-Theoretic Methods**: Application of Halton sequences [@halton1960] from computational geometry to statistical graphics.
-
-- Brings rigorous mathematical guarantees to visualization
-- Connects low-discrepancy theory to perceptual quality
-- Establishes formal framework for distribution quality
-
-## 2. Comparative Framework
-
-First systematic comparison of tie-breaking methods for PCPs:
-
-- Establishes evaluation criteria (determinism, uniformity, perceptual validity, scalability)
-- Provides quantitative metrics for distribution quality
-- Offers guidance for future algorithm development
-
-## 3. Negative Result Documentation
-
-Scientific value of Intelligent jitter failure:
-
-- Identifies problematic design pattern (linear scaling)
-- Demonstrates importance of scaling function choice
-- Provides cautionary tale for golden ratio applications
-- Contributes to methodological knowledge
-
-## 4. Design Principles
-
-Articulation of core requirements:
-
-- **Determinism**: Necessary for scientific reproducibility [@peng2011]
-- **Uniformity**: Required for faithful density representation
-- **Perceptual Validity**: Balances accuracy and visibility
-- **Scalability**: Enables real-world application
-
-These principles extend beyond PCPs to general visualization design.
-
-# Practical Impact
-
-## Immediate Benefits for Researchers
-
-**Reliable Density Visualization**:
-
-- Trustworthy assessment of observation counts
-- Accurate perception of relative frequencies
-- Detection of outliers within tied groups
-
-**Reproducible Figures**:
-
-- Identical visualizations across sessions
-- Verifiable results for peer review
-- Consistency in publications
-
-**Enhanced Exploratory Analysis**:
-
-- Pattern detection in complex data
-- Cluster identification
-- Multivariate relationship exploration
-
-## Implementation Advantages
-
-**Simple Interface**:
-
-```r
-# Single function call with default
-data %>% pcp_arrange(method = "sunflower")
-
-# All the complexity handled internally
-```
-
-**Customizable Parameters**:
-
-- Epsilon magnitude adjustment
-- Method selection
-- Tie tolerance specification
-
-**Integration with Existing Workflows**:
-
-- Works with tidyverse pipes
-- Compatible with ggplot2 ecosystem
-- Minimal learning curve
-
-## Long-term Impact
-
-**Complete GPCP Framework**: Completes the vision of VanderPlas et al. [-@vanderplas2023]:
-
-- Categorical ties: ✓ Solved (existing)
-- Numerical ties: ✓ Solved (new contribution)
-- Unified approach to tie resolution
-
-**Methodological Contribution**: Establishes:
-
-- Evaluation methodology for jittering algorithms
-- Performance benchmarks
-- Design patterns for distribution algorithms
-
-**Foundation for Extensions**:
-
-- Adaptive parameter selection
-- 2D scatter plot applications
-- Other visualization contexts with overplotting
-
-# Future Work
-
-## 1. Adaptive Epsilon Selection
-
-**Current Limitation**: User must specify epsilon parameter.
-
-**Proposed Solution**: Automatic, context-aware epsilon selection based on:
-
-### Data-Driven Heuristics
-
-- Tie group size distribution
-- Axis range and scale
-- Number of dimensions
-- Display resolution
-
-### Perceptual Models
-
-Just-noticeable-difference thresholds [@weber1834]:
-
-$$\Delta I / I = k$$
-
-where:
-- $I$ = stimulus intensity
-- $\Delta I$ = minimum perceivable change
-- $k$ = Weber constant (≈ 0.02 for line length)
-
-### Optimization Framework
-
-$$\epsilon^* = \arg\min_{\epsilon} \left[\alpha \cdot \text{Occlusion}(\epsilon) + \beta \cdot \text{Distortion}(\epsilon)\right]$$
-
-where:
-- Occlusion($\epsilon$) measures remaining overlap
-- Distortion($\epsilon$) measures deviation from true values
-- $\alpha$, $\beta$ are user-specified weights
-
-## 2. 2D Generalization
-
-**Motivation**: Scatter plots face similar overplotting issues [@cleveland1984].
-
-### Current Practice
-
-- Random jitter with transparency
-- Hexagonal binning
-- Density contours
-
-### Proposed Extension
-
-**2D Sunflower**: Use full $(r, \theta)$ coordinates without projection
-
-$$x_j = \epsilon_x \cdot \sqrt{\frac{j-1}{n}} \cdot \cos((j-1) \times 137.508°)$$
-
-$$y_j = \epsilon_y \cdot \sqrt{\frac{j-1}{n}} \cdot \sin((j-1) \times 137.508°)$$
-
-**2D Halton**: Base-2 for x-axis, base-3 for y-axis (well-studied in computer graphics)
-
-### Research Questions
-
-- How does 2D deterministic jitter compare to current methods?
-- What are optimal epsilon values for x and y dimensions?
-- How does method performance vary with tie group geometry?
-
-## 3. Performance Optimization
-
-### Algorithmic Improvements
-
-- **Hash-based tie detection**: $O(n)$ average case instead of $O(n \log n)$
-- **Parallel processing**: Independent tie groups processed concurrently
-- **GPU acceleration**: Large datasets benefit from parallel computation
-
-### Implementation Efficiency
-
-- Vectorized operations in R
-- C++ backend for critical paths via Rcpp
-- Memory-efficient data structures
-- Lazy evaluation strategies
-
-### Scalability Targets
-
-- **Current**: 100K observations tested and functional
-- **Goal**: 10M+ observations with real-time interaction
-- **Stretch**: Streaming data support for dynamic visualizations
-
-## 4. Extended Evaluation
-
-### Domain-Specific Studies
-
-**Medical Data**:
-
-- Electronic health records
-- Patient trajectory visualization
-- Clinical decision support systems
-
-**Financial Data**:
-
-- High-frequency trading patterns
-- Portfolio analysis
-- Risk assessment visualization
-
-**Scientific Data**:
-
-- Genomics (gene expression profiles)
-- Climate science (model ensembles)
-- Physics (particle collision data)
-
-### Expert User Evaluation
-
-- Experienced data analysts
-- Domain scientists
-- Professional data journalists
-- Information visualization researchers
-
-### Longitudinal Studies
-
-- Learning effects over time
-- Integration into real workflows
-- Adoption patterns
-- Long-term satisfaction
-
-### Alternative Tasks
-
-- Hypothesis generation
-- Anomaly detection [@johansson2005]
-- Model diagnostics
-- Uncertainty visualization
-
-# Conclusions
-
-## Summary of Problem and Solution
-
-**The Problem**: Numerical ties in parallel coordinate plots create visual occlusion that:
-
-- Obscures density information
-- Hides substructure
-- Prevents accurate pattern detection
-- Compromises exploratory data analysis
-
-**The Solution**: Three deterministic jittering algorithms:
-
-1. **Sunflower**: Biomimetic approach with evolutionary optimization
-2. **Halton**: Quasi-random method with mathematical guarantees
-3. **Intelligent**: Novel approach that reveals design pitfalls
-
-## Key Findings
-
-### Low-Discrepancy Methods Superior
-
-Sunflower and Halton jitter outperform random jitter because:
-
-- Uniform distribution = faithful density representation
-- Mathematical guarantees translate to perceptual benefits
-- Elimination of clustering artifacts
-- Predictable, interpretable results
-
-### Determinism Essential
-
-Reproducibility in scientific visualization [@peng2011] requires:
-
-- Identical input → identical output
-- Verifiable results
-- Consistency across sessions
-- Trustworthy publications
-
-### Scaling Function Critical
-
-Intelligent jitter demonstrates that:
-
-- Linear scaling creates artificial stratification
-- Excessive displacement distorts perception
-- Scaling function choice is as important as distribution algorithm
-- Not all golden ratio applications succeed
-
-### General Principle
-
-**Uniformity + Determinism** together provide optimal tie resolution for PCPs.
-
-## Significance of Contributions
-
-### Theoretical
-
-- Cross-domain algorithm adaptation
-- Mathematical framework for distribution quality
-- Negative result documentation
-- Design principles articulation
-
-### Methodological
-
-- Three novel algorithms
-- Comparative evaluation framework
-- Implementation in production software
-- Reproducible research materials
-
-### Practical
-
-- Solves long-standing problem
-- Simple user interface
-- Integration with existing tools
-- Immediate utility for analysts
-
-## Broader Implications
-
-The principles and methods developed here extend beyond parallel coordinates to:
-
-- **Scatter plots**: 2D overplotting with similar characteristics
-- **Time series**: Repeated measurements creating ties
-- **Network visualization**: Node positioning with constraints
-- **General principle**: Wherever stochastic jitter is used, low-discrepancy alternatives merit consideration
-
-## Final Thoughts
-
-This research completes the Grammar of Generalized Parallel Coordinates vision by providing systematic solutions for both categorical and numerical ties. The integration of biomimetic optimization and number-theoretic methods demonstrates the value of cross-disciplinary approaches in visualization research. The negative result with Intelligent jitter reminds us that not all theoretical ideas succeed in practice, and documenting failures contributes to scientific knowledge.
-
-The development of deterministic jittering methods represents a step toward more trustworthy, reproducible, and effective multivariate data visualization. As datasets continue to grow in size and complexity, such systematic solutions become increasingly essential for extracting meaningful insights from high-dimensional data.
-
-# Timeline to Dissertation Defense
-
-| Phase | Timeframe | Key Milestones |
-|-------|-----------|----------------|
-| Comprehensive Exam | Fall 2025 | Presentation & committee approval |
-| Algorithm Refinement | Winter 2025 – Spring 2026 | Adaptive epsilon, optimization |
-| User Study | Spring – Summer 2026 | IRB approval, data collection, analysis |
-| Dissertation Writing | May – June 2026 | Integration of all components |
-| Defense | July 2026 | Committee review and final defense |
-
-**Target Defense Date**: July 2026
-
-# References
-
-::: {#refs}
-:::
-
-# Appendix A: Algorithm Pseudocode
-
-## Sunflower Jitter
+- **Near-optimal minimum separation** [@vogel1979]
+- **Low-discrepancy** in 2D space
+- **Aesthetically consistent** across all scales
+- **Progressively validated** optimization
+- **Deterministic** and fully reproducible
+
+## Algorithm Pseudocode
 
 ```
 function sunflower_jitter(tied_values, epsilon):
     n = length(tied_values)
-    golden_angle = 137.508 * (pi / 180)
+    golden_angle = 137.508 * (π / 180)
     
     displacements = empty_array(n)
     
@@ -995,7 +301,111 @@ function sunflower_jitter(tied_values, epsilon):
     return tied_values + displacements
 ```
 
-## Halton Jitter
+
+## Advantages
+
+1. **Biomimetic optimization**: Leverages millions of years of natural selection
+2. **Aesthetic appeal**: Creates visually pleasing, organic-looking patterns
+3. **Balanced distribution**: Neither too uniform (mechanical) nor too random (chaotic)
+4. **Proven effectiveness**: Successfully used in nature for optimal packing
+
+## Applications Beyond PCPs
+
+The Sunflower algorithm has proven useful in:
+
+- Point cloud sampling
+- Sphere packing
+- Texture synthesis
+- Computer graphics rendering
+- Quasi-Monte Carlo methods
+
+# Method 2: Halton Jitter (Quasi-Random Sequences)
+
+```{r halton-demo, fig.cap="Halton jittering provides uniform low-discrepancy distribution", fig.width=10, fig.height=5}
+# Demonstration of Halton jitter
+
+p2 +
+  iris_scale_color() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(title = "Halton Jitter: Uniform Distribution, No Clustering",
+       x = NULL, y = "Value")
+
+```
+
+## Beyond Pseudo-Randomness
+
+Halton sequences [@halton1960] represent a fundamental advancement over pseudo-random numbers:
+
+- **Deterministic** (not random)
+- **Low-discrepancy** (fill space uniformly)
+- **Number-theoretically constructed** using prime bases
+- **Mathematically guaranteed** uniform coverage
+
+## The Random Number Problem
+
+Pseudo-random numbers inevitably cluster due to the birthday paradox:
+
+**Example**: In 100 random points on [0, 1]:
+- Expected maximum gap: ~0.05
+- Expected minimum gap: ~0.0001
+- Visual artifacts mislead analysts
+- Density perception becomes unreliable
+
+## Halton's Solution
+
+Place each new point as far as possible from all previous points through systematic construction using the **van der Corput sequence**.
+
+## Van der Corput Sequence Construction
+
+The van der Corput sequence in base 2 generates a low-discrepancy sequence by:
+
+1. Take integer index $i$
+2. Convert to binary
+3. Reverse the binary digits
+4. Interpret as binary fraction
+
+**Example**:
+
+| $i$ | Binary | Reversed | Decimal $h_i$ |
+|-----|--------|----------|---------------|
+| 0   | 0      | 0        | 0.0           |
+| 1   | 1      | 1        | 0.5           |
+| 2   | 10     | 01       | 0.25          |
+| 3   | 11     | 11       | 0.75          |
+| 4   | 100    | 001      | 0.125         |
+| 5   | 101    | 101      | 0.625         |
+| 6   | 110    | 011      | 0.375         |
+| 7   | 111    | 111      | 0.875         |
+
+**Pattern**: Each point bisects the largest remaining gap.
+
+## Mathematical Formulation
+
+For observation $i$ in a tie group:
+
+$$h_i = \text{VanDerCorput}(i, \text{base}=2)$$
+
+$$\text{displacement}_i = \epsilon \times (h_i - 0.5)$$
+
+Centering around 0.5 creates symmetric bidirectional displacement.
+
+## Theoretical Guarantees: Discrepancy Theory
+
+**Star Discrepancy** measures how uniformly points fill an interval [@niederreiter1992]:
+
+$$D_n^* = \sup_{I \subseteq [0,1]} \left|\frac{\#\{x_i \in I\}}{n} - |I|\right|$$
+
+**Theoretical Bounds**:
+
+- **Random sequences**: $D_n = O(n^{-1/2})$
+- **Halton sequences**: $D_n = O(n^{-1} \log n)$
+- **Optimal lower bound**: $D_n = \Omega(n^{-1} \log n)$
+
+**Conclusion**: Halton sequences are **near-optimal** in the information-theoretic sense.
+
+## Algorithm Pseudocode
 
 ```
 function van_der_corput(i, base):
@@ -1018,7 +428,127 @@ function halton_jitter(tied_values, epsilon):
     return tied_values + displacements
 ```
 
-## Intelligent Jitter
+<!-- ## Computational Complexity -->
+
+<!-- - **Van der Corput generation**: $O(\log n)$ per point -->
+<!-- - **Per tie group**: $O(n \log n)$  -->
+<!-- - **Practical performance**: Very fast due to simple bit operations -->
+<!-- - **Memory**: $O(n)$ for displacement array -->
+
+<!-- ## Advantages -->
+
+<!-- 1. **Mathematical guarantees**: Proven optimal distribution -->
+<!-- 2. **No clustering**: Eliminates birthday paradox artifacts -->
+<!-- 3. **Predictable**: Always fills largest gaps first -->
+<!-- 4. **Efficient**: Simple bit operations -->
+<!-- 5. **Extensible**: Easily extended to higher dimensions using different prime bases -->
+
+## Applications in Computer Science
+
+Halton sequences are widely used in:
+
+- **Quasi-Monte Carlo integration**: Better convergence than random sampling
+- **Computer graphics**: Anti-aliasing, global illumination
+- **Ray tracing**: Sample generation for realistic rendering
+- **Numerical analysis**: Multidimensional quadrature
+- **Machine learning**: Hyperparameter search spaces
+
+## Higher-Dimensional Extensions
+
+For 2D applications (e.g., scatter plots):
+
+$$x_i = \text{VanDerCorput}(i, 2) \quad \text{(base 2 for x-axis)}$$
+$$y_i = \text{VanDerCorput}(i, 3) \quad \text{(base 3 for y-axis)}$$
+
+Using different prime bases for each dimension maintains low-discrepancy properties.
+
+# Method 3: Intelligent Jitter (Novel Exploration)
+
+```{r intelligent-demo, fig.cap="Intellient jittering resolves ties", fig.width=10, fig.height=5}
+# Demonstration of intelligent jitter
+
+p4 +
+  iris_scale_color() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(title = "intelligent Jitter",
+       x = NULL, y = "Value")
+
+```
+
+## Design Motivation
+
+**Research Question**: Can we apply the golden ratio directly in 1D rather than through angular spacing?
+
+The Intelligent jitter was developed to explore whether:
+
+- Direct golden ratio modulation could work in 1D
+- Linear scaling might provide progressive reveal
+- A simpler algorithm could match Sunflower performance
+
+## Mathematical Formulation
+
+For observation $j$ in a tie group of size $n_{\text{ties}}$:
+
+$$\text{angle}_j = (j-1) \times 2\pi \times 0.618$$
+
+$$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}{n_{\text{ties}}}$$
+
+## Key Distinctions from Sunflower
+
+| Feature | Sunflower | Intelligent |
+|---------|-----------|-------------|
+| Angle | Golden angle (137.5°) | Golden ratio × 2π (224.4°) |
+| Scaling | Square root: $\sqrt{j/n}$ | Linear: $j/n$ |
+| Projection | 2D spiral → 1D | 1D cosine modulation |
+| Inspiration | Phyllotaxis patterns | Golden ratio mathematics |
+
+## Initial Hypothesis
+
+**Progressive Reveal**: Linear scaling would create:
+
+- **Early observations**: Small displacement (stay near true value)
+- **Later observations**: Larger displacement (fill available space)
+- **Golden ratio modulation**: Optimal distribution through natural constant
+
+This would provide intuitive interpretation: "early arrivals" cluster near the true value, while "late arrivals" spread outward.
+
+## Empirical Reality: Failure Analysis
+
+The Intelligent jitter produced **poor visual quality** with several critical problems:
+
+### Problem 1: Excessive Displacement
+
+For a tie group with $n = 100$ observations:
+
+| Observation | Displacement |
+|-------------|--------------|
+| 1          | 0% of $\epsilon$ |
+| 25         | ~24% of $\epsilon$ |
+| 50         | ~49% of $\epsilon$ |
+| 75         | ~74% of $\epsilon$ |
+| 100        | ~99% of $\epsilon$ |
+
+**Result**: Later observations displaced nearly to the boundary, creating false impression of substructure.
+
+### Problem 2: Artificial Stratification
+
+The linear scaling creates **artificial layers** that don't represent actual data structure:
+
+- Visual appearance suggests distinct sub-groups
+- These "clusters" are algorithmic artifacts
+- Misrepresents uniform density as stratified distribution
+
+### Problem 3: Perceptual Distortion
+
+Users interpret visual patterns as data patterns:
+
+- **Large gaps** appear meaningful (but are artifacts)
+- **Density gradients** suggest ordering (but observations are exchangeable)
+- **Boundary concentration** implies separation (but all values are tied)
+
+## Algorithm Pseudocode
 
 ```
 function intelligent_jitter(tied_values, epsilon):
@@ -1028,25 +558,725 @@ function intelligent_jitter(tied_values, epsilon):
     displacements = empty_array(n)
     
     for j from 1 to n:
-        angle = (j - 1) * 2 * pi * golden_ratio
+        angle = (j - 1) * 2 * π * golden_ratio
         scale = (j - 1) / n
         displacements[j] = epsilon * cos(angle) * scale
     
     return tied_values + displacements
 ```
 
-# Appendix B: Contact Information
+<!-- ## Computational Complexity -->
 
-**Author**: Denise Bradford  
-**Email**: denise.bradford@huskers.unl.edu  
-**Institution**: University of Nebraska–Lincoln, Department of Statistics  
-**GitHub**: https://github.com/drbradford12/Dissertation-Data
+<!-- - **Per tie group**: $O(n)$ -->
+<!-- - **Memory**: $O(n)$ -->
+<!-- - **Performance**: Similar to other methods -->
 
-**Dissertation Committee**:
+## Why This Method Fails: Theoretical Analysis
 
-- [Committee members to be listed]
+### Root Cause: Linear Scaling
 
----
+The linear scaling function $\frac{j-1}{n}$ is inappropriate because:
 
-*Document generated: October 2025*  
-*Last updated: [Date]*
+1. **Violates uniformity**: Creates increasing displacement magnitudes
+2. **Breaks perceptual validity**: Large displacements misrepresent true values
+3. **Artificial ordering**: Imposes structure where none exists
+4. **Cognitive interference**: Visual patterns contradict data properties
+
+### Comparison with Sunflower
+
+Sunflower's $\sqrt{j/n}$ scaling maintains **constant area density** in 2D:
+
+- Area of annulus at radius $r$: $\pi[(r+dr)^2 - r^2] \approx 2\pi r \, dr$
+- For constant density: points per area = constant
+- Therefore: $\frac{dN}{dA} \propto \frac{1}{r}$
+- Solution: $N \propto r^2$, thus $r \propto \sqrt{N}$
+
+Intelligent's linear scaling has **no such geometric justification**.
+
+## Value of This Negative Result
+
+This failure provides important scientific contributions:
+
+### 1. Design Pattern to Avoid
+
+**Lesson**: Linear displacement scaling creates misleading stratification.
+
+**Implication**: Future methods should use constant or sublinear scaling.
+
+### 2. Golden Ratio Not Universal
+
+**Lesson**: Golden ratio works in specific geometric contexts (angular distribution), not universally.
+
+**Implication**: Biomimetic approaches require careful adaptation, not blind application.
+
+### 3. Importance of Scaling Function
+
+**Lesson**: The scaling function is as critical as the distribution algorithm.
+
+**Implication**: Algorithm design must consider both angular distribution and radial scaling together.
+
+### 4. Empirical Validation Essential
+
+**Lesson**: Theoretical elegance doesn't guarantee practical effectiveness.
+
+**Implication**: User studies and visual assessment are necessary even for mathematically motivated methods.
+
+## Recommendations
+
+**Do not use Intelligent jitter for production visualizations.**
+
+Include in research as:
+
+- **Comparison baseline**: Shows what not to do
+- **Methodological contribution**: Documents design failure
+- **Educational value**: Teaches importance of scaling functions
+- **Scientific rigor**: Negative results advance knowledge
+
+# Comparative Analysis of All Three Methods
+
+```{r comparison-all, fig.cap="Side-by-side comparison of all jittering methods", fig.width=12, fig.height=8}
+# Create comparison grid
+grid.arrange(
+  p1 + labs(title = "No Jitter"),
+  p2 + labs(title = "Halton"),
+  p3 + labs(title = "Sunflower"),
+  p4 + labs(title = "Intelligent"),
+  ncol = 2
+)
+```
+
+## Dimensional Analysis
+
+| Method | Approach | Dimension | Projection |
+|--------|----------|-----------|------------|
+| **Halton** | Pure 1D sequence | 1D | None |
+| **Sunflower** | 2D spiral | 2D → 1D | Cosine |
+| **Intelligent** | 1D with 2D-inspired modulation | Hybrid | Cosine |
+
+## Scaling Behavior
+
+| Method | Scaling Function | Growth Rate | At $n=50$, $j=25$ |
+|--------|-----------------|-------------|-------------------|
+| **Halton** | Uniform distribution | Constant | ~0.5 $\epsilon$ |
+| **Sunflower** | $\sqrt{j/n}$ | Sublinear | ~0.7 $\epsilon$ |
+| **Intelligent** | $j/n$ | Linear | ~0.5 $\epsilon$ |
+
+## Distribution Quality Metrics
+
+### Minimum Separation Distance
+
+Smallest gap between any two consecutive points:
+
+- **Halton**: Guaranteed $O(1/n)$, highly predictable
+- **Sunflower**: Approximately $O(1/\sqrt{n})$ in projection, variable
+- **Intelligent**: Highly variable, depends on cosine phase
+
+### Discrepancy (Uniformity Measure)
+
+How evenly points fill the interval:
+
+- **Halton**: $O(n^{-1} \log n)$ — near-optimal 
+- **Sunflower**: Not directly measurable in 1D projection, but empirically good
+- **Intelligent**: Poor due to linear scaling creating density gradients
+
+### Visual Clustering
+
+Tendency to create artificial clusters:
+
+- **Halton**: Minimal — systematic gap-filling 
+- **Sunflower**: Slight central concentration (natural)
+- **Intelligent**: Severe stratification artifacts
+
+<!-- ## Computational Performance -->
+
+<!-- All three methods share similar computational profiles: -->
+
+<!-- | Operation | Complexity | Notes | -->
+<!-- |-----------|-----------|--------| -->
+<!-- | Identify Ties | $O(N \log N)$ | Sorting required | -->
+<!-- | Generate Displacements | $O(k)$ | Per tie group size $k$ | -->
+<!-- | Apply to Data | $O(N)$ | Linear in observations | -->
+<!-- | **Overall** | **$O(N \log N)$** | Dominated by tie detection | -->
+
+<!-- **Practical Performance** (tested on 100,000 observations): -->
+
+<!-- - All methods: <100ms response time -->
+<!-- - Real-time interaction maintained -->
+<!-- - No memory issues -->
+<!-- - Scalable to large datasets -->
+
+<!-- ## Perceptual Validity Assessment -->
+
+<!-- How well do visual patterns represent data properties? -->
+
+<!-- | Method | Density Representation | Value Preservation | Artifact Level | -->
+<!-- |--------|----------------------|-------------------|----------------| -->
+<!-- | **Halton** | Excellent ✓ | Excellent ✓ | Minimal ✓ | -->
+<!-- | **Sunflower** | Very Good ✓ | Very Good ✓ | Slight (acceptable) ✓ | -->
+<!-- | **Intelligent** | Poor ✗ | Poor ✗ | Severe ✗ | -->
+
+## Aesthetic Quality
+
+Subjective but important for user acceptance:
+
+- **Halton**: Clean, mechanical, predictable
+- **Sunflower**: Organic, pleasing, natural
+- **Intelligent**: Artificial, stratified, problematic
+
+## Use Case Recommendations
+
+### Halton: Best for...
+
+- **Precision-critical applications**: Scientific publications
+- **Maximum uniformity**: When faithful density representation is paramount
+- **Mathematical rigor**: When provable guarantees matter
+- **Large datasets**: Efficient, predictable performance
+
+### Sunflower: Best for...
+
+- **General purpose**: Good balance of properties
+- **Aesthetic presentations**: Visually appealing
+- **Exploratory analysis**: Natural-looking distributions
+- **User preference**: Often preferred in studies
+
+### Intelligent: Best for...
+
+- **Methodological research**: As a comparison baseline
+- **Educational examples**: Teaching what not to do
+- **Negative controls**: Demonstrating failure modes
+- **Do NOT use for production visualizations**
+
+# Integration with ggpcp Package
+
+## Architectural Integration
+
+The `ggpcp` package implements a grammar of graphics approach with three core modules:
+
+1. **Variable Selection** (`pcp_select`): Choose and order dimensions
+2. **Axis Scaling** (`pcp_scale`): Normalize or transform scales
+3. **Tie Resolution** (`pcp_arrange`): Handle overlapping values ← **EXTENDED**
+
+Our contribution extends `pcp_arrange` to handle numerical ties alongside existing categorical tie-breaking.
+
+## Proposed API Design
+
+### Function Signature
+
+```r
+pcp_arrange(
+  data,
+  method = c("from-left", "from-right", "halton", "sunflower", "intelligent"),
+  space = 0.05,
+  epsilon = NULL,
+  numeric_ties = TRUE
+)
+```
+
+### Parameters
+
+- **method**: Tie-breaking strategy
+  - `"from-left"`, `"from-right"`: Existing categorical methods
+  - `"halton"`: Quasi-random low-discrepancy sequence
+  - `"sunflower"`: Biomimetic golden angle distribution
+  - `"intelligent"`: Golden ratio linear (research only)
+  
+- **space**: Proportion of axis for categorical spacing (existing parameter)
+
+- **epsilon**: Maximum displacement for numerical ties
+  - `NULL` (default): Auto-determined as 0.05 * axis range
+  - Numeric value: User-specified displacement magnitude
+  
+- **numeric_ties**: Whether to apply jittering to numerical ties (default: TRUE)
+
+### Example Usage
+
+```r
+library(ggpcp)
+library(dplyr)
+
+# Basic usage with Sunflower (recommended default)
+iris_plot <- iris %>%
+  pcp_select(1:5) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "sunflower") %>%
+  ggplot() +
+  geom_pcp()
+
+# Halton for maximum uniformity
+iris_halton <- iris %>%
+  pcp_select(Sepal.Length:Species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(
+    method = "halton",
+    epsilon = 0.08,
+    numeric_ties = TRUE
+  ) %>%
+  ggplot() +
+  geom_pcp(aes(color = Species))
+
+# Mixed categorical and numerical ties
+mixed_data %>%
+  pcp_select(cat1, num1, cat2, num2) %>%
+  pcp_arrange(
+    method = "sunflower",  # Applied to numerical
+    space = 0.05           # Applied to categorical
+  )
+
+# Comparison of methods
+library(patchwork)
+
+p_none <- iris %>% pcp_select(1:4) %>% 
+  pcp_arrange(method = "none") %>% plot_pcp()
+  
+p_halton <- iris %>% pcp_select(1:4) %>% 
+  pcp_arrange(method = "halton") %>% plot_pcp()
+  
+p_sunflower <- iris %>% pcp_select(1:4) %>% 
+  pcp_arrange(method = "sunflower") %>% plot_pcp()
+
+(p_none | p_halton | p_sunflower) +
+  plot_annotation(title = "Comparison of Tie-Breaking Methods")
+```
+
+## Implementation Strategy
+
+### 1. Automatic Tie Detection
+
+```r
+detect_numerical_ties <- function(values, tolerance = .Machine$double.eps^0.5) {
+  # Group values within tolerance
+  # Return list of tie groups with indices
+}
+```
+
+### 2. Method Dispatch
+
+```r
+apply_numerical_jitter <- function(data, method, epsilon) {
+  switch(method,
+    "halton" = halton_jitter(data, epsilon),
+    "sunflower" = sunflower_jitter(data, epsilon),
+    "intelligent" = intelligent_jitter(data, epsilon),
+    "none" = data
+  )
+}
+```
+
+### 3. Preservation of Original Values
+
+```r
+# Store original values in metadata
+attr(jittered_data, "original_values") <- original_values
+attr(jittered_data, "jitter_method") <- method
+attr(jittered_data, "epsilon") <- epsilon
+```
+
+## Backward Compatibility
+
+- Existing `pcp_arrange` calls continue to work unchanged
+- Default behavior (categorical-only) preserved when `numeric_ties = FALSE`
+- New functionality opt-in through explicit method selection
+- Warning messages guide users to new features
+
+## Documentation Requirements
+
+### Function Documentation
+
+- Detailed explanation of each method
+- Theoretical foundations and references
+- When to use each method
+- Parameter selection guidance
+- Examples with multiple datasets
+
+### Vignettes
+
+1. **"Handling Numerical Ties in ggpcp"**: Introduction and basic usage
+2. **"Comparing Tie-Breaking Methods"**: Detailed comparison with examples
+3. **"Advanced Tie Resolution"**: Parameter tuning and edge cases
+4. **"Theory of Deterministic Jittering"**: Mathematical foundations
+
+### Visual Indicators
+
+Add optional visual indicators showing:
+
+- Which axes have numerical tie-breaking applied
+- Magnitude of epsilon used
+- Number of tied observations per group
+- Method employed
+
+# Research Questions and Methodology
+
+## Primary Research Question
+
+**How can the formal structure of the Grammar of Graphics be extended to systematically incorporate and evaluate methods for resolving numerical ties in parallel coordinate plots, and what is the quantifiable impact of these methods on the accuracy and efficiency of visual data analysis?**
+
+## Secondary Research Questions
+
+### RQ1: Theory
+
+**How can the management of numerical ties be most effectively and coherently formalized within the layered grammar of graphics, building on the established ggpcp framework for categorical tie management?**
+
+**Methodology**:
+
+- Theoretical analysis of Grammar of Graphics structure
+- Literature synthesis on position adjustments
+- Specification of new grammatical element
+- Integration with existing ggpcp architecture
+- Formal documentation of tie-breaking grammar
+
+**Deliverables**:
+
+- Formal specification document
+- Extended grammar notation
+- Theoretical paper on biomimetic transformations
+- Integration guidelines for ggpcp
+
+### RQ2: Methodology
+
+**What are the optimal algorithmic criteria for ordering and spacing tied data points to maximize visual clarity while preserving underlying data properties, particularly in comparison to the hierarchical sorting methods already established in ggpcp for categorical variables?**
+
+**Methodology**:
+
+- Algorithm design and implementation in R
+- Comparative analysis of distribution quality
+- Computational performance benchmarking
+- Parameter sensitivity analysis
+- Edge case identification and handling
+
+**Evaluation Metrics**:
+
+- Minimum separation distance
+- Discrepancy (uniformity measure)
+- Computational complexity
+- Memory efficiency
+- Scalability testing
+
+**Deliverables**:
+
+- Complete R implementation in ggpcp
+- Performance benchmarks
+- Algorithm comparison paper
+- Best practices guidelines
+
+### RQ3: Perception
+
+**How do different visualization strategies for numerical ties affect an analyst's ability to perform key visual tasks (cluster identification, outlier detection, density estimation) compared to the categorical tie-breaking approaches already validated in ggpcp?**
+
+**Methodology**: Controlled user study with human subjects
+
+**Study Design**:
+
+- **Type**: Within-subjects repeated measures
+- **Participants**: 30-50 analysts (mixed expertise)
+- **Methods compared**: No jitter, Random, Halton, Sunflower, Intelligent
+- **Tasks**: 
+  - Density estimation: "How many observations follow this path?"
+  - Cluster identification: "Identify distinct clusters"
+  - Outlier detection: "Find observations that don't fit patterns"
+  - Pattern tracing: "Follow observation #42 across all dimensions"
+
+**Dependent Variables**:
+
+1. **Accuracy**: Absolute error from ground truth
+2. **Completion Time**: Seconds to complete task
+3. **Confidence**: Self-reported certainty (1-10 scale)
+4. **Preference**: Comparative ranking of methods
+
+**Statistical Analysis**:
+
+- Repeated-measures ANOVA
+- Bonferroni post-hoc tests
+- Effect size calculations (partial $\eta^2$)
+- Correlation analysis (accuracy vs. confidence)
+
+**Expected Hypotheses**:
+
+- **H1**: Halton and Sunflower > Random > No Jitter (accuracy)
+- **H2**: Halton $\approx$ Sunflower < Random < No Jitter (time)
+- **H3**: Sunflower $\approx$ Halton > Random > No Jitter (preference)
+- **H4**: Intelligent performs poorly across all metrics
+
+**Deliverables**:
+
+- IRB-approved study protocol
+- Complete dataset with results
+- Statistical analysis report
+- Empirical paper on perceptual effectiveness
+
+### RQ4: Practice
+
+**Can a set of evidence-based heuristics be developed to guide practitioners in selecting the most appropriate numerical tie-breaking method for their specific data context, integrating with existing ggpcp parameter selection guidelines?**
+
+**Methodology**:
+
+- Synthesize findings from RQ1-3
+- Develop decision tree/flowchart
+- Validate with case studies
+- Gather practitioner feedback
+- Refine through iterative testing
+
+**Case Study Domains**:
+
+1. **Bioinformatics**: Gene expression data
+2. **Finance**: Market data with discrete prices
+3. **Engineering**: Sensor data with limited precision
+4. **Social Science**: Survey responses with Likert scales
+5. **Climate Science**: Model ensemble outputs
+
+**Heuristic Framework Components**:
+
+- Data characteristics assessment
+- Task requirements analysis
+- Method selection guidelines
+- Parameter tuning recommendations
+- Validation procedures
+
+**Deliverables**:
+
+- Practitioner's guide document
+- Interactive decision tool (Shiny app)
+- Case study collection
+- Best practices paper
+- Tutorial videos
+
+# Implementation Roadmap
+
+## Phase 1: Algorithm Refinement (Winter 2025)
+
+### Tasks
+
+1. Finalize all three jittering implementations
+2. Develop adaptive epsilon selection
+3. Optimize computational performance
+4. Complete test suite with edge cases
+5. Benchmark against large datasets
+
+### Deliverables
+
+- Optimized R functions
+- Unit tests with 100% coverage
+- Performance benchmarks
+- Technical documentation
+
+## Phase 2: ggpcp Integration (Spring 2026)
+
+### Tasks
+
+1. Extend `pcp_arrange()` function
+2. Implement automatic tie detection
+3. Add epsilon auto-determination
+4. Create visual indicators
+5. Write package vignettes
+6. Prepare for CRAN submission
+
+### Deliverables
+
+- Updated ggpcp package
+- Comprehensive documentation
+- Three tutorial vignettes
+- Package ready for CRAN
+
+## Phase 3: User Study (Spring-Summer 2026)
+
+### Tasks
+
+1. Obtain IRB approval (early Spring)
+2. Develop study materials
+3. Recruit participants
+4. Conduct study sessions
+5. Analyze results
+6. Write empirical paper
+
+### Deliverables
+
+- IRB approval documentation
+- Complete dataset
+- Statistical analysis
+- Empirical research paper draft
+
+## Phase 4: Case Studies & Dissertation Writing (Summer 2026)
+
+### Tasks
+
+1. Apply to diverse real-world datasets
+2. Gather practitioner feedback
+3. Develop decision heuristics
+4. Write dissertation chapters
+5. Integrate all components
+6. Prepare defense presentation
+
+### Deliverables
+
+- Five domain case studies
+- Practitioner's guide
+- Complete dissertation draft
+- Defense presentation
+
+## Phase 5: Final Review and Defense (May-July 2026)
+
+### Tasks
+
+1. Committee review of dissertation
+2. Incorporate feedback
+3. Final revisions
+4. Defense rehearsals
+5. Dissertation defense
+
+### Deliverables
+
+- Final dissertation
+- Successful defense
+- Submitted for graduation
+
+
+# Expected Outcomes and Contributions
+
+## Theoretical Contributions
+
+1. **Grammar of Graphics Extension**
+   - Formal specification of biomimetic transformations
+   - Integration of natural optimization principles
+   - New category of position adjustments
+
+2. **Cross-Domain Algorithm Adaptation**
+   - Phyllotaxis → data visualization
+   - Quasi-random sequences → statistical graphics
+   - Demonstrates value of interdisciplinary approaches
+
+3. **Negative Result Documentation**
+   - Intelligent jitter failure analysis
+   - Design patterns to avoid
+   - Methodological lessons
+
+## Methodological Contributions
+
+1. **Three Novel Algorithms**
+   - Halton jitter for PCPs
+   - Sunflower jitter for PCPs
+   - Intelligent jitter (with failure analysis)
+
+2. **Comparative Framework**
+   - Systematic evaluation criteria
+   - Quantitative metrics
+   - Perceptual assessment methods
+
+3. **Implementation Quality**
+   - Production-ready R code
+   - Comprehensive testing
+   - Extensive documentation
+
+## Practical Contributions
+
+1. **ggpcp Package Enhancement**
+   - Complete tie-handling solution
+   - Categorical + numerical ties
+   - Unified grammar interface
+
+2. **User Guidance**
+   - Evidence-based selection heuristics
+   - Interactive decision tools
+   - Tutorial materials
+
+3. **Real-World Impact**
+   - Improved exploratory data analysis
+   - More accurate pattern detection
+   - Better density visualization
+
+## Empirical Contributions
+
+1. **User Study Results**
+   - Quantitative performance data
+   - Perceptual effectiveness measures
+   - Preference rankings
+
+2. **Case Study Collection**
+   - Diverse domain applications
+   - Best practices examples
+   - Common pitfall documentation
+
+3. **Benchmark Dataset**
+   - Performance comparisons
+   - Scalability testing
+   - Reference implementations
+
+# Broader Implications
+
+## Beyond Parallel Coordinates
+
+The methods developed here generalize to other visualization contexts:
+
+### 2D Scatter Plots
+
+**Problem**: Overplotting with tied values
+
+**Solution**: Full 2D Sunflower and 2D Halton
+
+```r
+# 2D Sunflower for scatter plots
+scatter_sunflower <- function(x_ties, y_ties, epsilon) {
+  n <- length(x_ties)
+  angles <- (0:(n-1)) * 137.508 * (pi/180)
+  radii <- epsilon * sqrt((0:(n-1)) / n)
+  
+  x_displaced <- x_ties + radii * cos(angles)
+  y_displaced <- y_ties + radii * sin(angles)
+  
+  return(data.frame(x = x_displaced, y = y_displaced))
+}
+```
+
+### Time Series Visualization
+
+**Problem**: Multiple series with identical values at time points
+
+**Solution**: Vertical displacement using deterministic methods
+
+### Network Visualization
+
+**Problem**: Node positioning with spatial constraints
+
+**Solution**: Optimal space-filling using golden angle principles
+
+## General Principle
+
+**Wherever random jitter is currently used, deterministic low-discrepancy alternatives should be considered.**
+
+Benefits:
+
+- Reproducibility
+- Better distribution quality
+- Elimination of artifacts
+- Theoretical guarantees
+
+# Timeline to Dissertation Defense
+
+| Phase | Timeframe | Key Milestones |
+|-------|-----------|----------------|
+| Algorithm Refinement | Winter 2025 (Months 1-2) | Algorithm optimization, adaptive epsilon |
+| ggpcp Integration | Spring 2026 (Months 3-4) | Package update, documentation |
+| User Study | Spring-Summer 2026 (Months 5-7) | IRB approval, data collection, analysis |
+| Case Studies & Writing | Summer 2026 (Months 7-8) | Real-world validation, dissertation drafting |
+| Dissertation Completion | May-June 2026 | Final revisions, committee review |
+| **Defense** | **July 2026** | **Final defense and submission** |
+
+
+# Conclusion
+
+This research addresses a fundamental limitation in parallel coordinate visualization: the visual occlusion caused by numerical ties. While the ggpcp package has successfully solved categorical ties through hierarchical sorting, numerical ties have remained problematic.
+
+We propose three deterministic jittering methods—Halton (quasi-random sequences), Sunflower (biomimetic distribution), and Intelligent (exploratory approach)—that provide reproducible, theoretically-grounded solutions. Our comparative analysis reveals:
+
+- **Halton excels** in uniformity and mathematical rigor
+- **Sunflower balances** performance with aesthetic appeal
+- **Intelligent demonstrates** the importance of proper scaling functions
+
+The integration of these methods into ggpcp will provide users with a complete solution for all forms of ties—categorical and numerical—within a unified Grammar of Graphics framework. This research contributes to visualization theory, methodology, and practice while establishing principles applicable beyond parallel coordinates.
+
+The planned user study will provide empirical evidence for method selection, while case studies will demonstrate real-world effectiveness. Together, these components will deliver evidence-based guidance for practitioners and advance the theoretical understanding of position adjustments in statistical graphics.
+
+By incorporating nature-inspired optimization principles into data visualization, this work exemplifies how cross-disciplinary approaches can solve longstanding challenges in information visualization.
+
+# References
+
+::: {#refs}
+:::
