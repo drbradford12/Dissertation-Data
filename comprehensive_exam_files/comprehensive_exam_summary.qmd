@@ -74,6 +74,13 @@ iris_scale_fill <- function(...) {
 
 # Clean iris data
 iris_clean <- iris %>% na.omit()
+
+img_van_der <- here::here("comprehensive_exam_files", "images", "Van_der_corput_distribution.jpeg")
+img_daisy <- here::here("comprehensive_exam_files", "images", "daisy.jpeg")
+img_vdc <- here::here("comprehensive_exam_files", "images","vdc_sequence.jpeg")
+img_golden_angle <- here::here("comprehensive_exam_files", "images","Phyllotaxis_golden_angle.jpeg")
+img_golden_ratio <- here::here("comprehensive_exam_files", "images","TheGoldenRationGraphic.jpeg")
+
 ```
 
 # Introduction
@@ -230,13 +237,18 @@ p3 +
 
 Sunflower seeds arrange themselves following nature's optimization solution for packing efficiency [@vogel1979]. This pattern appears throughout nature in:
 
+```{r natural-demo, fig.cap="Natural Examples of the Nature's Optimaization", out.width="48%"}
+knitr::include_graphics(img_daisy)
+```
+
+
 - Sunflower seed heads
 - Pine cone spirals
 - Romanesco broccoli
 - Succulent leaf arrangements
 - Daisy florets
 
-The mathematical principle: **The Golden Angle** = $137.508° = 360° \times (2 - \phi)$
+The mathematical principle: **The Golden Angle** = $137.5^\circ = 360^\circ \times (2 - \phi)$
 
 where $\phi = \frac{1+\sqrt{5}}{2} \approx 1.618$ is the golden ratio.
 
@@ -257,7 +269,7 @@ This property ensures:
 
 For observation $j$ in a tie group of size $n_{\text{ties}}$:
 
-$$\text{angle}_j = (j-1) \times 137.508°$$
+$$\text{angle}_j = (j-1) \times 137.508^\circ$$
 
 $$\text{radius}_j = \epsilon \times \sqrt{\frac{j-1}{n_{\text{ties}}}}$$
 
@@ -289,7 +301,7 @@ In a 2D disk:
 ```
 function sunflower_jitter(tied_values, epsilon):
     n = length(tied_values)
-    golden_angle = 137.508 * (π / 180)
+    golden_angle = 137.508 * (pi / 180)
     
     displacements = empty_array(n)
     
@@ -304,6 +316,10 @@ function sunflower_jitter(tied_values, epsilon):
 
 ## Advantages
 
+```{r golden-angle, fig.cap="Phyllotaxis of the Golden Angle", out.width="48%"}
+knitr::include_graphics(img_golden_angle)
+```
+
 1. **Biomimetic optimization**: Leverages millions of years of natural selection
 2. **Aesthetic appeal**: Creates visually pleasing, organic-looking patterns
 3. **Balanced distribution**: Neither too uniform (mechanical) nor too random (chaotic)
@@ -313,10 +329,10 @@ function sunflower_jitter(tied_values, epsilon):
 
 The Sunflower algorithm has proven useful in:
 
-- Point cloud sampling
-- Sphere packing
-- Texture synthesis
-- Computer graphics rendering
+- Point cloud sampling: Uses the Fibonacci angle ($137.5^\circ$) and square-root radial spacing ($r = a\sqrt{\varphi}$) to generate uniformly distributed points on discs or spheres.
+- Sphere packing: Places circles or spheres at Sunflower positions to achieve near-optimal packing density in circular domains.
+- Texture synthesis: Creates organic, non-repetitive patterns for procedural textures.
+- Computer graphics rendering: Provides stratified sample points for stochastic rendering techniques (ray tracing, depth-of-field).
 - Quasi-Monte Carlo methods
 
 # Method 2: Halton Jitter (Quasi-Random Sequences)
@@ -348,14 +364,20 @@ Halton sequences [@halton1960] represent a fundamental advancement over pseudo-r
 Pseudo-random numbers inevitably cluster due to the birthday paradox:
 
 **Example**: In 100 random points on [0, 1]:
-- Expected maximum gap: ~0.05
-- Expected minimum gap: ~0.0001
+
+- Expected maximum gap: $~0.05$
+- Expected minimum gap: $~0.0001$
 - Visual artifacts mislead analysts
 - Density perception becomes unreliable
 
 ## Halton's Solution
 
 Place each new point as far as possible from all previous points through systematic construction using the **van der Corput sequence**.
+
+```{r halton-example, fig.cap="Van der Corput vs. pseudorandom", out.width="45%"}
+knitr::include_graphics(img_van_der)
+```
+
 
 ## Van der Corput Sequence Construction
 
@@ -380,6 +402,10 @@ The van der Corput sequence in base 2 generates a low-discrepancy sequence by:
 | 7   | 111    | 111      | 0.875         |
 
 **Pattern**: Each point bisects the largest remaining gap.
+
+```{r vdc-example, fig.cap="Van der Corput Sequence Visual", out.width="35%", eval=FALSE}
+knitr::include_graphics(img_vdc)
+```
 
 ## Mathematical Formulation
 
@@ -464,9 +490,8 @@ Using different prime bases for each dimension maintains low-discrepancy propert
 
 # Method 3: Intelligent Jitter (Novel Exploration)
 
-```{r intelligent-demo, fig.cap="Intellient jittering resolves ties", fig.width=10, fig.height=5}
+```{r intelligent-demo, fig.cap="Intelligent jittering resolves ties", fig.width=10, fig.height=5}
 # Demonstration of intelligent jitter
-
 p4 +
   iris_scale_color() +
   theme_minimal() +
@@ -499,7 +524,7 @@ $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}
 
 | Feature | Sunflower | Intelligent |
 |---------|-----------|-------------|
-| Angle | Golden angle (137.5°) | Golden ratio × 2π (224.4°) |
+| Angle | Golden angle ($137.5^\circ$) | Golden ratio × 2π (224.4°) |
 | Scaling | Square root: $\sqrt{j/n}$ | Linear: $j/n$ |
 | Projection | 2D spiral → 1D | 1D cosine modulation |
 | Inspiration | Phyllotaxis patterns | Golden ratio mathematics |
@@ -513,6 +538,10 @@ $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}
 - **Golden ratio modulation**: Optimal distribution through natural constant
 
 This would provide intuitive interpretation: "early arrivals" cluster near the true value, while "late arrivals" spread outward.
+
+```{r golden-ratio, fig.cap="1-dimension Example of the Golden Ratio", out.width="30%", eval=FALSE}
+knitr::include_graphics(img_golden_ratio)
+```
 
 ## Empirical Reality: Failure Analysis
 
@@ -597,31 +626,31 @@ Intelligent's linear scaling has **no such geometric justification**.
 
 This failure provides important scientific contributions:
 
-### 1. Design Pattern to Avoid
+1. Design Pattern to Avoid
 
 **Lesson**: Linear displacement scaling creates misleading stratification.
 
 **Implication**: Future methods should use constant or sublinear scaling.
 
-### 2. Golden Ratio Not Universal
+2. Golden Ratio Not Universal
 
 **Lesson**: Golden ratio works in specific geometric contexts (angular distribution), not universally.
 
 **Implication**: Biomimetic approaches require careful adaptation, not blind application.
 
-### 3. Importance of Scaling Function
+3. Importance of Scaling Function
 
 **Lesson**: The scaling function is as critical as the distribution algorithm.
 
 **Implication**: Algorithm design must consider both angular distribution and radial scaling together.
 
-### 4. Empirical Validation Essential
+4. Empirical Validation Essential
 
 **Lesson**: Theoretical elegance doesn't guarantee practical effectiveness.
 
 **Implication**: User studies and visual assessment are necessary even for mathematically motivated methods.
 
-## Recommendations
+Recommendations
 
 **Do not use Intelligent jitter for production visualizations.**
 
@@ -637,10 +666,10 @@ Include in research as:
 ```{r comparison-all, fig.cap="Side-by-side comparison of all jittering methods", fig.width=12, fig.height=8}
 # Create comparison grid
 grid.arrange(
-  p1 + labs(title = "No Jitter"),
-  p2 + labs(title = "Halton"),
-  p3 + labs(title = "Sunflower"),
-  p4 + labs(title = "Intelligent"),
+  p1_zoom + labs(title = "No Jitter"),
+  p2_zoom + labs(title = "Halton"),
+  p3_zoom + labs(title = "Sunflower"),
+  p4_zoom + labs(title = "Intelligent"),
   ncol = 2
 )
 ```
@@ -758,7 +787,7 @@ The `ggpcp` package implements a grammar of graphics approach with three core mo
 
 Our contribution extends `pcp_arrange` to handle numerical ties alongside existing categorical tie-breaking.
 
-## Proposed API Design
+## Proposed Software Implementation
 
 ### Function Signature
 
