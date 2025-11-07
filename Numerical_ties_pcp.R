@@ -114,7 +114,7 @@ p1 <- iris %>%
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
   ggpcp::geom_pcp_labels() +
   theme_pcp() +
-  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
   theme(legend.position = "none") +
   iris_scale_color() +
   ggplot2::labs(title = "Iris Data no adjustment")
@@ -139,7 +139,7 @@ p2 <- iris %>%
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
   ggpcp::geom_pcp_labels()+
   theme_pcp() +
-  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
   theme(legend.position = "none") +
   iris_scale_color() +
   labs(title = "Iris Data with Halton Jitter for Ties")
@@ -166,7 +166,7 @@ p3 <- iris %>%
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
   ggpcp::geom_pcp_labels()+
   theme_pcp() +
-  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
   theme(legend.position = "none") +
   iris_scale_color() +
   labs(title = "Iris Data with Sunflower Jitter Sequence for Ties")
@@ -194,7 +194,7 @@ p4 <- iris %>%
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
   ggpcp::geom_pcp_labels()+
   theme_pcp() +
-  geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
+  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
   theme(legend.position = "none") +
   iris_scale_color() +
   labs(title = "Iris Data with Intelligent Jitter Sequence for Ties")

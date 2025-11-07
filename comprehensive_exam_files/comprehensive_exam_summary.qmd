@@ -403,7 +403,7 @@ The van der Corput sequence in base 2 generates a low-discrepancy sequence by:
 
 **Pattern**: Each point bisects the largest remaining gap.
 
-```{r vdc-example, fig.cap="Van der Corput Sequence Visual", out.width="35%", eval=FALSE}
+```{r vdc-example, fig.cap="Van der Corput Sequence Visual", out.width="45%"}
 knitr::include_graphics(img_vdc)
 ```
 
@@ -524,9 +524,9 @@ $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}
 
 | Feature | Sunflower | Intelligent |
 |---------|-----------|-------------|
-| Angle | Golden angle ($137.5^\circ$) | Golden ratio × 2π (224.4°) |
+| Angle | Golden angle ($137.5^\circ$) | Golden ratio × $2\pi (224.4^\circ)$ |
 | Scaling | Square root: $\sqrt{j/n}$ | Linear: $j/n$ |
-| Projection | 2D spiral → 1D | 1D cosine modulation |
+| Projection | 2D spiral $\rightarrow$ 1D | 1D cosine modulation |
 | Inspiration | Phyllotaxis patterns | Golden ratio mathematics |
 
 ## Initial Hypothesis
@@ -539,7 +539,7 @@ $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}
 
 This would provide intuitive interpretation: "early arrivals" cluster near the true value, while "late arrivals" spread outward.
 
-```{r golden-ratio, fig.cap="1-dimension Example of the Golden Ratio", out.width="30%", eval=FALSE}
+```{r golden-ratio, fig.cap="1-dimension Example of the Golden Ratio", out.width="35%"}
 knitr::include_graphics(img_golden_ratio)
 ```
 
@@ -679,7 +679,7 @@ grid.arrange(
 | Method | Approach | Dimension | Projection |
 |--------|----------|-----------|------------|
 | **Halton** | Pure 1D sequence | 1D | None |
-| **Sunflower** | 2D spiral | 2D → 1D | Cosine |
+| **Sunflower** | 2D spiral | 2D $\rightarrow$ 1D | Cosine |
 | **Intelligent** | 1D with 2D-inspired modulation | Hybrid | Cosine |
 
 ## Scaling Behavior
@@ -783,7 +783,7 @@ The `ggpcp` package implements a grammar of graphics approach with three core mo
 
 1. **Variable Selection** (`pcp_select`): Choose and order dimensions
 2. **Axis Scaling** (`pcp_scale`): Normalize or transform scales
-3. **Tie Resolution** (`pcp_arrange`): Handle overlapping values ← **EXTENDED**
+3. **Tie Resolution** (`pcp_arrange`): Handle overlapping values $\leftarrow$ **EXTENDED**
 
 Our contribution extends `pcp_arrange` to handle numerical ties alongside existing categorical tie-breaking.
 
@@ -1002,7 +1002,7 @@ Add optional visual indicators showing:
   - Density estimation: "How many observations follow this path?"
   - Cluster identification: "Identify distinct clusters"
   - Outlier detection: "Find observations that don't fit patterns"
-  - Pattern tracing: "Follow observation #42 across all dimensions"
+  - Pattern tracing: "Follow observation 42 across all dimensions"
 
 **Dependent Variables**:
 
@@ -1168,8 +1168,8 @@ Add optional visual indicators showing:
    - New category of position adjustments
 
 2. **Cross-Domain Algorithm Adaptation**
-   - Phyllotaxis → data visualization
-   - Quasi-random sequences → statistical graphics
+   - Phyllotaxis $\rightarrow$ data visualization
+   - Quasi-random sequences $\rightarrow$ statistical graphics
    - Demonstrates value of interdisciplinary approaches
 
 3. **Negative Result Documentation**
@@ -1291,17 +1291,21 @@ Benefits:
 
 # Conclusion
 
-This research addresses a fundamental limitation in parallel coordinate visualization: the visual occlusion caused by numerical ties. While the ggpcp package has successfully solved categorical ties through hierarchical sorting, numerical ties have remained problematic.
+This research addresses a fundamental limitation in parallel coordinate visualization: the visual occlusion caused by numerical ties. 
+While the ggpcp package has successfully solved categorical ties through hierarchical sorting, numerical ties have remained problematic.
 
-We propose three deterministic jittering methods—Halton (quasi-random sequences), Sunflower (biomimetic distribution), and Intelligent (exploratory approach)—that provide reproducible, theoretically-grounded solutions. Our comparative analysis reveals:
+We propose three deterministic jittering methods, Halton (quasi-random sequences), Sunflower (biomimetic distribution), and Intelligent (exploratory approach), that provide reproducible, theoretically-grounded solutions.
+Our comparative analysis reveals:
 
 - **Halton excels** in uniformity and mathematical rigor
 - **Sunflower balances** performance with aesthetic appeal
 - **Intelligent demonstrates** the importance of proper scaling functions
 
-The integration of these methods into ggpcp will provide users with a complete solution for all forms of ties—categorical and numerical—within a unified Grammar of Graphics framework. This research contributes to visualization theory, methodology, and practice while establishing principles applicable beyond parallel coordinates.
+The integration of these methods into ggpcp will provide users with a complete solution for all forms of ties, categorical and numerical—within a unified Grammar of Graphics framework. 
+This research contributes to visualization theory, methodology, and practice while establishing principles applicable beyond parallel coordinates.
 
-The planned user study will provide empirical evidence for method selection, while case studies will demonstrate real-world effectiveness. Together, these components will deliver evidence-based guidance for practitioners and advance the theoretical understanding of position adjustments in statistical graphics.
+The planned user study will provide empirical evidence for method selection, while case studies will demonstrate real-world effectiveness. 
+Together, these components will deliver evidence-based guidance for practitioners and advance the theoretical understanding of position adjustments in statistical graphics.
 
 By incorporating nature-inspired optimization principles into data visualization, this work exemplifies how cross-disciplinary approaches can solve longstanding challenges in information visualization.
 
