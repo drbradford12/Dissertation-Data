@@ -218,7 +218,7 @@ We propose three methods, each with distinct theoretical foundations and charact
 | Sunflower | Phyllotaxis [@vogel1979] | 2D → 1D | Sublinear ($\sqrt{n}$) | Aesthetic + performance |
 | Intelligent | Golden ratio direct application | Hybrid 1D | Linear | Research comparison |
 
-# Method 1: Sunflower Jitter (Biomimetic Approach)
+## Method 1: Sunflower Jitter (Biomimetic Approach)
 
 ```{r sunflower-demo, fig.cap="Sunflower jittering resolves ties with biomimetic distribution", fig.width=10, fig.height=5}
 # Demonstration of sunflower jitter
@@ -233,7 +233,7 @@ p3 +
 
 ```
 
-## Biological Inspiration
+### Biological Inspiration
 
 Sunflower seeds arrange themselves following nature's optimization solution for packing efficiency [@vogel1979]. This pattern appears throughout nature in:
 
@@ -252,7 +252,7 @@ The mathematical principle: **The Golden Angle** = $137.5^\circ = 360^\circ \tim
 
 where $\phi = \frac{1+\sqrt{5}}{2} \approx 1.618$ is the golden ratio.
 
-## Why This Angle Works
+### Why This Angle Works
 
 The golden angle is the "most irrational" number in the continued fraction sense:
 
@@ -265,7 +265,7 @@ This property ensures:
 - **Self-similar structure**: Pattern looks similar at all scales
 - **Progressive optimization**: Refined over millions of years
 
-## Mathematical Formulation
+### Mathematical Formulation
 
 For observation $j$ in a tie group of size $n_{\text{ties}}$:
 
@@ -288,7 +288,7 @@ In a 2D disk:
 
 **Spiral Structure**: The characteristic spiral pattern is preserved even in 1D projection, creating aesthetically pleasing distributions.
 
-## Theoretical Properties
+### Theoretical Properties
 
 - **Near-optimal minimum separation** [@vogel1979]
 - **Low-discrepancy** in 2D space
@@ -296,7 +296,7 @@ In a 2D disk:
 - **Progressively validated** optimization
 - **Deterministic** and fully reproducible
 
-## Algorithm Pseudocode
+### Algorithm Pseudocode
 
 ```
 function sunflower_jitter(tied_values, epsilon):
@@ -314,7 +314,7 @@ function sunflower_jitter(tied_values, epsilon):
 ```
 
 
-## Advantages
+### Advantages
 
 ```{r golden-angle, fig.cap="Phyllotaxis of the Golden Angle", out.width="48%"}
 knitr::include_graphics(img_golden_angle)
@@ -325,7 +325,7 @@ knitr::include_graphics(img_golden_angle)
 3. **Balanced distribution**: Neither too uniform (mechanical) nor too random (chaotic)
 4. **Proven effectiveness**: Successfully used in nature for optimal packing
 
-## Applications Beyond PCPs
+### Applications Beyond PCPs
 
 The Sunflower algorithm has proven useful in:
 
@@ -335,7 +335,7 @@ The Sunflower algorithm has proven useful in:
 - Computer graphics rendering: Provides stratified sample points for stochastic rendering techniques (ray tracing, depth-of-field).
 - Quasi-Monte Carlo methods
 
-# Method 2: Halton Jitter (Quasi-Random Sequences)
+## Method 2: Halton Jitter (Quasi-Random Sequences)
 
 ```{r halton-demo, fig.cap="Halton jittering provides uniform low-discrepancy distribution", fig.width=10, fig.height=5}
 # Demonstration of Halton jitter
@@ -350,7 +350,7 @@ p2 +
 
 ```
 
-## Beyond Pseudo-Randomness
+### Beyond Pseudo-Randomness
 
 Halton sequences [@halton1960] represent a fundamental advancement over pseudo-random numbers:
 
@@ -359,7 +359,7 @@ Halton sequences [@halton1960] represent a fundamental advancement over pseudo-r
 - **Number-theoretically constructed** using prime bases
 - **Mathematically guaranteed** uniform coverage
 
-## The Random Number Problem
+### The Random Number Problem
 
 Pseudo-random numbers inevitably cluster due to the birthday paradox:
 
@@ -370,7 +370,7 @@ Pseudo-random numbers inevitably cluster due to the birthday paradox:
 - Visual artifacts mislead analysts
 - Density perception becomes unreliable
 
-## Halton's Solution
+### Halton's Solution
 
 Place each new point as far as possible from all previous points through systematic construction using the **van der Corput sequence**.
 
@@ -379,7 +379,7 @@ knitr::include_graphics(img_van_der)
 ```
 
 
-## Van der Corput Sequence Construction
+### Van der Corput Sequence Construction
 
 The van der Corput sequence in base 2 generates a low-discrepancy sequence by:
 
@@ -407,7 +407,7 @@ The van der Corput sequence in base 2 generates a low-discrepancy sequence by:
 knitr::include_graphics(img_vdc)
 ```
 
-## Mathematical Formulation
+### Mathematical Formulation
 
 For observation $i$ in a tie group:
 
@@ -417,7 +417,7 @@ $$\text{displacement}_i = \epsilon \times (h_i - 0.5)$$
 
 Centering around 0.5 creates symmetric bidirectional displacement.
 
-## Theoretical Guarantees: Discrepancy Theory
+### Theoretical Guarantees: Discrepancy Theory
 
 **Star Discrepancy** measures how uniformly points fill an interval [@niederreiter1992]:
 
@@ -431,7 +431,7 @@ $$D_n^* = \sup_{I \subseteq [0,1]} \left|\frac{\#\{x_i \in I\}}{n} - |I|\right|$
 
 **Conclusion**: Halton sequences are **near-optimal** in the information-theoretic sense.
 
-## Algorithm Pseudocode
+### Algorithm Pseudocode
 
 ```
 function van_der_corput(i, base):
@@ -469,7 +469,7 @@ function halton_jitter(tied_values, epsilon):
 <!-- 4. **Efficient**: Simple bit operations -->
 <!-- 5. **Extensible**: Easily extended to higher dimensions using different prime bases -->
 
-## Applications in Computer Science
+### Applications in Computer Science
 
 Halton sequences are widely used in:
 
@@ -479,7 +479,7 @@ Halton sequences are widely used in:
 - **Numerical analysis**: Multidimensional quadrature
 - **Machine learning**: Hyperparameter search spaces
 
-## Higher-Dimensional Extensions
+### Higher-Dimensional Extensions
 
 For 2D applications (e.g., scatter plots):
 
@@ -488,7 +488,7 @@ $$y_i = \text{VanDerCorput}(i, 3) \quad \text{(base 3 for y-axis)}$$
 
 Using different prime bases for each dimension maintains low-discrepancy properties.
 
-# Method 3: Intelligent Jitter (Novel Exploration)
+## Method 3: Intelligent Jitter (Novel Exploration)
 
 ```{r intelligent-demo, fig.cap="Intelligent jittering resolves ties", fig.width=10, fig.height=5}
 # Demonstration of intelligent jitter
@@ -502,7 +502,7 @@ p4 +
 
 ```
 
-## Design Motivation
+### Design Motivation
 
 **Research Question**: Can we apply the golden ratio directly in 1D rather than through angular spacing?
 
@@ -512,7 +512,7 @@ The Intelligent jitter was developed to explore whether:
 - Linear scaling might provide progressive reveal
 - A simpler algorithm could match Sunflower performance
 
-## Mathematical Formulation
+### Mathematical Formulation
 
 For observation $j$ in a tie group of size $n_{\text{ties}}$:
 
@@ -520,7 +520,7 @@ $$\text{angle}_j = (j-1) \times 2\pi \times 0.618$$
 
 $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}{n_{\text{ties}}}$$
 
-## Key Distinctions from Sunflower
+### Key Distinctions from Sunflower
 
 | Feature | Sunflower | Intelligent |
 |---------|-----------|-------------|
@@ -529,7 +529,7 @@ $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}
 | Projection | 2D spiral $\rightarrow$ 1D | 1D cosine modulation |
 | Inspiration | Phyllotaxis patterns | Golden ratio mathematics |
 
-## Initial Hypothesis
+### Initial Hypothesis
 
 **Progressive Reveal**: Linear scaling would create:
 
@@ -543,11 +543,11 @@ This would provide intuitive interpretation: "early arrivals" cluster near the t
 knitr::include_graphics(img_golden_ratio)
 ```
 
-## Empirical Reality: Failure Analysis
+### Empirical Reality: Failure Analysis
 
 The Intelligent jitter produced **poor visual quality** with several critical problems:
 
-### Problem 1: Excessive Displacement
+#### Problem 1: Excessive Displacement
 
 For a tie group with $n = 100$ observations:
 
@@ -561,7 +561,7 @@ For a tie group with $n = 100$ observations:
 
 **Result**: Later observations displaced nearly to the boundary, creating false impression of substructure.
 
-### Problem 2: Artificial Stratification
+#### Problem 2: Artificial Stratification
 
 The linear scaling creates **artificial layers** that don't represent actual data structure:
 
@@ -569,7 +569,7 @@ The linear scaling creates **artificial layers** that don't represent actual dat
 - These "clusters" are algorithmic artifacts
 - Misrepresents uniform density as stratified distribution
 
-### Problem 3: Perceptual Distortion
+#### Problem 3: Perceptual Distortion
 
 Users interpret visual patterns as data patterns:
 
@@ -577,7 +577,7 @@ Users interpret visual patterns as data patterns:
 - **Density gradients** suggest ordering (but observations are exchangeable)
 - **Boundary concentration** implies separation (but all values are tied)
 
-## Algorithm Pseudocode
+### Algorithm Pseudocode
 
 ```
 function intelligent_jitter(tied_values, epsilon):
@@ -600,9 +600,9 @@ function intelligent_jitter(tied_values, epsilon):
 <!-- - **Memory**: $O(n)$ -->
 <!-- - **Performance**: Similar to other methods -->
 
-## Why This Method Fails: Theoretical Analysis
+### Why This Method Fails: Theoretical Analysis
 
-### Root Cause: Linear Scaling
+#### Root Cause: Linear Scaling
 
 The linear scaling function $\frac{j-1}{n}$ is inappropriate because:
 
@@ -611,7 +611,7 @@ The linear scaling function $\frac{j-1}{n}$ is inappropriate because:
 3. **Artificial ordering**: Imposes structure where none exists
 4. **Cognitive interference**: Visual patterns contradict data properties
 
-### Comparison with Sunflower
+#### Comparison with Sunflower
 
 Sunflower's $\sqrt{j/n}$ scaling maintains **constant area density** in 2D:
 
@@ -622,7 +622,7 @@ Sunflower's $\sqrt{j/n}$ scaling maintains **constant area density** in 2D:
 
 Intelligent's linear scaling has **no such geometric justification**.
 
-## Value of This Negative Result
+#### Value of This Negative Result
 
 This failure provides important scientific contributions:
 
@@ -661,7 +661,7 @@ Include in research as:
 - **Educational value**: Teaches importance of scaling functions
 - **Scientific rigor**: Negative results advance knowledge
 
-# Comparative Analysis of All Three Methods
+# Comparative Analysis of Methods
 
 ```{r comparison-all, fig.cap="Side-by-side comparison of all jittering methods", fig.width=12, fig.height=8}
 # Create comparison grid
