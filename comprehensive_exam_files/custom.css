@@ -8,6 +8,24 @@
   --accent-blue: #005A9C;
 }
 
+/* Bottom-right logo on every slide */
+.reveal .slides section {
+  position: relative;
+}
+.reveal .slides section::after {
+  content: "";
+  position: absolute;
+  right: 1rem;              /* adjust as needed */
+  bottom: 1rem;             /* adjust as needed */
+  width: 80px;              /* logo size */
+  height: 80px;
+  background-image: url("unl-n-logo.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.95;            /* optional */
+  pointer-events: none;     /* keep slide clickable */
+}
+
 /* Overall presentation styling */
 .reveal {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;

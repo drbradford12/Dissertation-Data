@@ -4,6 +4,8 @@ library(tidyverse)
 library(gridExtra)
 library(ggpcp)
 library(datasets)
+library(ggmagnify)
+library(ggfx)
 
 theme_set(theme_bw())
 
@@ -12,8 +14,11 @@ iris_scale_color <-   function(...) scale_color_manual(
 iris_scale_fill <-   function(...) scale_fill_manual(
   "Species", values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000", ...))
 
+species_to_zoom <- "setosa"
+
 iris <- iris %>%
-  na.omit()
+  na.omit() %>%
+  mutate(focus = Species == species_to_zoom)
 
 intelligent_jitter <- function(values, epsilon = 0.025) {
   identify_tie_groups <- function(values) {
@@ -104,6 +109,9 @@ halton_jitter <- function(values, epsilon = 0.01) {
 
 idx <- which(names(iris) == "Petal.Width")
 
+
+
+
 p1 <- iris %>%
   pcp_select(c(1:5)) %>%
   pcp_scale(method="uniminmax") %>%
@@ -122,6 +130,21 @@ p1 <- iris %>%
 p1_zoom <- p1 +
   coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
   labs(subtitle = "Zoomed on Petal.Width axis")
+
+p1_magnify <- p1 +
+  geom_magnify(
+    from = aes(xmin = 2.8, xmax = 4.2, ymin = 0.00, ymax = 0.45),
+    to   = aes(xmin = 5.0, xmax = 6.3, ymin = 0.35, ymax = 0.95),
+    shadow       = TRUE,
+    linewidth    = 0.4
+  ) +
+  # ensure nothing bleeds into the margins
+  coord_cartesian(clip = "on")  +
+  geom_pcp(
+    data = ~ dplyr::filter(., Species == "setosa"),
+    aes(colour = Species),
+    linewidth = 1.05, alpha = 0.95
+  )
 
 
 p2 <- iris %>%
