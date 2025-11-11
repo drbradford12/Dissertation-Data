@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.5)  9 NOV 2025 16:21
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.5)  11 NOV 2025 16:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1016,7 +1016,7 @@ File: pgflibraryarrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 File: tikzlibrarypositioning.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 )
 \c@algostep=\count409
-Package hyperref Info: Option `colorlinks' set `true' on input line 338.
+Package hyperref Info: Option `colorlinks' set `true' on input line 349.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/listings/listings.sty
 \lst@mode=\count410
 \lst@gtempboxa=\box114
@@ -1142,26 +1142,26 @@ File: bkm-dvipdfm.def 2023-12-10 v1.31 bookmark driver for dvipdfm (HO)
 )) (./comprehensive_exam_presentation_updated.aux)
 \openout1 = `comprehensive_exam_presentation_updated.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 434.
-LaTeX Font Info:    ... okay on input line 434.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 445.
+LaTeX Font Info:    ... okay on input line 445.
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
 *geometry* verbose mode - [ preamble ] result:
@@ -1196,7 +1196,7 @@ LaTeX Font Info:    ... okay on input line 434.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 434.
+Package hyperref Info: Link coloring OFF on input line 445.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/translator/translator-basic-dictionary-English.dict
 Dictionary: translator-basic-dictionary, Language: English 
 ) (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/translator/translator-bibliography-dictionary-English.dict
@@ -1211,19 +1211,19 @@ Dictionary: translator-numbers-dictionary, Language: English
 Dictionary: translator-theorem-dictionary, Language: English 
 )
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `normal'
-(Font)                  OT1/lmr/m/n --> TU/lmr/m/n on input line 434.
+(Font)                  OT1/lmr/m/n --> TU/lmr/m/n on input line 445.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/lmr/m/it --> TU/lmr/m/it on input line 434.
+(Font)                  OT1/lmr/m/it --> TU/lmr/m/it on input line 445.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/lmr/bx/n --> TU/lmr/bx/n on input line 434.
+(Font)                  OT1/lmr/bx/n --> TU/lmr/bx/n on input line 445.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/lmss/m/n --> TU/lmss/m/n on input line 434.
+(Font)                  OT1/lmss/m/n --> TU/lmss/m/n on input line 445.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/lmss/bx/n --> TU/lmss/bx/n on input line 434.
+(Font)                  OT1/lmss/bx/n --> TU/lmss/bx/n on input line 445.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/lmtt/m/n --> TU/lmtt/m/n on input line 434.
+(Font)                  OT1/lmtt/m/n --> TU/lmtt/m/n on input line 445.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/lmtt/m/n --> TU/lmtt/bx/n on input line 434.
+(Font)                  OT1/lmtt/m/n --> TU/lmtt/bx/n on input line 445.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 1.030159004111184.
@@ -1251,7 +1251,7 @@ Package fontspec Info:
 (fontspec)             <->s*[1.030159004111184]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(0)/m/n' will be
-(Font)              scaled to size 8.24133pt on input line 434.
+(Font)              scaled to size 8.24133pt on input line 445.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 1.030159004111184.
@@ -1287,15 +1287,15 @@ Package fontspec Info:
 (fontspec)             <->s*[1.030159004111184]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 8.24133pt on input line 434.
+(Font)              scaled to size 8.24133pt on input line 445.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 434.
+(Font)              `operators' in the math version `normal' on input line 445.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/lmr/m/n --> TU/latinmodern-math.otf(1)/m/n on input line 434.
+(Font)                  OT1/lmr/m/n --> TU/latinmodern-math.otf(1)/m/n on input line 445.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 434.
+(Font)              `operators' in the math version `bold' on input line 445.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/lmr/bx/n --> TU/latinmodern-math.otf(1)/b/n on input line 434.
+(Font)                  OT1/lmr/bx/n --> TU/latinmodern-math.otf(1)/b/n on input line 445.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 1.030159004111184.
@@ -1361,13 +1361,13 @@ Package fontspec Info:
 (fontspec)             <->s*[1.030262020011595]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Encoding `OMS' has changed to `TU' for symbol font
-(Font)              `symbols' in the math version `normal' on input line 434.
+(Font)              `symbols' in the math version `normal' on input line 445.
 LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
-(Font)                  OMS/lmsy/m/n --> TU/latinmodern-math.otf(2)/m/n on input line 434.
+(Font)                  OMS/lmsy/m/n --> TU/latinmodern-math.otf(2)/m/n on input line 445.
 LaTeX Font Info:    Encoding `OMS' has changed to `TU' for symbol font
-(Font)              `symbols' in the math version `bold' on input line 434.
+(Font)              `symbols' in the math version `bold' on input line 445.
 LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
-(Font)                  OMS/lmsy/b/n --> TU/latinmodern-math.otf(2)/b/n on input line 434.
+(Font)                  OMS/lmsy/b/n --> TU/latinmodern-math.otf(2)/b/n on input line 445.
 
 Package fontspec Info: 
 (fontspec)             latinmodern-math scale = 1.030159004111184.
@@ -1427,13 +1427,13 @@ Package fontspec Info:
 (fontspec)             <->s*[1.030055988210773]"[latinmodern-math.otf]/OT:script=math;language=dflt;"
 
 LaTeX Font Info:    Encoding `OMX' has changed to `TU' for symbol font
-(Font)              `largesymbols' in the math version `normal' on input line 434.
+(Font)              `largesymbols' in the math version `normal' on input line 445.
 LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
-(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/m/n on input line 434.
+(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/m/n on input line 445.
 LaTeX Font Info:    Encoding `OMX' has changed to `TU' for symbol font
-(Font)              `largesymbols' in the math version `bold' on input line 434.
+(Font)              `largesymbols' in the math version `bold' on input line 445.
 LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
-(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/b/n on input line 434.
+(Font)                  OMX/lmex/m/n --> TU/latinmodern-math.otf(3)/b/n on input line 445.
 
 Package unicode-math Warning: Using \overbracket and \underbracket from
 (unicode-math)                `mathtools' package.
@@ -1463,75 +1463,93 @@ Package caption Info: End \AtBeginDocument code.
 
 ] [2
 
+] [3
+
 ]
-LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <8> not available
-(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 476.
+File: images/rural_shrink_dashboard.jpeg Graphic file (type bmp)
+<images/rural_shrink_dashboard.jpeg>
+
+Overfull \vbox (17.26361pt too high) detected at line 500
+ []
+
+[4
+
+]
+File: comprehensive_exam_presentation_updated_files/figure-beamer/comparison-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/comparison-1.pdf>
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.76894pt on input line 476.
+(Font)              scaled to size 6.181pt on input line 538.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 4.12067pt on input line 476.
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 476.
+(Font)              scaled to size 5.15083pt on input line 538.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 538.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 8.24207pt on input line 476.
+(Font)              scaled to size 6.18155pt on input line 538.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.76944pt on input line 476.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 4.12103pt on input line 476.
+(Font)              scaled to size 5.15129pt on input line 538.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 8.24048pt on input line 476.
+(Font)              scaled to size 6.18036pt on input line 538.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 5.76834pt on input line 476.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 4.12024pt on input line 476.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 476.
+(Font)              scaled to size 5.1503pt on input line 538.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 538.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 476.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 538.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 476.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 538.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 476.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 538.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [3
+)
+Overfull \vbox (26.06534pt too high) detected at line 538
+ []
 
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb) [4
-
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb) [5
+[5
 
 ] [6
 
-] [7
+]
+LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <8> not available
+(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 605.
+[7
+
+]
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 5.76894pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 4.12067pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 8.24207pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 5.76944pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 4.12103pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 8.24048pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 5.76834pt on input line 641.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 4.12024pt on input line 641.
+[8
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [8
-
-] [9
+(./comprehensive_exam_presentation_updated.vrb) [9
 
 ] [10
 
 ] [11
 
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb) [12
+] [12
 
 ] [13
 
@@ -1539,56 +1557,64 @@ File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 
 ] [15
 
-] [16
+]
+File: comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo-1.pdf>
+[16
 
-] [17
+]
+\openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-] [18
+(./comprehensive_exam_presentation_updated.vrb
+File: comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo1-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo1-1.pdf>
+) [17
+
+]
+File: comprehensive_exam_presentation_updated_files/figure-beamer/hammcock-example-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/hammcock-example-1.pdf>
+
+Overfull \vbox (7.82248pt too high) detected at line 943
+ []
+
+[18
 
 ] [19
 
 ] [20
 
-]
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.21117pt on input line 1082.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.15083pt on input line 1082.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.2118pt on input line 1082.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.15129pt on input line 1082.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 7.21042pt on input line 1082.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 5.1503pt on input line 1082.
-[21
+] [21
 
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb) [22
+] [22
 
 ] [23
 
 ] [24
 
-] [25
-
-] [26
-
-] [27
-
-] [28
+]
+File: images/lyer_illusion.jpeg Graphic file (type bmp)
+<images/lyer_illusion.jpeg>
+File: images/sine_illusions.jpeg Graphic file (type bmp)
+<images/sine_illusions.jpeg>
+[25
 
 ]
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 6.181pt on input line 1373.
+(Font)              scaled to size 7.21117pt on input line 1236.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 6.18155pt on input line 1373.
+(Font)              scaled to size 7.2118pt on input line 1236.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 6.18036pt on input line 1373.
-[29
+(Font)              scaled to size 7.21042pt on input line 1236.
+[26
+
+]
+\openout4 = `comprehensive_exam_presentation_updated.vrb'.
+
+(./comprehensive_exam_presentation_updated.vrb) [27
+
+] [28
+
+] [29
 
 ] [30
 
@@ -1598,45 +1624,10 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 
 ] [33
 
-] [34
-
-] [35
-
-] [36
-
-] [37
-
-] [38
-
-] [39
-
-] [40
-
-]
-Missing character: There is no ≠ (U+2260) in font [lmsans8-regular]:mapping=tex-text;!
-[41
-
-] [42
-
-] [43
-
-]
-Missing character: There is no ∼ (U+223C) in font [lmsans8-regular]:mapping=tex-text;!
-Missing character: There is no 𝜖 (U+1D716) in font [lmsans8-regular]:mapping=tex-text;!
-Missing character: There is no ∼ (U+223C) in font [lmsans8-regular]:mapping=tex-text;!
-Missing character: There is no 𝜖 (U+1D716) in font [lmsans8-regular]:mapping=tex-text;!
-Missing character: There is no ∼ (U+223C) in font [lmsans8-regular]:mapping=tex-text;!
-Missing character: There is no 𝜖 (U+1D716) in font [lmsans8-regular]:mapping=tex-text;!
-[44
-
-] [45
-
-] [46
-
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [47
+(./comprehensive_exam_presentation_updated.vrb) [34
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
@@ -1644,25 +1635,46 @@ Missing character: There is no 𝜖 (U+1D716) in font [lmsans8-regular]:mapping=
 (./comprehensive_exam_presentation_updated.vrb
 LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
 (Font)              Font shape `TU/lmtt/b/n' tried instead on input line 7.
-) [48
+) [35
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb)
-Overfull \vbox (1.66618pt too high) detected at line 2032
- []
-
-[49
+(./comprehensive_exam_presentation_updated.vrb) [36
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb)
-Overfull \vbox (32.70502pt too high) detected at line 2064
- []
+(./comprehensive_exam_presentation_updated.vrb) [37
 
-[50
+] [38
+
+] [39
+
+] [40
+
+] [41
+
+] [42
+
+] [43
+
+] [44
+
+] [45
+
+] [46
+
+] [47
+
+]
+\openout4 = `comprehensive_exam_presentation_updated.vrb'.
+
+(./comprehensive_exam_presentation_updated.vrb) [48
+
+] [49
+
+] [50
 
 ] [51
 
@@ -1676,10 +1688,7 @@ Overfull \vbox (32.70502pt too high) detected at line 2064
 
 ] [56
 
-]
-Missing character: There is no ≈ (U+2248) in font [lmsans8-regular]:mapping=tex-text;!
-Missing character: There is no ≈ (U+2248) in font [lmsans8-regular]:mapping=tex-text;!
-[57
+] [57
 
 ] [58
 
@@ -1687,20 +1696,24 @@ Missing character: There is no ≈ (U+2248) in font [lmsans8-regular]:mapping=te
 
 ] [60
 
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb) [61
+] [61
 
 ] [62
 
 ] [63
 
-] [64
+]
+Missing character: There is no ✓ (U+2713) in font [lmsans10-bold]:mapping=tex-text;!
+Missing character: There is no ✓ (U+2713) in font [lmsans10-bold]:mapping=tex-text;!
+Missing character: There is no ✗ (U+2717) in font [lmsans10-bold]:mapping=tex-text;!
+[64
 
 ] [65
 
-] [66
+]
+\openout4 = `comprehensive_exam_presentation_updated.vrb'.
+
+(./comprehensive_exam_presentation_updated.vrb) [66
 
 ] [67
 
@@ -1722,28 +1735,36 @@ Missing character: There is no ≈ (U+2248) in font [lmsans8-regular]:mapping=te
 
 ] [76
 
-]
-Missing character: There is no ✓ (U+2713) in font [lmsans10-bold]:mapping=tex-text;!
-Missing character: There is no ✓ (U+2713) in font [lmsans10-bold]:mapping=tex-text;!
-Missing character: There is no ✗ (U+2717) in font [lmsans10-bold]:mapping=tex-text;!
-[77
+] [77
 
 ] [78
 
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb) [79
+] [79
 
 ] [80
 
-]
-LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <5> not available
-(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 3053.
-[81
+] [81
 
 ] [82
 
+]
+Missing character: There is no ≠ (U+2260) in font [lmsans8-regular]:mapping=tex-text;!
+[83
+
+] [84
+
+] [85
+
+] [86
+
+]
+LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <5> not available
+(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 3180.
+
+Overfull \vbox (175.58498pt too high) detected at line 3180
+ []
+
+[87
 
 ]
 \tf@nav=\write6
@@ -1762,12 +1783,12 @@ L3 programming layer <2025-10-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 39663 strings out of 470195
- 833297 string characters out of 5477636
- 1443070 words of memory out of 5000000
- 67439 multiletter control sequences out of 15000+600000
- 655985 words of font info for 129 fonts, out of 8000000 for 9000
+ 39858 strings out of 470195
+ 840463 string characters out of 5477636
+ 1449070 words of memory out of 5000000
+ 67627 multiletter control sequences out of 15000+600000
+ 655993 words of font info for 130 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 109i,11n,123p,1908b,696s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 109i,11n,123p,1908b,661s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on comprehensive_exam_presentation_updated.pdf (82 pages).
+Output written on comprehensive_exam_presentation_updated.pdf (87 pages).

@@ -110,12 +110,10 @@ halton_jitter <- function(values, epsilon = 0.01) {
 idx <- which(names(iris) == "Petal.Width")
 
 
-
-
 p1 <- iris %>%
   pcp_select(c(1:5)) %>%
   pcp_scale(method="uniminmax") %>%
-  pcp_arrange(method = "from-left") %>%
+  ggpcp::pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = Species), alpha = 0.5) +
@@ -131,20 +129,29 @@ p1_zoom <- p1 +
   coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
   labs(subtitle = "Zoomed on Petal.Width axis")
 
-p1_magnify <- p1 +
+p1_magnify_species <- p1 +
   geom_magnify(
-    from = aes(xmin = 2.8, xmax = 4.2, ymin = 0.00, ymax = 0.45),
-    to   = aes(xmin = 5.0, xmax = 6.3, ymin = 0.35, ymax = 0.95),
-    shadow       = TRUE,
-    linewidth    = 0.4
-  ) +
+  from = c(xmin = 4.8, xmax = 5.2, ymin = 0.45, ymax = 0.55),
+  to   = c(xmin = 2.5, xmax = 4.5, ymin = 0.5, ymax = 1.0),
+  shadow    = TRUE,
+  linewidth = 0.5,
+  colour    = "black"
+) +
   # ensure nothing bleeds into the margins
   coord_cartesian(clip = "on")  +
-  geom_pcp(
-    data = ~ dplyr::filter(., Species == "setosa"),
-    aes(colour = Species),
-    linewidth = 1.05, alpha = 0.95
-  )
+  labs(subtitle = "Zoomed on Categorical Ties in ggpcp")
+
+p1_magnify_ties <- p1 +
+  geom_magnify(
+    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
+    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
+    shadow    = TRUE,
+    linewidth = 0.5,
+    colour    = "black"
+  )+
+  # ensure nothing bleeds into the margins
+  coord_cartesian(clip = "on") +
+  labs(subtitle = "Zoomed on Numerical Ties in ggpcp")
 
 
 p2 <- iris %>%
@@ -155,7 +162,7 @@ p2 <- iris %>%
   ) %>%
   pcp_select(c(1:5)) %>%
   pcp_scale(method = "uniminmax") %>%
-  pcp_arrange(method = "from-left") %>%
+  ggpcp::pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = Species), alpha = 0.5) +
@@ -171,6 +178,18 @@ p2_zoom <- p2 +
   coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
   labs(subtitle = "Zoomed on Petal.Width axis")
 
+p2_magnify_ties <- p2 +
+  geom_magnify(
+    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
+    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
+    shadow    = TRUE,
+    linewidth = 0.5,
+    colour    = "black"
+  )+
+  # ensure nothing bleeds into the margins
+  coord_cartesian(clip = "on")
+
+
 #grid.arrange(p1, p2, ncol = 2)
 #grid.arrange(p1_zoom, p2_zoom, ncol = 2)
 
@@ -182,7 +201,7 @@ p3 <- iris %>%
   ) %>%
   pcp_select(c(1:5)) %>%
   pcp_scale(method = "uniminmax") %>%
-  pcp_arrange(method = "from-left") %>%
+  ggpcp::pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = Species), alpha = 0.5) +
@@ -199,6 +218,18 @@ p3_zoom <- p3 +
   coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
   labs(subtitle = "Zoomed on Petal.Width axis")
 
+p3_magnify_ties <- p3 +
+  geom_magnify(
+    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
+    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
+    shadow    = TRUE,
+    linewidth = 0.5,
+    colour    = "black"
+  ) +
+  # ensure nothing bleeds into the margins
+  coord_cartesian(clip = "on")
+
+
 #grid.arrange(p1, p3, ncol = 2)
 #grid.arrange(p1_zoom, p3_zoom, ncol = 2)
 
@@ -210,7 +241,7 @@ p4 <- iris %>%
   ) %>%
   pcp_select(c(1:5)) %>%
   pcp_scale(method = "uniminmax") %>%
-  pcp_arrange(method = "from-left") %>%
+  ggpcp::pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
   geom_pcp(aes(colour = Species), alpha = 0.5) +
@@ -225,6 +256,18 @@ p4 <- iris %>%
 p4_zoom <- p4 +
   coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
   labs(subtitle = "Zoomed on Petal.Width axis")
+
+p4_magnify_ties <- p4 +
+  geom_magnify(
+    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
+    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
+    shadow    = TRUE,
+    linewidth = 0.5,
+    colour    = "black"
+  ) +
+  # ensure nothing bleeds into the margins
+  coord_cartesian(clip = "on")
+
 
 #grid.arrange(p1, p4, ncol = 2)
 #grid.arrange(p1_zoom, p4_zoom, ncol = 2)
