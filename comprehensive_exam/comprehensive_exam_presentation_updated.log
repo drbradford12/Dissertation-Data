@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.5)  11 NOV 2025 22:30
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.5)  11 NOV 2025 23:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1509,11 +1509,7 @@ File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 551.
 (/Users/dbradford4/Library/TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-Overfull \vbox (26.06534pt too high) detected at line 551
- []
-
-[5
+) [5
 
 ] [6
 
@@ -1552,32 +1548,12 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 
 ] [12
 
-]
-File: comprehensive_exam_presentation_updated_files/figure-beamer/jitter-comparison-1.pdf Graphic file (type pdf)
-<use comprehensive_exam_presentation_updated_files/figure-beamer/jitter-comparison-1.pdf>
-[13
-
-] [14
-
-]
-File: comprehensive_exam_presentation_updated_files/figure-beamer/pcp-integration-1.pdf Graphic file (type pdf)
-<use comprehensive_exam_presentation_updated_files/figure-beamer/pcp-integration-1.pdf>
-[15
-
-]
-\openout4 = `comprehensive_exam_presentation_updated.vrb'.
-
-(./comprehensive_exam_presentation_updated.vrb
-LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 33.
-) [16
-
-] [17
+] [13
 
 ]
 File: comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo-1.pdf Graphic file (type pdf)
 <use comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo-1.pdf>
-[18
+[14
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
@@ -1585,16 +1561,24 @@ File: comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo-1
 (./comprehensive_exam_presentation_updated.vrb
 File: comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo1-1.pdf Graphic file (type pdf)
 <use comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo1-1.pdf>
-) [19
+) [15
 
 ]
 File: comprehensive_exam_presentation_updated_files/figure-beamer/hammcock-example-1.pdf Graphic file (type pdf)
 <use comprehensive_exam_presentation_updated_files/figure-beamer/hammcock-example-1.pdf>
 
-Overfull \vbox (7.82248pt too high) detected at line 972
+Overfull \vbox (2.07251pt too high) detected at line 887
  []
 
-[20
+[16
+
+] [17
+
+] [18
+
+] [19
+
+] [20
 
 ] [21
 
@@ -1604,56 +1588,68 @@ Overfull \vbox (7.82248pt too high) detected at line 972
 
 ] [24
 
-] [25
+]
+File: images/vandercorput_vs_pseudorandom_R.png Graphic file (type bmp)
+<images/vandercorput_vs_pseudorandom_R.png>
+[25
 
 ] [26
 
 ] [27
-
-] [28
-
-]
-File: images/vandercorput_vs_pseudorandom_R.png Graphic file (type bmp)
-<images/vandercorput_vs_pseudorandom_R.png>
-[29
-
-] [30
-
-] [31
 
 ]
 File: images/lyer_illusion.jpeg Graphic file (type bmp)
 <images/lyer_illusion.jpeg>
 File: images/sine_illusions.jpeg Graphic file (type bmp)
 <images/sine_illusions.jpeg>
-[32
+[28
 
 ]
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.21117pt on input line 1381.
+(Font)              scaled to size 7.21117pt on input line 1290.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.2118pt on input line 1381.
+(Font)              scaled to size 7.2118pt on input line 1290.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 7.21042pt on input line 1381.
-[33
+(Font)              scaled to size 7.21042pt on input line 1290.
+[29
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [34
+(./comprehensive_exam_presentation_updated.vrb) [30
 
-] [35
+] [31
+
+] [32
+
+] [33
+
+] [34
+
+]
+File: comprehensive_exam_presentation_updated_files/figure-beamer/jitter-comparison-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/jitter-comparison-1.pdf>
+[35
 
 ] [36
 
-] [37
+]
+File: comprehensive_exam_presentation_updated_files/figure-beamer/pcp-integration-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/pcp-integration-1.pdf>
+[37
 
-] [38
+]
+File: comprehensive_exam_presentation_updated_files/figure-beamer/pcp-implementation-1.pdf Graphic file (type pdf)
+<use comprehensive_exam_presentation_updated_files/figure-beamer/pcp-implementation-1.pdf>
+[38
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [39
+(./comprehensive_exam_presentation_updated.vrb
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 33.
+) [39
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
@@ -1670,7 +1666,10 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 
 (./comprehensive_exam_presentation_updated.vrb) [42
 
-] [43
+]
+\openout4 = `comprehensive_exam_presentation_updated.vrb'.
+
+(./comprehensive_exam_presentation_updated.vrb) [43
 
 ] [44
 
@@ -1690,12 +1689,12 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 
 ] [52
 
+] [53
+
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [53
-
-] [54
+(./comprehensive_exam_presentation_updated.vrb) [54
 
 ] [55
 
@@ -1725,20 +1724,20 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 
 ] [68
 
+] [69
+
 ]
 Missing character: There is no ✓ (U+2713) in font [lmsans10-bold]:mapping=tex-text;!
 Missing character: There is no ✓ (U+2713) in font [lmsans10-bold]:mapping=tex-text;!
 Missing character: There is no ✗ (U+2717) in font [lmsans10-bold]:mapping=tex-text;!
-[69
+[70
 
-] [70
+] [71
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [71
-
-] [72
+(./comprehensive_exam_presentation_updated.vrb) [72
 
 ] [73
 
@@ -1780,14 +1779,16 @@ Missing character: There is no ✗ (U+2717) in font [lmsans10-bold]:mapping=tex-
 
 ] [92
 
+] [93
+
 ]
 LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <5> not available
-(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 3316.
+(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 3331.
 
-Overfull \vbox (175.58498pt too high) detected at line 3316
+Overfull \vbox (175.58498pt too high) detected at line 3331
  []
 
-[93
+[94
 
 ]
 \tf@nav=\write6
@@ -1806,12 +1807,12 @@ L3 programming layer <2025-10-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 39919 strings out of 470195
- 843330 string characters out of 5477636
+ 39931 strings out of 470195
+ 844135 string characters out of 5477636
  1449136 words of memory out of 5000000
- 67682 multiletter control sequences out of 15000+600000
+ 67693 multiletter control sequences out of 15000+600000
  655993 words of font info for 130 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  109i,11n,123p,1908b,661s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on comprehensive_exam_presentation_updated.pdf (93 pages).
+Output written on comprehensive_exam_presentation_updated.pdf (94 pages).

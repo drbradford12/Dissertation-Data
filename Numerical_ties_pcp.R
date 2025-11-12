@@ -90,7 +90,8 @@ plot_original <- iris  %>%
   labs(title = "Original Data (with ties)",
        subtitle = "Overlapping lines create visual density issues") +
   iris_scale_color() +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
 p1_magnify_species <- plot_original +
   geom_magnify(
@@ -132,10 +133,11 @@ plot_uniform <- pcp_data_uniform %>%
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
   ggpcp::geom_pcp_labels() +
   theme_pcp() +
-  labs(title = "Uniform Jittering (ε = 1/n)",
+  labs(title = "Uniform Jittering (epilson = 1/n)",
        subtitle = "Random distribution within adaptive intervals") +
   iris_scale_color() +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
 plot_uniform_magnify <- plot_uniform +
   geom_magnify(
@@ -167,7 +169,8 @@ plot_halton <- pcp_data_halton %>%
   labs(title = "Halton Sequence Jittering",
        subtitle = "Quasi-random distribution for better visual uniformity") +
   iris_scale_color() +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
 plot_halton_magnify <- plot_halton +
   geom_magnify(

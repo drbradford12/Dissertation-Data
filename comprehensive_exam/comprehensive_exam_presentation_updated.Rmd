@@ -116,16 +116,16 @@ knitr::include_graphics(img_shrink)
 
 **Central Challenge:**
 
+\footnotesize
 Numerical ties in parallel coordinate plots create severe visual occlusion that fundamentally compromises data exploration.
 
-```{r comparison, out.width="75%"}
+```{r comparison, out.width="65%"}
 #| fig-cap: "Comparison of current state of tie methods currently in ggpcp"
 #| fig-align: center
 #grid.arrange(p1, p2, ncol = 2)
 grid.arrange(p1_magnify_species, p1_magnify_ties, ncol = 2)
 ```
 
-\footnotesize
 
 **Our Approach:**
 
@@ -270,12 +270,12 @@ When categorical variables or discrete values create ties in parallel coordinate
 
 <!-- $$\left[v - \frac{1}{2n_{\text{ties}}}, v + \frac{1}{2n_{\text{ties}}}\right]$$ -->
 
-<!-- **Key Properties:** -->
+**Key Properties:**
 
-<!-- - **Adaptive interval**: Width scales inversely with tie frequency -->
-<!-- - **Preservation**: Expected value remains $v$ -->
-<!-- - **Separation**: No overlap between distinct values -->
-<!-- - **Scalability**: Works for any number of ties -->
+- **Adaptive interval**: Width scales inversely with tie frequency
+- **Preservation**: Expected value remains $v$
+- **Separation**: No overlap between distinct values
+- **Scalability**: Works for any number of ties
 
 <!-- ## Implementation in R -->
 
@@ -296,162 +296,6 @@ When categorical variables or discrete values create ties in parallel coordinate
 <!--   return(x_jittered) -->
 <!-- } -->
 <!-- ``` -->
-
-## Comparison: Uniform vs. Halton Sequence Jittering
-
-```{r jitter-comparison, fig.height=4, echo=FALSE}
-# Halton sequence function
-halton_sequence <- function(n, base = 2) {
-  seq <- numeric(n)
-  for (i in 1:n) {
-    f <- 1 / base
-    j <- i
-    while (j > 0) {
-      seq[i] <- seq[i] + f * (j %% base)
-      j <- floor(j / base)
-      f <- f / base
-    }
-  }
-  return(seq)
-}
-
-# Jittering functions
-jitter_uniform <- function(x) {
-  x_jit <- numeric(length(x))
-  for (v in unique(x)) {
-    idx <- which(x == v)
-    n <- length(idx)
-    eps <- 1/n
-    x_jit[idx] <- v + runif(n, -eps/2, eps/2)
-  }
-  x_jit
-}
-
-jitter_halton <- function(x, base = 2) {
-  x_jit <- numeric(length(x))
-  for (v in unique(x)) {
-    idx <- which(x == v)
-    n <- length(idx)
-    eps <- 1/n
-    halton_vals <- halton_sequence(n, base)
-    x_jit[idx] <- v - eps/2 + halton_vals * eps
-  }
-  x_jit
-}
-
-# Create comparison visualization
-set.seed(123)
-test_vals <- c(rep(1, 30), rep(2, 20), rep(3, 15))
-df_compare <- data.frame(
-  Original = test_vals,
-  Uniform = jitter_uniform(test_vals),
-  Halton = jitter_halton(test_vals)
-)
-
-# Plot
-par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
-for (method in names(df_compare)) {
-  plot(rep(1, length(test_vals)), df_compare[[method]], 
-       xlim = c(0.8, 1.2), ylim = c(0.5, 3.5),
-       xlab = "", ylab = "Value", xaxt = "n",
-       main = method, pch = 19, col = rgb(0,0,0,0.4))
-  abline(h = 1:3, lty = 2, col = "gray")
-}
-```
-
-## Method Characteristics
-
-\footnotesize
-
-| Method | Distribution | Spacing | Visual Quality | Complexity |
-|--------|-------------|---------|----------------|------------|
-| **Uniform** | Random | Irregular | Good | O(n) |
-| **Halton** | Quasi-random | Regular | Excellent | O(n log n) |
-
-\normalsize
-
-**Uniform Jittering:**
-
-- Simple implementation  
-- Statistical properties preserved
-- May create irregular spacing
-
-**Halton Sequence:**
-
-- More uniform visual spacing
-- Deterministic patterns
-- Better for publication graphics
-
-## Integration with Parallel Coordinate Plots
-
-```{r pcp-integration, fig.height=3.5}
-# Create sample data with ties
-set.seed(42)
-n <- 60
-pcp_data <- data.frame(
-  id = 1:n,
-  Var1 = sample(1:3, n, replace = TRUE, prob = c(0.4, 0.4, 0.2)),
-  Var2 = sample(1:2, n, replace = TRUE, prob = c(0.6, 0.4)),
-  Var3 = sample(1:4, n, replace = TRUE, prob = c(0.3, 0.3, 0.2, 0.2))
-)
-
-# Apply jittering
-pcp_jittered <- pcp_data
-pcp_jittered[,2:4] <- lapply(pcp_data[,2:4], jitter_uniform)
-
-# Create parallel plots
-par(mfrow = c(1, 2), mar = c(3, 4, 3, 1))
-
-# Original with ties
-plot(1, type = "n", xlim = c(1, 3), ylim = c(0.5, 4.5),
-     xlab = "", ylab = "Value", xaxt = "n", 
-     main = "Original: Severe Overplotting")
-axis(1, at = 1:3, labels = paste0("Var", 1:3))
-for (i in 1:n) {
-  lines(1:3, as.numeric(pcp_data[i,2:4]), col = rgb(0,0,0,0.2))
-}
-
-# Jittered
-plot(1, type = "n", xlim = c(1, 3), ylim = c(0.5, 4.5),
-     xlab = "", ylab = "Value", xaxt = "n", 
-     main = "Jittered: Individual Paths Visible")
-axis(1, at = 1:3, labels = paste0("Var", 1:3))
-for (i in 1:n) {
-  lines(1:3, as.numeric(pcp_jittered[i,2:4]), col = rgb(0,0,1,0.3))
-}
-```
-
-## Implementation Guidelines
-
-**When to Apply Jittering:**
-
-1. **Categorical variables** in parallel coordinates
-2. **Discrete numeric data** with many ties  
-3. **Mixed data types** (categorical + continuous)
-4. **Large datasets** where overplotting obscures patterns
-
-**Choice of Method:**
-
-- **Exploratory analysis**: Uniform jittering (faster, simpler)
-- **Publication graphics**: Halton sequence (better aesthetics)
-- **Interactive visualization**: Consider user-controlled epsilon
-
-**Integration with ggpcp:**
-
-```{r ggpcp-integration, echo=TRUE, eval=FALSE}
-library(ggpcp)
-# Prepare data with jittering
-data_processed <- raw_data %>%
-  # Apply adaptive jittering
-  mutate(across(categorical_vars, 
-                jitter_ties, seed = 123)) %>%
-  # Standard ggpcp workflow
-  pcp_select(var1:var4) %>%
-  pcp_scale() %>%
-  pcp_arrange()
-```
-
-\normalsize
 
 
 # Background and Motivation
@@ -550,11 +394,11 @@ ggplot(data_plot, aes(x = x, id = id, split = y, value = n)) +
 
 ```
 
-**Hammock Plot Strategy** [@schonlau2003; @schonlau2024]:
-
-Uses boxes (parallelograms) where width $\propto$ number of observations
-
 \footnotesize
+
+**Hammock Plot Strategy**:
+
+Uses boxes (parallelograms) where width $\propto$ number of observations [@schonlau2003; @schonlau2024]
 
 **How Hammock Plots Handle Ties:**
 
@@ -576,7 +420,6 @@ Uses boxes (parallelograms) where width $\propto$ number of observations
 
 ## Comparison: Hammock vs. GPCP
 
-\footnotesize
 
 | Feature | Hammock Plot | GPCP (ggpcp) |
 |---------|-------------|--------------|
@@ -676,7 +519,6 @@ Future work could combine:
 
 \vspace{0.2cm}
 
-\footnotesize
 
 | Aspect | Requirement | Justification |
 |--------|-------------|---------------|
@@ -696,8 +538,6 @@ $$\left[v - \frac{1}{2n_{\text{ties}}}, v + \frac{1}{2n_{\text{ties}}}\right]$$
 This formulation ensures that the jittering interval scales inversely with the number of tied observations. 
 
 \vspace{0.2cm}
-
-\footnotesize
 
 **Key Properties:**
 
@@ -743,7 +583,7 @@ Systematic gap-filling using number theory [@halton1960]
 
 **Pattern:** Each point bisects largest gap
 
-```{r vdc-seq, out.width="75%"}
+```{r vdc-seq, out.width="90%"}
 knitr::include_graphics(img_van_der)
 ```
 
@@ -870,6 +710,7 @@ Recent studies evaluated cluster identification in PCPs [@holten2010; @blumensch
 
 Critical question: Does tie-breaking help or hinder cluster identification?
 
+
 **Potential Positive Effects:**
 
 - Reveals hidden clusters within tied groups
@@ -939,6 +780,171 @@ All six principles addressed through integrated approach
 
 
 # Chapter 2: Integration with ggpcp Package
+
+## Comparison: Uniform vs. Halton Sequence Jittering
+
+```{r jitter-comparison, fig.height=4, echo=FALSE}
+# Halton sequence function
+halton_sequence <- function(n, base = 2) {
+  seq <- numeric(n)
+  for (i in 1:n) {
+    f <- 1 / base
+    j <- i
+    while (j > 0) {
+      seq[i] <- seq[i] + f * (j %% base)
+      j <- floor(j / base)
+      f <- f / base
+    }
+  }
+  return(seq)
+}
+
+# Jittering functions
+jitter_uniform <- function(x) {
+  x_jit <- numeric(length(x))
+  for (v in unique(x)) {
+    idx <- which(x == v)
+    n <- length(idx)
+    eps <- 1/n
+    x_jit[idx] <- v + runif(n, -eps/2, eps/2)
+  }
+  x_jit
+}
+
+jitter_halton <- function(x, base = 2) {
+  x_jit <- numeric(length(x))
+  for (v in unique(x)) {
+    idx <- which(x == v)
+    n <- length(idx)
+    eps <- 1/n
+    halton_vals <- halton_sequence(n, base)
+    x_jit[idx] <- v - eps/2 + halton_vals * eps
+  }
+  x_jit
+}
+
+# Create comparison visualization
+set.seed(123)
+test_vals <- c(rep(1, 30), rep(2, 20), rep(3, 15))
+df_compare <- data.frame(
+  Original = test_vals,
+  Uniform = jitter_uniform(test_vals),
+  Halton = jitter_halton(test_vals)
+)
+
+# Plot
+par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
+for (method in names(df_compare)) {
+  plot(rep(1, length(test_vals)), df_compare[[method]], 
+       xlim = c(0.8, 1.2), ylim = c(0.5, 3.5),
+       xlab = "", ylab = "Value", xaxt = "n",
+       main = method, pch = 19, col = rgb(0,0,0,0.4))
+  abline(h = 1:3, lty = 2, col = "gray")
+}
+```
+
+## Method Characteristics
+
+\footnotesize
+
+| Method | Distribution | Spacing | Visual Quality | Complexity |
+|--------|-------------|---------|----------------|------------|
+| **Uniform** | Random | Irregular | Good | O(n) |
+| **Halton** | Quasi-random | Regular | Excellent | O(n log n) |
+
+\normalsize
+
+**Uniform Jittering:**
+
+- Simple implementation  
+- Statistical properties preserved
+- May create irregular spacing
+
+**Halton Sequence:**
+
+- More uniform visual spacing
+- Deterministic patterns
+- Better for publication graphics
+
+## Integration with Parallel Coordinate Plots
+
+```{r pcp-integration, fig.height=3.5}
+# Create sample data with ties
+set.seed(42)
+n <- 60
+pcp_data <- data.frame(
+  id = 1:n,
+  Var1 = sample(1:3, n, replace = TRUE, prob = c(0.4, 0.4, 0.2)),
+  Var2 = sample(1:2, n, replace = TRUE, prob = c(0.6, 0.4)),
+  Var3 = sample(1:4, n, replace = TRUE, prob = c(0.3, 0.3, 0.2, 0.2))
+)
+
+# Apply jittering
+pcp_jittered <- pcp_data
+pcp_jittered[,2:4] <- lapply(pcp_data[,2:4], jitter_uniform)
+
+# Create parallel plots
+par(mfrow = c(1, 2), mar = c(3, 4, 3, 1))
+
+# Original with ties
+plot(1, type = "n", xlim = c(1, 3), ylim = c(0.5, 4.5),
+     xlab = "", ylab = "Value", xaxt = "n", 
+     main = "Original: Severe Overplotting")
+axis(1, at = 1:3, labels = paste0("Var", 1:3))
+for (i in 1:n) {
+  lines(1:3, as.numeric(pcp_data[i,2:4]), col = rgb(0,0,0,0.2))
+}
+
+# Jittered
+plot(1, type = "n", xlim = c(1, 3), ylim = c(0.5, 4.5),
+     xlab = "", ylab = "Value", xaxt = "n", 
+     main = "Jittered: Individual Paths Visible")
+axis(1, at = 1:3, labels = paste0("Var", 1:3))
+for (i in 1:n) {
+  lines(1:3, as.numeric(pcp_jittered[i,2:4]), col = rgb(0,0,1,0.3))
+}
+```
+
+## Psudeocode Implementation
+
+```{r pcp-implementation, fig.cap="Combination Plot of Pseduocode framework"}
+# Combine plots
+library(patchwork)
+p1_magnify_ties + plot_uniform_magnify + plot_halton_magnify
+```
+
+
+## Implementation Guidelines
+
+**When to Apply Jittering:**
+
+1. **Categorical variables** in parallel coordinates
+2. **Discrete numeric data** with many ties  
+3. **Mixed data types** (categorical + continuous)
+4. **Large datasets** where overplotting obscures patterns
+
+**Choice of Method:**
+
+- **Exploratory analysis**: Uniform jittering (faster, simpler)
+- **Publication graphics**: Halton sequence (better aesthetics)
+- **Interactive visualization**: Consider user-controlled epsilon
+
+**Integration with ggpcp:**
+
+```{r ggpcp-integration, echo=TRUE, eval=FALSE}
+library(ggpcp)
+# Prepare data with jittering
+data_processed <- raw_data %>%
+  # Apply adaptive jittering
+  mutate(across(categorical_vars, 
+                jitter_ties, seed = 123)) %>%
+  # Standard ggpcp workflow
+  pcp_select(var1:var4) %>%
+  pcp_scale() %>%
+  pcp_arrange()
+```
+
+\normalsize
 
 ## Architectural Integration
 
@@ -1156,7 +1162,7 @@ How do different visualization strategies for numerical ties affect an analyst's
 **Expected Hypotheses:**
 
 - **H1**: Halton > No Jitter (accuracy)
-- **H2**: Halton < Random < No Jitter (time)
+- **H2**: Halton < No Jitter (time)
 
 ## RQ4: Practice
 
@@ -1303,7 +1309,6 @@ Can a set of evidence-based heuristics be developed to guide practitioners in se
 
 **3. Negative Result Documentation**
 
-- Intelligent jitter failure analysis
 - Design patterns to avoid
 - Methodological lessons for future research
 
@@ -1541,15 +1546,13 @@ Complete framework for tie resolution in PCPs, extending Grammar of Graphics and
 \Large{Questions?}
 \end{center}
 
-# References
+# References {.reference}
 
 ## References {.allowframebreaks}
-
 \footnotesize
 
 
-
-# Appendix 
+# Appendix {.appendix}
 
 ## Displacement Constraint
 
@@ -1914,7 +1917,6 @@ Linear scaling violates uniformity and perceptual validity principles
 - **Minimum separation**: Halton guaranteed $O(1/n)$, highly predictable
 - **Discrepancy**: Halton $O(n^{-1} \log n)$ near-optimal
 - **Visual clustering**: Halton minimal
-
 
 
 ## Use Case Recommendations
