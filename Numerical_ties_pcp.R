@@ -6,6 +6,7 @@ library(ggpcp)
 library(datasets)
 library(ggmagnify)
 library(ggfx)
+library(janitor)
 
 theme_set(theme_bw())
 
@@ -14,134 +15,96 @@ iris_scale_color <-   function(...) scale_color_manual(
 iris_scale_fill <-   function(...) scale_fill_manual(
   "Species", values = c("setosa" = "#540D6E", "versicolor" = "#219B9D", "virginica" = "#FF8000", ...))
 
-species_to_zoom <- "setosa"
 
 iris <- iris %>%
-  na.omit() %>%
-  mutate(focus = Species == species_to_zoom)
+  na.omit()
 
-intelligent_jitter <- function(values, epsilon = 0.025) {
-  identify_tie_groups <- function(values) {
-    split(seq_along(values), values)
+# Uniform jittering function (ε = 1/n)
+jitter_ties_uniform <- function(x, seed = NULL) {
+  if (!is.null(seed)) set.seed(seed)
+  x_jittered <- numeric(length(x))
+  unique_vals <- unique(x)
+
+  for (v in unique_vals) {
+    tie_indices <- which(x == v)
+    n_ties <- length(tie_indices)
+    epsilon <- 1 / n_ties
+    lower_bound <- v - epsilon / 2
+    upper_bound <- v + epsilon / 2
+    x_jittered[tie_indices] <- runif(n_ties, min = lower_bound, max = upper_bound)
   }
+  return(x_jittered)
+}
 
-  tie_groups <- identify_tie_groups(values)
-  golden_ratio <- 0.618033988749895
-  two_pi <- 2 * pi
-
-  for (group in tie_groups) {
-    n_ties <- length(group)
-    if (n_ties > 1) {
-      for (i in seq_along(group)) {
-        angle <- (i - 1) * two_pi * golden_ratio
-        displacement <- epsilon * cos(angle) * ((i - 1) / n_ties)
-        values[group[i]] <- values[group[i]] + displacement
+# Halton sequence jittering
+jitter_ties_halton <- function(x, base = 2) {
+  halton_sequence <- function(n, base) {
+    seq <- numeric(n)
+    for (i in 1:n) {
+      f <- 1 / base
+      j <- i
+      while (j > 0) {
+        seq[i] <- seq[i] + f * (j %% base)
+        j <- floor(j / base)
+        f <- f / base
       }
     }
-  }
-  return(values)
-}
-
-sunflower_jitter <- function(values, epsilon = 0.01) {
-  # helper: group indices by exactly‐equal values
-  identify_tie_groups <- function(v) split(seq_along(v), v)
-
-  tie_groups   <- identify_tie_groups(values)
-  golden_angle <- 137.508 * pi / 180  # convert degrees → radians
-
-  for (grp in tie_groups) {
-    n_ties <- length(grp)
-    if (n_ties > 1) {
-      for (j in seq_along(grp)) {
-        idx    <- grp[j]
-        angle  <- (j - 1) * golden_angle
-        radius <- epsilon * sqrt((j - 1) / n_ties)
-        values[idx] <- values[idx] + radius * cos(angle)
-      }
-    }
+    return(seq)
   }
 
-  values
-}
+  x_jittered <- numeric(length(x))
+  unique_vals <- unique(x)
 
-halton_sequence <- function(index, base) {
-  result <- 0
-  f <- 1 / base
-  i <- index
-
-  while (i > 0) {
-    result <- result + f * (i %% base)
-    i <- floor(i / base)
-    f <- f / base
+  for (v in unique_vals) {
+    tie_indices <- which(x == v)
+    n_ties <- length(tie_indices)
+    epsilon <- 1 / n_ties
+    halton_vals <- halton_sequence(n_ties, base)
+    x_jittered[tie_indices] <- v - epsilon/2 + halton_vals * epsilon
   }
-
-  return(result)
+  return(x_jittered)
 }
 
-halton_jitter <- function(values, epsilon = 0.01) {
-  # Find which values are duplicated (i.e., are part of a tie group)
-  tied_values <- unique(values[duplicated(values)])
 
-  # Create a copy to modify
-  jittered_values <- values
+# Apply jittering methods
+data_uniform <- iris %>%
+  clean_names() %>%
+  mutate(across(sepal_length:petal_width, ~jitter_ties_uniform(., seed = 123), .names = "{.col}_uniform"))
 
-  for (tie in tied_values) {
-    # Get the indices of the elements in this tie group
-    group_indices <- which(values == tie)
-    n_ties <- length(group_indices)
-
-    # Apply Halton jitter to each member of the group
-    for (i in 1:n_ties) {
-      # Halton sequence is 0-indexed, so we use i-1
-      h <- halton_sequence(i - 1, base = 2)
-
-      # The raw Halton sequence is in [0, 1]. Center it on 0 by subtracting 0.5
-      # This creates jitter in the range [-0.5 * epsilon, 0.5 * epsilon]
-      jitter <- epsilon * (h - 0.5)
-
-      # Apply the jitter to the original value
-      jittered_values[group_indices[i]] <- jittered_values[group_indices[i]] + jitter
-    }
-  }
-
-  return(jittered_values)
-}
-
-idx <- which(names(iris) == "Petal.Width")
+data_halton <- iris %>%
+  clean_names() %>%
+  mutate(across(sepal_length:petal_width, ~jitter_ties_halton(., base = 2), .names = "{.col}_halton"))
 
 
-p1 <- iris %>%
+plot_original <- iris  %>%
+  clean_names() %>%
   pcp_select(c(1:5)) %>%
   pcp_scale(method="uniminmax") %>%
   ggpcp::pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
-  geom_pcp(aes(colour = Species), alpha = 0.5) +
+  geom_pcp(aes(colour = species), alpha = 0.5) +
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
   ggpcp::geom_pcp_labels() +
   theme_pcp() +
-  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
-  theme(legend.position = "none") +
+  labs(title = "Original Data (with ties)",
+       subtitle = "Overlapping lines create visual density issues") +
   iris_scale_color() +
-  ggplot2::labs(title = "Iris Data no adjustment")
+  theme(legend.position = "none")
 
-p1_zoom <- p1 +
-  coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
-  labs(subtitle = "Zoomed on Petal.Width axis")
-
-p1_magnify_species <- p1 +
+p1_magnify_species <- plot_original +
   geom_magnify(
-  from = c(xmin = 4.8, xmax = 5.2, ymin = 0.45, ymax = 0.55),
-  to   = c(xmin = 2.5, xmax = 4.5, ymin = 0.5, ymax = 1.0),
-  shadow    = TRUE,
-  linewidth = 0.5,
-  colour    = "black"
-) +
+    from = c(xmin = 4.8, xmax = 5.2, ymin = 0.45, ymax = 0.55),
+    to   = c(xmin = 2.5, xmax = 4.5, ymin = 0.5, ymax = 1.0),
+    shadow    = TRUE,
+    linewidth = 0.5,
+    colour    = "black"
+  ) +
   # ensure nothing bleeds into the margins
   coord_cartesian(clip = "on")  +
   labs(subtitle = "Zoomed on Categorical Ties in ggpcp")
 
-p1_magnify_ties <- p1 +
+p1_magnify_ties <- plot_original +
   geom_magnify(
     from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
     to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
@@ -154,31 +117,59 @@ p1_magnify_ties <- p1 +
   labs(subtitle = "Zoomed on Numerical Ties in ggpcp")
 
 
-p2 <- iris %>%
-  mutate(Petal.Width = halton_jitter(Petal.Width),
-         Petal.Length = halton_jitter(Petal.Length),
-         Sepal.Width = halton_jitter(Sepal.Width),
-         Sepal.Length = halton_jitter(Sepal.Length)
-  ) %>%
-  pcp_select(c(1:5)) %>%
-  pcp_scale(method = "uniminmax") %>%
+# Uniform jittering plot
+pcp_data_uniform <- data_uniform %>%
+  select(species, ends_with("_uniform")) %>%
+  rename_with(~gsub("_uniform", "", .), ends_with("_uniform"))
+
+plot_uniform <- pcp_data_uniform %>%
+  pcp_select(c(2:5, 1)) %>%
+  pcp_scale(method="uniminmax") %>%
   ggpcp::pcp_arrange(method = "from-left") %>%
   ggplot(aes_pcp()) +
   geom_pcp_axes() +
-  geom_pcp(aes(colour = Species), alpha = 0.5) +
+  geom_pcp(aes(colour = species), alpha = 0.5) +
   ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
-  ggpcp::geom_pcp_labels()+
+  ggpcp::geom_pcp_labels() +
   theme_pcp() +
-  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
-  theme(legend.position = "none") +
+  labs(title = "Uniform Jittering (ε = 1/n)",
+       subtitle = "Random distribution within adaptive intervals") +
   iris_scale_color() +
-  labs(title = "Iris Data with Halton Jitter for Ties")
+  theme(legend.position = "none")
 
-p2_zoom <- p2 +
-  coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
-  labs(subtitle = "Zoomed on Petal.Width axis")
+plot_uniform_magnify <- plot_uniform +
+  geom_magnify(
+    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
+    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
+    linewidth = 0.5,
+    colour    = "black"
+  ) +
+  # ensure nothing bleeds into the margins
+  coord_cartesian(clip = "on") +
+  labs(subtitle = "Zoomed on Numerical Ties in ggpcp")
 
-p2_magnify_ties <- p2 +
+# Halton sequence plot
+pcp_data_halton <- data_halton %>%
+  select(species, ends_with("_halton")) %>%
+  rename_with(~gsub("_halton", "", .), ends_with("_halton"))
+
+
+plot_halton <- pcp_data_halton %>%
+  pcp_select(c(2:5, 1)) %>%
+  pcp_scale(method="uniminmax") %>%
+  ggpcp::pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = species), alpha = 0.5) +
+  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
+  ggpcp::geom_pcp_labels() +
+  theme_pcp() +
+  labs(title = "Halton Sequence Jittering",
+       subtitle = "Quasi-random distribution for better visual uniformity") +
+  iris_scale_color() +
+  theme(legend.position = "none")
+
+plot_halton_magnify <- plot_halton +
   geom_magnify(
     from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
     to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
@@ -187,88 +178,5 @@ p2_magnify_ties <- p2 +
     colour    = "black"
   )+
   # ensure nothing bleeds into the margins
-  coord_cartesian(clip = "on")
-
-
-#grid.arrange(p1, p2, ncol = 2)
-#grid.arrange(p1_zoom, p2_zoom, ncol = 2)
-
-p3 <- iris %>%
-  mutate(Petal.Width = sunflower_jitter(Petal.Width),
-         Petal.Length = sunflower_jitter(Petal.Length),
-         Sepal.Width = sunflower_jitter(Sepal.Width),
-         Sepal.Length = sunflower_jitter(Sepal.Length)
-  ) %>%
-  pcp_select(c(1:5)) %>%
-  pcp_scale(method = "uniminmax") %>%
-  ggpcp::pcp_arrange(method = "from-left") %>%
-  ggplot(aes_pcp()) +
-  geom_pcp_axes() +
-  geom_pcp(aes(colour = Species), alpha = 0.5) +
-  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
-  ggpcp::geom_pcp_labels()+
-  theme_pcp() +
-  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
-  theme(legend.position = "none") +
-  iris_scale_color() +
-  labs(title = "Iris Data with Sunflower Jitter Sequence for Ties")
-
-
-p3_zoom <- p3 +
-  coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
-  labs(subtitle = "Zoomed on Petal.Width axis")
-
-p3_magnify_ties <- p3 +
-  geom_magnify(
-    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
-    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
-    shadow    = TRUE,
-    linewidth = 0.5,
-    colour    = "black"
-  ) +
-  # ensure nothing bleeds into the margins
-  coord_cartesian(clip = "on")
-
-
-#grid.arrange(p1, p3, ncol = 2)
-#grid.arrange(p1_zoom, p3_zoom, ncol = 2)
-
-p4 <- iris %>%
-  mutate(Petal.Width = intelligent_jitter(Petal.Width),
-         Petal.Length = intelligent_jitter(Petal.Length),
-         Sepal.Width = intelligent_jitter(Sepal.Width),
-         Sepal.Length = intelligent_jitter(Sepal.Length)
-  ) %>%
-  pcp_select(c(1:5)) %>%
-  pcp_scale(method = "uniminmax") %>%
-  ggpcp::pcp_arrange(method = "from-left") %>%
-  ggplot(aes_pcp()) +
-  geom_pcp_axes() +
-  geom_pcp(aes(colour = Species), alpha = 0.5) +
-  ggpcp::geom_pcp_boxes(boxwidth = 0.2) +
-  ggpcp::geom_pcp_labels()+
-  theme_pcp() +
-  #geom_point(aes(colour = Species), size = 0.75, position = position_dodge(0.01)) +
-  theme(legend.position = "none") +
-  iris_scale_color() +
-  labs(title = "Iris Data with Intelligent Jitter Sequence for Ties")
-
-p4_zoom <- p4 +
-  coord_cartesian(xlim = c(idx - 0.1, idx + 0.1), clip = "on") +
-  labs(subtitle = "Zoomed on Petal.Width axis")
-
-p4_magnify_ties <- p4 +
-  geom_magnify(
-    from = c(xmin = 3.8, xmax = 4.2, ymin = -0.05, ymax = 0.25),
-    to   = c(xmin = 1.0, xmax = 3.0, ymin = 0.6, ymax = 1.0),
-    shadow    = TRUE,
-    linewidth = 0.5,
-    colour    = "black"
-  ) +
-  # ensure nothing bleeds into the margins
-  coord_cartesian(clip = "on")
-
-
-#grid.arrange(p1, p4, ncol = 2)
-#grid.arrange(p1_zoom, p4_zoom, ncol = 2)
-
+  coord_cartesian(clip = "on") +
+  labs(subtitle = "Zoomed on Numerical Ties in ggpcp")

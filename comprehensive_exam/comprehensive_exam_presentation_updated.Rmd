@@ -79,7 +79,7 @@ iris_clean <- iris %>% na.omit()
 img_lyer <- here::here("comprehensive_exam", "images", "lyer_illusion.jpeg")
 img_sine <- here::here("comprehensive_exam", "images", "sine_illusions.jpeg")
 img_shrink <- here::here("comprehensive_exam", "images", "rural_shrink_dashboard.jpeg")
-img_van_der <- here::here("comprehensive_exam", "images", "Van_der_corput_distribution.jpeg")
+img_van_der <- here::here("comprehensive_exam", "images", "vandercorput_vs_pseudorandom_R.png")
 img_daisy <- here::here("comprehensive_exam", "images", "daisy.jpeg")
 img_vdc <- here::here("comprehensive_exam", "images","vdc_sequence.jpeg")
 img_golden_angle <- here::here("comprehensive_exam", "images","Phyllotaxis_golden_angle.jpeg")
@@ -110,8 +110,7 @@ knitr::include_graphics(img_shrink)
 | **Solution applied** | Deterministic jittering | Enables meaningful comparisons |
 
 \footnotesize
-**Key Frustration & Insight:** Without tie resolution, the dashboard was unusable. 
-The massive overplotting from numerical ties (e.g., 30 towns with the exact same median income) meant individual community profiles were completely obscured. This visual occlusion prevented data-driven decision-making, as users could not distinguish, select, or compare their town against other similar communities—the dashboard's primary goal.
+**Key Frustration & Insight:** The dashboard was unusable because numerical ties (e.g., multiple towns with the same median income) caused massive overplotting. This visual clutter obscured individual community profiles, preventing users from comparing their town to others—the dashboard's main goal—and blocking data-driven decisions.
 
 ## Research Overview
 
@@ -159,14 +158,6 @@ Complete Grammar of Graphics framework for tie resolution in high-dimensional vi
 **General Principle:**
 
 Wherever random jitter is used, deterministic low-discrepancy alternatives should be considered for reproducible visualization.
-
-<!-- ## Implications for Visualization Science -->
-
-<!-- **Methodological:** -->
-
-<!-- - Biomimetic approaches validated for visualization -->
-<!-- - Determinism as design requirement established -->
-<!-- - Trade-off analysis framework demonstrated -->
 
 ## Problem Statement
 
@@ -232,7 +223,7 @@ Wherever random jitter is used, deterministic low-discrepancy alternatives shoul
 **Our Extension:**
 
 - Existing: Categorical ties via hierarchical sorting
-- **Adding:** Numerical ties via deterministic jittering
+- **Adding:** Numerical ties via deterministic jittering (an uniformly constraint applied)
 - Result: Complete tie-handling framework
 
 # Terminology and Definitions
@@ -260,67 +251,208 @@ Wherever random jitter is used, deterministic low-discrepancy alternatives shoul
 
 **Distinction:** Categorical ties (expected, sorted) vs. Numerical ties (data-driven, requiring displacement)
 
-## Core Concept: Jittering
+## Core Concept: Handling Numerical Tied Values - Adaptive Uniform Jittering
 
-**Definition:** Controlled displacement preventing visual overlap while preserving approximate position
+When categorical variables or discrete values create ties in parallel coordinate plots:
 
-\vspace{0.2cm}
+- Multiple observations stack on identical positions
+- Visual density becomes misleading
+- Individual trajectories become impossible to follow
+- Pattern detection is compromised
 
-**Properties:**
+**Solution**: Apply adaptive uniform jittering with interval width $\epsilon = \frac{1}{n_{\text{ties}}}$
+
+<!-- ## Adaptive Jittering: Mathematical Foundation -->
+
+<!-- ### Core Constraint (Uniform Version) -->
+
+<!-- For tied value $v$ with $n_{\text{ties}}$ observations, distribute points uniformly within: -->
+
+<!-- $$\left[v - \frac{1}{2n_{\text{ties}}}, v + \frac{1}{2n_{\text{ties}}}\right]$$ -->
+
+<!-- **Key Properties:** -->
+
+<!-- - **Adaptive interval**: Width scales inversely with tie frequency -->
+<!-- - **Preservation**: Expected value remains $v$ -->
+<!-- - **Separation**: No overlap between distinct values -->
+<!-- - **Scalability**: Works for any number of ties -->
+
+<!-- ## Implementation in R -->
+
+<!-- ```{r jitter-function, echo=TRUE, eval=FALSE} -->
+<!-- jitter_ties <- function(x, seed = NULL) { -->
+<!--   if (!is.null(seed)) set.seed(seed) -->
+<!--   x_jittered <- numeric(length(x)) -->
+
+<!--   for (v in unique(x)) { -->
+<!--     tie_indices <- which(x == v) -->
+<!--     n_ties <- length(tie_indices) -->
+<!--     epsilon <- 1 / n_ties -->
+<!--     lower <- v - epsilon / 2 -->
+<!--     upper <- v + epsilon / 2 -->
+<!--     x_jittered[tie_indices] <-  -->
+<!--       runif(n_ties, min = lower, max = upper) -->
+<!--   } -->
+<!--   return(x_jittered) -->
+<!-- } -->
+<!-- ``` -->
+
+## Comparison: Uniform vs. Halton Sequence Jittering
+
+```{r jitter-comparison, fig.height=4, echo=FALSE}
+# Halton sequence function
+halton_sequence <- function(n, base = 2) {
+  seq <- numeric(n)
+  for (i in 1:n) {
+    f <- 1 / base
+    j <- i
+    while (j > 0) {
+      seq[i] <- seq[i] + f * (j %% base)
+      j <- floor(j / base)
+      f <- f / base
+    }
+  }
+  return(seq)
+}
+
+# Jittering functions
+jitter_uniform <- function(x) {
+  x_jit <- numeric(length(x))
+  for (v in unique(x)) {
+    idx <- which(x == v)
+    n <- length(idx)
+    eps <- 1/n
+    x_jit[idx] <- v + runif(n, -eps/2, eps/2)
+  }
+  x_jit
+}
+
+jitter_halton <- function(x, base = 2) {
+  x_jit <- numeric(length(x))
+  for (v in unique(x)) {
+    idx <- which(x == v)
+    n <- length(idx)
+    eps <- 1/n
+    halton_vals <- halton_sequence(n, base)
+    x_jit[idx] <- v - eps/2 + halton_vals * eps
+  }
+  x_jit
+}
+
+# Create comparison visualization
+set.seed(123)
+test_vals <- c(rep(1, 30), rep(2, 20), rep(3, 15))
+df_compare <- data.frame(
+  Original = test_vals,
+  Uniform = jitter_uniform(test_vals),
+  Halton = jitter_halton(test_vals)
+)
+
+# Plot
+par(mfrow = c(1, 3), mar = c(4, 4, 2, 1))
+for (method in names(df_compare)) {
+  plot(rep(1, length(test_vals)), df_compare[[method]], 
+       xlim = c(0.8, 1.2), ylim = c(0.5, 3.5),
+       xlab = "", ylab = "Value", xaxt = "n",
+       main = method, pch = 19, col = rgb(0,0,0,0.4))
+  abline(h = 1:3, lty = 2, col = "gray")
+}
+```
+
+## Method Characteristics
 
 \footnotesize
 
-| Aspect | Specification | Rationale |
-|--------|---------------|-----------|
-| **Magnitude** | Parameter $\epsilon$ (0.05-0.10 of range) | Balance visibility/validity |
-| **Purpose** | Visual separation only | Not data modification |
-| **Constraint** | Minimal displacement | Maintain perceptual truth |
-| **Requirement** | Uniform distribution | Faithful density representation |
+| Method | Distribution | Spacing | Visual Quality | Complexity |
+|--------|-------------|---------|----------------|------------|
+| **Uniform** | Random | Irregular | Good | O(n) |
+| **Halton** | Quasi-random | Regular | Excellent | O(n log n) |
 
 \normalsize
 
-## Core Concept: Determinism
+**Uniform Jittering:**
 
-**Deterministic Methods:** Identical input $\rightarrow$ Identical output (always)
+- Simple implementation  
+- Statistical properties preserved
+- May create irregular spacing
 
-\vspace{0.2cm}
+**Halton Sequence:**
 
-**Method Comparison:**
+- More uniform visual spacing
+- Deterministic patterns
+- Better for publication graphics
 
-\footnotesize
+## Integration with Parallel Coordinate Plots
 
-| Property | Deterministic | Stochastic |
-|----------|---------------|------------|
-| Reproducibility | Perfect | None |
-| Scientific validity | Verifiable | Unreliable |
-| Artifacts | None | Clustering/gaps |
-| Examples | Halton, Sunflower | Random uniform |
-| **Our choice** | **Required** | **Rejected** |
+```{r pcp-integration, fig.height=3.5}
+# Create sample data with ties
+set.seed(42)
+n <- 60
+pcp_data <- data.frame(
+  id = 1:n,
+  Var1 = sample(1:3, n, replace = TRUE, prob = c(0.4, 0.4, 0.2)),
+  Var2 = sample(1:2, n, replace = TRUE, prob = c(0.6, 0.4)),
+  Var3 = sample(1:4, n, replace = TRUE, prob = c(0.3, 0.3, 0.2, 0.2))
+)
+
+# Apply jittering
+pcp_jittered <- pcp_data
+pcp_jittered[,2:4] <- lapply(pcp_data[,2:4], jitter_uniform)
+
+# Create parallel plots
+par(mfrow = c(1, 2), mar = c(3, 4, 3, 1))
+
+# Original with ties
+plot(1, type = "n", xlim = c(1, 3), ylim = c(0.5, 4.5),
+     xlab = "", ylab = "Value", xaxt = "n", 
+     main = "Original: Severe Overplotting")
+axis(1, at = 1:3, labels = paste0("Var", 1:3))
+for (i in 1:n) {
+  lines(1:3, as.numeric(pcp_data[i,2:4]), col = rgb(0,0,0,0.2))
+}
+
+# Jittered
+plot(1, type = "n", xlim = c(1, 3), ylim = c(0.5, 4.5),
+     xlab = "", ylab = "Value", xaxt = "n", 
+     main = "Jittered: Individual Paths Visible")
+axis(1, at = 1:3, labels = paste0("Var", 1:3))
+for (i in 1:n) {
+  lines(1:3, as.numeric(pcp_jittered[i,2:4]), col = rgb(0,0,1,0.3))
+}
+```
+
+## Implementation Guidelines
+
+**When to Apply Jittering:**
+
+1. **Categorical variables** in parallel coordinates
+2. **Discrete numeric data** with many ties  
+3. **Mixed data types** (categorical + continuous)
+4. **Large datasets** where overplotting obscures patterns
+
+**Choice of Method:**
+
+- **Exploratory analysis**: Uniform jittering (faster, simpler)
+- **Publication graphics**: Halton sequence (better aesthetics)
+- **Interactive visualization**: Consider user-controlled epsilon
+
+**Integration with ggpcp:**
+
+```{r ggpcp-integration, echo=TRUE, eval=FALSE}
+library(ggpcp)
+# Prepare data with jittering
+data_processed <- raw_data %>%
+  # Apply adaptive jittering
+  mutate(across(categorical_vars, 
+                jitter_ties, seed = 123)) %>%
+  # Standard ggpcp workflow
+  pcp_select(var1:var4) %>%
+  pcp_scale() %>%
+  pcp_arrange()
+```
 
 \normalsize
 
-\vspace{0.2cm}
-
-**Implication:** Determinism essential for reproducible science [@peng2011]
-
-## Evaluation Framework: "Best For"
-
-**Interpretation:** "Best for" = optimal balance of competing demands in specific context
-
-\vspace{0.2cm}
-
-**Four Evaluation Dimensions:**
-
-\footnotesize
-
-| Dimension | Considerations |
-|-----------|----------------|
-| **1. Task requirements** | Density estimation, clustering, outlier detection |
-| **2. Data characteristics** | Tie group sizes, dimensions, distributions |
-| **3. Performance criteria** | Accuracy, speed, perceptual quality, cognitive load |
-| **4. Trade-off optimization** | Method strengths aligned with scenario needs |
-
-\normalsize
 
 # Background and Motivation
 
@@ -459,7 +591,7 @@ Uses boxes (parallelograms) where width $\propto$ number of observations
 
 \vspace{0.2cm}
 
-**When Hammock Plots Excel:**
+When Hammock Plots Excel:
 
 - Emphasis on bivariate relationships
 - Datasets with many observations per value
@@ -554,6 +686,96 @@ Future work could combine:
 
 \normalsize
 
+# Mathematical Framework
+
+## Core Constraint (Uniform Version)
+
+For tied value $v$ with $n_{\text{ties}}$ observations, distribute points uniformly within:
+
+$$\left[v - \frac{1}{2n_{\text{ties}}}, v + \frac{1}{2n_{\text{ties}}}\right]$$
+This formulation ensures that the jittering interval scales inversely with the number of tied observations. 
+
+\vspace{0.2cm}
+
+\footnotesize
+
+**Key Properties:**
+
+- **Adaptive interval**: Width scales inversely with tie frequency
+- **Preservation**: Expected value remains $v$
+- **Separation**: No overlap between distinct values
+- **Scalability**: Works for any number of ties
+
+
+## Halton Jitter - Overview
+
+**Beyond Pseudo-Randomness:**
+
+Systematic gap-filling using number theory [@halton1960]
+
+\vspace{0.2cm}
+
+**The Random Number Problem:**
+
+\footnotesize
+
+| Random Method | Expected Gap | Expected Min | Issue |
+|---------------|--------------|--------------|--------|
+| 100 uniform points | 0.05 max | 0.0001 min | Clustering |
+| Birthday paradox | - | - | Artifacts |
+| **Halton solution** | **Systematic** | **Predictable** | **Optimal** |
+
+\normalsize
+
+\vspace{0.2cm}
+
+**Key Advantage:** Deterministic low-discrepancy guarantees
+
+## Halton Jitter - Van der Corput Construction
+
+::: {layout-ncol=2}
+**Algorithm (base 2):**
+
+1. Take integer index $i$
+2. Convert to binary
+3. Reverse binary digits
+4. Interpret as fraction
+
+**Pattern:** Each point bisects largest gap
+
+```{r vdc-seq, out.width="75%"}
+knitr::include_graphics(img_van_der)
+```
+
+:::
+
+## Halton Jitter - Theoretical Guarantees
+
+**Discrepancy Theory [@niederreiter1992]:**
+
+Star discrepancy measures uniformity:
+
+$$D_n^* = \sup_{I \subseteq [0,1]} \left| \frac{\#\{x_i \in I\}}{n} - |I| \right|$$
+
+\vspace{0.2cm}
+
+**Performance Bounds:**
+
+\footnotesize
+
+| Method | Discrepancy | Optimality |
+|--------|-------------|------------|
+| Random sequences | $O(n^{-1/2})$ | Poor |
+| **Halton sequences** | **$O(n^{-1} \log n)$** | **Near-optimal** |
+| Theoretical limit | $\Omega(n^{-1} \log n)$ | Unreachable |
+
+\normalsize
+
+\vspace{0.2cm}
+
+**Applications:** Quasi-Monte Carlo, computer graphics, numerical analysis, machine learning
+
+
 # Empirical Evidence and Perceptual Foundations
 
 ## Perceptual Challenges in Parallel Coordinates
@@ -597,7 +819,7 @@ Even medium-sized datasets suffer from overplotting, resulting in displays too c
    - Limitation: Loss of individual tracing
 2. **Transparency/density**: Alpha blending, density plots
    - Limitation: Fails with perfect overlap (ties)
-3. **Our contribution**: Uniformity adjustmeny
+3. **Our contribution**: Uniformity adjustment
    - Resolves ties before rendering
    - Preserves individual traces
    - Complements other methods
@@ -705,7 +927,7 @@ PCP effectiveness varies by task complexity [@johansson2016]
 
 6. **Resolve numerical ties uniformly:**
    - Apply jittering to prevent perfect overlap
-   - Use low-discrepancy methods (Halton/Sunflower)
+   - Use low-discrepancy methods (Halton)
    - Integrate with existing capabilities
    - Maintain reproducibility
 
@@ -714,33 +936,6 @@ PCP effectiveness varies by task complexity [@johansson2016]
 **Implementation in ggpcp:**
 
 All six principles addressed through integrated approach
-
-# Mathematical Framework
-
-## Displacement Constraint
-
-**For each tied value $v$ with $n_{\text{ties}}$ observations:**
-
-Distribute points within displacement interval:
-
-$$\left[v - \frac{\epsilon}{2}, v + \frac{\epsilon}{2}\right]$$
-
-\vspace{0.2cm}
-
-**Key Parameter:**
-
-- $\epsilon$: maximum displacement magnitude
-- Typically 0.05–0.10 of axis range
-- User-adjustable based on data characteristics and perceptual requirements
-
-\vspace{0.2cm}
-
-**Optimization Goals:**
-
-1. Maximize minimum inter-point distance (prevent collision)
-2. Minimize visual artifacts (avoid clustering and false patterns)
-3. Maintain deterministic reproducibility (enable verification)
-4. Achieve uniform coverage (faithfully represent density)
 
 
 # Chapter 2: Integration with ggpcp Package
@@ -1101,7 +1296,6 @@ Can a set of evidence-based heuristics be developed to guide practitioners in se
 
 **2. Cross-Domain Algorithm Adaptation**
 
-- Phyllotaxis $\rightarrow$ data visualization
 - Quasi-random sequences $\rightarrow$ statistical graphics
 - Demonstrates value of interdisciplinary approaches
 
@@ -1115,11 +1309,9 @@ Can a set of evidence-based heuristics be developed to guide practitioners in se
 
 ## Methodological Contributions
 
-**1. Three Novel Algorithms**
+**1. Novel Algorithm**
 
 - Halton jitter for PCPs
-- Sunflower jitter for PCPs
-- Intelligent jitter (with failure analysis)
 
 \vspace{0.2cm}
 
@@ -1197,7 +1389,7 @@ Can a set of evidence-based heuristics be developed to guide practitioners in se
 
 Problem: Overplotting with tied values
 
-Solution: Full 2D Sunflower and 2D Halton
+Solution: Full 2D Halton
 
 \vspace{0.2cm}
 
@@ -1290,7 +1482,7 @@ Complete framework for tie resolution in PCPs, extending Grammar of Graphics and
 
 **✓ Low-discrepancy methods superior**
 
-- Halton and Sunflower outperform random jitter
+- Halton outperform random jitter
 - Uniform distribution = faithful density representation
 - Mathematical guarantees translate to perceptual benefits
 
@@ -1318,7 +1510,7 @@ Complete framework for tie resolution in PCPs, extending Grammar of Graphics and
 
 1. Should adaptive epsilon be user-overrideable or always automatic?
 
-2. Should package default to Sunflower or Halton?
+2. Should package default to Halton?
 
 3. Additional task types or datasets for user study?
 
@@ -1355,7 +1547,34 @@ Complete framework for tie resolution in PCPs, extending Grammar of Graphics and
 
 \footnotesize
 
+
+
 # Appendix 
+
+## Displacement Constraint
+
+**For each tied value $v$ with $n_{\text{ties}}$ observations:**
+
+Distribute points within displacement interval:
+
+$$\left[v - \frac{\epsilon}{2}, v + \frac{\epsilon}{2}\right]$$
+
+\vspace{0.2cm}
+
+**Key Parameter:**
+
+- $\epsilon$: maximum displacement magnitude
+- Typically 0.05–0.10 of axis range
+- User-adjustable based on data characteristics and perceptual requirements
+
+\vspace{0.2cm}
+
+**Optimization Goals:**
+
+1. Maximize minimum inter-point distance (prevent collision)
+2. Minimize visual artifacts (avoid clustering and false patterns)
+3. Maintain deterministic reproducibility (enable verification)
+4. Achieve uniform coverage (faithfully represent density)
 
 # Three Deterministic Jittering Methods
 
@@ -1584,7 +1803,7 @@ $$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}
 
 **Key Distinctions from Sunflower:**
 
-- Angle: Golden ratio × $2\pi$ (224.4°) vs. Golden angle (137.5°)
+- Angle: Golden ratio × $2\pi$ ($224.4^\circ$) vs. Golden angle ($137.5^\circ$)
 - Scaling: **Linear** $(j/n)$ vs. Square root $(\sqrt{j/n})$
 - Projection: 1D cosine modulation vs. 2D spiral $\rightarrow$ 1D
 
@@ -1643,24 +1862,27 @@ Linear scaling violates uniformity and perceptual validity principles
 \vspace{0.2cm}
 
 1. **Design Pattern to Avoid**
+
    - Lesson: Linear displacement scaling creates misleading stratification
    - Implication: Future methods should use constant or sublinear scaling
 
 2. **Golden Ratio Not Universal**
+
    - Lesson: Works in specific geometric contexts, not universally
    - Implication: Biomimetic approaches require careful adaptation
 
 3. **Importance of Scaling Function**
+
    - Lesson: Scaling function as critical as distribution algorithm
    - Implication: Must consider angular distribution AND radial scaling together
 
 4. **Empirical Validation Essential**
-   - Lesson: Theoretical elegance ≠ practical effectiveness
+
+   - Lesson: Theoretical elegance $\neq$ practical effectiveness
    - Implication: User studies necessary even for mathematically motivated methods
 
 
 # Comparative Analysis
-
 ## Dimensional Analysis
 
 \footnotesize
@@ -1691,7 +1913,7 @@ Linear scaling violates uniformity and perceptual validity principles
 
 - **Minimum separation**: Halton guaranteed $O(1/n)$, highly predictable
 - **Discrepancy**: Halton $O(n^{-1} \log n)$ near-optimal
-- **Visual clustering**: Halton minimal, Sunflower slight central concentration, Intelligent severe stratification
+- **Visual clustering**: Halton minimal
 
 
 
