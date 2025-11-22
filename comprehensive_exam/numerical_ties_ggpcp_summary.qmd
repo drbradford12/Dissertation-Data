@@ -1,0 +1,344 @@
+---
+title: "Solving Numerical Ties in Parallel Coordinate Plots"
+subtitle: "A Grammar of Graphics Approach Using ggpcp"
+author: "Denise Bradford"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    include-in-header:
+      text: |
+        \usepackage{soul}
+        \usepackage[dvipsnames]{xcolor} % colors
+        \newcommand{\db}[1]{{\textcolor{Green}{#1}}}
+        \newcommand{\svp}[1]{{\textcolor{RedOrange}{#1}}}
+        \newcommand{\hh}[1]{{\textcolor{blue}{#1}}}
+    html:
+      css: edits.css
+bibliography: references_summary.bib
+bibliographystyle: apa
+filters:
+   - latex-environment
+commands: [db,svp,hh]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 5,
+  dpi = 300
+)
+
+# Load required packages
+library(GGally)
+library(palmerpenguins)
+library(tidyverse)
+library(gridExtra)
+library(ggpcp)
+library(datasets)
+library(knitr)
+library(kableExtra)
+library(ggforce)
+
+source(here::here("numerical_tie_attempts/even_space_ties.R"))
+
+
+# Set theme
+theme_set(theme_bw(base_size = 11))
+
+# Color scales for iris
+iris_scale_color <- function(...) {
+  scale_color_manual(
+    "Species", 
+    values = c("setosa" = "#540D6E", 
+               "versicolor" = "#219B9D", 
+               "virginica" = "#FF8000"), 
+    ...
+  )
+}
+
+iris_scale_fill <- function(...) {
+  scale_fill_manual(
+    "Species", 
+    values = c("setosa" = "#540D6E", 
+               "versicolor" = "#219B9D", 
+               "virginica" = "#FF8000"), 
+    ...
+  )
+}
+
+# Clean iris data
+iris_clean <- iris %>% na.omit()
+
+```
+
+## Research Question
+
+How can we effectively handle numerical ties in parallel coordinate plots so that we can still see individual observations across multiple axes without making the plot too busy and keeping it easy to understand when visualizing datasets with both categorical and continuous variables?
+
+## Background
+
+When using traditional parallel coordinate plots (PCPs) with categorical variables or numerical ties, a major problem arises: multiple observations with the same value on an axis create overlapping lines that form an uninformative mesh. This makes it impossible to follow individual cases through the visualization. 
+The early works of @inselberg1985 and @wegman1990 did not address this issue, and earlier attempts to combine categorical and numeric variables, like the categorical parallel coordinate plots of @pilhöfer2013, led to visualizations that didn't give any useful information.
+
+The ggpcp package adds generalized parallel coordinate plots (GPCPs) that build on traditional PCPs by carefully handling ties on vertical axes so that they can easily handle both categorical and quantitative variables [@vanderplas2023].
+
+## Proposed Solutions
+
+### Tie-Breaking Methods
+
+The research identifies and compares primary approaches to handling categorical variables and numerical ties:
+
+**Equi-spaced (Unordered)**: Spreads observations evenly within each categorical level without considering the ordering of adjacent axes. 
+This provides better visual separation than jittering but does not optimize for readability.
+
+**Equi-spaced with Hierarchical Sorting (Recommended)**: The optimal solution that spaces observations evenly within categorical levels while ordering them hierarchically to minimize line crossings between axes. 
+This method:
+
+- Preserves the ability to follow individual observations across the plot
+- Creates natural visualizations of marginal frequencies through proportional grouping
+- Minimizes visual clutter through intelligent ordering
+- Reduces cognitive load required to interpret the visualization
+
+### Technical Implementation: The `even_tie_spread` Algorithm
+
+The even tie spread algorithm implements the equi-spaced hierarchical sorting approach through the following steps:
+
+**Step 1: Identify Tie Groups**
+The algorithm first sorts observations by their value and a deterministic key (typically observation index), then identifies groups of observations sharing identical values. This double-sorting ensures consistent, reproducible spreading within tie groups.
+
+**Step 2: Calculate Spread Width**
+The default spread width is set to 2% of the data range (configurable via the `frac` parameter):
+
+```
+width = frac × (max(x) - min(x))
+```
+
+This ensures that the spread is proportional to the scale of the data, making the visualization scale-invariant.
+
+**Step 3: Neighbor-Aware Capping (Optional)**
+To prevent spread values from overlapping with neighboring distinct values, the algorithm can optionally cap the spread width based on the distance to nearest neighbors:
+
+```
+cap = min(gap_to_left/2, gap_to_right/2) × 1.999
+actual_width = min(default_width, cap)
+```
+
+The factor of 1.999 (just under 2.0) ensures spread values approach but never quite reach the midpoint between neighboring values, maintaining clear separation.
+
+**Step 4: Generate Evenly Spaced Offsets**
+For each tie group of size k, the algorithm generates k evenly spaced offsets centered at zero:
+
+```
+offsets = seq(-0.5, 0.5, length.out = k) × width
+new_values = original_value + offsets
+```
+
+This creates symmetric spreading around the original value, with the range spanning from `original_value - width/2` to `original_value + width/2`.
+
+**Step 5: Deterministic Within-Group Ordering**
+The use of a secondary key parameter ensures that observations within a tie group are spread in a consistent, deterministic order. This is critical for:
+
+- Reproducibility across multiple runs
+- Hierarchical sorting that considers adjacent axis values
+- Maintaining visual continuity when the same data is plotted multiple times
+
+**Edge Case Handling:** The algorithm includes robust handling for:
+
+- **Missing values**: NA observations are preserved unchanged
+- **Single observations**: Values with no ties remain at their original position
+- **Degenerate ranges**: When data range is zero or infinite, no spreading occurs
+- **Empty input**: Returns an empty vector immediately
+
+### 3. Implementation Details
+
+The hierarchical sorting approach is implemented in ggpcp through the `pcp_arrange(data, method, space)` function, which internally utilizes the `even_tie_spread` algorithm. Two primary methods are available:
+
+- **"from-left"**: Tie breaks are determined hierarchically by variables' values from left to right
+- **"from-right"**: Tie breaks are determined hierarchically by variables' values from right to left
+
+The `space` parameter controls the amount of vertical axis used for spacing between categorical levels (default: 5%, equivalent to `frac = 0.05` in the spreading algorithm).
+
+**Algorithm Parameters:**
+
+- `x`: The numeric vector containing values to spread (including ties)
+- `key`: A secondary sorting key (default: observation index) ensuring deterministic ordering within tie groups
+- `width`: Explicit spread width (if NULL, calculated as `frac × range`)
+- `frac`: Fraction of data range to use for spread width (default: 0.02 or 2%)
+- `cap_to_neighbor`: Boolean flag to enable/disable neighbor-aware capping (default: TRUE)
+
+### Visual Design Principles
+
+The solution leverages Gestalt principles of perception:
+
+- **Good Continuation**: Minimizing line crossings allows the visual system to naturally follow lines across axes
+- **Common Fate**: Observations with similar values "move together" through the vertical axes, creating perceptual grouping
+- **External Cognition**: Additional computational processing reduces the cognitive burden on users
+
+### Algorithm Illustration
+
+Consider a simple example with values `[1.0, 1.0, 1.0, 2.5, 2.5]` and a data range of 1.5:
+
+**Without Spreading:**
+
+```
+Position:  1.0  1.0  1.0  2.5  2.5
+           (3 overlapping) (2 overlapping)
+```
+
+**With Even Tie Spreading (frac = 0.02):**
+
+```
+width = 0.02 × 1.5 = 0.03
+
+Tie group at 1.0 (k=3):
+offsets = [-0.015, 0.0, 0.015]
+new_values = [0.985, 1.000, 1.015]
+
+Tie group at 2.5 (k=2):
+offsets = [-0.015, 0.015]
+new_values = [2.485, 2.515]
+
+Position:  0.985  1.000  1.015  2.485  2.51
+           (spread evenly)      (spread evenly)
+```
+
+**With Neighbor-Aware Capping:**
+
+```
+Gap between 1.0 and 2.5 = 1.5
+Half-gap = 0.75
+Cap = 0.75 × 1.999 ≈ 1.499
+
+Since default width (0.03) < cap (1.499), no adjustment needed
+Spreading proceeds as above without crossing into neighbor territory
+```
+
+This illustration demonstrates how the algorithm maintains clear separation between distinct values while enabling individual observation tracking within tie groups.
+
+## Example Applications
+
+### Palmer Penguins Dataset
+
+The Palmer Penguins dataset [@horst2020] contains body measurements of three penguin species (Adelie, Chinstrap, and Gentoo) with both categorical variables (species, sex) and continuous measurements (bill length, bill depth, flipper length, body mass).
+
+```{r ggpcp-penguins, fig.cap="ggpcp data using the Palmer Penguins Dataset", out.width="95%"}
+grid.arrange(plot_original_penguins, p3_even_ties, ncol = 2)
+```
+
+
+### Iris Dataset
+
+While not explicitly detailed in the provided materials, the Iris dataset represents a classic application where species (categorical) must be visualized alongside four continuous measurements (sepal length, sepal width, petal length, petal width).
+
+```{r ggpcp-iris, fig.cap="ggpcp data using the Iris Dataset", out.width="95%"}
+grid.arrange(plot_original_iris, p1_even_ties, ncol = 2)
+```
+
+### Asthma Dataset
+
+The asthma dataset (@schonlau2024) demonstrates the power of GPCPs for health science applications with mixed variable types including:
+
+- **Categorical variables**: Age group (child, adolescent, adult), gender (male, female)
+- **Numerical variables**: Hospitalizations, comorbidities
+
+```{r ggpcp-asthma, fig.cap="ggpcp data using the Asthma Data used in @schonlau2024", out.width="95%"}
+grid.arrange(p2_original, p2_even_ties, ncol = 2)
+```
+
+The visualization shows two approaches zoomed on numerical ties:
+
+**Left panel (Original Plot)**: Shows the traditional hammock plot representation where the dense convergence at numerical values creates triangular patterns that, while showing frequency, make individual observation tracking difficult.
+
+**Right panel (Uniform Spacing)**: Demonstrates the ggpcp approach with equi-spaced hierarchical sorting, where:
+
+- Individual lines remain traceable across all axes
+- Marginal frequencies are preserved through proportional box heights
+- The transition from categorical age groups through numerical hospitalizations and comorbidities to categorical gender maintains visual continuity
+- Patterns such as the concentration of observations at hospitalizations = 0 with varying comorbidities become more interpretable
+
+
+## Implementation Workflow
+
+This function moves tied (identical) values in a numeric vector so that they can be seen in plots while keeping their approximate original position. 
+It works by finding groups of values that are the same and then putting them evenly within a small range of the original value. 
+The default spread width is 2% of the data range, but you can set a limit to keep it from overlapping with nearby distinct values. 
+The function keeps the order of ties by using a key parameter for consistency, doesn't change NA values, and doesn't spread when there's only one observation at a value. 
+
+The ggpcp package implements a clear separation between data management and visualization:
+
+```r
+even_tie_spread <- function(x, key = seq_along(x), width = NULL, frac = 0.02) {
+  stopifnot(is.numeric(x))
+  
+  n <- length(x)
+  if (n == 0L) return(x)
+  
+  out <- x
+  is_na <- is.na(x)
+  
+  # Calculate default width
+  if (is.null(width)) {
+    rng <- range(x[!is_na], na.rm = TRUE)
+    width <- if (is.finite(diff(rng))) frac * diff(rng) else 0
+  }
+  
+  if (width <= 0 || !is.finite(width)) return(out)
+  
+  # Sort by value, then key
+  ord <- order(x, key, na.last = TRUE)
+  
+  # Identify tie groups
+  run_vals <- x[ord]
+  run_id <- cumsum(c(TRUE, diff(run_vals) != 0 | is.na(diff(run_vals))))
+  
+  # Spread each tie group
+  for (group in unique(run_id)) {
+    idx <- which(run_id == group)
+    
+    if (length(idx) <= 1 || is.na(run_vals[idx[1]])) next
+    
+    # Create evenly spaced offsets
+    k <- length(idx)
+    offsets <- seq(-0.5, 0.5, length.out = k) * width
+    
+    # Apply offsets
+    out[ord[idx]] <- run_vals[idx[1]] + offsets
+  }
+  
+  out
+}
+
+# Data management steps
+data %>%
+  dplyr::mutate(across(where(is.numeric),
+                       ~ even_tie_spread(.x, width = 0.03, 
+                       key = dplyr::row_number()))) %>%
+  pcp_select(variables) %>%           
+  pcp_scale(method = "uniminmax") %>% 
+  pcp_arrange(method = "from-left") 
+
+# Visualization
+ggplot(pcp_data, aes_pcp()) +
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = category)) +
+  geom_pcp_labels() +
+  theme_pcp()
+```
+
+This modular approach allows users to:
+
+- Customize each step independently
+- Reuse prepared data across multiple plot variations
+- Extend functionality through custom functions
+- Integrate with existing ggplot2 workflows
+
+## References
+

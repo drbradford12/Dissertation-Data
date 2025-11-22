@@ -46,7 +46,7 @@ library(knitr)
 library(kableExtra)
 library(ggforce)
 
-source(here::here("Numerical_ties_pcp.R"))
+source(here::here("numerical_tie_attempts/Numerical_ties_pcp.R"))
 
 
 # Set theme

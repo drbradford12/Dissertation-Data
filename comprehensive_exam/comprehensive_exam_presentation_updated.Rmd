@@ -46,7 +46,7 @@ library(knitr)
 library(kableExtra)
 library(ggforce)
 
-source(here::here("Numerical_ties_pcp.R"))
+source(here::here("numerical_tie_attempts/Numerical_ties_pcp.R"))
 
 
 # Set theme
@@ -150,7 +150,7 @@ Complete Grammar of Graphics framework for tie resolution in high-dimensional vi
 |--------------------|---------|----------|
 | **2D scatter plots** | Overplotting | Full 2D Halton |
 | **Time series** | Multiple series overlap | Vertical jittering |
-| **Network layouts** | Node positioning | Golden angle spacing |
+| **Network layouts** | Node positioning | Uniform spacing |
 | **Heatmaps** | Discrete values | Cell jittering |
 
 \normalsize
@@ -260,6 +260,8 @@ When categorical variables or discrete values create ties in parallel coordinate
 - Individual trajectories become impossible to follow
 - Pattern detection is compromised
 
+\vspace{0.2cm}
+
 **Solution**: Apply adaptive uniform jittering with interval width $\epsilon = \frac{1}{n_{\text{ties}}}$
 
 <!-- ## Adaptive Jittering: Mathematical Foundation -->
@@ -269,6 +271,7 @@ When categorical variables or discrete values create ties in parallel coordinate
 <!-- For tied value $v$ with $n_{\text{ties}}$ observations, distribute points uniformly within: -->
 
 <!-- $$\left[v - \frac{1}{2n_{\text{ties}}}, v + \frac{1}{2n_{\text{ties}}}\right]$$ -->
+\vspace{0.2cm}
 
 **Key Properties:**
 
@@ -396,8 +399,8 @@ ggplot(data_plot, aes(x = x, id = id, split = y, value = n)) +
 
 \footnotesize
 
+\vspace{0.2cm}
 **Hammock Plot Strategy**:
-
 Uses boxes (parallelograms) where width $\propto$ number of observations [@schonlau2003; @schonlau2024]
 
 **How Hammock Plots Handle Ties:**
@@ -553,7 +556,7 @@ This formulation ensures that the jittering interval scales inversely with the n
 
 Systematic gap-filling using number theory [@halton1960]
 
-\vspace{0.2cm}
+\vspace{0.3cm}
 
 **The Random Number Problem:**
 
@@ -573,7 +576,6 @@ Systematic gap-filling using number theory [@halton1960]
 
 ## Halton Jitter - Van der Corput Construction
 
-::: {layout-ncol=2}
 **Algorithm (base 2):**
 
 1. Take integer index $i$
@@ -581,13 +583,14 @@ Systematic gap-filling using number theory [@halton1960]
 3. Reverse binary digits
 4. Interpret as fraction
 
+\vspace{0.2cm}
+
 **Pattern:** Each point bisects largest gap
 
 ```{r vdc-seq, out.width="90%"}
 knitr::include_graphics(img_van_der)
 ```
 
-:::
 
 ## Halton Jitter - Theoretical Guarantees
 
@@ -710,6 +713,7 @@ Recent studies evaluated cluster identification in PCPs [@holten2010; @blumensch
 
 Critical question: Does tie-breaking help or hinder cluster identification?
 
+\vspace{0.2cm}
 
 **Potential Positive Effects:**
 
@@ -860,6 +864,8 @@ for (method in names(df_compare)) {
 - Statistical properties preserved
 - May create irregular spacing
 
+\vspace{0.2cm}
+
 **Halton Sequence:**
 
 - More uniform visual spacing
@@ -923,6 +929,8 @@ p1_magnify_ties + plot_uniform_magnify + plot_halton_magnify
 3. **Mixed data types** (categorical + continuous)
 4. **Large datasets** where overplotting obscures patterns
 
+\vspace{0.2cm}
+
 **Choice of Method:**
 
 - **Exploratory analysis**: Uniform jittering (faster, simpler)
@@ -930,7 +938,7 @@ p1_magnify_ties + plot_uniform_magnify + plot_halton_magnify
 - **Interactive visualization**: Consider user-controlled epsilon
 
 **Integration with ggpcp:**
-
+\footnotesize
 ```{r ggpcp-integration, echo=TRUE, eval=FALSE}
 library(ggpcp)
 # Prepare data with jittering
@@ -1157,12 +1165,13 @@ How do different visualization strategies for numerical ties affect an analyst's
 - Effect size calculations (partial $\eta^2$)
 - Correlation analysis (accuracy vs. confidence)
 
-\vspace{0.2cm}
+\vspace{0.3cm}
 
 **Expected Hypotheses:**
 
 - **H1**: Halton > No Jitter (accuracy)
 - **H2**: Halton < No Jitter (time)
+- **H3**: Halton performance below expectations (Artificial patterns interfere with perception)
 
 ## RQ4: Practice
 
@@ -1227,7 +1236,7 @@ Can a set of evidence-based heuristics be developed to guide practitioners in se
 
 - Updated ggpcp package
 - Comprehensive documentation
-- Three tutorial vignettes
+- Tutorial vignettes
 - Package ready for CRAN
 
 ## Phase 3: User Study (Spring-Summer 2026)
@@ -1410,13 +1419,13 @@ Solution: Vertical displacement using deterministic methods
 
 Problem: Node positioning with spatial constraints
 
-Solution: Optimal space-filling using golden angle principles
+Solution: Optimal space-filling using uniform principles
 
 ## General Principle
 
 \Large
 
-**Wherever random jitter is currently used, deterministic low-discrepancy alternatives should be considered.**
+Wherever random jitter is currently used, deterministic low-discrepancy alternatives should be considered.
 
 \normalsize
 
@@ -1519,9 +1528,9 @@ Complete framework for tie resolution in PCPs, extending Grammar of Graphics and
 
 3. Additional task types or datasets for user study?
 
-4. Should dissertation include 2D scatter plot extension?
+<!--4. Should dissertation include 2D scatter plot extension?--->
 
-5. Publication strategy - single comprehensive vs. multiple focused papers?
+4. Publication strategy - single comprehensive vs. multiple focused papers?
 
 ## Acknowledgments
 
@@ -1546,401 +1555,7 @@ Complete framework for tie resolution in PCPs, extending Grammar of Graphics and
 \Large{Questions?}
 \end{center}
 
-# References {.reference}
+# References 
 
 ## References {.allowframebreaks}
 \footnotesize
-
-
-# Appendix {.appendix}
-
-## Displacement Constraint
-
-**For each tied value $v$ with $n_{\text{ties}}$ observations:**
-
-Distribute points within displacement interval:
-
-$$\left[v - \frac{\epsilon}{2}, v + \frac{\epsilon}{2}\right]$$
-
-\vspace{0.2cm}
-
-**Key Parameter:**
-
-- $\epsilon$: maximum displacement magnitude
-- Typically 0.05–0.10 of axis range
-- User-adjustable based on data characteristics and perceptual requirements
-
-\vspace{0.2cm}
-
-**Optimization Goals:**
-
-1. Maximize minimum inter-point distance (prevent collision)
-2. Minimize visual artifacts (avoid clustering and false patterns)
-3. Maintain deterministic reproducibility (enable verification)
-4. Achieve uniform coverage (faithfully represent density)
-
-# Three Deterministic Jittering Methods
-
-## Method Comparison Overview
-
-\footnotesize
-
-| Method | Theoretical Basis | Dimension | Scaling | Best For |
-|--------|------------------|-----------|---------|----------|
-| **Halton** | Quasi-random sequences [@halton1960] | Pure 1D | Constant | Uniform distributions |
-| **Sunflower** | Phyllotaxis [@vogel1979] | 2D $\rightarrow$ 1D | Sublinear $(\sqrt{n})$ | Aesthetic + performance |
-| **Intelligent** | Golden ratio direct application | Hybrid 1D | Linear | Research comparison |
-
-\normalsize
-
-\vspace{0.2cm}
-
-**All methods provide:**
-
-- Deterministic, reproducible output
-- Theoretically-grounded distributions
-- Computational efficiency $O(n)$ or $O(n \log n)$
-
-## Method 1: Sunflower Jitter - Biological Inspiration
-
-**Phyllotaxis**: Nature's optimal packing solution
-
-Sunflower seed arrangements follow evolutionary optimization [@vogel1979]
-
-\vspace{0.2cm}
-
-**The Golden Angle**: $137.508^\circ = 360^\circ \times (2 - \phi)$
-
-where $\phi = \frac{1+\sqrt{5}}{2} \approx 1.618$ is the golden ratio
-
-\vspace{0.2cm}
-
-**Why This Angle Works:**
-
-- Most "irrational" number in continued fraction sense
-- Ensures no radial alignment even after hundreds of iterations
-- Optimal space-filling property
-
-$$\phi = 1 + \frac{1}{1 + \frac{1}{1 + \frac{1}{1 + \cdots}}}$$
-
-## Sunflower Jitter - Mathematical Formulation
-
-**For observation $j$ in tie group of size $n_{\text{ties}}$:**
-
-$$\text{angle}_j = (j-1) \times 137.50^\circ$$
-
-$$\text{radius}_j = \epsilon \times \sqrt{\frac{j-1}{n_{\text{ties}}}}$$
-
-$$\text{displacement}_j = \text{radius}_j \times \cos(\text{angle}_j)$$
-
-\vspace{0.2cm}
-
-**Key Features:**
-
-- **Square root scaling**: Maintains constant density as radius increases
-- **Cosine projection**: Maps 2D polar $\rightarrow$ 1D linear displacement
-- **Spiral structure**: Preserved even in 1D projection
-- **Biomimetic**: Leverages millions of years of natural selection
-
-## Sunflower Jitter - Why Square Root Scaling?
-
-**Geometric Justification:**
-
-In a 2D disk:
-
-- Circumference at radius $r$: $2\pi r$
-- Number of points at radius $r_j$: proportional to $j$
-- For constant area density: Need $\frac{dN}{dA} = \text{constant}$
-
-\vspace{0.2cm}
-
-**Mathematical Derivation:**
-
-$$A \propto r^2 \implies N \propto r^2 \implies r \propto \sqrt{N}$$
-
-Therefore: $r \propto \sqrt{j}$ balances linear growth in points with radial expansion
-
-\vspace{0.2cm}
-
-**Distribution Quality:**
-
-- Near-optimal minimum separation [@vogel1979]
-- Low-discrepancy properties in 2D
-- Aesthetically consistent across scales
-- Progressively validated through evolution
-
-## Sunflower Jitter - Applications Beyond PCPs
-
-**Proven Applications:**
-
-\vspace{0.2cm}
-
-- **Point cloud sampling**: Uniform distribution on discs/spheres
-- **Sphere packing**: Near-optimal packing density
-- **Texture synthesis**: Organic, non-repetitive patterns
-- **Computer graphics**: Stratified sampling for ray tracing
-- **Quasi-Monte Carlo methods**: Numerical integration
-
-\vspace{0.2cm}
-
-**Why It Works Broadly:**
-
-The golden angle property—maximal incommensurability—creates optimal spacing in any radial system
-
-## Method 2: Halton Jitter - Beyond Pseudo-Randomness
-
-**The Random Number Problem:**
-
-Pseudo-random numbers inevitably cluster (birthday paradox)
-
-\vspace{0.2cm}
-
-**Example:** 100 random points on $[0,1]$:
-
-- Expected maximum gap: 0.05
-- Expected minimum gap: 0.0001
-- Creates misleading visual artifacts
-- Density perception unreliable
-
-\vspace{0.2cm}
-
-**Halton's Solution** [@halton1960]:
-
-Place each new point to systematically fill largest gaps using van der Corput sequence
-
-- Deterministic (not random)
-- Low-discrepancy (uniform space-filling)
-- Number-theoretically constructed using prime bases
-- Mathematically guaranteed coverage
-
-## Van der Corput Sequence Construction
-
-**Algorithm (base 2):**
-
-1. Take integer index $i$
-2. Convert to binary
-3. Reverse the binary digits
-4. Interpret as binary fraction
-
-\vspace{0.2cm}
-
-\footnotesize
-
-| $i$ | Binary | Reversed | Decimal $h_i$ |
-|-----|--------|----------|---------------|
-| 0 | 0 | 0 | 0.0 |
-| 1 | 1 | 1 | 0.5 |
-| 2 | 10 | 01 | 0.25 |
-| 3 | 11 | 11 | 0.75 |
-| 4 | 100 | 001 | 0.125 |
-| 5 | 101 | 101 | 0.625 |
-
-\normalsize
-
-**Pattern:** Each point bisects the largest remaining gap
-
-## Halton Jitter - Mathematical Formulation
-
-**For observation $i$ in tie group:**
-
-$$h_i = \text{VanDerCorput}(i, \text{base} = 2)$$
-
-$$\text{displacement}_i = \epsilon \times (h_i - 0.5)$$
-
-\vspace{0.2cm}
-
-**Centering around 0.5** creates symmetric bidirectional displacement
-
-\vspace{0.2cm}
-
-**Theoretical Guarantees - Discrepancy Theory:**
-
-Star discrepancy measures uniformity [@niederreiter1992]:
-
-$$D_n^* = \sup_{I \subseteq [0,1]} \left| \frac{\#\{x_i \in I\}}{n} - |I| \right|$$
-
-- Random sequences: $D_n = O(n^{-1/2})$
-- Halton sequences: $D_n = O(n^{-1} \log n)$ ← near-optimal
-- Optimal lower bound: $D_n = \Omega(n^{-1} \log n)$
-
-## Halton Jitter - Applications
-
-**Widely Used in:**
-
-\vspace{0.2cm}
-
-- **Quasi-Monte Carlo integration**: Better convergence than random sampling
-- **Computer graphics**: Anti-aliasing, global illumination
-- **Ray tracing**: Sample generation for realistic rendering
-- **Numerical analysis**: Multidimensional quadrature
-- **Machine learning**: Hyperparameter search spaces
-
-\vspace{0.2cm}
-
-**Higher-Dimensional Extensions:**
-
-For 2D applications (e.g., scatter plots):
-
-- $x_i = \text{VanDerCorput}(i, 2)$ (base 2 for x-axis)
-- $y_i = \text{VanDerCorput}(i, 3)$ (base 3 for y-axis)
-
-Different prime bases for each dimension maintain low-discrepancy
-
-## Method 3: Intelligent Jitter - Novel Exploration
-
-**Design Motivation:**
-
-Research question: Can we apply golden ratio directly in 1D rather than through angular spacing?
-
-\vspace{0.2cm}
-
-**Mathematical Formulation:**
-
-For observation $j$ in tie group of size $n_{\text{ties}}$:
-
-$$\text{angle}_j = (j-1) \times 2\pi \times 0.618$$
-
-$$\text{displacement}_j = \epsilon \times \cos(\text{angle}_j) \times \frac{j-1}{n_{\text{ties}}}$$
-
-\vspace{0.2cm}
-
-**Key Distinctions from Sunflower:**
-
-- Angle: Golden ratio × $2\pi$ ($224.4^\circ$) vs. Golden angle ($137.5^\circ$)
-- Scaling: **Linear** $(j/n)$ vs. Square root $(\sqrt{j/n})$
-- Projection: 1D cosine modulation vs. 2D spiral $\rightarrow$ 1D
-
-## Intelligent Jitter - Failure Analysis
-
-**Initial Hypothesis:**
-
-Linear scaling would create "progressive reveal":
-
-- Early observations: Small displacement (near true value)
-- Later observations: Larger displacement (fill space)
-- Intuitive interpretation: "early arrivals" cluster, "late arrivals" spread
-
-\vspace{0.2cm}
-
-**Empirical Reality: Three Critical Problems**
-
-**Problem 1: Excessive Displacement**
-
-For $n = 100$:
-
-- Observation 1: 0% of $\epsilon$
-- Observation 50: 49% of $\epsilon$
-- Observation 100: 99% of $\epsilon$ ← Near boundary!
-
-## Why Intelligent Jitter Fails
-
-**Problem 2: Artificial Stratification**
-
-Linear scaling creates visible "layers" that don't represent data structure
-
-- Visual appearance suggests distinct sub-groups
-- These "clusters" are algorithmic artifacts
-- Misrepresents uniform density as stratified distribution
-
-\vspace{0.2cm}
-
-**Problem 3: Perceptual Distortion**
-
-Users interpret visual patterns as data patterns:
-
-- Large gaps appear meaningful (but are artifacts)
-- Density gradients suggest ordering (observations are exchangeable)
-- Boundary concentration implies separation (all values are tied)
-
-\vspace{0.2cm}
-
-**Root Cause:**
-
-Linear scaling violates uniformity and perceptual validity principles
-
-## Value of This Negative Result
-
-**Scientific Contributions:**
-
-\vspace{0.2cm}
-
-1. **Design Pattern to Avoid**
-
-   - Lesson: Linear displacement scaling creates misleading stratification
-   - Implication: Future methods should use constant or sublinear scaling
-
-2. **Golden Ratio Not Universal**
-
-   - Lesson: Works in specific geometric contexts, not universally
-   - Implication: Biomimetic approaches require careful adaptation
-
-3. **Importance of Scaling Function**
-
-   - Lesson: Scaling function as critical as distribution algorithm
-   - Implication: Must consider angular distribution AND radial scaling together
-
-4. **Empirical Validation Essential**
-
-   - Lesson: Theoretical elegance $\neq$ practical effectiveness
-   - Implication: User studies necessary even for mathematically motivated methods
-
-
-# Comparative Analysis
-## Dimensional Analysis
-
-\footnotesize
-
-| Method | Approach | Dimension | Projection |
-|--------|----------|-----------|------------|
-| **Halton** | Pure 1D sequence | 1D | None |
-| **Sunflower** | 2D spiral | 2D $\rightarrow$ 1D | Cosine |
-| **Intelligent** | 1D with 2D-inspired modulation | Hybrid | Cosine |
-
-\normalsize
-
-## Scaling Behavior
-
-\footnotesize
-
-| Method | Scaling Function | Growth Rate | At $n=50$, $j=25$ |
-|--------|-----------------|-------------|-------------------|
-| **Halton** | Uniform distribution | Constant | ~$0.5\epsilon$ |
-| **Sunflower** | $\sqrt{j/n}$ | Sublinear | ~$0.7\epsilon$ |
-| **Intelligent** | $j/n$ | Linear | ~$0.5\epsilon$ |
-
-\normalsize
-
-\vspace{0.2cm}
-
-**Distribution Quality Metrics:**
-
-- **Minimum separation**: Halton guaranteed $O(1/n)$, highly predictable
-- **Discrepancy**: Halton $O(n^{-1} \log n)$ near-optimal
-- **Visual clustering**: Halton minimal
-
-
-## Use Case Recommendations
-
-**Halton: Best for...**
-
-- Precision-critical applications (scientific publications)
-- Maximum uniformity requirements
-- Mathematical rigor and provable guarantees
-- Large datasets with efficient performance
-
-\vspace{0.2cm}
-
-**Sunflower: Best for...**
-
-- General purpose use (good balance of properties)
-- Aesthetic presentations
-- Exploratory analysis
-- User preference (often preferred in studies)
-
-\vspace{0.2cm}
-
-**Intelligent: Best for...**
-
-- Methodological research (comparison baseline)
-- Educational examples (teaching what NOT to do)
-- **DO NOT use for production visualizations**

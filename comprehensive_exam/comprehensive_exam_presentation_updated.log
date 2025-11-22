@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.5)  11 NOV 2025 23:53
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.5)  12 NOV 2025 12:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1567,7 +1567,7 @@ File: comprehensive_exam_presentation_updated_files/figure-beamer/problem-demo1-
 File: comprehensive_exam_presentation_updated_files/figure-beamer/hammcock-example-1.pdf Graphic file (type pdf)
 <use comprehensive_exam_presentation_updated_files/figure-beamer/hammcock-example-1.pdf>
 
-Overfull \vbox (2.07251pt too high) detected at line 887
+Overfull \vbox (7.76297pt too high) detected at line 892
  []
 
 [16
@@ -1606,11 +1606,11 @@ File: images/sine_illusions.jpeg Graphic file (type bmp)
 
 ]
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.21117pt on input line 1290.
+(Font)              scaled to size 7.21117pt on input line 1297.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.2118pt on input line 1290.
+(Font)              scaled to size 7.2118pt on input line 1297.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 7.21042pt on input line 1290.
+(Font)              scaled to size 7.21042pt on input line 1297.
 [29
 
 ]
@@ -1647,8 +1647,8 @@ File: comprehensive_exam_presentation_updated_files/figure-beamer/pcp-implementa
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
 (./comprehensive_exam_presentation_updated.vrb
-LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
-(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 33.
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <6> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 35.
 ) [39
 
 ]
@@ -1659,7 +1659,10 @@ LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
 
-(./comprehensive_exam_presentation_updated.vrb) [41
+(./comprehensive_exam_presentation_updated.vrb
+LaTeX Font Info:    Font shape `TU/lmtt/bx/n' in size <8> not available
+(Font)              Font shape `TU/lmtt/b/n' tried instead on input line 7.
+) [41
 
 ]
 \openout4 = `comprehensive_exam_presentation_updated.vrb'.
@@ -1741,54 +1744,13 @@ Missing character: There is no ✗ (U+2717) in font [lmsans10-bold]:mapping=tex-
 
 ] [73
 
-] [74
+]
+LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <5> not available
+(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 2702.
+[74
 
 ] [75
 
-] [76
-
-] [77
-
-] [78
-
-] [79
-
-] [80
-
-] [81
-
-] [82
-
-] [83
-
-] [84
-
-] [85
-
-] [86
-
-] [87
-
-] [88
-
-] [89
-
-] [90
-
-] [91
-
-] [92
-
-] [93
-
-]
-LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <5> not available
-(Font)              Font shape `TU/lmss/m/sl' tried instead on input line 3331.
-
-Overfull \vbox (175.58498pt too high) detected at line 3331
- []
-
-[94
 
 ]
 \tf@nav=\write6
@@ -1807,12 +1769,12 @@ L3 programming layer <2025-10-24>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 39931 strings out of 470195
- 844135 string characters out of 5477636
- 1449136 words of memory out of 5000000
- 67693 multiletter control sequences out of 15000+600000
- 655993 words of font info for 130 fonts, out of 8000000 for 9000
+ 39861 strings out of 470195
+ 843040 string characters out of 5477636
+ 1440136 words of memory out of 5000000
+ 67622 multiletter control sequences out of 15000+600000
+ 656001 words of font info for 131 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 109i,11n,123p,1908b,661s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 109i,11n,123p,1908b,692s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on comprehensive_exam_presentation_updated.pdf (94 pages).
+Output written on comprehensive_exam_presentation_updated.pdf (75 pages).
