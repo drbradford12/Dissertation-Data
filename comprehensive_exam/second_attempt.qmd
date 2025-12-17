@@ -616,7 +616,7 @@ optimize_spacing_numerical <- function(values, n_obs, space = 0.05, buffer = 0.0
 - Bias analysis: systematic over/under-estimation
 - Confidence calibration: accuracy vs. subjective confidence
 
-### Phase 3: Comparative Benchmarking (Weeks 6-18)
+### Phase 3: Comparative Benchmarking (Weeks 6-12)
 
 **Computational Metrics:**
 
