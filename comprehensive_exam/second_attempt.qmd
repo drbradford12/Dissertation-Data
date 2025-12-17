@@ -46,50 +46,67 @@ library(knitr)
 library(kableExtra)
 library(ggforce)
 
-source(here::here("numerical_tie_attempts/even_space_ties.R"))
+#source(here::here("numerical_tie_attempts/even_space_ties.R"))
 
 
 # Set theme
 theme_set(theme_bw(base_size = 11))
 
-# Color scales for iris
-iris_scale_color <- function(...) {
-  scale_color_manual(
-    "Species", 
-    values = c("setosa" = "#540D6E", 
-               "versicolor" = "#219B9D", 
-               "virginica" = "#FF8000"), 
-    ...
-  )
-}
-
-iris_scale_fill <- function(...) {
-  scale_fill_manual(
-    "Species", 
-    values = c("setosa" = "#540D6E", 
-               "versicolor" = "#219B9D", 
-               "virginica" = "#FF8000"), 
-    ...
-  )
-}
-
-# Clean iris data
-iris_clean <- iris %>% na.omit()
 
 ```
 
-## Introduction and Background
+# Introduction and Background
 
-### The Challenge of Visualizing Mixed-Type Data
+## The Challenge of Visualizing Mixed-Type Data
 
 Parallel coordinate plots (PCPs) have been established as valuable tools for exploratory data analysis of high-dimensional numerical data since their introduction [@inselberg1985; @wegman1990]. 
 However, the use of PCPs is fundamentally limited when working with categorical variables or mixed categorical-continuous data. 
 As @vanderplas2023 note in their introduction to generalized parallel coordinate plots (GPCPs), existing solutions for categorical values become insufficient when attempting to maintain visual continuity across both data types.
 
-The treatment of ties—multiple observations sharing the same value—represents a critical design decision that affects both perceptual effectiveness and analytical utility. 
+The treatment of ties, multiple observations sharing the same value, represents a critical design decision that affects both perceptual effectiveness and analytical utility. 
 As @vanderplas2023 observe, "The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of @inselberg1985 and @wegman1990. 
 We have found a need to deal with ties" (p. 6). 
 This observation extends naturally from categorical to numerical variables.
+
+The ability to follow individual observations is central to the analytical power of PCPs, enabling users to identify patterns, outliers, and relationships that span multiple variables simultaneously.
+
+### Step 1: Identify the Parallel Axes
+
+Begin by identifying each vertical axis in the plot. Each axis represents one variable from the dataset. 
+The axes are typically arranged from left to right, and the order may be determined by the data analyst to highlight specific relationships or minimize visual clutter.
+
+![The parallel axes form the structural framework of the visualization.](images/pcp_line_tracing_guide_images/figure-1.png){#fig-figure-1 width=90%}
+
+### Step 2: Locate the Starting Point
+
+Find the observation of interest on the leftmost axis. The vertical position indicates the scaled value of that observation for the first variable. If you are examining a highlighted or color-coded observation, look for its distinctive marker at this starting position.
+
+![The starting point is identified on the first axis with its corresponding value.](images/pcp_line_tracing_guide_images/figure-2.png){#fig-figure-2 width=90%}
+
+### Step 3: Follow the Line Segment
+
+Trace the line segment from the starting point to its intersection with the next axis. 
+The human visual system naturally follows smooth, continuous paths due to the Gestalt principle of good continuation. 
+This principle allows viewers to perceive connected lines as unified objects, making it easier to track observations across multiple variables.
+
+![Following the line segment uses the Gestalt principle of good continuation.](images/pcp_line_tracing_guide_images/figure-3.png){#fig-figure-3 width=90%}
+
+### Step 4: Read Values at Intersections
+
+At each axis intersection, the vertical position of the line indicates the observation's value for that variable. 
+Read these values to understand how the observation changes across different dimensions of the data. 
+The slope of line segments between axes provides information about the relationship between consecutive variables for that specific observation.
+
+![Values are read at each axis intersection point.](images/pcp_line_tracing_guide_images/figure-4.png){#fig-figure-4 width=90%}
+
+### Step 5: Continue Across All Axes
+
+Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis. 
+By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables. 
+This enables identification of unique characteristics, cluster membership, or outlier status.
+
+![The complete traced path reveals the observation's values across all variables.](images/pcp_line_tracing_guide_images/figure-5.png){#fig-figure-5 width=90%}
+
 
 ### Current State: ggpcp's Categorical Tie-Breaking
 
@@ -115,7 +132,7 @@ where:
 
 ### Alternative Approach: Hammock Plots
 
-Hammock plots, introduced by Schonlau (2003, 2024), take a fundamentally different approach to handling both categorical and numerical variables. 
+Hammock plots, introduced by Schonlau [@schonlau2003, @schonlau2024], take a fundamentally different approach to handling both categorical and numerical variables. 
 Rather than using individual lines, hammock plots employ two-dimensional boxes to connect adjacent axes, with box width proportional to the number of observations.
 
 As @schonlau2024 describe:
@@ -151,15 +168,45 @@ Both approaches must contend with perceptual illusions that affect visual interp
 > "The distance between two parallel lines is perceived at a right angle rather than as the vertical distance between the lines (Wallgren et al., 1996; Tufte, 2001)... 
 The line width illusion is part of the family of Müller-Lyer illusions where two lines of same length appear to be of different lengths." (p. 8)
 
-@hofmann2013 further identify the "reverse line width illusion," where centering of lines creates a contextual cue encouraging evaluation of line widths using vertical rather than orthogonal measures. As they demonstrate empirically, this illusion can lead to systematic biases in frequency estimation.
+@hofmann2013 further identify the "reverse line width illusion," where centering of lines creates a contextual cue encouraging evaluation of line widths using vertical rather than orthogonal measures. 
+As they demonstrate empirically, this illusion can lead to systematic biases in frequency estimation.
 
 The equispaced line approach proposed here may inherently avoid these illusions by maintaining parallel lines at consistent vertical spacing rather than using area-based encoding, though this requires empirical validation.
+
+
+# Handling Numerical Ties
+
+A significant challenge arises when multiple observations share identical values on an axis. 
+In traditional PCPs, these observations converge to a single point, creating overlapping lines that make individual tracking impossible. 
+The ggpcp package addresses this through the even_tie_spread algorithm.
+
+## The Problem: Overlapping Lines
+
+When multiple observations have the same value for a variable, their lines converge to a single point on that axis. 
+This convergence creates visual clutter and breaks the continuity needed for individual observation tracking.
+
+![Numerical ties cause lines to converge at a single point.](images/pcp_line_tracing_guide_images/figure-6.png){#fig-figure-6 width=90%}
+
+## The Solution: Even Tie Spreading
+
+The `even_tie_spread` algorithm separates tied observations by distributing them evenly within a small range centered on their original value. 
+By default, this range spans 2% of the data range, sufficient to maintain visual separation while preserving the approximate position of values.
+
+![Even tie spreading maintains visual separation while preserving approximate positions.](images/pcp_line_tracing_guide_images/figure-7.png){#fig-figure-7 width=90%}
+
+## Hierarchical Sorting for Minimal Crossings
+
+Beyond simply spreading tied values, the ggpcp package implements hierarchical sorting to minimize line crossings. 
+Observations within a tie group are ordered based on their values on adjacent axes. 
+This ordering leverages the Gestalt principle of common fate: observations with similar trajectories appear near each other, creating visual bands that facilitate perception of groups moving together through the high-dimensional space.
+
+![Hierarchical sorting reduces line crossings, making patterns easier to perceive.](images/pcp_line_tracing_guide_images/figure-8.png){#fig-figure-8 width=90%}
 
 ## Theoretical Framework: Perception-Driven Design
 
 ### Colin Ware's Model of Visual Information Processing
 
-Colin Ware's seminal work "Information Visualization: Perception for Design" provides a comprehensive framework for understanding how humans process visual information [@ware2012]. 
+Colin Ware's seminal work "Information Visualization: Perception for Design" provides a comprehensive framework for understanding how humans process visual information [@ware2012, 3rd ed., pp. 20-21, Figure 1.11]. 
 Ware describes visual perception as occurring in three distinct stages, each with specific implications for visualization design.
 
 #### Stage 1: Parallel Processing of Low-Level Properties
@@ -171,7 +218,7 @@ Four fundamental categories of preattentive visual properties exist:
 **1. Form Attributes:**
 
 - Orientation
-- Length  
+- Length
 - Width
 - Size
 - Curvature
@@ -328,6 +375,7 @@ Present implementations show a split:
 
  1. **ggpcp**: This method uses Gestalt principles of continuity and common fate to break ties between categorical variables in a smart way. 
  However, when numbers are tied, the lines overlap.
+ 
  2. **Hammock plots**: All variable types have boxes with the same width, which makes frequency encoding clear, but you can't follow individual observations without highlighting them.
 
 There is no current research that thoroughly evaluates these methodologies from the perspective of perceptual science or adapts ggpcp's optimization framework to numerical variables.  
@@ -370,160 +418,9 @@ This question breaks down into smaller, more specific questions based on percept
 
 ## Hypotheses Grounded in Perceptual Theory
 
-### Hypothesis 1: Preattentive Line Tracing
+### Hypothesis 1: Categorical-Numerical Consistency
 
-**H1**: Equispaced lines support faster and more accurate individual observation tracing than constant-width boxes due to preattentive processing of orientation and position.
-
-**Perceptual Basis:**
-
-- Orientation is a preattentive visual property [@ware2012]
-- The principle of good continuation supports smooth path following
-- Position along a common scale is Cleveland and McGill's most accurate perceptual task
-
-**Operationalization:**
-
-- **Task**: "Trace observation X (highlighted in red) from axis A through axis B to axis C. What is its final value?"
-- **Independent Variables**: 
-
-  - Visualization method (equispaced lines vs. constant-width boxes)
-  - Dataset size (50, 200, 1000 observations)
-  - Tie density (10%, 30%, 50% of observations tied)
-  
-- **Dependent Variables**: 
-
-  - Completion time (milliseconds)
-  - Error rate (% incorrect responses)
-  - Eye-tracking metrics (fixation count, saccade length, time to first fixation on target)
-
-**Expected Results:**
-
-- Equispaced lines will show significantly faster completion times (H1a)
-- Error rates will be lower for equispaced lines (H1b)
-- Eye-tracking data will show fewer fixations and more direct saccades (H1c)
-- Advantage will diminish as dataset size increases (interaction effect)
-
-**Experimental Design:**
-
-- Within-subjects factorial design
-- 40 participants
-- Counterbalanced presentation order
-- Practice trials to control for learning effects
-- Analysis: Mixed-effects ANOVA with subject as random effect
-
-### Hypothesis 2: Gestalt Principles and Visual Continuity
-
-**H2**: Equispaced lines better support perceptual grouping and pattern detection through Gestalt principles of continuity and common fate.
-
-**Perceptual Basis:**
-
-- Good continuation: Visual system prefers smooth, continuous paths
-- Common fate: Objects moving or flowing together are grouped perceptually
-- Proximity: Lines close together are perceived as related
-
-**Operationalization:**
-
-- **Task A** (Pattern Detection): "Identify clusters or groups in the data"
-- **Task B** (Relationship Assessment): "Are variables X and Y positively correlated, negatively correlated, or independent?"
-- **Task C** (Subgroup Tracing): "Follow all observations in group A from left to right. Do they tend to have high or low values on the final variable?"
-
-**Dependent Variables**:
-
-- Pattern identification accuracy
-- Confidence ratings (7-point Likert scale)
-- Time to first correct response
-- Qualitative descriptions of perceived patterns
-
-**Expected Results:**
-
-- Equispaced lines will lead to more accurate pattern identification
-- Higher confidence ratings for equispaced lines
-- Richer qualitative descriptions demonstrating deeper understanding
-- Particularly strong advantage for relationship assessment tasks
-
-**Experimental Design:**
-
-- Between-subjects with 60 participants (30 per condition)
-- Mixed categorical-numerical datasets with known correlation structure
-- Think-aloud protocol during task completion
-- Content analysis of verbal descriptions
-
-### Hypothesis 3: Working Memory Load
-
-**H3**: Equispaced lines reduce visual working memory demands compared to constant-width boxes for tasks requiring integration across multiple axes.
-
-**Perceptual Basis:**
-
-- Visual working memory capacity limited to 3-4 objects [@ware2012]
-- Continuous lines can be treated as single objects (chunking)
-- Box-based representations require reconstructing paths across discontinuities
-
-**Operationalization:**
-
-- **Primary Task**: Multi-axis comparison requiring integration of information
-- **Secondary Task**: Concurrent memory load (remember random digit sequence)
-- **Measure**: Dual-task performance decrement
-
-**Dependent Variables**:
-
-- Primary task accuracy under dual-task conditions
-- Secondary task performance (digit recall accuracy)
-- NASA Task Load Index (TLX) subjective workload assessment
-- Pupil dilation (physiological measure of cognitive load)
-
-**Expected Results:**
-
-- Smaller performance decrement for equispaced lines under dual-task conditions
-- Better secondary task performance with equispaced lines
-- Lower subjective workload ratings
-- Smaller pupil dilation changes
-
-**Experimental Design:**
-
-- Within-subjects, 40 participants
-- Counterbalanced order
-- Baseline single-task performance measured first
-- Analysis: Compare dual-task decrement between conditions
-
-### Hypothesis 4: Frequency Estimation Accuracy
-
-**H4**: Constant-width boxes enable more accurate frequency estimation than equispaced lines, but both approaches support adequate ordinal comparisons (rank ordering by frequency).
-
-**Perceptual Basis:**
-
-- Area is preattentively processed but poorly judged quantitatively [@cleveland1984]
-- Density estimation is challenging but supports relative comparisons
-- Explicit encoding (boxes) vs. implicit encoding (line density)
-
-**Operationalization:**
-
-- **Task A** (Magnitude Estimation): "What percentage of observations have value v?"
-- **Task B** (Ordinal Comparison): "Which value has more observations: v₁ or v₂?"
-- **Task C** (Ratio Judgment): "Value v₁ has how many times as many observations as v₂?"
-
-**Dependent Variables**:
-
-- Absolute percentage error for Task A
-- Accuracy (% correct) for Task B
-- Ratio estimation error for Task C
-- Response time for each task
-
-**Expected Results:**
-
-- Hammock plots will show lower absolute error for magnitude estimation (H4a)
-- No significant difference for ordinal comparisons (H4b)
-- Hammock plots advantage for ratio judgments (H4c)
-- Faster response times for hammock plots on frequency tasks
-
-**Experimental Design:**
-
-- Between-subjects, 60 participants
-- Stimuli controlled for actual frequency distributions
-- Range of frequencies tested (10% to 50% of observations)
-- Analysis: ANOVA with planned contrasts
-
-### Hypothesis 5: Categorical-Numerical Consistency
-
-**H5**: Using consistent visual encoding (equispaced lines for both categorical and numerical variables) reduces cognitive load compared to mixed encoding strategies.
+**H1**: Using consistent visual encoding (equispaced lines for both categorical and numerical variables) reduces cognitive load compared to mixed encoding strategies.
 
 **Perceptual Basis:**
 
@@ -557,47 +454,6 @@ This question breaks down into smaller, more specific questions based on percept
 - Test phase (15 minutes, 12 mixed tasks)
 - Post-test preference questionnaire
 - Analysis: Growth curve modeling for learning effects
-
-### Hypothesis 6: Scalability and Graceful Degradation
-
-**H6**: As dataset size increases, equispaced lines degrade gracefully from individual-level to aggregate-level representation, maintaining perceptual advantages throughout the transition.
-
-**Perceptual Basis:**
-
-- Perceptual aggregation: Dense lines perceived as unified regions
-- Texture perception: Line density patterns processed preattentively
-- Gestalt grouping: Proximity and similarity create emergent bands
-
-**Operationalization:**
-
-- **Dataset Sizes**: $n \in {50, 100, 500, 1000, 5000}\$
-- **Tie Distributions**: 
-
-  - Uniform (equal frequencies)
-  - Zipfian (power-law distribution)
-  - Extreme (80% in 20% of values)
-  
-- **Tasks**: Same tasks as H1-H4 administered at different scales
-
-**Dependent Variables**:
-
-- Performance metrics from H1-H4 measured across scales
-- Subjective clarity ratings
-- Point at which individual lines become indistinguishable (perceptual threshold)
-
-**Expected Results:**
-
-- Smooth performance degradation for equispaced lines
-- Discontinuous transition for boxes (individual → aggregate)
-- Equispaced lines maintain relative advantage even at large scales
-- Advantage most pronounced for extreme tie distributions
-
-**Experimental Design:**
-
-- Mixed design: visualization method (between) × dataset size (within)
-- 40 participants per between-subjects condition
-- Subset of tasks from H1-H4 at each scale
-- Analysis: Mixed-effects models with scale as continuous predictor
 
 
 ## Mathematical Formalization
@@ -737,76 +593,9 @@ optimize_spacing_numerical <- function(values, n_obs, space = 0.05, buffer = 0.0
 }
 ```
 
-### Phase 2: Perceptual Validation Studies (Weeks 5-14)
+### Phase 2: Perceptual Validation Studies (Weeks 5-7)
 
-**Study 1: Preattentive Processing and Visual Search (H1)**
-
-- **Duration**: Weeks 5-7
-- **Participants**: n = 40 recruited via university participant pool
-- **Compensation**: Course credit or $10
-- **Apparatus**: Eye-tracking system (EyeLink 1000)
-- **IRB**: Submitted week 4
-
-**Procedure:**
-
-1. Calibration and practice (5 minutes)
-2. 48 trials: trace observation from axis 1 to axis 3
-3. Counterbalanced design: half trials with equispaced lines, half with boxes
-4. Record: response time, accuracy, eye movements
-
-**Analysis:**
-
-- Mixed-effects regression: RT ~ method × dataset_size + (1|participant)
-- Eye-tracking metrics: fixation count, saccade amplitude
-- Compare to predictions from preattentive processing theory
-
-
-**Study 2: Gestalt Principles and Pattern Perception (H2)**
-
-- **Duration**: Weeks 8-10  
-- **Participants**: n = 60 (30 per condition)
-- **Compensation**: $12
-- **Design**: Between-subjects with think-aloud protocol
-
-**Procedure:**
-
-1. Training on visualization type (10 minutes)
-2. Pattern detection task (6 trials)
-3. Relationship assessment task (6 trials)
-4. Subgroup tracing task (6 trials)
-5. Post-test questionnaire on strategies used
-
-**Analysis:**
-
-- Accuracy rates compared between conditions
-- Content analysis of think-aloud transcripts
-- Thematic coding of perceived patterns
-- Correlation with participant visualization experience
-
-
-**Study 3: Working Memory and Cognitive Load (H3)**
-
-- **Duration**: Weeks 11-12
-- **Participants**: n = 40
-- **Compensation**: $15
-- **Apparatus**: Eye-tracking with pupillometry
-
-**Procedure:**
-
-1. Single-task baseline (12 trials each visualization)
-2. Dual-task condition: visualization task + digit span (24 trials)
-3. NASA-TLX workload assessment
-4. Post-test preference and strategy questionnaire
-
-**Analysis:**
-
-- Dual-task decrement: (single_task_acc - dual_task_acc) / single_task_acc
-- Pupil dilation change from baseline
-- Repeated measures ANOVA on workload subscales
-- Correlational analysis: working memory capacity (OSPAN) × visualization method
-
-
-**Study 4: Frequency Perception (H4)**
+**Study 1: Frequency Perception (H1)**
 
 - **Duration**: Weeks 12-14
 - **Participants**: n = 60 (30 per condition)
@@ -827,7 +616,7 @@ optimize_spacing_numerical <- function(values, n_obs, space = 0.05, buffer = 0.0
 - Bias analysis: systematic over/under-estimation
 - Confidence calibration: accuracy vs. subjective confidence
 
-### Phase 3: Comparative Benchmarking (Weeks 13-15)
+### Phase 3: Comparative Benchmarking (Weeks 6-18)
 
 **Computational Metrics:**
 
@@ -858,7 +647,7 @@ optimize_spacing_numerical <- function(values, n_obs, space = 0.05, buffer = 0.0
 - Known correlation structure
 - Expert validation of insights discovered
 
-**Case Study 2: Auto MPG Dataset**
+**Case Study 2: Iris Dataset**
 
 - Multiple numerical variables with natural ties
 - Replication of classic visualization examples
@@ -870,7 +659,7 @@ optimize_spacing_numerical <- function(values, n_obs, space = 0.05, buffer = 0.0
 - Same data, same research questions
 - Evaluate relative effectiveness for medical decision-making
 
-### Phase 4: Integration and Dissemination (Weeks 15-16)
+### Phase 4: Integration and Dissemination (Weeks 8-9)
 
 **Deliverables:**
 
@@ -916,13 +705,10 @@ optimize_spacing_numerical <- function(values, n_obs, space = 0.05, buffer = 0.0
 
 ### Theoretical Contributions
 
-1. **Perceptually-Grounded Framework:** First comprehensive application of Ware's three-stage model to evaluate parallel coordinate plot design decisions, establishing methodology for theory-driven visualization evaluation
+1. **Unified Tie-Breaking Theory:** Formalization of equispaced optimization for both categorical and numerical variables, with mathematical proofs of key perceptual properties (separability, continuity, space efficiency)
 
-2. **Unified Tie-Breaking Theory:** Formalization of equispaced optimization for both categorical and numerical variables, with mathematical proofs of key perceptual properties (separability, continuity, space efficiency)
+2. **Empirical Characterization:** Rigorous experimental evidence quantifying perceptual trade-offs between individual-level and aggregate-level encoding strategies across multiple task types
 
-3. **Empirical Characterization:** Rigorous experimental evidence quantifying perceptual trade-offs between individual-level and aggregate-level encoding strategies across multiple task types
-
-4. **Scalability Model:** Theory of graceful degradation describing how equispaced lines transition from discrete to continuous representation as density increases
 
 ### Practical Contributions
 
@@ -970,20 +756,17 @@ By providing both theoretical understanding and practical tools, this work enabl
 | 1-2 | Literature synthesis | Annotated bibliography | Ware framework integration |
 | 3-4 | Core algorithm | Working R code | Perceptual properties implemented |
 | 4 | IRB submission | Approved protocol | Human subjects clearance |
-| 5-7 | Study 1: Visual search | Raw data + analysis | Preattentive processing |
-| 8-10 | Study 2: Pattern perception | Raw data + analysis | Gestalt principles |
-| 11-12 | Study 3: Cognitive load | Raw data + analysis | Working memory |
-| 12-14 | Study 4: Frequency | Raw data + analysis | Magnitude estimation |
-| 13-15 | Benchmarking | Performance report | Computational metrics |
-| 15-16 | Integration | Draft manuscript | Synthesis |
+| 5-7 | Study 1: Frequency | Raw data + analysis | Magnitude estimation |
+| 8-10 | Benchmarking | Performance report | Computational metrics |
+| 10-12 | Integration | Draft manuscript | Synthesis |
 
-**Total Duration:** 16 weeks (4 months)
+**Total Duration:** 12 weeks (3 months)
 
 **Key Dependencies:**
 - IRB approval required before any human subjects research (Week 4)
 - Algorithm implementation must be stable before Study 1 (Week 5)
-- Studies 1-4 can run partially in parallel (Weeks 8-14)
-- Benchmarking overlaps with final studies (Weeks 13-15)
+- Study 1 can run partially in parallel (Weeks 8-10)
+- Benchmarking overlaps with final studies (Weeks 10-12)
 
 
 ## 9. Limitations and Future Directions
@@ -1089,35 +872,3 @@ The answer, as with most visualization questions, is nuanced and context-depende
 
 
 ## References
-
-Cleveland, W. S., & McGill, R. (1984). Graphical perception: Theory, experimentation, and application to the development of graphical methods. *Journal of the American Statistical Association*, *79*(387), 531-554.
-
-Dennig, F. L., Bögl, M., & Keim, D. A. (2021). ParSetgnostics: Quality metrics for parallel sets. *Computer Graphics Forum*, *40*(3), 375-386. https://doi.org/10.1111/cgf.14314
-
-Hofmann, H., & Vendettuoli, M. (2013). Common angle plots as perception-true visualizations of categorical associations. *IEEE Transactions on Visualization and Computer Graphics*, *19*(12), 2297-2305. https://doi.org/10.1109/TVCG.2013.140
-
-Inselberg, A. (1985). The plane with parallel coordinates. *The Visual Computer*, *1*, 69-91. https://doi.org/10.1007/BF01898350
-
-Kosara, R., Bendix, F., & Hauser, H. (2006). Parallel sets: Interactive exploration and visual analysis of categorical data. *IEEE Transactions on Visualization and Computer Graphics*, *12*(4), 558-568. https://doi.org/10.1109/TVCG.2006.76
-
-Scaife, M., & Rogers, Y. (1996). External cognition: How do graphical representations work? *International Journal of Human-Computer Studies*, *45*(2), 185-213.
-
-Schonlau, M. (2003). Visualizing non-hierarchical and hierarchical cluster analyses with clustergrams. *Computational Statistics*, *19*(1), 95-111.
-
-Schonlau, M. (2024). The hammock plot: Where categorical and numerical data relax together. *The Stata Journal*, *24*(1), 1-21. https://doi.org/10.1177/1536867X241234567
-
-Schonlau, M., & Yang, T. (2024). The hammock plot: Where categorical and numerical data relax together. arXiv:2506.13630v1 [stat.AP].
-
-Tufte, E. R. (2001). *The Visual Display of Quantitative Information* (2nd ed.). Graphics Press.
-
-VanderPlas, S., Ge, Y., Unwin, A., & Hofmann, H. (2023). Penguins go parallel: A grammar of graphics framework for generalized parallel coordinate plots. *Journal of Computational and Graphical Statistics*. Advance online publication.
-
-Wallgren, A., Wallgren, B., Persson, R., Jorner, U., & Haaland, J. (1996). *Graphing Statistics & Data: Creating Better Charts*. Sage Publications.
-
-Ware, C. (2004). *Information Visualization: Perception for Design* (2nd ed.). Morgan Kaufmann.
-
-Ware, C. (2012). *Information Visualization: Perception for Design* (3rd ed.). Morgan Kaufmann.
-
-Ware, C., Purchase, H. C., Colpoys, L., & McGill, M. (2002). Cognitive measurements of graph aesthetics. *Information Visualization*, *1*(2), 103-110.
-
-Wegman, E. J. (1990). Hyperdimensional data analysis using parallel coordinates. *Journal of the American Statistical Association*, *85*(411), 664-675.

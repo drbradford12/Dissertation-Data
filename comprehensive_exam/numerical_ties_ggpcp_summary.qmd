@@ -157,7 +157,7 @@ The use of a secondary key parameter ensures that observations within a tie grou
 - **Degenerate ranges**: When data range is zero or infinite, no spreading occurs
 - **Empty input**: Returns an empty vector immediately
 
-### 3. Implementation Details
+### Implementation Details
 
 The hierarchical sorting approach is implemented in ggpcp through the `pcp_arrange(data, method, space)` function, which internally utilizes the `even_tie_spread` algorithm. Two primary methods are available:
 
