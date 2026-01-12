@@ -56,7 +56,51 @@ theme_set(theme_bw(base_size = 11))
 
 ```
 
-# Introduction and Background
+# Introduction
+
+This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs). 
+Parallel coordinates, first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes simultaneously [@inselberg2009]. 
+However, when datasets contain exact numerical ties, the resulting overlapping lines in PCPs can obscure critical distinctions. 
+
+To address this, we propose a uniform method for collected spacing to tied values.
+The method will be integrated into the `ggpcp` package in R, ensuring a streamlined workflow for users seeking enhanced clarity in their parallel coordinate visualizations.
+
+Importantly, our approach complements recent work on generalized parallel coordinate plots (GPCPs), an extension of PCPs that supports categorical variables [@vanderplas2023]. 
+The `ggpcp` package for R implements these GPCPs using a grammar of graphics framework, which seamlessly incorporates both continuous and categorical variables in a single parallel coordinate plot. 
+One of the key contributions of that work is a robust tie-breaking mechanism for categorical variables, implemented through the `pcp_arrange()` function with methods including "from-left" and "from-right" hierarchical sorting. 
+This ensures that individual observations can be traced across multiple dimensions, even when categories induce identical or "tied" values. 
+
+By adding multiple numerical tie-breaking techniques for continuous data—including our three deterministic approaches—we further refine GPCPs' capacity to handle the visualization of real-world datasets exhibiting many types of ties.
+
+# Background and Motivation
+
+## Parallel Coordinate Plots
+
+Parallel coordinate plots assign each dimension of an $n$-dimensional dataset to a vertical axis arranged in parallel [@wegman1990]. 
+Each observation is drawn as a polyline connecting its values on these axes, providing a visual representation that can illuminate underlying data structures.
+
+## Numerical Ties and Visual Overlap
+
+When multiple observations share the same value in a given dimension, their polylines perfectly overlap, creating "visual collisions." 
+This masks information about distribution, density, or potential outliers. 
+The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
+However, the `ggpcp` implementation has demonstrated that careful tie-handling is essential for both continuous and categorical variables.
+
+Introducing a small offset ("jitter") to these tied values can mitigate overlap without distorting the overall relationships in the data [@peng2004]. 
+In the context of generalized parallel coordinate plots, the `ggpcp` package separates data management from visual rendering into three distinct components: variable selection and reshaping, scaling of axes, and treatment of ties in categorical axes [@vanderplas2023].
+
+```{r ggpcp-workflow, fig.cap="ggpcp data wrangling workflow", out.width="70%"}
+#p1
+```
+
+## Existing Solutions for Categorical Ties in ggpcp
+
+The `ggpcp` package currently addresses categorical ties through sophisticated tie-breaking algorithms. 
+The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, with two primary methods: "from-left" and "from-right", meaning that tie breaks are determined hierarchically by variables' values from the specified direction. 
+The parameter `space` specifies the amount of the y-axis to use for spacing between levels of categorical variables, with a default of 5% of the axis used for spacing.
+
+This hierarchical sorting approach serves as "external cognition," the additional computational processing reduces the cognitive load required to untangle overlapping lines in the parallel coordinate plot. 
+The categorical tie-breaking creates equispaced tie-breaking that reduces line crossings and allows users to follow individual observations from left to right through the plot even for categorical variables.
 
 ## The Challenge of Visualizing Mixed-Type Data
 
@@ -157,6 +201,9 @@ A key visual difference emerges when connecting categorical to numerical variabl
 
 This observation suggests that each approach has perceptual advantages in different contexts, motivating rigorous comparative evaluation grounded in perceptual science.
 
+Understanding the perceptual and practical challenges of parallel coordinate plots provides essential context for our tie-resolution methods. 
+This section synthesizes empirical evidence from the visualization literature that directly informs our design decisions and evaluation strategy.
+
 ### The Line Width Illusion and Perceptual Constraints
 
 Both approaches must contend with perceptual illusions that affect visual interpretation. @schonlau2024 discusses the line width illusion:
@@ -203,7 +250,7 @@ These bands facilitate the perception of distinct groups as they move together t
 Colin Ware's "Information Visualization: Perception for Design" provides a comprehensive framework for understanding how humans process visual information [@ware2012, 3rd ed., pp. 20-21, Figure 1.11]. 
 Ware describes visual perception as occurring in three distinct stages, each with specific implications for visualization design.
 
-![Colin Ware's three-stage model of visual information processing, illustrating the flow from low-level feature extraction to goal-directed processing (adapted from Ware, 2012).](images/ware_three_stage_model.png){#fig-ware-stages width="90%"}
+![Colin Ware's three-stage model of visual information processing, illustrating the flow from low-level feature extraction to goal-directed processing (adapted from Ware, 2012).](images/ware_three_stage_model.png){#fig-ware-stages width="60%"}
 
 
 #### Stage 1: Parallel Processing of Low-Level Properties
@@ -216,18 +263,18 @@ Four fundamental categories of preattentive visual properties exist:
 It includes simple geometric cues—orientation, length, width, and size—as well as more structured cues like curvature and the way marks are grouped. 
 Form also depends on how clearly something is rendered (sharp vs. blurred) and whether boundaries are emphasized through added marks or enclosing shapes.
 
-![Form-based pop-out: orientation and size.](mages/fig_preattentive_form.png){#fig-preattentive-form width="90%"}
+![Form-based pop-out: orientation and size.](images/fig_preattentive_form.png){#fig-preattentive-form width="60%"}
 
 **Color** provides another immediate signal. 
 Differences in hue, brightness (intensity), and saturation let viewers separate categories or perceive gradients quickly, typically without much mental work.
 
-![Color-based pop-out: hue; plus an intensity ramp.](images/fig_preattentive_color.png){#fig-preattentive-color width="90%"}
+![Color-based pop-out: hue; plus an intensity ramp.](images/fig_preattentive_color.png){#fig-preattentive-color width="60%"}
 
 **Spatial position** underlies nearly every visualization. 
 At its simplest, it’s where something lands on a 2D plane via $(x, y)$ coordinates. 
 Position can also suggest depth or distance through stereoscopic cues or shading that makes shapes appear concave or convex.
 
-![Spatial position (x,y) and implied depth via shading.](images/fig_preattentive_position_depth.png){#fig-preattentive-position width="90%"}
+![Spatial position (x,y) and implied depth via shading.](images/fig_preattentive_position_depth.png){#fig-preattentive-position width="60%"}
 
 
 Finally, **motion** is especially effective at grabbing attention. 
@@ -240,7 +287,7 @@ As Ware notes, it is easy to spot a single hawk in a sky full of pigeons, but if
 While Colin Ware’s model provides a foundational understanding of the physiological stages of vision, researchers like Lace Padilla have expanded this framework to include the complex cognitive processes involved in decision-making.
 @padilla2018 integrates Dual-Process Theory, which suggests that users oscillate between fast, intuitive "System 1" thinking and slow, deliberative "System 2" reasoning when interpreting data.
 
-![Lace Padilla's cognitive model (Padilla et al., 2018).](images/padilla_processing.png){#fig-padilla width="90%"}
+![Lace Padilla's cognitive model (Padilla et al., 2018).](images/padilla_processing.png){#fig-padilla width="60%"}
 
 Ware’s framework is primarily a bottom-up, perceptual model that describes how the physical properties of a graphic (like color and orientation) are mechanically processed by the eye and brain. 
 In contrast, Padilla’s model is a cognitive-integrative model that places greater emphasis on the user's prior knowledge and the dual nature of reasoning. 
@@ -303,13 +350,16 @@ Equispaced lines require inferring frequency from density, which is a second-ord
 
 ### External Cognition and Computational Offloading
 
-@vanderplas2023 invoke @scaife1996 concept of "external cognition":
+@scaife1996 concept of "external cognition": <!-- @vanderplas2023 invoke-->
 
 > "While hierarchical sorting requires additional computations relative to the jittering or equally spaced solutions in Figure 5, this extra processing serves as 'external cognition' \[Scaife and Rogers, 1996\] - the additional computer time reduces the cognitive load required to untangle the lines" (p. 11)
 
-This principle aligns with Ware's emphasis on reducing working memory load through careful visual design. By computing optimal line positions algorithmically, the equispaced approach offloads cognitive work from the viewer. Rather than the viewer mentally sorting and organizing lines, the visualization presents pre-organized information that leverages natural perceptual grouping.
+This principle aligns with Ware's emphasis on reducing working memory load through careful visual design. 
+By computing optimal line positions algorithmically, the equispaced approach offloads cognitive work from the viewer. 
+Rather than the viewer mentally sorting and organizing lines, the visualization presents pre-organized information that leverages natural perceptual grouping.
 
-Hammock plots achieve a different form of cognitive offloading by aggregating observations into boxes, explicitly computing and displaying frequency information. The trade-off is between individual-level detail (equispaced lines) and aggregate-level clarity (boxes).
+Hammock plots achieve a different form of cognitive offloading by aggregating observations into boxes, explicitly computing and displaying frequency information. 
+The trade-off is between individual-level detail (equispaced lines) and aggregate-level clarity (boxes).
 
 ### Gestalt Principles and Line Continuity
 
@@ -370,7 +420,8 @@ These metrics can be adapted to compare the two approaches quantitatively.
 
 Present implementations show a split:
 
-1.  **ggpcp**: This method uses Gestalt principles of continuity and common fate to break ties between categorical variables in a smart way. However, when numbers are tied, the lines overlap.
+1.  **ggpcp**: This method uses Gestalt principles of continuity and common fate to break ties between categorical variables in a smart way. 
+However, when numbers are tied, the lines overlap.
 
 2.  **Hammock plots**: All variable types have boxes with the same width, which makes frequency encoding clear, but you can't follow individual observations without highlighting them.
 
@@ -413,7 +464,7 @@ This question breaks down into smaller, more specific questions based on percept
 
 **Q5 (Scalability):** How do the pros and cons of perception change when the size of the dataset and the distribution of ties change?
 
-## Hypotheses Grounded in Perceptual Theory
+## Hypothesis Grounded in Perceptual Theory
 
 ### Hypothesis: Categorical-Numerical Consistency
 
@@ -458,17 +509,21 @@ For a numerical axis with values $V = \{v_1, v_2, ..., v_m\}$ ordered such that 
 
 For each value $v_i$, allocate proportional space:
 
-$$S_i = \frac{n_i}{\sum_{k=1}^{m} n_k} \cdot (1 - space \cdot (m-1))$$
+$S_i = \frac{n_i}{\sum_{k=1}^{m} n_k} \cdot (1 - space \cdot (m-1))$
 
 where $space \in [0, 0.5]$ is the spacing parameter controlling separation between value regions.
 
 **Position assignment:**
+\db{(Check this please!!!), the buffer should not be in the equal anymore}
 
 For observation $j$ within value $v_i$ (after hierarchical sorting):
 
-$$y_{i,j} = start_i + \frac{S_i - 2 \cdot buffer}{n_i - 1} \cdot (j-1) + buffer$$
+$y_{i,j} = start_i + \frac{S_i - 2 \cdot buffer}{n_i - 1} \cdot (j-1) + buffer$
 
-where: - $start_i = \sum_{k=1}^{i-1}(S_k + space)$ is the starting position for value $v_i$ - $buffer$ provides margin space at boundaries (typically 0.02 × $S_i$) - The formula ensures even distribution across available space
+where: 
+- $start_i = \sum_{k=1}^{i-1}(S_k + space)$ is the starting position for value $v_i$ 
+- $buffer$ provides margin space at boundaries (typically $S_i$) 
+- The formula ensures even distribution across available space
 
 ### Properties
 
@@ -513,7 +568,7 @@ This ensures that observations with similar trajectories are positioned near eac
 **Tasks:**
 
 1.  Extend `pcp_arrange()` to detect and handle numerical ties
-2.  Implement `optimize_spacing_numerical()` function with perceptually-motivated parameters
+2.  Implement `optimize_spacing_numerical()` or `tie_spacing()` function with perceptually-motivated parameters
 3.  Handle edge cases while preserving perceptual properties:
     -   Single unique value (centered position)
     -   Extreme skew (adaptive buffer sizing)
@@ -748,6 +803,7 @@ Compared to hammock plots' constant-width boxes, equispaced lines offer differen
 This research contributes to theory by demonstrating how established perceptual principles generate testable hypotheses about visualization effectiveness, to practice by delivering open-source software and evidence-based design guidelines, and to methodology by exemplifying theory-driven, multi-method evaluation.
 
 As @ware2012 emphasizes, effective visualization must be grounded in understanding of human perception. 
-This research takes that principle seriously, asking not just "which visualization looks better?" but rather "which visualization better aligns with the architecture of human visual processing for specific analytical tasks?" The answer, as with most visualization questions, is nuanced and context-dependent—but now it will be grounded in empirical evidence and perceptual theory.
+This research takes that principle seriously, asking not just "which visualization looks better?" but rather "which visualization better aligns with the architecture of human visual processing for specific analytical tasks?" 
+The answer, as with most visualization questions, is nuanced and context-dependent—but now it will be grounded in empirical evidence and perceptual theory.
 
 ## References
