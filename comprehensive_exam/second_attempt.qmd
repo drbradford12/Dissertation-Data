@@ -47,7 +47,7 @@ library(knitr)
 library(kableExtra)
 library(ggforce)
 
-#source(here::here("numerical_tie_attempts/even_space_ties.R"))
+source(here::here("numerical_tie_attempts/toy_example.R"))
 
 
 # Set theme
@@ -90,14 +90,14 @@ Introducing a small offset ("jitter") to these tied values can mitigate overlap 
 In the context of generalized parallel coordinate plots, the `ggpcp` package separates data management from visual rendering into three distinct components: variable selection and reshaping, scaling of axes, and treatment of ties in categorical axes [@vanderplas2023].
 
 ```{r ggpcp-workflow, fig.cap="ggpcp data wrangling workflow", out.width="70%"}
-#p1
+combined_ggpcp
 ```
 
 ## Existing Solutions for Categorical Ties in ggpcp
 
 The `ggpcp` package currently addresses categorical ties through sophisticated tie-breaking algorithms. 
 The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, with two primary methods: "from-left" and "from-right", meaning that tie breaks are determined hierarchically by variables' values from the specified direction. 
-The parameter `space` specifies the amount of the y-axis to use for spacing between levels of categorical variables, with a default of 5% of the axis used for spacing.
+The parameter `space` specifies the amount of the y-axis to use for spacing between levels of categorical variables the axis used for spacing.
 
 This hierarchical sorting approach serves as "external cognition," the additional computational processing reduces the cognitive load required to untangle overlapping lines in the parallel coordinate plot. 
 The categorical tie-breaking creates equispaced tie-breaking that reduces line crossings and allows users to follow individual observations from left to right through the plot even for categorical variables.
@@ -235,6 +235,7 @@ By default, this range is set to maximize the space available for tie breaking w
 
 ![Tie spreading maintains visual separation while preserving approximate positions.](images/pcp_line_tracing_guide_images/figure-7.png){#fig-figure-7 width="90%"}
 
+
 ## Hierarchical Sorting for Minimal Crossings
 
 Beyond simply spreading tied values, the ggpcp package implements hierarchical sorting to minimize line crossings as in categorical tie breaking.
@@ -276,10 +277,8 @@ Position can also suggest depth or distance through stereoscopic cues or shading
 
 ![Spatial position (x,y) and implied depth via shading.](images/fig_preattentive_position_depth.png){#fig-preattentive-position width="60%"}
 
-
 Finally, **motion** is especially effective at grabbing attention. 
 Flicker or directional movement stands out strongly and can quickly indicate changes or relationships in data that unfold over time.
-
 
 These preattentive properties are critical for visualization design because they allow information to be perceived "at a glance" without requiring serial visual search. 
 As Ware notes, it is easy to spot a single hawk in a sky full of pigeons, but if the sky contains many types of birds, the hawk becomes much harder to see—the distinctiveness of preattentive properties diminishes as visual variety increases.
@@ -341,11 +340,13 @@ A key distinction between the two approaches concerns the nature of visual searc
 -   **Parallel Search (Preattentive):** Target pops out immediately, search time independent of number of distractors 
 -   **Serial Search (Attentive):** Search time increases linearly with number of items, requiring conscious attention
 
+
 For tracing individual observations through equispaced lines, the task may benefit from preattentive processing of orientation and position. 
 Each observation maintains a consistent visual identity as a continuous line with specific orientation. 
 In contrast, tracing through constant-width boxes requires conscious attention to reconstruct the path, as the area-based encoding does not support preattentive line following.
 
-However, for frequency estimation tasks, constant-width boxes may have an advantage. Ware notes that area is preattentively processed, allowing immediate perception of relative quantities. 
+However, for frequency estimation tasks, constant-width boxes may have an advantage. 
+Ware notes that area is preattentively processed, allowing immediate perception of relative quantities. 
 Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 2).
 
 ### External Cognition and Computational Offloading
@@ -468,7 +469,9 @@ This question breaks down into smaller, more specific questions based on percept
 
 ### Hypothesis: Categorical-Numerical Consistency
 
-Participants using consistent visual encoding (same representation for categorical and numerical variables) will show significantly lower cognitive load, defined as mental effort required to complete visualization tasks, than those using mixed encoding strategies, tested through task completion time, error rates, and self-reported mental demand [@hart1988development].
+Participants using consistent visual encoding (same representation for categorical and numerical variables) will show significantly lower cognitive load, defined as mental effort required to complete visualization tasks, than those using mixed encoding strategies, tested through task completion time, error rates, and self-reported mental demand using NASA-TLX cognitive load score [@hart1988development].
+
+<!-- **H1**: Using consistent visual encoding we will help viewers make better sense of the data without introducing misunderstandings due to the display of tie broken numerical values. -->
 
 **Theoretical Framework:**
 
@@ -484,6 +487,19 @@ Participants using consistent visual encoding (same representation for categoric
   - Condition C: Consistent boxes (Hammock)
 - Dependent variables: Response time (ms), error rate (proportion), NASA-TLX cognitive load score
 - Task: 30 trials alternating between pathway tracing and frequency estimation
+
+
+**Perceptual Basis:**
+
+- Consistent visual grammar reduces need for strategy switching
+- Unified mental model reduces working memory demands
+
+**Dependent Variables**:
+
+- Learning curve (performance over time)
+- Task-switching cost (RT increase after switching task types)
+- Transfer effects (performance on novel task combinations)
+- Subjective preference ratings
 
 **Experimental Design:**
 
