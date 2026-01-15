@@ -1,0 +1,718 @@
+---
+title: "Chapter 2: Literature Review"
+subtitle: "Solving Numerical Ties in Parallel Coordinate Plots Through the Grammar of Graphics"
+format: html
+bibliography: references.bib
+---
+
+# Chapter 2: Literature Review
+
+## 2.1 Introduction and Chapter Overview
+
+This chapter provides a comprehensive review of the theoretical and methodological foundations underlying the treatment of numerical ties in parallel coordinate plots.
+Building upon the research questions and objectives established in Chapter 1, we examine the evolution of parallel coordinate plots from their origins as tools for continuous data visualization to their contemporary implementation as generalized parallel coordinate plots capable of handling mixed categorical and numerical data.
+This review synthesizes three interconnected bodies of literature: (1) the theoretical foundations of the grammar of graphics as formalized by Wilkinson and operationalized in computational implementations, (2) the historical development and variants of parallel coordinate plots and related visualizations for multivariate data, and (3) algorithmic approaches to resolving visual ambiguity through tie-breaking methods.
+
+The primary contribution of this chapter is to establish the theoretical framework within which our proposed even tie spread algorithm operates.
+By situating this algorithm within the grammar of graphics paradigm, we demonstrate that the resolution of numerical ties is not merely a technical implementation detail but rather a fundamental question about how statistical transformations, aesthetic mappings, and geometric representations compose to create interpretable visualizations.
+This theoretical grounding provides the foundation for the methodological developments presented in Chapter 3 and the empirical evaluations discussed in Chapter 4.
+
+The chapter is organized as follows: Section 2.2 establishes the grammar of graphics as the foundational framework for principled visualization design.
+Section 2.3 traces the historical development of parallel coordinate plots and identifies the numerical ties problem as a fundamental limitation.
+Section 2.4 reviews alternative visualization approaches for categorical data, including parallel sets, hammock plots, and alluvial plots, establishing the design space within which our approach is situated.
+Section 2.5 explicates how grammar of graphics principles apply specifically to tie resolution.
+Section 2.6 presents the mathematical and algorithmic foundations of the even tie spread approach.
+Section 2.7 discusses perceptual and cognitive principles that inform effective visualization design.
+Section 2.8 provides comparative evaluation frameworks for assessing different visualization techniques.
+Section 2.9 examines implementation considerations in the R statistical computing environment.
+Section 2.10 synthesizes methodological implications and identifies directions for future research that will be addressed in subsequent chapters of this dissertation.
+
+## 2.2 Theoretical Foundations: The Grammar of Graphics
+
+### 2.2.1 Wilkinson's Formalization and Theoretical Principles
+
+The grammar of graphics, formalized by [-@wilkinson1999, -@wilkinson2006], represents a paradigm shift in how we conceptualize and construct statistical graphics. 
+Rather than treating visualizations as a collection of named chart types (bar charts, scatterplots, line graphs, etc.), the grammar decomposes graphics into a systematic combination of independent components that can be specified, combined, and reasoned about formally. This theoretical framework provides the foundation for the methodological contributions of this dissertation, as it establishes principles for how statistical transformations, aesthetic mappings, and geometric representations should compose to create valid visualizations.
+
+Wilkinson's formalization identifies seven fundamental components that comprise any statistical graphic:
+
+1. **Data**: The information to be visualized, including variables and their observations
+2. **Transformations**: Functions applied to data variables (e.g., aggregation, binning, statistical summaries)
+3. **Scales**: Mappings from data space to aesthetic space (e.g., linear, logarithmic, categorical)
+4. **Coordinates**: The geometric space in which data are plotted (e.g., Cartesian, polar, geographic)
+5. **Elements**: The geometric objects representing data (points, lines, polygons, etc.)
+6. **Guides**: Visual aids for interpreting the graphic (axes, legends, gridlines)
+7. **Aesthetics**: The sensory attributes to which data are mapped (position, color, size, shape, etc.)
+
+The theoretical power of this decomposition lies in its composability: by specifying each component independently, we can construct an enormous variety of visualizations from a relatively small set of primitive operations. 
+Moreover, the formal specification enables us to reason about the properties of visualizations—such as whether aesthetic mappings are invertible, whether transformations preserve relevant statistical properties, and whether geometric representations support intended perceptual inferences.
+
+For the purposes of this dissertation, the grammar of graphics framework provides three crucial theoretical contributions:
+
+**First**, it establishes the principle that aesthetic mappings must be functional, creating one-to-one (or at minimum, many-to-one) correspondences between data values and visual properties.
+This principle directly motivates the numerical ties problem: when multiple observations share identical data values, a naive mapping produces visual ambiguity because the one-to-one correspondence is violated.
+The `tie spread` algorithm, which we develop in this dissertation, can be understood as a transformation that restores the functional nature of the aesthetic mapping while preserving statistical information.
+
+**Second**, the grammar requires that transformations be explicit and composable. Rather than hiding data manipulations within monolithic plotting functions, the grammar demands that each transformation be specified as a separate, well-defined operation.
+This principle guides our architectural decision (detailed in Section 2.9) to separate tie-breaking from geometric rendering, implementing it as an explicit statistical transformation in the data processing pipeline.
+
+**Third**, the grammar establishes that visual properties should be determined by data rather than by arbitrary design choices.
+This data-driven philosophy informs our use of hierarchical sorting (Section 2.6.4), where the ordering of observations within tie groups is determined by their values on adjacent axes rather than by random assignment or fixed orderings.
+The result is visualizations that reflect the multivariate structure of the data rather than imposing external structure through visualization design.
+
+### 2.2.2 Wickham's Computational Implementation in ggplot2
+
+@wickham2016 operationalized Wilkinson's theoretical framework in ggplot2, creating a layered grammar of graphics that has become the de facto standard for statistical visualization in R.
+The significance of this implementation extends beyond providing a convenient API for creating graphics; it demonstrates that the grammar of graphics can be realized as a practical computational system while maintaining theoretical rigor.
+
+The ggplot2 implementation introduces several key innovations that are directly relevant to this dissertation:
+
+**Layered Construction**: Graphics are built additively through explicit combination of layers.
+The syntax `ggplot(data) + geom_point(aes(x, y)) + scale_x_log10()` constructs a scatterplot by combining a data layer, a geometric layer with aesthetic mappings, and a scale transformation.
+This additive syntax, made possible by R's operator overloading capabilities, directly reflects the compositional structure of the grammar itself.
+Each `+` operator composes layers through well-defined interfaces, ensuring that components interact predictably.
+
+**Aesthetic Mappings as First-Class Objects**: The `aes()` function creates explicit mappings between data variables and visual properties.
+These mappings are not simply function calls but rather objects that can be inspected, modified, and reasoned about programmatically.
+This reification of aesthetic mappings enables the kind of metaprogramming necessary for complex visualizations like parallel coordinate plots, where standard one-to-one mappings must be adapted to handle multiple axes.
+
+**Statistical Transformations as Separate Components**: Unlike traditional plotting systems where statistical summaries are intertwined with geometric rendering, ggplot2 separates stats (statistical transformations) from geoms (geometric objects).
+A histogram, for instance, is created by pairing `stat_bin` (which bins continuous data and counts frequencies) with `geom_bar` (which renders rectangles). This separation enables flexible recombination: the same stat can be paired with different geoms, and vice versa.
+
+**Scale Systems for Consistent Mapping**: The scale system in ggplot2 manages the translation between data space and aesthetic space, handling both continuous and discrete variables, multiple data types (numeric, categorical, temporal), and various transformation functions (linear, logarithmic, square root, etc.).
+Scales are applied consistently across all layers of a graphic, ensuring visual coherence even when multiple datasets or transformations are combined.
+
+For this dissertation, ggplot2 provides both the conceptual framework and the computational infrastructure for implementing generalized parallel coordinate plots.
+Our methodological contributions (Chapter 3) extend ggplot2's grammar through:
+
+1. Specialized data transformations (`pcp_select`, `pcp_scale`, `pcp_arrange`) that prepare data for parallel coordinate rendering
+2. Custom aesthetic mappings (`aes_pcp`) that handle the multi-axis coordinate system
+3. Domain-specific geoms (`geom_pcp`, `geom_pcp_axes`, `geom_pcp_boxes`) that render parallel coordinate plot elements
+4. Integration with ggplot2's existing infrastructure (themes, facets, coordinate systems) to leverage the broader ecosystem
+
+The theoretical principle underlying this extension is that parallel coordinate plots, despite their visual distinctiveness, can be understood within the grammar of graphics framework as a specific combination of data transformations, aesthetic mappings, and geometric representations.
+This understanding guides our implementation strategy and ensures that our contributions integrate coherently with existing visualization infrastructure.
+
+### 2.2.3 Functional Mappings and the Principle of Invertibility
+
+A fundamental principle of the grammar of graphics, emphasized by both @wilkinson2006 and @wickham2016, is that aesthetic mappings should be functional: each data value should map to a unique visual property, or at minimum, the mapping should be many-to-one with well-defined inverse properties.
+This principle is not merely a technical convenience but reflects a deeper epistemological commitment: visualizations should support accurate reconstruction of data properties from visual inspection.
+
+As @vanderplas2023 observe, "In standard plots any mapping is a function between one data variable and one aesthetic."
+For a scatterplot with aesthetic mapping `aes(x = variable1, y = variable2)`, the mapping is strictly one-to-one: each observation has unique x and y coordinates, and visual inspection reveals both the individual values and the bivariate relationship.
+Even when points overlap due to identical or similar values, the aesthetic mapping itself remains functional—the overlap is a consequence of data structure rather than a failure of the mapping.
+
+This principle becomes particularly challenging for parallel coordinate plots, which appear to violate the one-to-one correspondence in two ways:
+
+**First**, parallel coordinate plots map multiple data variables to what appears to be a single x-axis.
+How can a functional mapping exist when we have, say, six variables (bill length, bill depth, flipper length, body mass, sex, species) all mapped to the same aesthetic property (x position)?
+
+@anderplas2023 resolve this apparent contradiction through data transformation: "By transforming the wide form of the data set into a long form, we obtain a one-to-one mapping to a now discrete x axis consisting of the (names of the) original data variables."
+The transformation from wide format (one row per observation, one column per variable) to long format (multiple rows per observation, one row per variable-value pair) reestablishes the functional mapping.
+In the transformed dataset, the x aesthetic maps to the variable name (a discrete factor), and the y aesthetic maps to the variable value. The polyline connecting these points across variables is constructed by grouping observations through an ID variable.
+
+**Second**, when multiple observations share identical values—the numerical ties problem central to this dissertation—the aesthetic mapping becomes many-to-one: multiple observations map to the same visual position.
+In this case, the mapping is no longer invertible: visual inspection cannot distinguish between a single observation and multiple overlapping observations.
+
+The `tie spread` algorithm addresses this by introducing a transformation $T: \mathbb{R} \to \mathbb{R}$ that maps original values to spread values:
+
+$$T(x_i | G_j, k, w) = v_j + w \cdot \left(\frac{i-1}{k-1} - 0.5\right)$$
+
+where $G_j$ is the tie group containing observation $i$, $v_j$ is the tied value, $k = |G_j|$ is the group size, and $w$ is the spread width.
+This transformation restores the one-to-one property of the aesthetic mapping: each observation receives a unique y-coordinate, even when the original data values were identical.
+
+Critically, this transformation operates in the data layer of the grammar of graphics, before aesthetic mappings are applied.
+From the perspective of the ggplot2 rendering system, it receives a dataset where all y-values are unique, and standard functional mappings proceed without modification.
+The transformation itself becomes part of the statistical transformation pipeline, analogous to how `stat_bin` transforms continuous variables into discrete bins for histograms.
+
+The theoretical implication is that tie-breaking is not an ad-hoc visualization trick but rather a principled statistical transformation that restores the functional mapping property required by the grammar of graphics.
+This framing guides our methodological choices (Chapter 3) and provides a foundation for evaluating alternative approaches (Chapter 4).
+
+## 2.3 Historical Development and Limitations of Parallel Coordinate Plots
+
+### 2.3.1 Origins and Early Development
+
+Parallel coordinate plots originated with @dOcagne:1885, a French engineer who introduced the concept of parallel axes as a method for geometric calculation and graphical computing.
+In his original formulation, d'Ocagne was concerned primarily with mathematical transformations and calculations rather than data visualization per se.
+The parallel axes system provided a way to perform geometric operations that would be cumbersome in traditional Cartesian coordinates.
+This early work established the fundamental geometric principle: points in n-dimensional space can be represented as polylines crossing n parallel axes.
+
+Despite this early foundation, parallel coordinates remained largely dormant as a visualization technique for nearly a century.
+@inselberg1985 revived and substantially extended the concept in his seminal paper "The plane with parallel coordinates," which is now recognized as the foundational work in modern parallel coordinate plot methodology.
+Inselberg's key insight was that parallel coordinates provide a natural representation for high-dimensional data that preserves certain geometric and topological properties. Specifically, he demonstrated that:
+
+1. Lines in n-dimensional space map to points in (n-1)-dimensional parallel coordinate space, and vice versa
+2. Hyperplanes become patterns of intersecting lines with characteristic shapes
+3. Proximity in original space corresponds to proximity of polylines in parallel coordinate space (with caveats)
+4. Various geometric relationships (collinearity, convexity, etc.) have characteristic visual signatures
+
+Inselberg's work established parallel coordinates as a legitimate tool for exploratory data analysis of high-dimensional numerical data, with applications in computer vision, air traffic control, process control, and other domains requiring multivariate analysis.
+
+@wegman1990 further popularized parallel coordinates for statistical data analysis in his influential paper "Hyperdimensional data analysis using parallel coordinates." 
+Wegman emphasized the technique's utility for revealing multivariate patterns, detecting outliers, and identifying clusters in high-dimensional space.
+He demonstrated applications in quality control, financial analysis, and medical diagnostics, establishing parallel coordinate plots as a standard tool in the exploratory data analysis toolkit.
+
+### 2.3.2 Theoretical Properties and Analytical Capabilities
+
+The appeal of parallel coordinate plots derives from several theoretical properties that make them well-suited for certain analytical tasks:
+
+**Dimensionality Reduction Without Information Loss**: Unlike projection-based dimensionality reduction techniques (e.g., principal components analysis, multidimensional scaling), parallel coordinate plots display all variables simultaneously without discarding information.
+While each two-dimensional view shows only pairwise relationships between adjacent variables, the complete polyline preserves the full multivariate structure of each observation.
+
+**Pattern Recognition for Specific Structures**: Certain multivariate patterns have characteristic visual signatures in parallel coordinates.
+For instance, observations following a linear relationship appear as converging lines (forming an "X" pattern), while groups of similar observations appear as bundled polylines.
+Outliers manifest as lines that diverge substantially from the main bundle.
+
+**Flexibility in Variable Ordering**: The order of variables along the x-axis profoundly affects which patterns are visible.
+Placing correlated variables adjacent reveals their relationship clearly, while separating them obscures it.
+This flexibility enables focused investigation of specific hypotheses about variable relationships.
+
+**Scalability to Moderate Dimensions**: While scatterplot matrices require $\binom{n}{2}$ panes to show all pairwise relationships among n variables, parallel coordinate plots require only a single pane with n axes.
+For moderately high-dimensional data (say, 5-15 variables), this consolidation provides substantial practical advantage.
+
+### 2.3.3 The Categorical Data Problem
+
+### 2.3.3 The Categorical Data Problem: A Fundamental Limitation
+
+The classical parallel coordinate plot, as formulated by @inselberg1985 and @wegman1990, was explicitly designed for continuous numerical variables.
+The fundamental assumption is that each observation occupies a unique (or approximately unique) position on each vertical axis, allowing polylines to be traced from axis to axis without ambiguity.
+This assumption holds reasonably well for continuous measurements, where ties occur only accidentally (e.g., due to measurement precision) rather than structurally.
+
+However, this design breaks down catastrophically when categorical variables are introduced.
+Categorical variables, by their nature, partition observations into discrete groups.
+All observations sharing a category must occupy the same position on the categorical axis, creating structural ties that cannot be resolved through more precise measurement.
+
+@pilhöfer2013 made an early attempt to extend parallel coordinate plots to categorical variables in their extracat package.
+Their approach was straightforward: "Levels of categorical variables are transformed to numbers and variables are then used as if they were numeric."
+Categorical levels are assigned numeric codes (typically 1, 2, 3, ..., k for k categories), and these codes are plotted as if they were measurements.
+
+As Pilhöfer and Unwin themselves recognized, this naive approach produces uninformative visualizations: "This introduces ties into the data, and the resulting parallel coordinate plot becomes uninformative, as it only shows a mesh of lines from each level of one variable to each level of the next variable."
+The result is a dense tangle of overlapping polylines that obscures individual observations and prevents the primary analytical goal of parallel coordinate plots—tracing individual cases through high-dimensional space.
+
+Figure 2.1 (adapted from @vanderplas2023, Figure 5) illustrates this problem vividly.
+With just two categorical variables and 12 observations randomly sampled from the Palmer Penguins dataset, the naive approach produces a dense mesh where individual observations cannot be distinguished.
+The visual result conveys only the marginal frequencies of each category and the conditional frequencies of category pairs—information that could be displayed far more effectively in a simple contingency table.
+
+The fundamental issue is that the naive approach violates the functional mapping principle discussed in Section 2.2.3: multiple observations map to identical visual positions, making the aesthetic mapping non-invertible.
+From the visual representation, we cannot reconstruct which polyline corresponds to which observation, or even determine how many observations share a particular path through the categorical values.
+
+This limitation is not merely a minor inconvenience but a fundamental barrier to using parallel coordinate plots for the increasingly common situation of mixed-type datasets containing both continuous measurements and categorical variables.
+In contemporary data science applications—from medical studies with patient demographics and clinical measurements, to ecological studies with species identification and morphometric data, to consumer analytics with demographic categories and behavioral metrics—mixed-type datasets are the norm rather than the exception.
+
+### 2.3.4 Formalization of the Numerical Ties Problem
+
+Building on the informal description above, we can formalize the numerical ties problem as follows:
+
+**Definition 2.1 (Numerical Tie)**: Let $X = \{x_1, x_2, ..., x_n\}$ be a set of observations on a variable $V$.
+A numerical tie of order $k$ exists when there exist distinct observations $x_{i_1}, x_{i_2}, ..., x_{i_k}$ such that $V(x_{i_1}) = V(x_{i_2}) = ... = V(x_{i_k})$.
+
+**Definition 2.2 (Categorical Tie Structure)**: For a categorical variable $C$ with levels $\{c_1, c_2, ..., c_m\}$, the tie structure is $\{G_1, G_2, ..., G_m\}$ where $G_j = \{x_i : C(x_i) = c_j\}$ is the set of observations in category $j$.
+The tie order for category $j$ is $|G_j|$.
+
+**Definition 2.3 (Visual Ambiguity)**: An aesthetic mapping $M: \mathcal{D} \to \mathcal{V}$ from data space $\mathcal{D}$ to visual space $\mathcal{V}$ exhibits visual ambiguity when it is not injective, i.e., when there exist distinct $d_1, d_2 \in \mathcal{D}$ such that $M(d_1) = M(d_2)$.
+
+The numerical ties problem, then, is the challenge of defining transformations that eliminate visual ambiguity while preserving statistical properties of interest.
+@vanderplas2023 articulate the analytical consequence: "Ties are visually the main obstacle to allowing the viewer to follow an observation from axis to axis through the high-dimensional space.
+If we can track a single observation through the high-dimensional space, we have the ability to look beyond the two-variable associations of adjacent axes...when ties cannot be separated and users cannot follow individual observations, higher-dimensional insights are next to impossible."
+
+This formalization establishes the problem that motivates this dissertation: how can we transform tied data values to eliminate visual ambiguity while maintaining the interpretability, statistical validity, and perceptual effectiveness of parallel coordinate plots?
+The remainder of this chapter reviews existing approaches to this problem and establishes the theoretical framework for our proposed solution.
+
+### 2.3.5 Research Gap and Dissertation Objectives
+
+The preceding discussion establishes a clear research gap: while parallel coordinate plots provide powerful tools for multivariate data exploration, and while various visualization techniques exist for categorical data (parallel sets, hammock plots, alluvial plots), there exists no principled, grammar-of-graphics-based framework for handling mixed-type data in parallel coordinate plots that simultaneously:
+
+1. Maintains individual observation traceability across all variable types
+2. Preserves statistical information about distributions and frequencies
+3. Minimizes visual clutter through data-driven ordering algorithms
+4. Integrates coherently with the established grammar of graphics framework
+5. Scales effectively to moderate dataset sizes and dimensionalities
+
+This dissertation addresses this gap by developing, implementing, and evaluating the tie spread algorithm within the `ggpcp` package.
+The algorithm resolves numerical ties through a theoretically-grounded statistical transformation that restores functional aesthetic mappings while maintaining the compositional properties required by the grammar of graphics.
+
+The subsequent sections of this chapter establish the theoretical and methodological foundations for this contribution by: (1) reviewing alternative visualization approaches for categorical data to establish the design space, (2) explicating how grammar of graphics principles apply to tie resolution, (3) presenting the mathematical and algorithmic foundations of even tie spreading, (4) discussing perceptual principles that inform effective design, and (5) examining implementation considerations in computational environments.
+
+## 2.4 Alternative Visualization Approaches for Categorical Data
+
+Having established the limitations of classical parallel coordinate plots for categorical data, we now review alternative visualization techniques that have been developed specifically for categorical or mixed-type data.
+Understanding these alternatives is essential for situating our proposed approach within the broader landscape of multivariate categorical visualization and for establishing the design trade-offs that inform our methodological choices.
+
+This section reviews four major classes of visualization techniques: parallel sets (Section 2.4.1), hammock plots (Section 2.4.2), alluvial plots (Section 2.4.3), and common angle plots (Section 2.4.4).
+For each, we examine the theoretical foundations, practical implementations, strengths and limitations, and relationship to the grammar of graphics framework.
+This comparative analysis establishes the design space within which generalized parallel coordinate plots with tie spreading must be evaluated.
+
+### 2.4.1 Parallel Sets: Aggregate Frequency Visualization (ADD PICTURES HERE IN THIS SECTION)
+
+@kosara2006 introduced parallel sets plots as an adaptation of parallel coordinate plots specifically for categorical data. Rather than representing individual observations as lines, parallel sets aggregate observations into ribbons whose widths encode frequencies.
+Categories are represented as boxes stacked along vertical axes, and ribbons connect corresponding categories between adjacent axes.
+
+This approach effectively visualizes marginal frequencies and conditional distributions but sacrifices individual-level information.
+Parallel sets answer questions about aggregate flows—"How many observations move from category A to category B?"—but cannot track specific cases.
+The graphical constraints (monotonic flow, every ribbon encounters every axis) correspond to combinatorial constraints on data structure: an id-key-value format where every id-key pair takes exactly one value.
+
+As @brunson2020 notes in the context of alluvial plots (a closely related visualization), the stat-geom pairing in the grammar of graphics framework provides "combinatorial richness to plotting possibilities."
+Parallel sets implementations in `ggparallel` [@hofmann2013] leverage this framework, offering both straight and common-angle ribbon geometries through alternative geom specifications.
+
+### 2.2 Hammock Plots (ADD PICTURES HERE IN THIS SECTION)
+
+[-@schonlau2003, -@schonlau2024] developed hammock plots as a visualization technique for categorical and mixed-type data arising in health sciences.
+Hammock plots use constant-width boxes to connect categories, emphasizing frequency distributions over individual observation tracking.
+The key distinguishing feature is the use of parallelogram-shaped connections with fixed widths, providing clear visual encoding of category frequencies.
+
+@schonlau2024 explicitly compares hammock plots with generalized parallel coordinate plots: "Hammock plots use constant-width boxes.
+This is further explained in Section 4. Notice the lines/boxes between the variables hospitalizations and comorbidities in the GPCP...and hammock plots.
+Most of the observations are in the boxes leading from hospitalizations=0 to either comorbidities=0 or comorbidities=1.
+This is far more obvious in the hammock plot than in the GPCP plot."
+
+The trade-off is clear: hammock plots excel at displaying aggregate patterns but require highlighting techniques to trace individual observations, whereas GPCPs maintain individual traceability by default but may require additional visual processing to perceive frequency patterns.
+
+### 2.3 Alluvial Plots (ADD PICTURES HERE IN THIS SECTION)
+
+@rosvall2010 proposed alluvial plots for visualizing changes in network community structure over time, using the metaphor of sediment flows to represent changing categorical memberships.
+@brunson2020 formalized alluvial plots within the grammar of graphics framework through the ggalluvial package, which introduces specialized stats (stratum, alluvium, flow) and geoms (strata, alluvia, lodes, flows) as ggplot2 extensions.
+
+The `ggalluvial` implementation demonstrates how the grammar of graphics accommodates domain-specific visualization types through extension rather than modification.
+New aesthetic mappings (stratum, alluvium, axis1, axis2, etc.) are introduced, and stat-geom pairings provide flexibility: "The alluvium geom was paired with the flow stat, so that the flows of each alluvium could change color across the axes."
+
+Alluvial plots share conceptual similarities with parallel sets but distinguish themselves through prescribed ordering of stacked elements and continuous use of the perpendicular plotting dimension, which "confer greater meaning on the second plotting dimension" [@brunson2020].
+The plots use rounded curves rather than straight lines, reducing visual complexity in dense regions.
+
+### 2.4 Common Angle Plots (ADD PICTURES HERE IN THIS SECTION)
+
+@hofmann2013 introduced common angle plots as perception-true visualizations of categorical associations, addressing the sine illusion that affects parallel sets plots.
+The sine illusion occurs when ribbon widths are perceived as varying based on their angle of connection rather than their actual width [@vanderplas2015].
+Common angle plots mitigate this by adjusting connection angles to maintain consistent perceived widths.
+
+This work demonstrates attention to perceptual principles in visualization design, connecting geometric properties of graphical representations to empirical studies of human visual perception.
+The `ggparallel` package @hofmann2016 implements multiple PCP variants including hammock plots and common angle plots, each offering different visual encodings through alternative geom specifications within the grammar of graphics framework.
+
+## 3. Grammar of Graphics Principles Applied to Tie Resolution
+
+### 3.1 Data Transformation and the Tidy Data Principle
+
+@wickham2014 established the tidy data principle: each variable forms a column, each observation forms a row, and each type of observational unit forms a table.
+This structure aligns naturally with statistical operations and provides the foundation for grammar of graphics implementations.
+
+Parallel coordinate plots pose a challenge to this framework because they require transformation from wide format (one row per observation, one column per variable) to long format (multiple rows per observation, one row per variable-value pair).
+@vanderplas2023 address this explicitly: "By transforming the wide form of the data set into a long form, we obtain a one-to-one mapping to a now discrete x axis consisting of the (names of the) original data variables."
+
+This transformation is crucial for maintaining the functional mapping principle of the grammar of graphics.
+The ggpcp implementation separates data wrangling from visualization:
+
+```r
+data %>%
+  pcp_select(variables) %>%     # Variable selection and reshaping
+  pcp_scale(method) %>%          # Scaling transformation
+  pcp_arrange(method) %>%        # Tie-breaking
+  ggplot(aes_pcp()) +            # Grammar of graphics layers begin here
+  geom_pcp_axes() +
+  geom_pcp(aes(colour = category))
+```
+
+This modular structure reflects the grammar of graphics philosophy: each step performs a well-defined transformation, and the resulting data structure supports standard ggplot2 operations.
+
+### 3.2 The Stat-Geom Paradigm
+
+The grammar of graphics distinguishes between statistical transformations (stats) and geometric representations (geoms).
+Stats transform data (e.g., binning for histograms, smoothing for trend lines), while geoms map transformed data to visual elements (e.g., bars, points, lines).
+Conventional ggplot2 extensions pair these components: `stat_boxplot` calculates quartiles, `geom_boxplot` renders boxes and whiskers.
+
+@vanderplas2023 deliberate explicitly about this paradigm for parallel coordinate plots: "A 'stat_pcp' data function would therefore have to deal with the translation from the user-friendly wide dataset to the technically motivated long form...Obviously, we decided against an implementation of this 'stat_pcp' function, resulting in the base ggpcp on the grammar of graphics framework."
+
+Instead, ggpcp places data transformation outside the stat-geom pipeline, implementing it as pre-processing functions (`pcp_select`, `pcp_scale`, `pcp_arrange`).
+This design decision reflects a pragmatic balance: it maintains compatibility with ggplot2's architecture while acknowledging that parallel coordinate plot transformations are more complex than typical statistical summaries.
+
+### 3.3 Aesthetic Mappings and Visual Properties
+
+The grammar of graphics requires explicit mappings between data variables and visual aesthetics (position, color, size, shape, etc.).
+For parallel coordinate plots, the challenge is maintaining standard aesthetic mappings while accommodating the specialized coordinate system.
+
+The ggpcp package introduces `aes_pcp()` as a specialized aesthetic mapping function that handles the transformed coordinate system while preserving access to standard aesthetics: "The only modification from default ggplot2 syntax is the use of aes_pcp() in place of aes(); this is necessary to handle the multiple axes in a parallel coordinate plot while maintaining the ability to map all other variables of the original data frame to aesthetics such as linetype and color."
+
+This approach allows users to leverage familiar ggplot2 functionality—color by category, facet by groups, adjust transparency—without learning a fundamentally different API.
+The grammar of graphics principle of compositionality is preserved: layers are added independently and interact through well-defined interfaces.
+
+### 3.4 Layers and Geometric Objects
+
+The layered structure of the grammar of graphics naturally accommodates the visual complexity of parallel coordinate plots. @vanderplas2023 emphasize this: "The user has complete control over layers such as PCP lines (geom_pcp), labels (geom_pcp_labels), and boxes around categorical variables (geom_pcp_boxes)."
+
+This layer-based construction enables fine-grained control over visual appearance and supports analytical tasks through selective emphasis.
+For instance, Listing 3 from VanderPlas et al. (2023) demonstrates using ribbons to show distributional summaries while overlaying individual unsexed penguins as lines:
+
+```r
+ggplot(pcp_data, aes_pcp()) +
+  geom_pcp_ribbon(aes(fill = sex), alpha = 0.3) +  # Distributional layer
+  geom_pcp(data = unsexed, alpha = 0.8) +          # Individual lines layer
+  geom_pcp_boxes()                                 # Category boxes layer
+```
+
+Each layer serves a distinct analytical purpose, and the grammar of graphics framework ensures they compose coherently through shared coordinate systems and aesthetic scales.
+
+## 4. The Even Tie Spread Algorithm: A Grammar of Graphics Implementation
+
+### 4.1 Algorithmic Objectives
+
+The even tie spread algorithm addresses the numerical ties problem while adhering to grammar of graphics principles. 
+Its objectives are:
+
+1. **Maintain functional mappings**: Each observation receives a unique position on each axis, preserving the one-to-one mapping between data and visual position
+2. **Preserve statistical information**: The spreading should not distort marginal distributions or frequencies
+3. **Minimize visual clutter**: Intelligent ordering within tie groups reduces line crossings
+4. **Scale invariance**: The spread width adapts proportionally to data range
+5. **Deterministic behavior**: Identical data produces identical visualizations
+6. **Composability**: The algorithm integrates seamlessly with ggplot2 layers and transformations
+
+### 4.2 Mathematical Formulation
+
+The algorithm operates through a sequence of transformations, each corresponding to a component of the grammar of graphics:
+
+**Data Layer**: Original observations $\{x_i\}_{i=1}^n$ with potential ties
+
+**Statistical Transformation**: Identify tie groups $G_j = \{i : x_i = v_j\}$ for unique values $v_j$
+
+**Scale Transformation**: Compute spread width $w$ as
+$$w = \begin{cases}
+\text{frac} \times (\max(x) - \min(x)) & \text{if width not specified} \\
+\text{width} & \text{otherwise}
+\end{cases}$$
+
+**Geometric Transformation**: For each tie group $G_j$ with $k$ members, generate offsets
+$$\text{offset}_i = v_j + w \times \left(\frac{i-1}{k-1} - 0.5\right), \quad i = 1, \ldots, k$$
+
+**Coordinate Adjustment**: Apply neighbor-aware capping (optional)
+$$w_{\text{effective}} = \min(w, 1.999 \times \min(\text{gap}_{\text{left}}, \text{gap}_{\text{right}}))$$
+
+This formulation ensures symmetric spreading centered at the original value, with the spread width proportional to data range and capped to prevent overlap with neighboring distinct values.
+
+### 4.3 Integration with Grammar of Graphics Layers
+
+The even tie spread algorithm operates as a data transformation layer, modifying the aesthetic mapping between original data values and visual positions. In grammar of graphics terms:
+
+**Original mapping**: $\text{aes}(y = \text{variable})$ maps data values directly to y-coordinates
+
+**Transformed mapping**: $\text{aes}(y = \text{even\_tie\_spread(variable, key, width, frac)})$ maps data values to spread positions
+
+This transformation occurs in the data layer (via `pcp_arrange()`), before geometric objects are rendered. The separation ensures that subsequent layers—color mappings, faceting, statistical summaries—operate on the transformed coordinate system consistently.
+
+### 4.4 Hierarchical Sorting and the Key Parameter
+
+The deterministic ordering within tie groups leverages the grammar of graphics principle of explicit variable mappings. The `key` parameter establishes a secondary sorting criterion that breaks ties according to values on adjacent axes:
+
+```r
+pcp_arrange(data, method = "from-left", space = 0.05)
+```
+
+The "from-left" method sorts observations hierarchically by their values on preceding axes, while "from-right" uses succeeding axes. This hierarchical sorting minimizes line crossings between adjacent axes, leveraging the Gestalt principle of good continuation: "observations with similar values across multiple axes are positioned near each other within categorical levels, allowing their polylines to flow smoothly without excessive crossing" (VanderPlas et al., 2023).
+
+The key parameter embodies the grammar of graphics principle that all visual properties should be explicitly specified and data-driven. Rather than imposing arbitrary orderings, the algorithm derives orderings from the multivariate structure of the data itself.
+
+### 4.5 Scale Transformations and Visual Consistency
+
+The grammar of graphics treats scales as independent components that control the mapping between data space and aesthetic space. The even tie spread algorithm respects this independence by implementing scale transformations that compose with ggplot2's native scale functions.
+
+The `pcp_scale()` function (VanderPlas et al., 2023) offers multiple scaling methods:
+
+- **uniminmax**: Maps each variable to [0,1] independently (default)
+- **globalminmax**: Maps all variables to a common [0,1] range
+- **robust**: Uses median ± 4×MAD, highlighting outliers
+- **raw**: No scaling applied
+
+These transformations occur before tie spreading, ensuring that the spread width calculation operates on appropriately scaled data. The separation of scaling and spreading reflects the grammar of graphics principle of independent, composable transformations.
+
+### 4.6 Edge Case Handling and Robustness
+
+The algorithm includes provisions for edge cases that arise in real data analysis:
+
+**Missing values (NA)**: Preserved unchanged, maintaining data integrity
+
+**Single observations**: No spreading applied, avoiding unnecessary transformation
+
+**Zero or infinite range**: No spreading possible, graceful degradation
+
+**Degenerate datasets**: Empty input returns empty output immediately
+
+These provisions ensure the algorithm behaves predictably across the full range of data conditions, a requirement for production-quality implementations in the grammar of graphics framework.
+
+## 5. Perceptual and Cognitive Foundations
+
+### 5.1 Gestalt Principles in Visualization
+
+The even tie spread algorithm's effectiveness derives partly from its alignment with Gestalt principles of visual perception. VanderPlas et al. (2023) explicitly invoke these principles:
+
+**Good Continuation**: "By reducing the number of line crossings at non-axis points [through hierarchical sorting], we simplify the plot, reducing the overall cognitive load required to 'untangle' (literally and metaphorically) the individual observations and leveraging the Gestalt principle of common fate."
+
+**Common Fate**: "Observations with similar values 'move together' through the vertical axes, creating perceptual grouping" via coordinated spreading that maintains relative positions.
+
+**Proximity**: The symmetric spreading creates visual clusters around original values, leveraging proximity cues to indicate shared categorical membership.
+
+### 5.2 External Cognition and Computational Offloading
+
+Scaife and Rogers (1996) introduced the concept of external cognition: using external representations to reduce internal cognitive processing demands. VanderPlas et al. (2023) frame the computational cost of hierarchical sorting as investment in external cognition: "While hierarchical sorting requires additional computations relative to the jittering or equally spaced solutions...this extra processing serves as 'external cognition'—the additional computer time reduces the cognitive load required to untangle the lines."
+
+This perspective aligns with the grammar of graphics philosophy that complex transformations should be automated and standardized rather than left to manual adjustment. The O(n log n) computational complexity of sorting is justified by the reduction in human cognitive effort required to interpret the resulting visualization.
+
+### 5.3 The Sine Illusion and Perceptual Accuracy
+
+VanderPlas and Hofmann (2015) documented the sine illusion affecting parallel sets plots: ribbon widths are perceived as varying based on connection angle rather than actual width. Hammock plots and common angle plots (Hofmann & Vendettuoli, 2013) address this through geometric adjustments, but generalized parallel coordinate plots approach it differently.
+
+By maintaining individual line representations rather than aggregating into ribbons, GPCPs avoid the primary source of the sine illusion. However, they introduce a different perceptual challenge: distinguishing individual lines in dense regions. The even tie spread algorithm addresses this by ensuring lines never overlap at axes, preserving the ability to trace individual observations even when many share similar values.
+
+## 6. Comparative Evaluation of Visualization Techniques
+
+### 6.1 Information Preservation and Visual Trade-offs
+
+Different visualization techniques for categorical and mixed-type data make different trade-offs between information preservation and visual clarity:
+
+**Parallel Sets**: Maximize frequency visibility, sacrifice individual traceability
+
+**Hammock Plots**: Balance frequency and structure, require highlighting for individual tracking
+
+**Alluvial Plots**: Emphasize flow and change, use ribbons for visual continuity
+
+**Generalized PCPs with tie spreading**: Maximize individual traceability, approximate frequency through line density
+
+As Schonlau (2024) notes, "For larger data sets, the individual lines for each observations appear as areas. When many observations have the same value for a categorical and an adjacent numerical variable, the corresponding area looks like a triangle." This emergent property suggests that GPCPs converge toward parallel sets representations in the limit of large datasets, providing a unified framework spanning individual and aggregate perspectives.
+
+### 6.2 Task-Dependent Effectiveness
+
+The effectiveness of different visualizations depends on analytical tasks:
+
+**Distribution assessment**: Hammock plots and parallel sets excel through explicit frequency encoding
+
+**Pattern detection**: Common angle plots optimize perceptual accuracy through geometric adjustment
+
+**Individual tracking**: GPCPs with tie spreading maintain line continuity across all axes
+
+**Anomaly identification**: GPCPs with color coding enable rapid detection of unusual trajectories
+
+**Clustering and similarity**: Hierarchical sorting in GPCPs creates visual clusters of similar observations
+
+VanderPlas et al. (2023) demonstrate task-specific effectiveness through multiple examples: sex determination in unsexed penguins (individual tracking), species separation analysis (clustering), and medical imaging variability assessment (anomaly identification).
+
+### 6.3 Scalability and Data Volume
+
+Scalability represents a crucial practical consideration. Parallel sets and hammock plots scale naturally to large datasets because they aggregate observations, reducing visual elements linearly with data volume. Generalized parallel coordinate plots, rendering individual lines, face theoretical scalability challenges.
+
+However, VanderPlas et al. (2023) note: "An interesting consequence of our treatment of case ordering with categorical variables is that with large data sets, our approach is visually similar to existing solutions for categorical-only parallel set plots, Sankey diagrams, and alluvial plots." As dataset size increases, individual lines blend perceptually into areas, and the GPCP representation approximates aggregate visualizations while preserving the capability for focused investigation of individual observations through interactive techniques.
+
+## 7. Implementation Considerations in R Ecosystem
+
+### 7.1 Integration with ggplot2 Architecture
+
+The ggpcp package exemplifies grammar of graphics principles through deep integration with ggplot2's architecture. VanderPlas et al. (2023) detail the design decisions:
+
+"Using the ggplot2 grammar of graphics API as a foundation has several benefits: users of ggplot2 and the tidyverse come with a general understanding of how an API is set up and should work. Aesthetically, users can make use of all of the 'ggplot2' functionality for customizing plots. Functionally, 'ggpcp' interfaces seamlessly with 'ggplot2' and can therefore leverage existing infrastructure, such as facetting."
+
+This integration enables powerful compositions. Faceting by categorical variables, standard in ggplot2, works naturally with GPCPs. Color scales, theme systems, and annotation layers all compose without modification. The grammar of graphics framework provides these capabilities "for free" once the basic stat-geom infrastructure is established.
+
+### 7.2 Interoperability with tidyverse Ecosystem
+
+The separation of data wrangling from visualization aligns ggpcp with the tidyverse philosophy of composable data transformations. The pipe operator (`%>%`) chains transformation functions:
+
+```r
+penguins %>%
+  filter(!is.na(sex)) %>%           # Standard dplyr operation
+  pcp_select(bill_length:body_mass, sex, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left") %>%
+  ggplot(aes_pcp()) +               # Standard ggplot2 construction
+  geom_pcp(aes(colour = species))
+```
+
+This composability extends to group-wise operations. VanderPlas et al. (2023) demonstrate using `group_by()` before `pcp_scale()` to apply different scaling within groups, enabling meaningful comparisons while preserving group-specific patterns.
+
+### 7.3 Extension Mechanisms and Customization
+
+The grammar of graphics framework supports extension through well-defined interfaces. Brunson (2020) demonstrates this with ggalluvial, introducing specialized stats and geoms. Similarly, ggpcp extends ggplot2 through:
+
+**Custom aesthetics**: `aes_pcp()` handles the transformed coordinate system
+
+**Specialized geoms**: `geom_pcp()`, `geom_pcp_axes()`, `geom_pcp_boxes()`, `geom_pcp_labels()` provide domain-specific geometric representations
+
+**Data transformation functions**: `pcp_select()`, `pcp_scale()`, `pcp_arrange()` implement PCP-specific transformations outside the stat-geom pipeline
+
+This architecture allows users to extend ggpcp functionality by writing custom transformation functions or geometric layers, maintaining consistency with the overall framework.
+
+### 7.4 Interactive Graphics and Web Deployment
+
+VanderPlas et al. (2023) note that designing ggpcp within the ggplot2 framework "expands the functionality available to users without much additional code, thanks to other packages, such as plotly and gridSVG, which extend ggplot2 to create interactive graphics for the web."
+
+This observation highlights a key advantage of grammar of graphics implementations: they automatically inherit ecosystem developments. The plotly R package (Sievert, 2020) converts ggplot2 objects to interactive web graphics through `ggplotly()`. Because ggpcp produces standard ggplot2 objects, this conversion works without modification, providing interactive features (hovering, zooming, filtering) for GPCPs.
+
+## 8. Methodological Implications and Future Directions
+
+### 8.1 Separation of Concerns in Visualization Design
+
+The ggpcp architecture embodies a key principle of software engineering—separation of concerns—applied to visualization design. By cleanly separating data transformation, scaling, tie-breaking, and geometric rendering into independent functions, the implementation achieves:
+
+**Modularity**: Each function performs a well-defined task and can be tested, optimized, and understood independently
+
+**Flexibility**: Users can customize individual steps without affecting others
+
+**Extensibility**: New transformation methods (e.g., alternative scaling algorithms, different tie-breaking strategies) can be added without modifying existing code
+
+**Maintainability**: Clear separation of responsibilities simplifies debugging and enhancement
+
+This architecture contrasts with monolithic visualization functions that intertwine data processing and rendering, limiting flexibility and understanding. The grammar of graphics framework encourages this separation by providing clear interfaces between components.
+
+### 8.2 Reproducibility and Transparency
+
+The explicit, declarative nature of grammar of graphics code enhances reproducibility. A ggpcp visualization is completely specified by its code:
+
+```r
+penguins %>%
+  pcp_select(bill_length_mm, bill_depth_mm, flipper_length_mm, 
+             body_mass_g, sex, species) %>%
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange(method = "from-left", space = 0.05) %>%
+  ggplot(aes_pcp()) +
+  geom_pcp(aes(colour = species), alpha = 0.8, overplot = "small-on-top") +
+  geom_pcp_boxes() +
+  theme_pcp()
+```
+
+This code serves simultaneously as executable specification, documentation, and record of analytical decisions. All parameters are explicitly stated, and the transformation pipeline is transparent. This transparency supports reproducible research practices and facilitates peer review of analytical methods.
+
+### 8.3 Pedagogical Benefits
+
+The grammar of graphics framework provides pedagogical advantages for teaching data visualization. Rather than memorizing which function produces which chart type, students learn a systematic approach: map data to aesthetics, choose geometric representation, apply transformations, adjust scales.
+
+The ggpcp implementation extends this pedagogical model to parallel coordinate plots. Students encountering GPCPs for the first time can leverage their existing ggplot2 knowledge: the syntax is familiar, the layering concept applies unchanged, and the aesthetic mapping system works as expected. The primary new concepts—data reshaping for PCPs and tie-breaking for categorical variables—are isolated in specialized functions, reducing cognitive load.
+
+### 8.4 Open Research Questions
+
+Several research directions emerge from this literature review:
+
+**Optimal factor ordering**: While hierarchical sorting optimizes within-category ordering, determining optimal category orderings remains computationally challenging and task-dependent (Mart & Laguna, 2003; Pilhöfer, Gribov, & Unwin, 2012)
+
+**Adaptive spreading width**: The default 2% spread width works well empirically, but optimal values may depend on dataset characteristics, screen resolution, and analytical tasks
+
+**Perceptual evaluation**: Controlled studies comparing task performance with different tie-breaking methods would quantify their relative effectiveness
+
+**Interactive refinement**: Hybrid approaches combining algorithmic optimization with interactive adjustment may provide superior results for complex analyses
+
+**Scalability limits**: Systematic investigation of GPCP effectiveness as function of dataset size, number of variables, and tie density would inform applicability guidelines
+
+**Color allocation strategies**: Principled approaches to color assignment for high-cardinality categorical variables in GPCPs remain underexplored
+
+**Animation and transition**: Animated transitions between different factor orders or tie-breaking methods might support exploratory analysis
+
+## 2.10 Chapter Summary and Transition to Methodology
+
+This chapter has established the theoretical and methodological foundations for addressing the numerical ties problem in parallel coordinate plots through the grammar of graphics framework. We have traced the evolution of parallel coordinate plots from their origins in continuous data visualization through the identification of fundamental limitations when applied to categorical data, and we have reviewed alternative approaches that address aspects of this challenge through different design trade-offs.
+
+### 2.10.1 Key Theoretical Contributions of This Review
+
+The literature review has made several key contributions to our understanding of the numerical ties problem:
+
+**First**, we have established that the problem of numerical ties is not merely a technical implementation challenge but a fundamental question about functional aesthetic mappings in the grammar of graphics. When multiple observations share identical values, the one-to-one correspondence between data and visual position is violated, creating visual ambiguity that prevents accurate interpretation. This theoretical framing elevates tie-breaking from an ad-hoc visualization trick to a principled statistical transformation.
+
+**Second**, we have demonstrated that Wilkinson's grammar of graphics, as implemented in Wickham's ggplot2, provides both a conceptual framework and a computational infrastructure for addressing this challenge. The key insights are: (1) transformations should be explicit and composable, (2) aesthetic mappings must be functional or many-to-one with defined inverse properties, (3) statistical transformations and geometric representations are independent components that can be combined flexibly, and (4) data-driven design choices should determine visual properties rather than arbitrary designer preferences.
+
+**Third**, we have situated the even tie spread algorithm within the broader design space of multivariate categorical visualization. By comparing parallel sets, hammock plots, alluvial plots, and common angle plots, we have identified the specific trade-offs our approach makes: maintaining individual observation traceability at the potential cost of aggregate pattern clarity, using symmetric spreading to preserve visual balance, implementing hierarchical sorting to minimize line crossings, and integrating with the ggplot2 ecosystem to leverage existing infrastructure.
+
+**Fourth**, we have established the perceptual and cognitive foundations that inform effective visualization design. The Gestalt principles of good continuation, common fate, and proximity guide our algorithmic choices, while the concept of external cognition justifies computational investment to reduce cognitive load. The awareness of perceptual phenomena like the sine illusion informs our choice to maintain individual line representations rather than aggregating into ribbons.
+
+**Fifth**, we have identified key implementation considerations that affect the practical utility of visualization techniques. The separation of data wrangling from visual rendering, the integration with the tidyverse ecosystem, the support for interactive graphics, and the extensibility through well-defined interfaces all contribute to the adoption and effectiveness of visualization tools in practice.
+
+### 2.10.2 Synthesis: A Grammar of Graphics Approach to Tie Resolution
+
+Synthesizing across these contributions, we can articulate the core principle underlying our approach: numerical ties in parallel coordinate plots should be resolved through explicit statistical transformations that restore functional aesthetic mappings while preserving the compositional properties of the grammar of graphics.
+
+The even tie spread algorithm operationalizes this principle through:
+
+1. **Data Layer Transformation**: Operating on data values before aesthetic mappings are applied
+2. **Scale-Invariant Spreading**: Using proportional width (2% of range by default) to ensure consistent behavior across different scales
+3. **Hierarchical Sorting**: Ordering observations within tie groups based on multivariate structure to minimize line crossings
+4. **Neighbor-Aware Capping**: Preventing spread values from overlapping with adjacent distinct values
+5. **Deterministic Behavior**: Using secondary key variables to ensure reproducible results
+6. **Modular Architecture**: Separating tie-breaking from other transformations (scaling, variable selection) and from geometric rendering
+
+This approach distinguishes itself from alternatives through its commitment to maintaining individual observation continuity—the ability to trace a single observation across all variables—while leveraging density of overlapping lines to create emergent aggregate patterns in large datasets.
+
+### 2.10.3 Limitations and Remaining Challenges
+
+While the literature review has established strong theoretical foundations, several challenges and limitations remain to be addressed:
+
+**Optimal Parameter Selection**: The default spread width of 2% of data range works well empirically, but we lack principled methods for determining optimal values for specific datasets, analytical tasks, or display configurations.
+
+**Factor Level Ordering**: While hierarchical sorting optimizes within-category ordering, determining optimal category orderings remains NP-hard and task-dependent. The literature provides heuristics but no universally optimal solution.
+
+**Scalability Limits**: The asymptotic behavior as dataset size, number of variables, or tie density increases remains incompletely characterized. At what point do generalized parallel coordinate plots become ineffective, and how do they compare to alternatives at these limits?
+
+**Perceptual Validation**: While we have theoretical grounds to expect effectiveness based on Gestalt principles, systematic empirical evaluation comparing task performance across different tie-breaking methods is lacking.
+
+**Interactive Refinement**: The balance between algorithmic optimization and interactive user control requires further exploration. When should automatic methods give way to manual adjustment?
+
+### 2.10.4 Research Questions Emerging from the Literature
+
+The review identifies several specific research questions that guide the methodological development in Chapter 3 and empirical evaluation in Chapter 4:
+
+**RQ1**: How do different tie-breaking methods (jittering, equi-spaced unordered, equi-spaced hierarchically sorted) compare in terms of task performance, cognitive load, and aesthetic preference?
+
+**RQ2**: What is the relationship between spread width, tie density, and visual effectiveness? Is there an optimal spread width function $w(n, k, r)$ depending on sample size $n$, tie group size $k$, and data range $r$?
+
+**RQ3**: How does the choice of hierarchical sorting direction ("from-left" vs. "from-right") affect pattern visibility and interpretation? Are there guidelines for matching sorting direction to analytical goals?
+
+**RQ4**: At what scale does the convergence of generalized parallel coordinate plots to parallel sets representations occur? Can we characterize this transition mathematically?
+
+**RQ5**: How does the even tie spread algorithm perform on real-world datasets with varying characteristics (dimension, sample size, missingness, tie structures)? What are the practical limits of applicability?
+
+### 2.10.5 Transition to Methodological Development
+
+Having established the theoretical foundations, reviewed alternative approaches, and identified key research questions, we now transition to the methodological development in Chapter 3. The next chapter will:
+
+1. Formally specify the even tie spread algorithm with complete mathematical detail
+2. Describe the implementation architecture in the ggpcp package
+3. Detail the data transformation pipeline from wide-format input to rendered visualization
+4. Specify the grammar of graphics components (stats, geoms, scales, aesthetics) that comprise the implementation
+5. Discuss design decisions and their theoretical justification
+6. Present algorithmic analyses of computational complexity and scaling behavior
+7. Describe the testing and validation procedures used to ensure correctness
+
+Chapter 3 thus translates the theoretical principles established in this literature review into concrete algorithmic specifications and software implementations that can be empirically evaluated in Chapter 4. The connections between theory (Chapter 2), methodology (Chapter 3), and evaluation (Chapter 4) form a cohesive argument for the even tie spread algorithm as a principled, effective, and practical solution to the numerical ties problem in parallel coordinate plots.
+
+## References
+
+Brunson, J. C. (2020). ggalluvial: Layered Grammar for Alluvial Plots. *Journal of Open Source Software*, 5(49), 2017. https://doi.org/10.21105/joss.02017
+
+d'Ocagne, M. (1885). *Coordonnées parallèles et axiales: Méthode de transformation géométrique et procédé nouveau de calcul graphique déduits de la considération des coordonnées parallèles*. Gauthier-Villars.
+
+Hofmann, H., & Vendettuoli, M. (2013). Common angle plots as perception-true visualizations of categorical associations. *IEEE Transactions on Visualization and Computer Graphics*, 19(12), 2297–2305. https://doi.org/10.1109/TVCG.2013.140
+
+Hofmann, H., & Vendettuoli, M. (2016). *ggparallel: Variations of parallel coordinate plots for categorical data*. R package version 0.2.0.
+
+Inselberg, A. (1985). The plane with parallel coordinates. *The Visual Computer*, 1(2), 69–91. https://doi.org/10.1007/BF01898350
+
+Kosara, R., Bendix, F., & Hauser, H. (2006). Parallel sets: Interactive exploration and visual analysis of categorical data. *IEEE Transactions on Visualization and Computer Graphics*, 12(4), 558–568. https://doi.org/10.1109/TVCG.2006.76
+
+Mart, R., & Laguna, M. (2003). *Scatter Search: Methodology and Implementations in C*. Kluwer Academic Publishers.
+
+Pilhöfer, A., Gribov, A., & Unwin, A. (2012). Comparing clusterings using Bertin's idea. *IEEE Transactions on Visualization and Computer Graphics*, 18(12), 2506–2515.
+
+Pilhöfer, A., & Unwin, A. (2013). New approaches in visualization of categorical data: R package extracat. *Journal of Statistical Software*, 53(7), 1–25.
+
+Rosvall, M., & Bergstrom, C. T. (2010). Mapping change in large networks. *PLoS ONE*, 5(1), e8694. https://doi.org/10.1371/journal.pone.0008694
+
+Scaife, M., & Rogers, Y. (1996). External cognition: How do graphical representations work? *International Journal of Human-Computer Studies*, 45(2), 185–213.
+
+Schonlau, M. (2003). Visualizing categorical data arising in the health sciences using hammock plots. In *Proceedings of the Section on Statistical Graphics*. American Statistical Association.
+
+Schonlau, M. (2024). Hammock plots: Visualizing categorical and numerical variables. *Journal of Computational and Graphical Statistics*, 33(4), 1475–1487. https://doi.org/10.1080/10618600.2024.2328039
+
+Sievert, C. (2020). *Interactive Web-Based Data Visualization with R, plotly, and shiny*. Chapman and Hall/CRC. https://plotly-r.com
+
+VanderPlas, S., & Hofmann, H. (2015). Signs of the sine illusion—Why we need to care. *Journal of Computational and Graphical Statistics*, 24(4), 1170–1190. https://doi.org/10.1080/10618600.2014.951547
+
+VanderPlas, S., Ge, Y., Unwin, A., & Hofmann, H. (2023). Penguins go parallel: A grammar of graphics framework for generalized parallel coordinate plots. *Journal of Computational and Graphical Statistics*. https://doi.org/10.1080/10618600.2023.2195462
+
+Wegman, E. J. (1990). Hyperdimensional data analysis using parallel coordinates. *Journal of the American Statistical Association*, 85(411), 664–675. https://doi.org/10.1080/01621459.1990.10474926
+
+Wickham, H. (2014). Tidy data. *Journal of Statistical Software*, 59(10), 1–23. https://doi.org/10.18637/jss.v059.i10
+
+Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis* (2nd ed.). Springer-Verlag. https://doi.org/10.1007/978-3-319-24277-4
+
+Wilkinson, L. (1999). *The Grammar of Graphics*. Springer.
+
+Wilkinson, L. (2006). *The Grammar of Graphics* (2nd ed.). Springer Science & Business Media. https://doi.org/10.1007/0-387-28695-0

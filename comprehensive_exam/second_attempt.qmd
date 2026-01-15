@@ -206,12 +206,15 @@ This section synthesizes empirical evidence from the visualization literature th
 
 ### The Line Width Illusion and Perceptual Constraints
 
-Both approaches must contend with perceptual illusions that affect visual interpretation. @schonlau2024 discusses the line width illusion:
+Both approaches must contend with perceptual illusions that affect visual interpretation. 
+@schonlau2024 discusses the line width illusion:
 
 > "The distance between two parallel lines is perceived at a right angle rather than as the vertical distance between the lines (Wallgren et al., 1996; Tufte, 2001)... The line width illusion is part of the family of Müller-Lyer illusions where two lines of same length appear to be of different lengths." (p. 8)
 
 @hofmann2013 further identify the "reverse line width illusion," where centering of lines creates a contextual cue encouraging evaluation of line widths using vertical rather than orthogonal measures. 
 As they demonstrate empirically, this illusion can lead to systematic biases in frequency estimation.
+
+![.](images/muller_lyer.png){#fig-muller}
 
 The equispaced line approach proposed here may inherently avoid these illusions by maintaining parallel lines at consistent vertical spacing rather than using area-based encoding, though this requires empirical validation.
 
@@ -231,7 +234,7 @@ This convergence creates visual clutter and breaks the continuity needed for ind
 ## The Solution: Tie Spreading
 
 The `tie_spread` algorithm separates tied observations by distributing them evenly within a small range centered on their original value. 
-By default, this range is set to maximize the space available for tie breaking while preserving the approximate position of values and maintaining visual separation.
+By default, this range is set to maximize the available space for tiebreaking while preserving the approximate positions of values and maintaining visual separation.
 
 ![Tie spreading maintains visual separation while preserving approximate positions.](images/pcp_line_tracing_guide_images/figure-7.png){#fig-figure-7 width="90%"}
 
@@ -248,7 +251,16 @@ These bands facilitate the perception of distinct groups as they move together t
 
 ## Theoretical Framework: Perception-Driven Design
 
-Colin Ware's "Information Visualization: Perception for Design" provides a comprehensive framework for understanding how humans process visual information [@ware2012, 3rd ed., pp. 20-21, Figure 1.11]. 
+Effective data visualizations must be grounded in how people actually see and process information. 
+This theoretical framework draws on research from cognitive psychology and visual perception to explain how viewers interpret visual displays. 
+The framework covers four key areas that trace the path from seeing a visualization to understanding its meaning. 
+**Stage 1** explores how Gestalt principles help viewers group visual elements into meaningful patterns. 
+**Stage 2** examines how visual working memory and attention allow people to hold and manipulate information while analyzing a visualization. 
+**Preattentive processing** describes how certain visual features can be detected quickly and automatically, enabling rapid visual search before focused attention is required. 
+Finally, **external cognition and computational offloading** addresses how visualizations act as external aids that extend our mental capabilities by shifting some cognitive work from our minds to the visual display itself. 
+These four components provide a foundation for understanding how design choices affect visualization effectiveness.
+
+<!--Colin Ware's "Information Visualization: Perception for Design" provides a comprehensive framework for understanding how humans process visual information [@ware2012, 3rd ed., pp. 20-21, Figure 1.11]. 
 Ware describes visual perception as occurring in three distinct stages, each with specific implications for visualization design.
 
 ![Colin Ware's three-stage model of visual information processing, illustrating the flow from low-level feature extraction to goal-directed processing (adapted from Ware, 2012).](images/ware_three_stage_model.png){#fig-ware-stages width="60%"}
@@ -264,21 +276,17 @@ Four fundamental categories of preattentive visual properties exist:
 It includes simple geometric cues—orientation, length, width, and size—as well as more structured cues like curvature and the way marks are grouped. 
 Form also depends on how clearly something is rendered (sharp vs. blurred) and whether boundaries are emphasized through added marks or enclosing shapes.
 
-![Form-based pop-out: orientation and size.](images/fig_preattentive_form.png){#fig-preattentive-form width="60%"}
-
 **Color** provides another immediate signal. 
 Differences in hue, brightness (intensity), and saturation let viewers separate categories or perceive gradients quickly, typically without much mental work.
-
-![Color-based pop-out: hue; plus an intensity ramp.](images/fig_preattentive_color.png){#fig-preattentive-color width="60%"}
 
 **Spatial position** underlies nearly every visualization. 
 At its simplest, it’s where something lands on a 2D plane via $(x, y)$ coordinates. 
 Position can also suggest depth or distance through stereoscopic cues or shading that makes shapes appear concave or convex.
 
-![Spatial position (x,y) and implied depth via shading.](images/fig_preattentive_position_depth.png){#fig-preattentive-position width="60%"}
-
 Finally, **motion** is especially effective at grabbing attention. 
 Flicker or directional movement stands out strongly and can quickly indicate changes or relationships in data that unfold over time.
+
+![Form-based pop-out: orientation and size. Color-based pop-out: hue; plus an intensity ramp. Spatial position (x,y) and implied depth via shading.](images/preattentive_images.png){#fig-preattentive}
 
 These preattentive properties are critical for visualization design because they allow information to be perceived "at a glance" without requiring serial visual search. 
 As Ware notes, it is easy to spot a single hawk in a sky full of pigeons, but if the sky contains many types of birds, the hawk becomes much harder to see—the distinctiveness of preattentive properties diminishes as visual variety increases.
@@ -292,11 +300,11 @@ Ware’s framework is primarily a bottom-up, perceptual model that describes how
 In contrast, Padilla’s model is a cognitive-integrative model that places greater emphasis on the user's prior knowledge and the dual nature of reasoning. 
 While Ware’s "Stage 3" (Sequential Goal-Directed Processing) touches on cognition, Padilla delves deeper into how a user’s working memory and long-term expertise can override or bias the initial perceptual signals. 
 For a package like ggpcp, Ware’s model explains why categorical tie-breaking helps the eye follow a line (low-level tracking), whereas Padilla’s model explains how those clear paths allow the user to transition from an intuitive "gut feeling" about a trend to a rigorous, analytical conclusion about the high-dimensional data.
+-->
 
+### Stage 1: Pattern Perception and Gestalt Principles
 
-#### Stage 2: Pattern Perception and Gestalt Principles
-
-The second stage involves active pattern perception processes that segment the visual scene into coherent regions. 
+The first stage involves active pattern perception processes that segment the visual scene into coherent regions. 
 The Gestalt laws of perceptual organization, articulated by German psychologists in 1912, remain fundamental principles for visualization design:
 
 -   **Proximity:** Objects near each other are perceived as belonging together
@@ -308,16 +316,17 @@ The Gestalt laws of perceptual organization, articulated by German psychologists
 -   **Common Fate:** Objects moving together are perceived as a group 
 -   **Relative Size:** Smaller elements are perceived as figures against larger backgrounds
 
+
+
 @vanderplas2023 explicitly invoke these principles in their design rationale for ggpcp:
 
 > "By reducing the number of line crossings at non-axis points simplifies the plot, reducing the overall cognitive load required to 'untangle' (literally and metaphorically) the individual observations and leveraging the Gestalt principle of common fate." (p. 4)
 
 The principle of **good continuation** is particularly relevant to parallel coordinate plots: can viewers smoothly follow individual lines through numerical ties, or do visual discontinuities disrupt the perceptual flow?
 
-#### Stage 3: Visual Working Memory and Attention
+### Stage 2: Visual Working Memory and Attention
 
-The third stage involves conscious attention and visual working memory, which holds only a limited number of objects (typically 3-4) for active processing. 
-As Ware emphasizes, the severe capacity limitations of visual working memory mean that effective visualizations must reduce cognitive load by leveraging the powerful parallel processing of stages 1 and 2.
+The seconnd stage involves conscious attention and visual working memory, which holds only a limited number of objects (typically 3-4) for active processing. 
 
 This three-stage model has direct implications for evaluating tie-breaking strategies:
 
@@ -325,7 +334,7 @@ This three-stage model has direct implications for evaluating tie-breaking strat
 
 -   Leverage preattentive orientation and position
 -   Support continuous line following (good continuation)
--   Implicitly encode frequency through density (requires stage 2 processing)
+-   Implicitly encode frequency through density (requires stage 1 processing)
 
 **Constant-Width Boxes:**
 
@@ -333,7 +342,7 @@ This three-stage model has direct implications for evaluating tie-breaking strat
 -   Explicitly encode frequency (reduced cognitive load)
 -   May disrupt line continuity (challenges good continuation)
 
-### Preattentive Processing and Visual Search
+## Preattentive Processing and Visual Search
 
 A key distinction between the two approaches concerns the nature of visual search required for different analytical tasks. Ware distinguishes between:
 
@@ -346,12 +355,11 @@ Each observation maintains a consistent visual identity as a continuous line wit
 In contrast, tracing through constant-width boxes requires conscious attention to reconstruct the path, as the area-based encoding does not support preattentive line following.
 
 However, for frequency estimation tasks, constant-width boxes may have an advantage. 
-Ware notes that area is preattentively processed, allowing immediate perception of relative quantities. 
-Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 2).
+Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 1).
 
 ### External Cognition and Computational Offloading
 
-@scaife1996 concept of "external cognition": <!-- @vanderplas2023 invoke-->
+@scaife1996 concept of "external cognition": 
 
 > "While hierarchical sorting requires additional computations relative to the jittering or equally spaced solutions in Figure 5, this extra processing serves as 'external cognition' \[Scaife and Rogers, 1996\] - the additional computer time reduces the cognitive load required to untangle the lines" (p. 11)
 
@@ -367,57 +375,80 @@ The trade-off is between individual-level detail (equispaced lines) and aggregat
 The principle of **good continuation** states that the human visual system preferentially perceives smooth, continuous contours over interpretations requiring abrupt changes in direction. 
 This principle directly impacts the effectiveness of parallel coordinate plots for tracing individual observations.
 
-Equispaced lines maintain perfect continuity—each observation is represented by a continuous polyline from the leftmost to rightmost axis. 
-When observations are tied at a numerical value, the spacing ensures that lines remain visually distinct without requiring discontinuities.
+Equispaced lines maintain continuity by representing each observation as a continuous polyline extending from the leftmost to the rightmost axis. 
+When observations share identical numerical values (ties), the equispacing mechanism distributes lines within each category so that they remain visually distinct without introducing discontinuities. 
+The ggpcp framework implements this through hierarchical sorting, which minimizes line crossings at axis intersections and leverages both the Gestalt principle of good continuation and the principle of common fate, wherein lines with similar values across multiple axes appear to move together through the display.
 
-Constant-width boxes, in contrast, represent observations as area segments rather than lines. 
-While this encoding effectively communicates aggregate quantities, it disrupts the continuity principle. 
-To trace an individual observation through a box, viewers must mentally reconstruct the implied path, engaging conscious attention and working memory.
+Constant-width boxes represent observations as aggregated area segments rather than individual lines. 
+This encoding communicates aggregate quantities effectively and provides an immediate visual representation of bivariate contingency relationships. 
+However, tracing a single observation through a box requires viewers to mentally reconstruct the implied path, engaging conscious attention and working memory. 
+In this sense, the two approaches serve distinct analytical purposes: equispaced lines support individual-level tracing, while boxes support aggregate-level frequency comparison.
 
-This distinction becomes critical as dataset size increases. 
-With many observations, equispaced lines may appear as ribbon-like bands, but the continuity principle still applies—viewers can perceive flow patterns even when individual lines are indistinguishable. 
-Boxes maintain their aggregate interpretation but lose any individual-level information.
+This distinction becomes increasingly relevant as dataset size grows. 
+With many observations, equispaced lines may coalesce into ribbon-like bands, yet the continuity principle still applies—viewers can perceive flow patterns even when individual lines are indistinguishable. 
+Boxes, by contrast, maintain their aggregate interpretation but are not designed to preserve individual-level information. 
+Rather than viewing these as competing representations, they can be understood as complementary: the line-based approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the box-based approach is optimal when the task involves comparing category frequencies or understanding distributional patterns.
 
 ### The Challenge of Area Perception
 
-While area is preattentively processed, humans are notoriously poor at accurately comparing areas, especially when aspect ratios vary. 
-This limitation is well-documented in @cleveland1984 hierarchy of elementary perceptual tasks, which ranks position along a common scale as most accurate, followed by length, angle, slope, area, and volume.
+Although area is preattentively processed, humans demonstrate notable difficulty in accurately comparing areas, particularly when aspect ratios vary. 
+This limitation is well documented in @cleveland1984's hierarchy of elementary perceptual tasks, which ranks position along a common scale as the most accurate encoding, followed by length, angle, slope, area, and volume in decreasing order of precision.
 
-Hammock plots rely on area perception for frequency encoding. 
+Hammock plots and related box-based visualizations rely on area perception for frequency encoding. 
 Observers must compare box widths (area divided by length) to estimate relative frequencies. 
-The line width illusion and reverse line width illusion @hofmann2013 further complicate this judgment by creating systematic biases.
+The line width illusion and its reverse counterpart, documented extensively by @hofmann2013, further complicate these judgments by introducing systematic biases. 
+Specifically, viewers tend to assess the orthogonal distance between curved or angled lines rather than the vertical distance that actually encodes the data, leading to perceptual distortion when comparing ribbons drawn at different angles.
 
-Equispaced lines instead rely on density estimation—counting or estimating the number of lines within a region. 
-While density estimation is also challenging, it may be less susceptible to geometric illusions. 
-Additionally, density provides a more continuous encoding: frequencies can be estimated at any scale, from individual line counts to overall patterns.
+
+
+Equispaced lines rely instead on density estimation, viewers count or estimate the number of lines within a given region. 
+While density estimation also presents perceptual challenges, research suggests it may be less susceptible to geometric illusions that affect area judgment. 
+Furthermore, density provides a more continuous encoding: frequencies can be estimated at any scale, from individual line counts to overall distributional patterns. 
+Common angle plots, which use a fixed angle for all connecting segments between categories, represent one attempt to neutralize line width illusions in box-based displays while preserving aggregate frequency information.
 
 ### Visual Clutter and Information Density
 
-Ware discusses the concept of "visual clutter" as a fundamental limitation on visualization effectiveness. 
-Clutter occurs when too many visual elements compete for attention, overwhelming the viewer's ability to extract meaningful patterns.
+Visual clutter constitutes a fundamental limitation on visualization effectiveness. 
+Clutter occurs when too many visual elements compete for attention, overwhelming the viewer's capacity to extract meaningful patterns from the display.
 
-The two approaches differ in how they manage clutter:
-
-**Equispaced Lines:**
-
--   Clutter increases with number of observations
--   Hierarchical sorting minimizes line crossings (reduces clutter)
--   Graceful degradation: lines → ribbons → filled areas as density increases
--   Individual observations remain theoretically accessible
-
-**Constant-Width Boxes:**
-
--   Clutter depends on number of unique value combinations
--   Aggregation inherently reduces clutter
--   Information loss: individual observations not accessible
--   Clear representation of bivariate contingency tables
+The two approaches manage clutter through fundamentally different mechanisms. 
+For equispaced lines, clutter increases with the number of observations, but hierarchical sorting minimizes line crossings and thereby reduces visual complexity. 
+The approach exhibits graceful degradation: as density increases, individual lines transition perceptually into ribbons and eventually into filled areas, yet individual observations remain theoretically accessible for highlighting or interactive selection. 
+For constant-width boxes, clutter depends primarily on the number of unique value combinations rather than on raw observation counts. 
+Aggregation inherently reduces clutter, though at the cost of individual-level accessibility. 
+The resulting display provides a clear representation of bivariate contingency relationships.
 
 @dennig2021 formalize clutter metrics for parallel sets visualizations, measuring ribbon overlap, crossing angles, and ribbon width variance. 
-These metrics can be adapted to compare the two approaches quantitatively.
+These metrics can be adapted to compare the two approaches quantitatively and to guide the selection of dimension and category orderings that minimize visual complexity.
 
-## Problem Statement and Research Questions
+## Problem Statement and Research Question
+
+### Main Research Question
+
+**To what extent can the integration of equispaced line-spreading algorithms and constant-width frequency boxes preserve individual-level data integrity while facilitating aggregate-level insights in the presence of data ties?**
+
+Parallel coordinate plots are a primary tool for multivariate data analysis, allowing researchers to observe relationships across multiple dimensions simultaneously. 
+Their strength lies in individual-level tracing, where a single data point’s "path" can be followed through various axes to identify profiles and outliers.
+
+### The Specific Conflict: Numerical Ties
+
+A significant breakdown occurs when numerical ties (identical values) are present. Standard implementations cause these lines to overlap perfectly, creating two distinct issues:
+
+- Loss of Visibility: Multiple observations appear as a single line, masking the true density or frequency of the data at that coordinate.
+- Traceability Failure: When lines converge and then diverge at a tie, it becomes visually impossible to determine which incoming line corresponds to which outgoing line, a phenomenon known as "ambiguous crossings."
+
+### The Limitations of Current Solutions
+
+Existing visualization systems typically force a trade-off between two extremes:
+
+- Individual Spreading: Techniques like equispaced line-spreading (e.g., "tie spreading") separate tied values to restore individual traceability. 
+However, this often distorts the visual representation of density, making it difficult to judge the relative frequency of values at a glance.
+- Aggregate Encoding: Approaches like constant-width boxes or frequency bars effectively communicate the "weight" of a tie (the forest) but completely sever the user’s ability to trace an individual observation (the tree) through the plot.
 
 ### Gap in Research
+
+There is currently no established hybrid representation that preserves the mathematical integrity of individual line paths while simultaneously encoding aggregate frequency information. 
+This lack of integration forces users to toggle between different views, creating cognitive friction and preventing a fluid transition between granular and high-level analytical perspectives during the discovery process.
 
 Present implementations show a split:
 
@@ -449,117 +480,6 @@ For a number $v$ with $n$ tied observations:
 This creates a single framework where the same algorithm deals with both categorical and numerical ties. 
 This could make things easier on the brain by keeping the visual grammar consistent and keeping the visual continuity across mixed-type data.
 
-### Main Research Question
-
-**Is the equispaced line method better for numerical ties than the constant-width box method in hammock plots, based on how people see things?**
-
-This question breaks down into smaller, more specific questions based on perceptual theory:
-
-**Q1 (Preattentive Processing):** Do equispaced lines facilitate preattentive detection and visual search more effectively than constant-width boxes for individual observation tracking?
-
-**Q2 (Pattern Perception):** How do the two methods use Gestalt principles in different ways, and which one works better for seeing relationships in multivariate data?
-
-**Q3 (Memory and Cognition):** Which method is better at lowering the cognitive load and visual working memory needs for everyday analytical tasks?
-
-**Q4 (How Often You Think):** How well can viewers guess frequencies when using implicit density (equispaced lines) instead of explicit area encoding (boxes)?
-
-**Q5 (Scalability):** How do the pros and cons of perception change when the size of the dataset and the distribution of ties change?
-
-## Hypothesis Grounded in Perceptual Theory
-
-### Hypothesis: Categorical-Numerical Consistency
-
-Participants using consistent visual encoding (same representation for categorical and numerical variables) will show significantly lower cognitive load, defined as mental effort required to complete visualization tasks, than those using mixed encoding strategies, tested through task completion time, error rates, and self-reported mental demand using NASA-TLX cognitive load score [@hart1988development].
-
-<!-- **H1**: Using consistent visual encoding we will help viewers make better sense of the data without introducing misunderstandings due to the display of tie broken numerical values. -->
-
-**Theoretical Framework:**
-
-- Consistent visual grammar reduces extraneous cognitive load by eliminating encoding strategy switches
-- Single mental model reduces working memory demands versus maintaining multiple schemas
-- Computational optimization at the visualization level reduces processing demands at the viewer level
-
-**Operationalization:**
-
-- Independent variable: Encoding consistency (3 levels)
-  - Condition A: Consistent equispaced lines (ggpcp)
-  - Condition B: Mixed encoding (categorical boxes, numerical lines)
-  - Condition C: Consistent boxes (Hammock)
-- Dependent variables: Response time (ms), error rate (proportion), NASA-TLX cognitive load score
-- Task: 30 trials alternating between pathway tracing and frequency estimation
-
-
-**Perceptual Basis:**
-
-- Consistent visual grammar reduces need for strategy switching
-- Unified mental model reduces working memory demands
-
-**Dependent Variables**:
-
-- Learning curve (performance over time)
-- Task-switching cost (RT increase after switching task types)
-- Transfer effects (performance on novel task combinations)
-- Subjective preference ratings
-
-**Experimental Design:**
-
-- Between-subjects design with three conditions
-- Sample: N = 60 (n = 20 per condition)
-- Procedure: Training (10 min), Practice (5 min), Test phase (15 min)
-- Analysis: One-way ANOVA for group differences, hierarchical linear modeling for learning effects, pairwise comparisons with Bonferroni correction
-
-## Mathematical Formalization
-
-### Optimization Problem
-
-For a numerical axis with values $V = \{v_1, v_2, ..., v_m\}$ ordered such that $v_1 < v_2 < ... < v_m$, let $n_i$ denote the number of observations with value $v_i$.
-
-**Objective:** Assign positions $\{y_{i,j}\}$ for $j = 1, ..., n_i$ such that:
-
-1.  **Non-intersection constraint**: $y_{i,j} \neq y_{i,k}$ for $j \neq k$ (maintain visual distinctiveness)
-2.  **Monotonicity constraint**: Within value $v_i$, hierarchical ordering is preserved (support common fate Gestalt)
-3.  **Continuity constraint**: Lines maintain smooth transitions between axes (leverage good continuation)
-4.  **Space efficiency**: Utilize available space proportionally to frequency (balanced visual density)
-
-**Space allocation:**
-
-For each value $v_i$, allocate proportional space:
-
-$S_i = \frac{n_i}{\sum_{k=1}^{m} n_k} \cdot (1 - space \cdot (m-1))$
-
-where $space \in [0, 0.5]$ is the spacing parameter controlling separation between value regions.
-
-**Position assignment:**
-\db{(Check this please!!!), the buffer should not be in the equal anymore}
-
-For observation $j$ within value $v_i$ (after hierarchical sorting):
-
-$y_{i,j} = start_i + \frac{S_i - 2 \cdot buffer}{n_i - 1} \cdot (j-1) + buffer$
-
-where: 
-- $start_i = \sum_{k=1}^{i-1}(S_k + space)$ is the starting position for value $v_i$ 
-- $buffer$ provides margin space at boundaries (typically $S_i$) 
-- The formula ensures even distribution across available space
-
-### Properties
-
-**Theorem 1 (Non-intersection):** For any two observations $j \neq k$ with the same value $v_i$: $$y_{i,j} \neq y_{i,k}$$
-
-*Proof:* By construction, $y_{i,j} = start_i + d_i \cdot (j-1) + buffer$ where $d_i = \frac{S_i - 2 \cdot buffer}{n_i - 1}$. For $j \neq k$, we have $(j-1) \neq (k-1)$. When $n_i > 1$, $d_i > 0$, thus $y_{i,j} \neq y_{i,k}$. When $n_i = 1$, the property holds trivially.$\square$
-
-**Theorem 2 (Perceptual Separability):** Any two observations with different values occupy non-overlapping vertical regions: $$\max_j(y_{i,j}) + \frac{space}{2} < \min_j(y_{i+1,j}) - \frac{space}{2}$$
-
-*Proof:* The maximum position for value $v_i$ is $start_i + S_i$. The minimum position for value $v_{i+1}$ is $start_{i+1} = start_i + S_i + space$. The spacing parameter $space$ creates explicit separation. $\square$
-
-**This property ensures preattentive separability: observations with different values can be distinguished without serial search.**
-
-**Theorem 3 (Space Utilization):** The algorithm achieves optimal space utilization: $$\sum_{i=1}^{m} S_i = 1 - space \cdot (m-1)$$
-
-*Proof:* By construction, $S_i = \frac{n_i}{\sum_{k} n_k} \cdot (1 - space \cdot (m-1))$. Summing over all values:
-
-$$\sum_{i=1}^{m} S_i = \sum_{i=1}^{m} \frac{n_i}{\sum_{k} n_k} \cdot (1 - space \cdot (m-1)) = \frac{\sum_i n_i}{\sum_k n_k} \cdot (1 - space \cdot (m-1)) = 1 - space \cdot (m-1)$$ $\square$
-
-**Corollary (Visual Density Proportionality):** Visual density within each region is proportional to observation count, supporting density-based frequency inference.
 
 ### Hierarchical Sorting for Line Crossing Minimization
 
@@ -734,9 +654,7 @@ kable(timeline, booktabs = TRUE, align = c("c", "l", "l", "l")) %>%
 
 ## Theoretical Contributions
 
-1. **Unified Tie-Breaking Theory:** Formalization of equispaced optimization for both categorical and numerical variables, with mathematical proofs of key perceptual properties (separability, continuity, space efficiency)
-
-2. **Empirical Characterization:** Rigorous experimental evidence quantifying perceptual trade-offs between individual-level and aggregate-level encoding strategies across multiple task types
+**Unified Tie-Breaking Theory:** Formalization of equispaced optimization for both categorical and numerical variables, with key perceptual properties (separability, continuity, space efficiency)
 
 ## Practical Contributions
 
@@ -751,8 +669,7 @@ kable(timeline, booktabs = TRUE, align = c("c", "l", "l", "l")) %>%
 
 ## Methodological Contributions
 
-1. **Theory-Driven Evaluation:** Demonstrates how established perceptual theory (Ware, Gestalt principles, Cleveland & McGill) can generate specific, testable hypotheses about visualization effectiveness
-
+1. **Theory-Driven Evaluation:** Demonstrates how established perceptual theory (Gestalt principles) can generate specific, testable hypothesis
 2. **Multi-Method Approach:** Integrates behavioral experiments with computational benchmarking to triangulate findings
 
 3. **Reproducible Research:** Complete open science package enabling replication and extension by other researchers
