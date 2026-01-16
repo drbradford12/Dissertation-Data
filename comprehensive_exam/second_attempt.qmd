@@ -89,10 +89,6 @@ However, the `ggpcp` implementation has demonstrated that careful tie-handling i
 Introducing a small offset ("jitter") to these tied values can mitigate overlap without distorting the overall relationships in the data [@peng2004]. 
 In the context of generalized parallel coordinate plots, the `ggpcp` package separates data management from visual rendering into three distinct components: variable selection and reshaping, scaling of axes, and treatment of ties in categorical axes [@vanderplas2023].
 
-```{r ggpcp-workflow, fig.cap="ggpcp data wrangling workflow", out.width="70%"}
-combined_ggpcp
-```
-
 ## Existing Solutions for Categorical Ties in ggpcp
 
 The `ggpcp` package currently addresses categorical ties through sophisticated tie-breaking algorithms. 
@@ -158,6 +154,8 @@ This enables identification of unique characteristics, cluster membership, or ou
 
 ### Current State: ggpcp's Categorical Tie-Breaking
 
+![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties.](images/better_working_thoery.png){#fig-working-theory}
+
 The ggpcp package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
 The approach spaces observations evenly within categorical levels:
 
@@ -195,7 +193,8 @@ As @schonlau2024 notes, "For small data sets, GPCP plots beautifully show all in
 
 ### Visual Comparison: Triangles vs. Boxes
 
-A key visual difference emerges when connecting categorical to numerical variables. @vanderplas2023 observe:
+A key visual difference emerges when connecting categorical to numerical variables. 
+@vanderplas2023 observe:
 
 > "When many observations have the same value for a categorical and an adjacent numerical variable, the corresponding area looks like a triangle... Notice the lines/boxes between the variables hospitalizations and comorbidities in the GPCP (Figure 13) and hammock plots (Figure 2). Most of the observations are in the boxes leading from hospitalizations=0 to either comorbidities=0 or comorbidities=1. This is far more obvious in the hammock plot than in the GPCP plot." (p. 19)
 
@@ -203,6 +202,8 @@ This observation suggests that each approach has perceptual advantages in differ
 
 Understanding the perceptual and practical challenges of parallel coordinate plots provides essential context for our tie-resolution methods. 
 This section synthesizes empirical evidence from the visualization literature that directly informs our design decisions and evaluation strategy.
+
+![The visual proof of the perceptual trade-offs they describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
 
 ### The Line Width Illusion and Perceptual Constraints
 
@@ -214,7 +215,7 @@ Both approaches must contend with perceptual illusions that affect visual interp
 @hofmann2013 further identify the "reverse line width illusion," where centering of lines creates a contextual cue encouraging evaluation of line widths using vertical rather than orthogonal measures. 
 As they demonstrate empirically, this illusion can lead to systematic biases in frequency estimation.
 
-![.](images/muller_lyer.png){#fig-muller}
+![This figure illustrates the line width illusion and its impact on frequency estimation in parallel coordinate plots.](images/muller_lyer.png){#fig-muller}
 
 The equispaced line approach proposed here may inherently avoid these illusions by maintaining parallel lines at consistent vertical spacing rather than using area-based encoding, though this requires empirical validation.
 
@@ -237,7 +238,6 @@ The `tie_spread` algorithm separates tied observations by distributing them even
 By default, this range is set to maximize the available space for tiebreaking while preserving the approximate positions of values and maintaining visual separation.
 
 ![Tie spreading maintains visual separation while preserving approximate positions.](images/pcp_line_tracing_guide_images/figure-7.png){#fig-figure-7 width="90%"}
-
 
 ## Hierarchical Sorting for Minimal Crossings
 
@@ -315,7 +315,6 @@ The Gestalt laws of perceptual organization, articulated by German psychologists
 -   **Closure:** Incomplete shapes are perceptually completed 
 -   **Common Fate:** Objects moving together are perceived as a group 
 -   **Relative Size:** Smaller elements are perceived as figures against larger backgrounds
-
 
 
 @vanderplas2023 explicitly invoke these principles in their design rationale for ggpcp:
@@ -425,7 +424,7 @@ These metrics can be adapted to compare the two approaches quantitatively and to
 
 ### Main Research Question
 
-**To what extent can the integration of equispaced line-spreading algorithms and constant-width frequency boxes preserve individual-level data integrity while facilitating aggregate-level insights in the presence of data ties?**
+**How can visualization systems implement hybrid representations that utilize full even spacing to resolve numerical ties, thereby preserving individual-level tracing capabilities while simultaneously encoding aggregate frequency information to facilitate seamless transitions between granular and high-level analytical perspectives?**
 
 Parallel coordinate plots are a primary tool for multivariate data analysis, allowing researchers to observe relationships across multiple dimensions simultaneously. 
 Their strength lies in individual-level tracing, where a single data point’s "path" can be followed through various axes to identify profiles and outliers.
