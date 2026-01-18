@@ -117,7 +117,7 @@ This study seeks to rectify this issue by ensuring uniform spacing of the lines.
 The `ggpcp` package currently addresses categorical ties through sophisticated tie-breaking algorithms, . 
 The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, which orders observations based on a hierarchical application of variable values. 
 The `method` parameter determines the sequence in which variables are considered when resolving ties in the arrangement. 
-The `space` parameter specifies the proportion of the y-axis allocated for spacing between levels of categorical variables (Figure @fig-categorical-fix).
+The `space` parameter specifies the proportion of the y-axis allocated for spacing between levels of categorical variables (@fig-categorical-fix).
 
 ```{r}
 #| label: fig-categorical-fix
@@ -231,7 +231,7 @@ For numerical variables specifically, hammock plots maintain constant-width boxe
 This creates a fundamental trade-off: hammock plots explicitly encode frequency through box width but sacrifice individual observation traceability. 
 As @schonlau2024 notes, "For small data sets, GPCP plots beautifully show all individual observations whereas hammock plots require highlighting to feature individual observations" (p. 19).
 
-### Visual Comparison: Triangles vs. Boxes
+### Visual Comparison:
 
 A key visual difference emerges when connecting categorical to numerical variables. 
 @vanderplas2023 observe:
@@ -240,7 +240,7 @@ A key visual difference emerges when connecting categorical to numerical variabl
 
 ![The visual proof of the perceptual trade-offs they describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
 
-When ggpcp connects categorical and numerical variables, the tie-breaking algorithms keep the triangular patterns clear (Figure @fig-boxes). 
+When ggpcp connects categorical and numerical variables, the tie-breaking algorithms keep the triangular patterns clear (@fig-boxes). 
 The `ggpcp` package makes sure that concentration patterns stay visible by keeping the vertical spacing consistent through the space parameter and the systematic ordering through the method parameter. 
 This doesn't make it harder to understand individual observation paths. 
 Box selections and triangular density representations have very different uses. 
@@ -297,7 +297,7 @@ By ordering observations within a tie group based on their values on adjacent ax
 This strategy ensures that observations with similar trajectories are positioned in close proximity, creating cohesive visual bands. 
 These bands facilitate the perception of distinct groups as they move together through high-dimensional space, reducing visual noise and highlighting underlying patterns.
 
-![Hierarchical sorting reduces line crossings, making patterns easier to perceive.](images/pcp_line_tracing_guide_images/figure-8.png){#fig-figure-8 width="90%"}
+![Hierarchical sorting reduces line crossings, making patterns easier to perceive.](images/pcp_line_tracing_guide_images/figure-8.png){#fig-figure-8}
 
 ## Theoretical Framework: Perception-Driven Design
 
@@ -404,6 +404,7 @@ In contrast, tracing through constant-width boxes requires conscious attention t
 
 However, for frequency estimation tasks, constant-width boxes may have an advantage. 
 Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 1).
+
 <!--
 ### External Cognition and Computational Offloading
 
@@ -418,6 +419,7 @@ Rather than the viewer mentally sorting and organizing lines, the visualization 
 Hammock plots achieve a different form of cognitive offloading by aggregating observations into boxes, explicitly computing and displaying frequency information. 
 The trade-off is between individual-level detail (equispaced lines) and aggregate-level clarity (boxes).
 -->
+
 ### Gestalt Principles and Line Continuity
 
 The principle of **good continuation** states that the human visual system preferentially perceives smooth, continuous contours over interpretations requiring abrupt changes in direction. 
@@ -453,7 +455,6 @@ While density estimation also presents perceptual challenges, research suggests 
 Furthermore, density provides a more continuous encoding: frequencies can be estimated at any scale, from individual line counts to overall distributional patterns. 
 Common angle plots, which use a fixed angle for all connecting segments between categories, represent one attempt to neutralize line width illusions in box-based displays while preserving aggregate frequency information.
 -->
-
 
 
 ## Implementation and Evaluation Plan
@@ -552,7 +553,7 @@ optimize_spacing_numerical <- function(values, space = 0.05) {
 
 **Deliverables:**
 
-1. **R Package Release (ggpcp Pull Request):**
+1. **R Package Update (ggpcp Pull Request):**
    - CRAN submission with full documentation
    - Vignette: "Handling Numerical Ties in Parallel Coordinate Plots"
    - Unit tests achieving > 95% coverage
@@ -702,9 +703,9 @@ This study rigorously examines the principle by inquiring not merely "which visu
 
 The answer, like most questions about visualization, is complicated and depends on the situation. But now it will be based on real-world data and perceptual theory.
 
-## Appendix
+# Appendix
 
-### Visual Clutter and Information Density (To investigate)
+## Visual Clutter and Information Density (To investigate)
 
 Visual clutter constitutes a fundamental limitation on visualization effectiveness. 
 Clutter occurs when too many visual elements compete for attention, overwhelming the viewer's capacity to extract meaningful patterns from the display.
@@ -721,4 +722,4 @@ These metrics can be adapted to compare the two approaches quantitatively and to
 
 
 
-## References
+# References
