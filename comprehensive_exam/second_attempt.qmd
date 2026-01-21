@@ -1,5 +1,5 @@
 ---
-title: "Visualizing Ambiguity: A Grammar of Graphics Approach to Resolving Numerical Ties in Parallel Coordinate Plots"
+title: "A Grammar of Graphics Approach to Managing Numerical Ties in Parallel Coordinate Plots"
 author: "Denise Bradford"
 date: "`r format(Sys.Date(), '%B %Y')`"
 format:
@@ -56,72 +56,52 @@ theme_set(theme_bw(base_size = 11))
 
 ```
 
-# Introduction
+# Introduction and Motivation
 
-This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs). 
-Parallel coordinates, first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes simultaneously [@inselberg2009]. 
-However, when datasets contain exact numerical ties, the resulting overlapping lines in PCPs can remove useful information.
+<!-- This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs).  -->
+Parallel coordinate plots (PCPs), first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes (variables) simultaneously [@inselberg2009].
+PCPs assign each dimension of an $n$-dimensional dataset to a vertical axis. Each vertical axis is then positioned along one dimension,  arranged in parallel [@wegman1990]. 
+Observations are drawn as polylines connecting a single point along the sequence of dimensional axes, providing a different perspective on hard-to-visualize multidimensional data that can be used to identify clusters, outliers, and other facets of a dataset. 
 
-To address this, we propose a uniform method for collected spacing to tied values.
-Pending approval, this feature will be integrated into `ggpcp` to help users resolve numerical ties more clearly. 
-This tool will use even spacing to fix overlapping lines, ensuring parallel coordinate plots remain readable.
-My goal is to streamline the workflow for anyone who needs to track specific data points while still analyzing aggregate trends
-
-Our approach is inspired by recent work on generalized parallel coordinate plots (GPCPs), an extension of PCPs that supports categorical variables [@vanderplas2023]. 
-The `ggpcp` package for R implements these GPCPs using a grammar of graphics framework, which seamlessly incorporates both continuous and categorical variables in a single parallel coordinate plot. 
-One of the key contributions of that work is a robust tie-breaking mechanism for categorical variables, implemented through the `pcp_arrange()` function with methods hierarchical sorting. 
-This ensures that individual observations can be traced across multiple dimensions, even when categories induce identical or "tied" values. 
-
-By adding a similar numerical tie-breaking technique for continuous data, we further enhance GPCPs' capacity to handle the visualization of real-world datasets exhibiting ties in numerical and categorical data.
-
-# Background and Motivation
-
-## Parallel Coordinate Plots
-
-Parallel coordinate plots assign each dimension of an $n$-dimensional dataset to a vertical axis arranged in parallel [@wegman1990]. 
-Each observation is drawn as a polyline connecting its values on these axes, providing a visual representation that can illuminate underlying data structures.
-
-## Numerical Ties and Visual Overlap
 
 When multiple observations share the same value in a given dimension, their polylines perfectly overlap, creating "visual collisions." 
-This masks information about distribution, density, or potential outliers. 
+This masks information about the joint distribution between variables as well as the density along a single axis. 
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
-However, the `ggpcp` package implementation has demonstrated that careful tie-handling is essential for both continuous and categorical variables.
 
-The `ggpcp` package separates data management from visual rendering into by implementing multiple stages of data transformation: selection (implicit reshaping), scaling and sorting, a step important because of the ggpcp's treatment of categorical variables [@vanderplas2023].
+PCPs, which were canoncially used to show continuous random variables, have always had this issue, and the use of PCPs for categorical data only emphasized the problem.
+Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs[@pilhöfer2013], and Parallel Sets[@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013]
 
+Hammock plots[@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. Because only bivariate relationships are shown, it is not possible to mentally reconstruct the full joint distribution using a hammock plot.
 
-### The Challenge of Visualizing Mixed-Type Data
+The development of Generalized PCPs (and the software implementation `ggpcp` [@vanderplas2023]) represent a major step forward in representing the full joint distribution of the data while showing individual observations. 
+One innovation in the `ggpcp` package is the handling of ties in continuous variables: ties are broken and the observations are spread out within the box representing the marginal frequency of each value of the categorical variable. 
+Sorting methods are implemented to distribute the tied values in a way that reduces the overall complexity of the plot, as random line-crossings can make PCPs difficult to read and interpret.
 
-Parallel coordinate plots (PCPs) have been established as valuable tools for exploratory data analysis of high-dimensional numerical data since their introduction [@inselberg1985; @wegman1990]. 
-However, the use of PCPs is fundamentally limited when working with mixed categorical-continuous data. 
-As @vanderplas2023 note in their introduction to generalized parallel coordinate plots (GPCPs), existing solutions for categorical values become insufficient when attempting to maintain visual continuity across both data types.
+This project aims to extend the treatment of categorical variables in generalized PCPs, implementing a solution for the treatment of continuous variables which has the following properties:
 
-The treatment of ties, multiple observations sharing the same value, represents a critical design decision that affects both perceptual effectiveness and analytical utility. 
-As noted earlier, the treatment of ties—where multiple observations share the same value—is a critical design decision that shapes both the perceptual effectiveness and the analytical utility of a visualization.
-This observation extends naturally from categorical to numerical variables.
+- marginal density information (approximately) faithfully represented on the vertical axis
+- individual lines can be visually distinguished, at least for data where the number of observations does not induce overplotting.
 
-The ability to follow individual observations is central to the analytical power of PCPs, enabling users to identify patterns, outliers, and relationships that span multiple variables simultaneously.
-The analytical effectiveness of parallel coordinate plots (PCPs) depends entirely on the Gestalt principle of continuity, which posits that the human visual system inherently follows lines that maintain a consistent trajectory. 
-PCPs use object-based visual attention to show a multidimensional data point as one long line. 
-This allows researchers to preserve the whole profile of an observation in working memory while it "threads" along several axes.
-This ability to stick to one path makes it easier to see complex multivariate patterns and outliers that would be hidden in summary statistics.
+An immediate consequence of the second objective is that the viewer can, at least in theory, reconstruct the full joint distribution between variables from the plot. 
+We will extend the method used in `ggpcp` to represent categorical data to continuous variables, modifying it to maintain the approximate scaling of the continuous variable, with slight local distortions when tied values occur.
+In addition, we will develop a consistent visual representation to provide visual cues which indicate the presence of a local distortion due to tied values, while preserving the visual representation of singular values on the parallel axis.
 
-But as @vanderplas2023 points out, the initial frameworks made by @inselberg1985 and @wegman1990 didn't adequately deal with the "treatment of ties." 
-This often leads to confusing crossings that go against the idea of common fate. 
-When lines perfectly overlap at a tie, the data point loses its "objectivity," which forces the analyst to transition between a general and a detailed perspective. 
-This study seeks to rectify this issue by ensuring uniform spacing of the lines. 
+This combination of the advantage of Hammock plots --  maintaining the marginal density information -- and generalized PCPs, which preserve individual observations and provide the ability to reconstruct the full joint distribution, will enhance GPCPs. 
+Real-world data sets frequently have both categorical and numerical data, and duplicated values in either type of variable. Our extension to GPCPs will facilitate the visual representation of these data sets. 
 
-### Existing Solutions for Categorical Ties in ggpcp
+## Categorical Variables and Ties in `ggpcp`
 
-The `ggpcp` package currently addresses categorical ties through sophisticated tie-breaking algorithms, . 
+The `ggpcp` package currently addresses categorical ties through a combination of sorting and tie-breaking algorithms. 
 The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, which orders observations based on a hierarchical application of variable values. 
 The `method` parameter determines the sequence in which variables are considered when resolving ties in the arrangement. 
-The `space` parameter specifies the proportion of the y-axis allocated for spacing between levels of categorical variables (@fig-categorical-fix).
+The `space` parameter specifies the proportion of the y-axis dedicated to empty space between levels of categorical variables (@fig-categorical-fix).
 
 ```{r}
 #| label: fig-categorical-fix
 #| message: false
+#| echo: true
+#| output-location: column
+#| fig-cap: "I need a caption"
 
 library(ggpcp)
 library(ggplot2)
@@ -129,11 +109,18 @@ library(dplyr)
 
 # 1. Modular Data Pipeline (The correct Step 1, 2, 3)
 # Note: 'pcp_data' is used here as a variable name for the transformed object.
-pcp_ready_data <- mtcars %>%
+pcp_data <- mtcars %>%
   mutate(across(c(cyl, am, gear), as.factor)) %>%
   pcp_select(cyl, am, gear) %>%           # Step 1: Reshape data
-  pcp_scale(method = "uniminmax") %>%      # Step 2: Scale axes
+  pcp_scale(method = "uniminmax") %>%     # Step 2: Scale axes
   pcp_arrange(method = "from-left")       # Step 3: Categorical tie-breaking
+
+ggplot(pcp_data, aes_pcp()) +
+  geom_pcp(aes(color = cyl), alpha = 0.6) + 
+  geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
+  geom_pcp_labels() +
+  theme_minimal() +
+  labs(title = "GPCP, no tie breaking")
 
 # 2. Plotting with aes_pcp()
 # Use aes_pcp() to automatically map the transformed pcp_x, pcp_y, and pcp_id variables.
@@ -146,6 +133,7 @@ ggplot(pcp_ready_data, aes_pcp()) +
        subtitle = "Using the pcp_arrange() modular workflow")
 ```
 
+<!-- Stopped here -- svp -->
 
 The ability to follow individual observations is central to the analytical power of PCPs, enabling users to identify patterns, outliers, and relationships that span multiple variables simultaneously. 
 This hierarchical sorting approach serves as "external cognition," the additional computational processing reduces the cognitive load required to untangle overlapping lines in the parallel coordinate plot. 
