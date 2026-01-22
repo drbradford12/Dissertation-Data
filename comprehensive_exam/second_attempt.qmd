@@ -216,11 +216,11 @@ It is worthwhile to examine how a viewer would follow a line across the plot in 
 #| include: false
 
 # This chunk is just to get the pdf that can be imported into Inkscape for generating the figure sequence...
-pcp_data <- mtcars %>%
+my_mtcars <- mtcars %>%
   mutate(across(c(cyl, am, gear), as.factor)) %>%
   mutate(am = factor(am, levels = c(1, 0), ordered = T),
-         inv_wt = -wt,
-         ) %>%
+         inv_wt = -wt) 
+pcp_data <- my_mtcars %>%
   pcp_select(cyl, am, mpg, qsec, inv_wt, gear, drat) %>%          
   pcp_scale(method = "uniminmax") %>%
   pcp_arrange()
@@ -233,7 +233,7 @@ p <- pcp_data %>%
   geom_pcp_labels() +
   theme_pcp() + 
   guides(color="none")
-ggsave("images/pcp_orig.pdf", p, width=8, height=4, units="in")
+ggsave("images/pcp_orig_ggplot2.pdf", p, width=8, height=4, units="in")
 ```
 
 <!-- Ideally, show the same things you've done in the 5 figures, but with a real pcp, made with real data. De-emphasize lines that you're not looking at. Show the bifurcation in the "path" when you hit a numerical tie. 
@@ -258,6 +258,14 @@ Repeat the tracing process for each consecutive pair of axes until reaching the 
 
 - Step 6: Numerical Ties -- a fork in the road.    
 Describe why this happens and what the problem is, showing a different line on the same chart. 
+
+<!-- When multiple observations have the same value for a variable, their lines converge to a single point on that axis.  -->
+<!-- This convergence creates visual clutter -->
+<!-- XXX No, it doesn't create clutter.  The lines are just there, we aren't adding additional complexity, really XXX -->
+<!-- and breaks the continuity needed for individual observation tracking. -->
+<!-- XXX Yes, this is the problem. They also somewhat reduce the effectiveness of marginal density estimation. XXX -->
+
+![Numerical ties cause lines to converge at a single point.](images/pcp_line_tracing_guide_images/figure-6.png){#fig-figure-6 width="90%"}
 
 ## Addressing Numerical Ties
 
@@ -287,7 +295,9 @@ where:
 -   $n_i$ is the number of observations in category $i$
 -   $d_i$ is the optimal spacing distance between consecutive observations
 
-### Visual Comparison:
+--- 
+
+Anything below this line needs a lot of work
 
 A key visual difference emerges when connecting categorical to numerical variables. 
 @vanderplas2023 observe:
@@ -315,34 +325,18 @@ This section combines real-world evidence from the visualization literature that
 
 <!-- No, we don't have any real-world evidence beyond introspection. Also, you're talking out of your ass a bit here.  -->
 
-<!--
-### The Line Width Illusion and Perceptual Constraints
+# An Approach to Numerical Ties
 
-Both approaches must contend with perceptual illusions that affect visual interpretation. 
-@schonlau2024 discusses the line width illusion:
+Currently, numerical variables disrupt some of the best innovations in the GPCP approach by making it impossible to track an observation across the plot and by obscuring marginal density information through overplotting. 
+The remaining two chapters of the dissertation will address the handling of ties on numerical axes and assess the utility of visual cues that can be paired with the tie breaking method to indicate that values are approximately accurate spatially and equivalent numerically.
 
-> "The distance between two parallel lines is perceived at a right angle rather than as the vertical distance between the lines (Wallgren et al., 1996; Tufte, 2001)... The line width illusion is part of the family of Müller-Lyer illusions where two lines of same length appear to be of different lengths." (p. 8)
 
-@hofmann2013 further identify the "reverse line width illusion," where centering of lines creates a contextual cue encouraging evaluation of line widths using vertical rather than orthogonal measures. 
-As they demonstrate empirically, this illusion can lead to systematic biases in frequency estimation.
 
-![This figure illustrates the line width illusion and its impact on frequency estimation in parallel coordinate plots.](images/muller_lyer.png){#fig-muller}
-
-The equispaced line approach proposed here may inherently avoid these illusions by maintaining parallel lines at consistent vertical spacing rather than using area-based encoding, though this requires empirical validation.
--->
-
-# Handling Numerical Ties
-
-A significant challenge arises when multiple observations share identical values on an axis. 
-In traditional PCPs, these observations converge to a single point, creating overlapping lines that make individual tracking impossible. 
-The ggpcp package addresses this through the `tie_spread` algorithm.
+<!-- The ggpcp package addresses this through the `tie_spread` algorithm. -->
+<!-- No, it doesn't. You're going to develop some code to break ties in a way consistent with the grammar of graphics and tidyselect (so that users can break ties on some axes but not others, if they want, with intelligent defaults).  -->
 
 ## The Problem: Overlapping Lines
 
-When multiple observations have the same value for a variable, their lines converge to a single point on that axis. 
-This convergence creates visual clutter and breaks the continuity needed for individual observation tracking.
-
-![Numerical ties cause lines to converge at a single point.](images/pcp_line_tracing_guide_images/figure-6.png){#fig-figure-6 width="90%"}
 
 ## The Solution: Tie Spreading
 
