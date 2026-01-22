@@ -95,94 +95,177 @@ The `ggpcp` package currently addresses categorical ties through a combination o
 The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, which orders observations based on a hierarchical application of variable values. 
 The `method` parameter determines the sequence in which variables are considered when resolving ties in the arrangement. 
 The `space` parameter specifies the proportion of the y-axis dedicated to empty space between levels of categorical variables (@fig-categorical-fix).
+```{r}
+#| label: fig-categorical-code
+#| echo: true
+#| eval: false
+
+
+# 1. Modular Data Pipeline (The correct Step 1, 2, 3)
+# Note: 'pcp_data' is used here as a variable name for the transformed object.
+pcp_data <- mtcars %>%
+  mutate(across(c(cyl, am, gear, carb), as.factor)) %>%
+  pcp_select(cyl, am, gear, carb) %>%     # Step 1: Reshape data
+  pcp_scale(method = "uniminmax") %>%     # Step 2: Scale axes
+  pcp_arrange(method="from-left")         # Step 3: Break Ties, 
+                                          #         sorting from left
+```
 
 ```{r}
 #| label: fig-categorical-fix
 #| message: false
-#| echo: true
+#| echo: false
 #| output-location: column
 #| fig-cap: "I need a caption"
 
 library(ggpcp)
 library(ggplot2)
 library(dplyr)
-
+library(patchwork)
 # 1. Modular Data Pipeline (The correct Step 1, 2, 3)
 # Note: 'pcp_data' is used here as a variable name for the transformed object.
 pcp_data <- mtcars %>%
-  mutate(across(c(cyl, am, gear), as.factor)) %>%
-  pcp_select(cyl, am, gear) %>%           # Step 1: Reshape data
-  pcp_scale(method = "uniminmax") %>%     # Step 2: Scale axes
-  pcp_arrange(method = "from-left")       # Step 3: Categorical tie-breaking
+  mutate(across(c(cyl, am, gear, carb), as.factor)) %>%
+  pcp_select(cyl, am, gear, carb) %>%           # Step 1: Reshape data
+  pcp_scale(method = "uniminmax")         # Step 2: Scale axes
 
-ggplot(pcp_data, aes_pcp()) +
+p0 <- pcp_data %>%
+ggplot(aes_pcp()) +
   geom_pcp(aes(color = cyl), alpha = 0.6) + 
   geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
   geom_pcp_labels() +
-  theme_minimal() +
-  labs(title = "GPCP, no tie breaking")
+  theme_pcp() +
+  labs(title = "Standard PCP", subtitle = "No Tie Breaking") + 
+  guides(color="none")
+
 
 # 2. Plotting with aes_pcp()
 # Use aes_pcp() to automatically map the transformed pcp_x, pcp_y, and pcp_id variables.
-ggplot(pcp_ready_data, aes_pcp()) +
+p2 <- pcp_data %>%
+  pcp_arrange("from-left") %>% # Sort from left
+  ggplot(aes_pcp()) +
   geom_pcp(aes(color = cyl), alpha = 0.6) + 
   geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
   geom_pcp_labels() +
-  theme_minimal() +
-  labs(title = "Resolved Categorical Ties",
-       subtitle = "Using the pcp_arrange() modular workflow")
+  theme_pcp() +
+  labs(title = "GPCP: Cat. Ties + Sorting", subtitle = "Sort from left") + 
+  guides(color="none")
+
+
+p3 <- pcp_data %>%
+  pcp_arrange("from-right") %>% # Sort from right
+  ggplot(aes_pcp()) +
+  geom_pcp(aes(color = cyl), alpha = 0.6) + 
+  geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
+  geom_pcp_labels() +
+  theme_pcp() +
+  labs(title = "GPCP: Cat. Ties + Sorting", subtitle = "Sort from right") + 
+  guides(color="none")
+
+pcp_data2 <- mtcars %>%
+  mutate(across(c( cyl, am, gear, carb), as.factor)) %>%
+  pcp_select(cyl, am, gear, carb) %>%
+  pcp_scale(method = "uniminmax") %>%     # Step 2: Scale axes
+  pcp_arrange("from-right") %>% # Sort from right
+  # This shuffles everything within category, ensuring no sorting persists
+  group_by(pcp_x, pcp_level) %>%
+  mutate(order = permute::shuffle(n()),
+         pcp_y = pcp_y[order],
+         pcp_yend = pcp_yend[order])
+
+p1 <-  pcp_data2 %>%
+  # ungroup() %>%
+  # pcp_arrange_opts(method="none", .by_group = F) %>% # No sorting - overwrote pcp_arrange()
+  ggplot(aes_pcp()) +
+  geom_pcp(aes(color = cyl), alpha = 0.6) + 
+  geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
+  geom_pcp_labels() +
+  theme_pcp() +
+  labs(title = "GPCP: Tie Breaking", subtitle = "No sorting") + 
+  guides(color="none")
+
+p0 + p1 + p2 + p3
 ```
 
-<!-- Stopped here -- svp -->
 
-The ability to follow individual observations is central to the analytical power of PCPs, enabling users to identify patterns, outliers, and relationships that span multiple variables simultaneously. 
-This hierarchical sorting approach serves as "external cognition," the additional computational processing reduces the cognitive load required to untangle overlapping lines in the parallel coordinate plot. 
-The categorical tie-breaking creates equispaced points along the axis that reduces line crossings and allows users to follow individual observations from left to right through the plot even for categorical variables.
+The ability to follow individual observations is key to being able to reconstruct the full joint distribution across parallel axes. 
+`ggpcp` creates equally spaced points within each category that span the portion of the vertical axis dedicated to the category (preserving the marginal frequency information, which is optionally emphasized with `geom_pcp_boxes`). 
+The top left plot in @fig-categorical-fix shows the PCP without this categorical tie-breaking approach. 
+However, `ggpcp` goes one step further by using hierarchical sorting (from the left, right, or both) to minimize unnecessary line crossings induced by the treatment of tied categorical variables. 
+The absence of the hierarchical sorting approach is emphasized in the top right plot in @fig-categorical-fix, while the bottom left and right plots show sorting from the left and right respectively. 
+This hierarchical sorting approach serves as a form of "external cognition," reducing the cognitive load required to "untangle" and group crossed lines. 
+The sorting also ensures that only necessary crossings^[A crossing is necessary if it is induced by the order of x-axis variables and scaled values, rather than by the treatment of categorical variables.] occur, minimizing visual clutter.
 
-- Step 1: Identify the Parallel Axes
+It is worthwhile to examine how a viewer would follow a line across the plot in detail, using a generalized PCP with both numeric and categorical variables to illustrate the challenges introduced when numerical ties are present.
 
-Begin by identifying each vertical axis in the plot. 
-Each axis represents one variable from the dataset. 
-The axes are typically arranged from left to right, and the order may be determined by the data analyst to highlight specific relationships or minimize visual clutter.
+::: {layout-ncol=3}
 
 ![The parallel axes form the structural framework of the visualization.](images/pcp_line_tracing_guide_images/figure-1.png){#fig-figure-1 width="90%"}
 
-- Step 2: Locate the Starting Point
-
-Find the observation of interest on the leftmost axis. 
-The vertical position indicates the scaled value of that observation for the first variable. 
-If you are examining a highlighted or color-coded observation, look for its distinctive marker at this starting position.
-
 ![The starting point is identified on the first axis with its corresponding value.](images/pcp_line_tracing_guide_images/figure-2.png){#fig-figure-2 width="90%"}
-
-- Step 3: Follow the Line Segment
-
-Trace the line segment from the starting point to its intersection with the next axis. 
-The human visual system naturally follows smooth, continuous paths due to the Gestalt principle of good continuation. 
-This principle allows viewers to perceive connected lines as unified objects, making it easier to track observations across multiple variables.
 
 ![Following the line segment uses the Gestalt principle of good continuation.](images/pcp_line_tracing_guide_images/figure-3.png){#fig-figure-3 width="90%"}
 
-- Step 4: Read Values at Intersections
-
-At each axis intersection, the vertical position of the line indicates the observation's value for that variable. 
-Read these values to understand how the observation changes across different dimensions of the data. 
-The slope of line segments between axes provides information about the relationship between consecutive variables for that specific observation.
-
 ![Values are read as approximate scaled value relative to the total range.](images/pcp_line_tracing_guide_images/figure-4.png){#fig-figure-4 width="90%"}
-
-- Step 5: Continue Across All Axes
-
-Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis. 
-By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables. 
-The vertical positions along each axis represent scaled values that can be interpreted as quantiles when the data are appropriately transformed.
-This enables identification of unique characteristics, cluster membership, or outlier status.
 
 ![The complete traced path reveals the observation's values across all variables.](images/pcp_line_tracing_guide_images/figure-5.png){#fig-figure-5 width="90%"}
 
-### Current State: ggpcp's Categorical Tie-Breaking
+:::
 
-![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties.](images/better_working_thoery.png){#fig-working-theory}
+```{r}
+#| include: false
+
+# This chunk is just to get the pdf that can be imported into Inkscape for generating the figure sequence...
+pcp_data <- mtcars %>%
+  mutate(across(c(cyl, am, gear), as.factor)) %>%
+  mutate(am = factor(am, levels = c(1, 0), ordered = T),
+         inv_wt = -wt,
+         ) %>%
+  pcp_select(cyl, am, mpg, qsec, inv_wt, gear, drat) %>%          
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange()
+
+p <- pcp_data %>%
+  pcp_arrange("from-left") %>% # Sort from left
+  ggplot(aes_pcp()) +
+  geom_pcp(aes(color = cyl), alpha = 0.6) + 
+  geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
+  geom_pcp_labels() +
+  theme_pcp() + 
+  guides(color="none")
+ggsave("images/pcp_orig.pdf", p, width=8, height=4, units="in")
+```
+
+<!-- Ideally, show the same things you've done in the 5 figures, but with a real pcp, made with real data. De-emphasize lines that you're not looking at. Show the bifurcation in the "path" when you hit a numerical tie. 
+
+The description here is not bad but a bit simple. What we want to do is use these to lead into the problem with ties... but the stark transition between the plots is not great. Find a single plot. Use that for all of the pictures. Create it by messing with the PDF in Inkscape, which will give you much more control and allow you to save as both PDF and SVG (better for HTML slides). -->
+
+
+- Step 1: Identify the Parallel Axes (@fig-figure-1).    
+Begin by identifying each vertical axis in the plot. Each axis represents one variable from the dataset. The axes are typically arranged from left to right, and the order may be determined by the data analyst to highlight specific relationships or minimize visual clutter.
+
+- Step 2: Locate the Starting Point (@fig-figure-2).    
+Find the observation of interest on the leftmost axis. The vertical position indicates the scaled value of that observation for the first variable. If you are examining a highlighted or color-coded observation, look for its distinctive marker at this starting position.
+
+- Step 3: Follow the Line Segment (@fig-figure-3).    
+Trace the line segment from the starting point to its intersection with the next axis. The human visual system naturally follows smooth, continuous paths due to the Gestalt principle of good continuation, which allows viewers to perceive connected line segments as a single, piecewise continuous line, making it easier to track observations across multiple parallel axes.
+
+- Step 4: Read Values at Intersections (@fig-figure-4).    
+At each axis intersection, the vertical position of the line indicates the observation's value for that variable. Read these values to understand how the observation changes (typically, relative to the other observations) across different dimensions of the data. The slope of line segments between axes provides information about the relationship between consecutive variables for that specific observation.
+
+- Step 5: Continue Across All Axes (@fig-figure-5).    
+Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis.  By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables.  The vertical positions along each axis represent scaled values that can be interpreted as quantiles when the data are appropriately transformed. This enables identification of unique characteristics, cluster membership, or outlier status.
+
+- Step 6: Numerical Ties -- a fork in the road.    
+Describe why this happens and what the problem is, showing a different line on the same chart. 
+
+## Addressing Numerical Ties
+
+![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties. 
+XXX I do not like this sketch. The goal is to maintain as much distance between numerical values as possible WHILE breaking the ties, so that the numerical scaling is approximately correct and the ties are broken. What you've done is equivalent to converting numerical variables to categorical, breaking the numerical meaning. Think of e.g. having 1980, 1980, 2000, and 2002. If you convert to a factor, the difference between 20 and 2 years is the same (Fox news style). Instead, if you have 1979.9, 1980.1, and 2000, and 2002, you approximately keep the numerical values and you can distinguish the tied values. Your sketch should represent that. XXX](images/better_working_thoery.png){#fig-working-theory}
+
+<!-- This section is where things go off the rails. I don't like the way you're introducing it -- hammock plots need to come earlier, and I've largely put them there with a brief pro/con description.  -->
+
 
 The ggpcp package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
 The approach spaces observations evenly within categorical levels:
@@ -191,6 +274,8 @@ The approach spaces observations evenly within categorical levels:
 
 The algorithm achieves this through hierarchical sorting implemented in `pcp_arrange(data, method, space)`, where the `space` parameter specifies the proportion of the y-axis used for spacing between categorical levels. 
 This optimization can be formalized as:
+
+<!-- You need to illustrate these parameters, not just define them with words, because the words are not sufficient. -->
 
 $$d_i = \frac{S_i - S_i^- - S_i^+}{n_i - 1}$$
 
@@ -202,23 +287,6 @@ where:
 -   $n_i$ is the number of observations in category $i$
 -   $d_i$ is the optimal spacing distance between consecutive observations
 
-### Alternative Approach: Hammock Plots
-
-Hammock plots, introduced by Schonlau [@schonlau2003, @schonlau2024], take a fundamentally different approach to handling both categorical and numerical variables. 
-Rather than using individual lines, hammock plots employ two-dimensional boxes to connect adjacent axes, with box width proportional to the number of observations.
-
-As @schonlau2024 describes:
-
-> "Like a parallel coordinate plot, the axes are aligned parallel to one another. Categories of adjacent variables are connected by boxes. (The boxes shown are parallelograms; I use the word boxes for simplicity). The width of boxes is proportional to the number of observations." (p. 3)
-
-For numerical variables specifically, hammock plots maintain constant-width boxes throughout the visualization. 
-@schonlau2024 explains the spatial constraint this imposes:
-
-> "When treating this variable as numerical, the range from 0 to 20 leaves 1/21th of the space for each unit length. Consequently, the widths of the boxes have to be more frugal." (p. 21)
-
-This creates a fundamental trade-off: hammock plots explicitly encode frequency through box width but sacrifice individual observation traceability. 
-As @schonlau2024 notes, "For small data sets, GPCP plots beautifully show all individual observations whereas hammock plots require highlighting to feature individual observations" (p. 19).
-
 ### Visual Comparison:
 
 A key visual difference emerges when connecting categorical to numerical variables. 
@@ -226,19 +294,26 @@ A key visual difference emerges when connecting categorical to numerical variabl
 
 > "When many observations have the same value for a categorical and an adjacent numerical variable, the corresponding area looks like a triangle... Notice the lines/boxes between the variables hospitalizations and comorbidities in the GPCP (Figure 13) and hammock plots (Figure 2). Most of the observations are in the boxes leading from hospitalizations=0 to either comorbidities=0 or comorbidities=1. This is far more obvious in the hammock plot than in the GPCP plot." (p. 19)
 
+<!-- This quote is not anywhere in the penguins go parallel paper. Is it maybe from the comparison paper between hammock and ggpcps, which hasn't officially been published and is under peer review? In any case, I don't think it's still present in the submitted version. YOU MUST BE ACCURATE WHEN ATTRIBUTING QUOTES!!!!!!!!!!  -->
+
 ![The visual proof of the perceptual trade-offs they describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
 
 When ggpcp connects categorical and numerical variables, the tie-breaking algorithms keep the triangular patterns clear (@fig-boxes). 
+<!-- I think you're missing the point here, and I don't think you should focus on the triangles! The point is that we can't distinguish the observations when the numerical stuff is there. In hammock plots the marginal density is more clear than in ggpcp, but there is no reason we couldn't get that fixed in ggpcp with some intelligent tie breaking that makes the vertical axis basically a rug plot, allowing you to visually estimate density. This would *also* ensure that we could resolve individual lines across the plot -- that is, fixing the ties fixes *both* issues. -->
 The `ggpcp` package makes sure that concentration patterns stay visible by keeping the vertical spacing consistent through the space parameter and the systematic ordering through the method parameter. 
 This doesn't make it harder to understand individual observation paths. 
 Box selections and triangular density representations have very different uses. 
 Box selections separate discrete data subsets for filtering and brushing interactions, while triangles show a continuous aggregate view of data relationships and density between dimensions. 
+<!-- Are you copying from hammock plot paper somehow? we don't have interactive selections in R implementations of either type of plot, so this doesn't make *any* sense. Where did it come from? -->
 Users do not have to choose between showing overall patterns and being able to follow specific cases through the plot.
 
 This observation indicates that each method possesses perceptual advantages in varying contexts, necessitating a thorough comparative analysis based on perceptual science.
+<!-- No, it doesn't. It indicates that there is an opportunity to adopt some of the conventions of both ggpcp and hammock plots to improve the ability to use ggpcps. -->
+
 To understand our tie-resolution methods, it is important to know about the perceptual and practical problems that come with parallel coordinate plots.
 This section combines real-world evidence from the visualization literature that directly affects our design choices and evaluation plan.
 
+<!-- No, we don't have any real-world evidence beyond introspection. Also, you're talking out of your ass a bit here.  -->
 
 <!--
 ### The Line Width Illusion and Perceptual Constraints
