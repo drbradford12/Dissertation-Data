@@ -69,9 +69,9 @@ This masks information about the joint distribution between variables as well as
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
 
 PCPs, which were canoncially used to show continuous random variables, have always had this issue, and the use of PCPs for categorical data only emphasized the problem.
-Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs[@pilhöfer2013], and Parallel Sets[@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013]
+Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013]
 
-Hammock plots[@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. Because only bivariate relationships are shown, it is not possible to mentally reconstruct the full joint distribution using a hammock plot.
+Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. Because only bivariate relationships are shown, it is not possible to mentally reconstruct the full joint distribution using a hammock plot.
 
 The development of Generalized PCPs (and the software implementation `ggpcp` [@vanderplas2023]) represent a major step forward in representing the full joint distribution of the data while showing individual observations. 
 One innovation in the `ggpcp` package is the handling of ties in continuous variables: ties are broken and the observations are spread out within the box representing the marginal frequency of each value of the categorical variable. 
@@ -95,6 +95,7 @@ The `ggpcp` package currently addresses categorical ties through a combination o
 The package implements hierarchical sorting through the `pcp_arrange(data, method, space)` function, which orders observations based on a hierarchical application of variable values. 
 The `method` parameter determines the sequence in which variables are considered when resolving ties in the arrangement. 
 The `space` parameter specifies the proportion of the y-axis dedicated to empty space between levels of categorical variables (@fig-categorical-fix).
+
 ```{r}
 #| label: fig-categorical-code
 #| echo: true
@@ -116,7 +117,7 @@ pcp_data <- mtcars %>%
 #| message: false
 #| echo: false
 #| output-location: column
-#| fig-cap: "I need a caption"
+#| fig-cap: "Comparison of tie-breaking methods for categorical variables in parallel coordinate plots using mtcars data. Standard PCP (top-left) shows overlapping lines without tie-breaking. GPCP with tie-breaking but no sorting (top-right) spreads observations evenly within categories. GPCP with sorting from left (bottom-left) and from right (bottom-right) apply hierarchical sorting to minimize line crossings, with light gray boxes indicating category groupings."
 
 library(ggpcp)
 library(ggplot2)
@@ -236,6 +237,64 @@ p <- pcp_data %>%
 ggsave("images/pcp_orig_ggplot2.pdf", p, width=8, height=4, units="in")
 ```
 
+```{r}
+#| include: false
+#| eval: false
+#| 
+
+# 1. Data Preparation
+my_mtcars <- mtcars %>%
+  mutate(across(c(cyl, am, gear), as.factor)) %>%
+  mutate(am = factor(am, levels = c(1, 0), ordered = TRUE),
+         inv_wt = -wt) 
+
+pcp_data <- my_mtcars %>%
+  pcp_select(cyl, am, mpg, qsec, inv_wt, gear, drat) %>%          
+  pcp_scale(method = "uniminmax") %>%
+  pcp_arrange()
+
+# 2. Select exactly 6 rows to highlight
+# You can slice(1:6) or select specific indices that show interesting bifurcations
+highlight_lines <- pcp_data %>% 
+  dplyr::slice(1:3) 
+
+# 3. Create the Plot
+pcp_data %>%
+  pcp_arrange("from-left") %>% 
+  ggplot(aes_pcp()) +
+  # Background: All lines, heavily de-emphasized to clear the "wire-heavy" look 
+  geom_pcp(aes(color = cyl), alpha = 0.05, size = 0.2) + 
+  
+  # THE HALO: Thicker white lines to separate the 6 traces from the background 
+  geom_pcp(data = highlight_lines, 
+           color = "white", 
+           alpha = 0.8, 
+           size = 2.5, 
+           over = 0) +
+  
+  # THE TRACE: The 6 specific lines 
+  # 'over = 0' ensures they don't merge/bundle, showing individual path splits 
+  geom_pcp(data = highlight_lines, 
+           aes(color = cyl), 
+           alpha = 1, 
+           size = 1.2, 
+           over = 0) +
+  
+  # Structural elements: Boxes and Labels to anchor numerical ties 
+  geom_pcp_boxes(boxwidth = 0.1, fill = "white", color = "gray90", alpha = 0.5) +
+  geom_pcp_labels() +
+  
+  # Formatting
+  scale_color_manual(values = c("4" = "#1f78b4", "6" = "#e31a1c", "8" = "#33a02c")) +
+  theme_pcp() + 
+  guides(color = "none") +
+  labs(title = "Six-Path PCP Trace",
+       subtitle = "Tracing specific observations to highlight multi-axis bifurcations")
+
+
+```
+
+
 <!-- Ideally, show the same things you've done in the 5 figures, but with a real pcp, made with real data. De-emphasize lines that you're not looking at. Show the bifurcation in the "path" when you hit a numerical tie. 
 
 The description here is not bad but a bit simple. What we want to do is use these to lead into the problem with ties... but the stark transition between the plots is not great. Find a single plot. Use that for all of the pictures. Create it by messing with the PDF in Inkscape, which will give you much more control and allow you to save as both PDF and SVG (better for HTML slides). -->
@@ -259,13 +318,26 @@ Repeat the tracing process for each consecutive pair of axes until reaching the 
 - Step 6: Numerical Ties -- a fork in the road.    
 Describe why this happens and what the problem is, showing a different line on the same chart. 
 
+![Numerical ties cause lines to converge at a single point.](images/pcp_line_tracing_guide_images/figure-6.png){#fig-figure-6 width="90%"}
+
+- Step 6: Ties in Numbers — A Fork in the Road (@fig-figure-6).
+
+What was once a single point now becomes the starting point for two separate line segments that go in different directions. 
+This split is a tie in numbers, which makes it hard to understand. 
+The Gestalt principle of good continuation doesn't work anymore when two or more lines come from the same point on an axis. 
+This makes it hard for the viewer to figure out which outgoing segment belongs to which incoming path. The visual continuity that made tracing easy in earlier steps breaks down exactly where it is needed most. 
+The observer cannot tell if the original observation follows the upper branch or the lower branch of the fork unless there are more visual cues, like color coding, clear labels, or a systematic tie-breaking arrangement. 
+This lack of clarity is not just an aesthetic problem; it also makes it harder to do the main analytical job of the parallel coordinate plot, which is to show patterns that would be hard to see in tabular data by following individual observations through high-dimensional space.
+
+
+
 <!-- When multiple observations have the same value for a variable, their lines converge to a single point on that axis.  -->
 <!-- This convergence creates visual clutter -->
 <!-- XXX No, it doesn't create clutter.  The lines are just there, we aren't adding additional complexity, really XXX -->
 <!-- and breaks the continuity needed for individual observation tracking. -->
 <!-- XXX Yes, this is the problem. They also somewhat reduce the effectiveness of marginal density estimation. XXX -->
 
-![Numerical ties cause lines to converge at a single point.](images/pcp_line_tracing_guide_images/figure-6.png){#fig-figure-6 width="90%"}
+
 
 ## Addressing Numerical Ties
 
@@ -283,7 +355,7 @@ The approach spaces observations evenly within categorical levels:
 The algorithm achieves this through hierarchical sorting implemented in `pcp_arrange(data, method, space)`, where the `space` parameter specifies the proportion of the y-axis used for spacing between categorical levels. 
 This optimization can be formalized as:
 
-<!-- You need to illustrate these parameters, not just define them with words, because the words are not sufficient. -->
+![Spacing parameters for Categorical Axis](images/spacing_diagram.png){#fig-spacing}
 
 $$d_i = \frac{S_i - S_i^- - S_i^+}{n_i - 1}$$
 
@@ -297,43 +369,44 @@ where:
 
 --- 
 
-Anything below this line needs a lot of work
+\db{Updated the writing below here. As of Thursday, Jan. 22nd, 2026}
+
+\svp{Anything below this line needs a lot of work}
 
 A key visual difference emerges when connecting categorical to numerical variables. 
-@vanderplas2023 observe:
+@schonlau2024 observe:
 
 > "When many observations have the same value for a categorical and an adjacent numerical variable, the corresponding area looks like a triangle... Notice the lines/boxes between the variables hospitalizations and comorbidities in the GPCP (Figure 13) and hammock plots (Figure 2). Most of the observations are in the boxes leading from hospitalizations=0 to either comorbidities=0 or comorbidities=1. This is far more obvious in the hammock plot than in the GPCP plot." (p. 19)
 
-<!-- This quote is not anywhere in the penguins go parallel paper. Is it maybe from the comparison paper between hammock and ggpcps, which hasn't officially been published and is under peer review? In any case, I don't think it's still present in the submitted version. YOU MUST BE ACCURATE WHEN ATTRIBUTING QUOTES!!!!!!!!!!  -->
-
-![The visual proof of the perceptual trade-offs they describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
+![The visual proof of the perceptual trade-offs as describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
 
 When ggpcp connects categorical and numerical variables, the tie-breaking algorithms keep the triangular patterns clear (@fig-boxes). 
 <!-- I think you're missing the point here, and I don't think you should focus on the triangles! The point is that we can't distinguish the observations when the numerical stuff is there. In hammock plots the marginal density is more clear than in ggpcp, but there is no reason we couldn't get that fixed in ggpcp with some intelligent tie breaking that makes the vertical axis basically a rug plot, allowing you to visually estimate density. This would *also* ensure that we could resolve individual lines across the plot -- that is, fixing the ties fixes *both* issues. -->
-The `ggpcp` package makes sure that concentration patterns stay visible by keeping the vertical spacing consistent through the space parameter and the systematic ordering through the method parameter. 
-This doesn't make it harder to understand individual observation paths. 
-Box selections and triangular density representations have very different uses. 
-Box selections separate discrete data subsets for filtering and brushing interactions, while triangles show a continuous aggregate view of data relationships and density between dimensions. 
-<!-- Are you copying from hammock plot paper somehow? we don't have interactive selections in R implementations of either type of plot, so this doesn't make *any* sense. Where did it come from? -->
-Users do not have to choose between showing overall patterns and being able to follow specific cases through the plot.
 
-This observation indicates that each method possesses perceptual advantages in varying contexts, necessitating a thorough comparative analysis based on perceptual science.
-<!-- No, it doesn't. It indicates that there is an opportunity to adopt some of the conventions of both ggpcp and hammock plots to improve the ability to use ggpcps. -->
+@schonlau2024 observes that concentration patterns—such as the flow from zero hospitalizations to low comorbidity values—are "far more obvious in the hammock plot than in the GPCP plot" precisely because hammock plots maintain constant-width boxes that make marginal densities apparent. 
+The triangular narrowing that occurs in GPCPs when categorical variables meet numerical ones obscures these density patterns and makes it difficult to distinguish individual observations.
+The `ggpcp` package can address both limitations through intelligent tie resolution. 
+The `space` parameter controls vertical spacing, while the `method` parameter determines systematic ordering of tied values. 
+When implemented effectively, these parameters transform the vertical axis into something functionally equivalent to a rug plot, allowing users to visually estimate density while simultaneously preserving the ability to trace individual observation paths across the plot. 
+This dual benefit—clear marginal density representation and resolvable individual lines—emerges from the same underlying solution.
 
-To understand our tie-resolution methods, it is important to know about the perceptual and practical problems that come with parallel coordinate plots.
-This section combines real-world evidence from the visualization literature that directly affects our design choices and evaluation plan.
+This observation suggests an opportunity to incorporate conventions from both GPCPs and hammock plots to improve the utility of generalized parallel coordinate visualizations. 
+Rather than treating these as competing approaches with distinct perceptual trade-offs, thoughtful tie-breaking implementation can combine the strengths of each method.
 
-<!-- No, we don't have any real-world evidence beyond introspection. Also, you're talking out of your ass a bit here.  -->
+To understand how our tie-resolution methods achieve this synthesis, it is important to recognize the perceptual and practical challenges inherent in parallel coordinate plots. 
+The following section draws on evidence from the visualization literature that directly informs our design choices and evaluation plan.
 
 # An Approach to Numerical Ties
 
 Currently, numerical variables disrupt some of the best innovations in the GPCP approach by making it impossible to track an observation across the plot and by obscuring marginal density information through overplotting. 
 The remaining two chapters of the dissertation will address the handling of ties on numerical axes and assess the utility of visual cues that can be paired with the tie breaking method to indicate that values are approximately accurate spatially and equivalent numerically.
 
+The `ggpcp` package does not currently provide a mechanism for resolving these tied values. 
+We propose `tie_spread`, an algorithm that distributes observations with identical values along the vertical axis, transforming overlapping lines into a visually resolvable spread. 
+Consistent with tidyverse conventions and the tidyselect grammar, the implementation allows users to specify tie-breaking behavior selectively across axes—applying spreading to some variables while preserving exact positioning on others. 
+Sensible defaults balance visual clarity against faithful representation of the underlying data, ensuring that users can immediately benefit from improved legibility without extensive parameter tuning. 
+The following section details the design and implementation of this approach.
 
-
-<!-- The ggpcp package addresses this through the `tie_spread` algorithm. -->
-<!-- No, it doesn't. You're going to develop some code to break ties in a way consistent with the grammar of graphics and tidyselect (so that users can break ties on some axes but not others, if they want, with intelligent defaults).  -->
 
 ## The Problem: Overlapping Lines
 
@@ -367,47 +440,6 @@ The framework covers four key areas that trace the path from seeing a visualizat
 Finally, **external cognition and computational offloading** addresses how visualizations act as external aids that extend our mental capabilities by shifting some cognitive work from our minds to the visual display itself. 
 These four components provide a foundation for understanding how design choices affect visualization effectiveness.
 
-<!--Colin Ware's "Information Visualization: Perception for Design" provides a comprehensive framework for understanding how humans process visual information [@ware2012, 3rd ed., pp. 20-21, Figure 1.11]. 
-Ware describes visual perception as occurring in three distinct stages, each with specific implications for visualization design.
-
-![Colin Ware's three-stage model of visual information processing, illustrating the flow from low-level feature extraction to goal-directed processing (adapted from Ware, 2012).](images/ware_three_stage_model.png){#fig-ware-stages width="60%"}
-
-
-#### Stage 1: Parallel Processing of Low-Level Properties
-
-The first stage involves rapid, parallel extraction of basic visual features across the entire visual field. 
-As Ware describes, this preattentive processing occurs in under 500 milliseconds and requires no conscious effort. 
-Four fundamental categories of preattentive visual properties exist:
-
-**Form** is one of the most basic. 
-It includes simple geometric cues—orientation, length, width, and size—as well as more structured cues like curvature and the way marks are grouped. 
-Form also depends on how clearly something is rendered (sharp vs. blurred) and whether boundaries are emphasized through added marks or enclosing shapes.
-
-**Color** provides another immediate signal. 
-Differences in hue, brightness (intensity), and saturation let viewers separate categories or perceive gradients quickly, typically without much mental work.
-
-**Spatial position** underlies nearly every visualization. 
-At its simplest, it’s where something lands on a 2D plane via $(x, y)$ coordinates. 
-Position can also suggest depth or distance through stereoscopic cues or shading that makes shapes appear concave or convex.
-
-Finally, **motion** is especially effective at grabbing attention. 
-Flicker or directional movement stands out strongly and can quickly indicate changes or relationships in data that unfold over time.
-
-![Form-based pop-out: orientation and size. Color-based pop-out: hue; plus an intensity ramp. Spatial position (x,y) and implied depth via shading.](images/preattentive_images.png){#fig-preattentive}
-
-These preattentive properties are critical for visualization design because they allow information to be perceived "at a glance" without requiring serial visual search. 
-As Ware notes, it is easy to spot a single hawk in a sky full of pigeons, but if the sky contains many types of birds, the hawk becomes much harder to see—the distinctiveness of preattentive properties diminishes as visual variety increases.
-
-While Colin Ware’s model provides a foundational understanding of the physiological stages of vision, researchers like Lace Padilla have expanded this framework to include the complex cognitive processes involved in decision-making.
-@padilla2018 integrates Dual-Process Theory, which suggests that users oscillate between fast, intuitive "System 1" thinking and slow, deliberative "System 2" reasoning when interpreting data.
-
-![Lace Padilla's cognitive model (Padilla et al., 2018).](images/padilla_processing.png){#fig-padilla width="60%"}
-
-Ware’s framework is primarily a bottom-up, perceptual model that describes how the physical properties of a graphic (like color and orientation) are mechanically processed by the eye and brain. 
-In contrast, Padilla’s model is a cognitive-integrative model that places greater emphasis on the user's prior knowledge and the dual nature of reasoning. 
-While Ware’s "Stage 3" (Sequential Goal-Directed Processing) touches on cognition, Padilla delves deeper into how a user’s working memory and long-term expertise can override or bias the initial perceptual signals. 
-For a package like ggpcp, Ware’s model explains why categorical tie-breaking helps the eye follow a line (low-level tracking), whereas Padilla’s model explains how those clear paths allow the user to transition from an intuitive "gut feeling" about a trend to a rigorous, analytical conclusion about the high-dimensional data.
--->
 
 ### Stage 1: Pattern Perception and Gestalt Principles
 
@@ -426,13 +458,13 @@ The Gestalt laws of perceptual organization, articulated by German psychologists
 
 @vanderplas2023 explicitly invoke these principles in their design rationale for ggpcp:
 
-> "By reducing the number of line crossings at non-axis points simplifies the plot, reducing the overall cognitive load required to 'untangle' (literally and metaphorically) the individual observations and leveraging the Gestalt principle of common fate." (p. 4)
+> "By reducing the number of line crossings at non-axis points simplifies the plot, reducing the overall cognitive load required to 'untangle' (literally and metaphorically) the individual observations and leveraging the Gestalt principle of common fate." (p. 2)
 
 The principle of **good continuation** is particularly relevant to parallel coordinate plots: can viewers smoothly follow individual lines through numerical ties, or do visual discontinuities disrupt the perceptual flow?
 
 ### Stage 2: Visual Working Memory and Attention
 
-The seconnd stage involves conscious attention and visual working memory, which holds only a limited number of objects (typically 3-4) for active processing. 
+The second stage involves conscious attention and visual working memory, which holds only a limited number of objects (typically 3-4) for active processing. 
 
 This three-stage model has direct implications for evaluating tie-breaking strategies:
 
@@ -462,20 +494,6 @@ In contrast, tracing through constant-width boxes requires conscious attention t
 However, for frequency estimation tasks, constant-width boxes may have an advantage. 
 Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 1).
 
-<!--
-### External Cognition and Computational Offloading
-
-@scaife1996 concept of "external cognition": 
-
-> "While hierarchical sorting requires additional computations relative to the jittering or equally spaced solutions in Figure 5, this extra processing serves as 'external cognition' \[Scaife and Rogers, 1996\] - the additional computer time reduces the cognitive load required to untangle the lines" (p. 11)
-
-This principle aligns with Ware's emphasis on reducing working memory load through careful visual design. 
-By computing optimal line positions algorithmically, the equispaced approach offloads cognitive work from the viewer. 
-Rather than the viewer mentally sorting and organizing lines, the visualization presents pre-organized information that leverages natural perceptual grouping.
-
-Hammock plots achieve a different form of cognitive offloading by aggregating observations into boxes, explicitly computing and displaying frequency information. 
-The trade-off is between individual-level detail (equispaced lines) and aggregate-level clarity (boxes).
--->
 
 ### Gestalt Principles and Line Continuity
 
@@ -496,23 +514,6 @@ With many observations, equispaced lines may coalesce into ribbon-like bands, ye
 Boxes, by contrast, maintain their aggregate interpretation but are not designed to preserve individual-level information. 
 Rather than viewing these as competing representations, they can be understood as complementary: the line-based approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the box-based approach is optimal when the task involves comparing category frequencies or understanding distributional patterns.
 
-<!--
-### The Challenge of Area Perception
-
-Although area is preattentively processed, humans demonstrate notable difficulty in accurately comparing areas, particularly when aspect ratios vary. 
-This limitation is well documented in @cleveland1984's hierarchy of elementary perceptual tasks, which ranks position along a common scale as the most accurate encoding, followed by length, angle, slope, area, and volume in decreasing order of precision.
-
-Hammock plots and related box-based visualizations rely on area perception for frequency encoding. 
-Observers must compare box widths (area divided by length) to estimate relative frequencies. 
-The line width illusion and its reverse counterpart, documented extensively by @hofmann2013, further complicate these judgments by introducing systematic biases. 
-Specifically, viewers tend to assess the orthogonal distance between curved or angled lines rather than the vertical distance that actually encodes the data, leading to perceptual distortion when comparing ribbons drawn at different angles.
-
-Equispaced lines rely instead on density estimation, viewers count or estimate the number of lines within a given region. 
-While density estimation also presents perceptual challenges, research suggests it may be less susceptible to geometric illusions that affect area judgment. 
-Furthermore, density provides a more continuous encoding: frequencies can be estimated at any scale, from individual line counts to overall distributional patterns. 
-Common angle plots, which use a fixed angle for all connecting segments between categories, represent one attempt to neutralize line width illusions in box-based displays while preserving aggregate frequency information.
--->
-
 
 ## Implementation and Evaluation Plan
 
@@ -525,6 +526,7 @@ Common angle plots, which use a fixed angle for all connecting segments between 
 1.  Extend `pcp_arrange()` to detect and handle numerical ties
 2.  Implement `optimize_spacing_numerical()` or `tie_spacing()` function with perceptually-motivated parameters
 3.  Handle edge cases while preserving perceptual properties:
+
     -   Single unique value (centered position)
     -   Extreme skew (adaptive buffer sizing)
     -   Missing values (explicit separation region)
