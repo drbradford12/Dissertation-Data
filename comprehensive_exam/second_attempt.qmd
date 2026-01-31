@@ -341,10 +341,12 @@ This lack of clarity is not just an aesthetic problem; it also makes it harder t
 
 ## Addressing Numerical Ties
 
-![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties. 
-XXX I do not like this sketch. The goal is to maintain as much distance between numerical values as possible WHILE breaking the ties, so that the numerical scaling is approximately correct and the ties are broken. What you've done is equivalent to converting numerical variables to categorical, breaking the numerical meaning. Think of e.g. having 1980, 1980, 2000, and 2002. If you convert to a factor, the difference between 20 and 2 years is the same (Fox news style). Instead, if you have 1979.9, 1980.1, and 2000, and 2002, you approximately keep the numerical values and you can distinguish the tied values. Your sketch should represent that. XXX](images/better_working_thoery.png){#fig-working-theory}
+![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties.](images/minimal_adjustment_full.png){#fig-working-theory}
 
-<!-- This section is where things go off the rails. I don't like the way you're introducing it -- hammock plots need to come earlier, and I've largely put them there with a brief pro/con description.  -->
+<!-- 
+XXX I do not like this sketch. The goal is to maintain as much distance between numerical values as possible WHILE breaking the ties, so that the numerical scaling is approximately correct and the ties are broken. What you've done is equivalent to converting numerical variables to categorical, breaking the numerical meaning. Think of e.g. having 1980, 1980, 2000, and 2002. If you convert to a factor, the difference between 20 and 2 years is the same (Fox news style). Instead, if you have 1979.9, 1980.1, and 2000, and 2002, you approximately keep the numerical values and you can distinguish the tied values. Your sketch should represent that. XXX
+
+This section is where things go off the rails. I don't like the way you're introducing it -- hammock plots need to come earlier, and I've largely put them there with a brief pro/con description.  -->
 
 
 The ggpcp package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
@@ -428,7 +430,7 @@ This strategy ensures that observations with similar trajectories are positioned
 These bands facilitate the perception of distinct groups as they move together through high-dimensional space, reducing visual noise and highlighting underlying patterns.
 
 ![Hierarchical sorting reduces line crossings, making patterns easier to perceive.](images/pcp_line_tracing_guide_images/figure-8.png){#fig-figure-8}
-
+<!--
 ## Theoretical Framework: Perception-Driven Design
 
 Effective data visualizations must be grounded in how people actually see and process information. 
@@ -480,6 +482,7 @@ This three-stage model has direct implications for evaluating tie-breaking strat
 -   Explicitly encode frequency (reduced cognitive load)
 -   May disrupt line continuity (challenges good continuation)
 
+
 ## Preattentive Processing and Visual Search
 
 A key distinction between the two approaches concerns the nature of visual search required for different analytical tasks. Ware distinguishes between:
@@ -493,9 +496,9 @@ In contrast, tracing through constant-width boxes requires conscious attention t
 
 However, for frequency estimation tasks, constant-width boxes may have an advantage. 
 Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 1).
+-->
 
-
-### Gestalt Principles and Line Continuity
+## Gestalt Principles and Line Continuity
 
 The principle of **good continuation** states that the human visual system preferentially perceives smooth, continuous contours over interpretations requiring abrupt changes in direction. 
 This principle directly impacts the effectiveness of parallel coordinate plots for tracing individual observations.
@@ -514,10 +517,154 @@ With many observations, equispaced lines may coalesce into ribbon-like bands, ye
 Boxes, by contrast, maintain their aggregate interpretation but are not designed to preserve individual-level information. 
 Rather than viewing these as competing representations, they can be understood as complementary: the line-based approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the box-based approach is optimal when the task involves comparing category frequencies or understanding distributional patterns.
 
+## Mathematical Framework
 
-## Implementation and Evaluation Plan
+### Introduction and Problem Statement
 
-### Phase 1: Algorithm Development (Weeks 1-4)
+Parallel coordinate plots (PCPs) provide a powerful visualization technique for multivariate data, where each observation is represented as a polyline connecting values across parallel vertical axes. 
+However, when multiple observations share identical values on a given axis—a condition termed *tied values*—the corresponding line segments overlap, creating visual occlusion that impedes pattern recognition and individual observation tracking.
+
+This section presents a unified mathematical framework that extends the categorical tie-breaking approach established in generalized parallel coordinate plots [@vanderplas2023] to numerical variables, creating a single optimization framework that handles both variable types consistently.
+
+### Notation and Definitions
+
+#### Data Structure
+
+Let $\mathcal{D}$ be a dataset consisting of $n$ observations and $p$ variables. 
+We define:
+
+* $\boldsymbol{X} = \{X_1, X_2, \ldots, X_p\}$: the ordered set of variables displayed on parallel axes.
+* $x_{ij}$: the value of observation $i$ on variable $j$, where $i \in \{1, \ldots, n\}$ and $j \in \{1, \ldots, p\}$.
+* $y_{ij}$: the scaled y-coordinate of observation $i$ on axis $j$, normalized to $[0, 1]$.
+* $\tilde{y}_{ij}$: the adjusted y-coordinate after tie-breaking transformation.
+
+#### Scaling Transformation
+
+For numerical variables, the standard min-max normalization (termed "uniminmax" scaling) transforms raw values to the unit interval:
+
+$$y_{ij} = \frac{x_{ij} - \min(X_j)}{\max(X_j) - \min(X_j)}$$ {#eq-scaling}
+
+#### Tie Definition
+
+::: {#def-tieset}
+##### Tie Set
+For a given variable $X_j$, we define the **tie set** at value $v$ as:
+$$T_j(v) = \left\{ i : |y_{ij} - v| < \varepsilon \right\}$$ {#eq-tie_set}
+where $\varepsilon$ is a numerical tolerance (default $\varepsilon = 10^{-10}$).
+:::
+
+A value $v$ constitutes a *tie* if and only if $|T_j(v)| > 1$.
+
+### Available Space Computation
+
+#### Neighbor Identification
+
+For a tied value $v$ on axis $j$, we identify the nearest distinct neighboring values. 
+Let $\mathcal{Y}_j$ denote the set of all unique scaled values on axis $j$.
+
+::: {#def-lower-neighbor}
+##### Lower Neighbor
+$$v^{-} = \max\left\{ y : y \in \mathcal{Y}_j \setminus \{v\},\, y < v \right\}$$ {#eq-lower_neighbor}
+:::
+
+::: {#def-upper-neighbor}
+##### Upper Neighbor
+$$v^{+} = \min\left\{ y : y \in \mathcal{Y}_j \setminus \{v\},\, y > v \right\}$$ {#eq-upper_neighbor}
+:::
+
+### Boundary Computation
+
+The available region for spreading tied observations is bounded by midpoints to neighboring values:
+
+$$L(v) = 
+\begin{cases}
+\frac{v + v^{-}}{2} & \text{if } v^{-} \text{ exists}\\
+\max(0, v - \beta) & \text{otherwise}
+\end{cases}$$ {#eq-lower_bound}
+
+$$U(v) = 
+\begin{cases}
+\frac{v + v^{+}}{2} & \text{if } v^{+} \text{ exists}\\
+\min(1, v + \beta) & \text{otherwise}
+\end{cases}$$ {#eq-upper_bound}
+
+where $\beta$ is the density bandwidth parameter (default $\beta = 0.05$).
+
+### Local Density Adjustment
+
+To prevent excessive spread in sparse regions, we compute local density using a kernel estimate:
+
+$$\rho_j(v) = \frac{1}{n} \cdot |\{ i : |y_{ij} - v| < \beta \}|$$ {#eq-local_density}
+
+The **density factor** scales the available space:
+
+$$\varphi(v) = 1 - 0.5 \cdot \rho_j(v)$$ {#eq-density_factor}
+
+### Final Available Space
+
+The adjusted available space incorporates both boundary constraints and density adjustment:
+
+$$S(v) = \max\left\{ (U(v) - L(v)) \cdot \varphi(v),\; \delta \cdot (|T_j(v)| - 1) \right\}$$ {#eq-available_space}
+
+where $\delta$ is the minimum spacing parameter (default $\delta = 0.01$).
+
+### Optimal Spacing Formula
+
+The fundamental principle mirrors the `ggpcp` categorical approach: distribute observations evenly within the available space. For $k = |T_j(v)|$ tied observations, the **optimal inter-observation spacing** is:
+
+$$\Delta = \frac{S(v)}{k - 1}$$ {#eq-optimal_spacing}
+
+
+### Hierarchical Ordering for Crossing Minimization
+
+#### Sorting Key Construction
+
+For observation $i \in T_j(v)$, define the **sorting key** based on adjacent variables $\mathcal{A}_j = \{X_{a_1}, X_{a_2}, \ldots, X_{a_m}\}$:
+
+$$\kappa_i = ( y_{i,a_1}, y_{i,a_2}, \ldots, y_{i,a_m} )$$ {#eq-sorting_key}
+
+The tied observations are ordered lexicographically:
+
+$$\pi = \text{argsort}\left( \{ \kappa_i : i \in T_j(v) \} \right)$$ {#eq-ordering}
+
+
+#### Position Assignment
+
+Positions are assigned symmetrically around the original tied value:
+
+$$\tilde{y}_{i_m, j} = s + (m - 1) \cdot \Delta$$ {#eq-position_assignment}
+
+where $s$ is the start position calculated from the center $c = \frac{L(v) + U(v)}{2}$.
+
+
+#### Unified Algorithm
+
+```{text}
+#| eval: false
+#| label: alg-unified
+#| caption: "Unified Tie-Breaking: pcp_arrange_unified"
+
+Algorithm: Unified Tie-Breaking
+Input: pcp_data, method, sigma, epsilon, beta, delta
+
+For each axis j from 1 to p:
+    If x_j is categorical:
+        Apply categorical tie-breaking box allocation
+
+    Else if x_j is numerical:
+        Identify tie sets T_j(v)
+    
+        For each tie set:
+            Compute S(v) using density and neighbors
+            Compute hierarchical order pi based on adjacent axes
+            Assign new positions y_tilde using optimal spacing Delta
+Return adjusted pcp_data
+```
+
+
+# Implementation and Evaluation Plan
+
+## Phase 1: Algorithm Development (Weeks 1-4)
 
 **Deliverable:** Functional R package extension with comprehensive documentation
 
@@ -612,64 +759,20 @@ optimize_spacing_numerical <- function(values, space = 0.05) {
 
 **Deliverables:**
 
-1. **R Package Update (ggpcp Pull Request):**
+1. **R Package Update:**
    - CRAN submission with full documentation
    - Vignette: "Handling Numerical Ties in Parallel Coordinate Plots"
    - Unit tests achieving > 95% coverage
 
 2. **Academic Paper:**
    - Target: IEEE Transactions on Visualization and Computer Graphics
-   - Submission deadline: March 2026 (IEEE VIS)
+   - Submission deadline: April 2026 (IEEE VIS)
 
 3. **Supplementary Materials:**
    - Open Science Framework repository
    - All experimental stimuli and data
    - Reproducibility package
 
-# Timeline and Milestones
-
-```{r}
-#| label: tbl-timeline
-#| tbl-cap: "Research Timeline (12 Weeks)"
-
-timeline <- data.frame(
-  Week = c("1–2", "3–4", "4", "5–7", "8–10", "10–12"),
-  Milestone = c(
-    "Literature synthesis",
-    "Core algorithm development",
-    "IRB submission",
-    "Study 1: Frequency perception",
-    "Benchmarking",
-    "Integration"
-  ),
-  Deliverable = c(
-    "Annotated bibliography with Gestalt framework integration",
-    "Working R code with perceptual properties verified",
-    "Approved protocol for human subjects research",
-    "Raw data and statistical analysis",
-    "Performance report with computational metrics",
-    "Draft manuscript and R package release"
-  ),
-  `Perceptual Focus` = c(
-    "Gestalt framework integration",
-    "Perceptual properties implemented",
-    "Human subjects clearance",
-    "Magnitude estimation validation",
-    "Computational metrics",
-    "Synthesis and dissemination"
-  ),
-  check.names = FALSE
-)
-
-kable(timeline, booktabs = TRUE, align = c("c", "l", "l", "l")) %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                full_width = TRUE,
-                font_size = 10) %>%
-  column_spec(1, bold = TRUE, width = "1.2cm") %>%
-  column_spec(2, width = "3cm") %>%
-  column_spec(3, width = "5cm") %>%
-  column_spec(4, width = "3.5cm")
-```
 
 # Expected Contributions
 
@@ -680,12 +783,10 @@ kable(timeline, booktabs = TRUE, align = c("c", "l", "l", "l")) %>%
 ## Practical Contributions
 
 1. **Production Software:** Open-source R package extension immediately usable by practicing data scientists and researchers
-
 2. **Evidence-Based Guidelines:** Design recommendations grounded in empirical evidence and perceptual theory:
    - When to use equispaced lines vs. constant-width boxes
    - How to set spacing parameters for optimal perceptual clarity
    - Task-specific visualization selection criteria
-
 3. **Benchmark Suite:** Reusable experimental framework and stimuli for evaluating future parallel coordinate plot innovations
 
 
@@ -693,46 +794,8 @@ kable(timeline, booktabs = TRUE, align = c("c", "l", "l", "l")) %>%
 
 1. **Theory-Driven Evaluation:** Demonstrates how established perceptual theory (Gestalt principles) can generate specific, testable hypothesis
 2. **Multi-Method Approach:** Integrates behavioral experiments with computational benchmarking to triangulate findings
-
 3. **Reproducible Research:** Complete open science package enabling replication and extension by other researchers
 
-# Broader Impact
-
-This research addresses visualization challenges across numerous domains where mixed categorical-numerical data is common:
-
-```{r}
-#| label: tbl-domains
-#| tbl-cap: "Application Domains for Research Impact"
-
-domains <- data.frame(
-  Domain = c("Healthcare", "Manufacturing", "Social Science", "Finance", "Education"),
-  Application = c(
-    "Patient trajectory visualization",
-    "Quality control monitoring",
-    "Survey analysis",
-    "Portfolio analysis",
-    "Learning analytics"
-  ),
-  `Data Characteristics` = c(
-    "Categorical diagnoses + numerical measurements",
-    "Defect categories + continuous sensor readings",
-    "Demographic categories + Likert scales",
-    "Categorical sectors + numerical performance metrics",
-    "Course completion + assessment scores"
-  ),
-  check.names = FALSE
-)
-
-kable(domains, booktabs = TRUE, align = c("l", "l", "l")) %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                full_width = TRUE,
-                font_size = 10) %>%
-  column_spec(1, bold = TRUE, width = "2.5cm") %>%
-  column_spec(2, width = "4cm") %>%
-  column_spec(3, width = "6cm")
-```
-
-By providing both theoretical understanding and practical tools, this work enables more effective exploratory data analysis across these domains, ultimately supporting better data-driven decision making.
 
 # Limitations and Future Directions
 
