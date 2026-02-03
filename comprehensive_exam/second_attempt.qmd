@@ -337,8 +337,6 @@ This lack of clarity is not just an aesthetic problem; it also makes it harder t
 <!-- and breaks the continuity needed for individual observation tracking. -->
 <!-- XXX Yes, this is the problem. They also somewhat reduce the effectiveness of marginal density estimation. XXX -->
 
-
-
 ## Addressing Numerical Ties
 
 ![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties.](images/minimal_adjustment_full.png){#fig-working-theory}
@@ -517,150 +515,150 @@ With many observations, equispaced lines may coalesce into ribbon-like bands, ye
 Boxes, by contrast, maintain their aggregate interpretation but are not designed to preserve individual-level information. 
 Rather than viewing these as competing representations, they can be understood as complementary: the line-based approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the box-based approach is optimal when the task involves comparing category frequencies or understanding distributional patterns.
 
-## Mathematical Framework
+# Mathematical Framework
 
+<!--
 ### Introduction and Problem Statement
 
 Parallel coordinate plots (PCPs) provide a powerful visualization technique for multivariate data, where each observation is represented as a polyline connecting values across parallel vertical axes. 
 However, when multiple observations share identical values on a given axis—a condition termed *tied values*—the corresponding line segments overlap, creating visual occlusion that impedes pattern recognition and individual observation tracking.
 
 This section presents a unified mathematical framework that extends the categorical tie-breaking approach established in generalized parallel coordinate plots [@vanderplas2023] to numerical variables, creating a single optimization framework that handles both variable types consistently.
+-->
 
-### Notation and Definitions
+## Notation
 
-#### Data Structure
+Let $\mathcal{D}$ be a dataset with $n$ observations and $p$ variables displayed on parallel axes $X_1, X_2, \ldots, X_p$.
 
-Let $\mathcal{D}$ be a dataset consisting of $n$ observations and $p$ variables. 
-We define:
+| Symbol | Definition |
+|--------|------------|
+| $x_{ij}$ | Raw value of observation $i$ on variable $j$ |
+| $y_{ij}$ | Scaled value (normalized to $[0,1]$) |
+| $\tilde{y}_{ij}$ | Adjusted value after tie-breaking |
+| $T_j(v)$ | Set of observations tied at value $v$ on axis $j$ |
+| $k$ | Number of tied observations: $k = |T_j(v)|$ |
 
-* $\boldsymbol{X} = \{X_1, X_2, \ldots, X_p\}$: the ordered set of variables displayed on parallel axes.
-* $x_{ij}$: the value of observation $i$ on variable $j$, where $i \in \{1, \ldots, n\}$ and $j \in \{1, \ldots, p\}$.
-* $y_{ij}$: the scaled y-coordinate of observation $i$ on axis $j$, normalized to $[0, 1]$.
-* $\tilde{y}_{ij}$: the adjusted y-coordinate after tie-breaking transformation.
+: Core notation {#tbl-notation}
 
-#### Scaling Transformation
+## Scaling
 
-For numerical variables, the standard min-max normalization (termed "uniminmax" scaling) transforms raw values to the unit interval:
+Variables are normalized to $[0,1]$ using min-max scaling:
 
-$$y_{ij} = \frac{x_{ij} - \min(X_j)}{\max(X_j) - \min(X_j)}$$ {#eq-scaling}
+$$
+y_{ij} = \frac{x_{ij} - \min(X_j)}{\max(X_j) - \min(X_j)}
+$$ {#eq-scaling}
 
-#### Tie Definition
+## The Tie-Breaking Algorithm
 
-::: {#def-tieset}
-##### Tie Set
-For a given variable $X_j$, we define the **tie set** at value $v$ as:
-$$T_j(v) = \left\{ i : |y_{ij} - v| < \varepsilon \right\}$$ {#eq-tie_set}
-where $\varepsilon$ is a numerical tolerance (default $\varepsilon = 10^{-10}$).
-:::
+### Step 1: Identify Ties
 
-A value $v$ constitutes a *tie* if and only if $|T_j(v)| > 1$.
+A value $v$ on axis $j$ is a tie if multiple observations share it:
 
-### Available Space Computation
+$$
+T_j(v) = \{i : y_{ij} = v\}, \quad \text{where } |T_j(v)| > 1
+$$ {#eq-ties}
 
-#### Neighbor Identification
+### Step 2: Compute Available Space
 
-For a tied value $v$ on axis $j$, we identify the nearest distinct neighboring values. 
-Let $\mathcal{Y}_j$ denote the set of all unique scaled values on axis $j$.
+For a tied value $v$, find the nearest distinct neighbors above ($v^+$) and below ($v^-$):
 
-::: {#def-lower-neighbor}
-##### Lower Neighbor
-$$v^{-} = \max\left\{ y : y \in \mathcal{Y}_j \setminus \{v\},\, y < v \right\}$$ {#eq-lower_neighbor}
-:::
+$$
+v^- = \max\{y : y < v, y \in Y_j\}, \quad v^+ = \min\{y : y > v, y \in Y_j\}
+$$ {#eq-neighbors}
 
-::: {#def-upper-neighbor}
-##### Upper Neighbor
-$$v^{+} = \min\left\{ y : y \in \mathcal{Y}_j \setminus \{v\},\, y > v \right\}$$ {#eq-upper_neighbor}
-:::
+where $Y_j$ is the set of unique values on axis $j$.
 
-### Boundary Computation
+The boundaries for spreading are midpoints to neighbors:
 
-The available region for spreading tied observations is bounded by midpoints to neighboring values:
+$$
+L(v) = \frac{v + v^-}{2}, \quad U(v) = \frac{v + v^+}{2}
+$$ {#eq-bounds}
 
-$$L(v) = 
-\begin{cases}
-\frac{v + v^{-}}{2} & \text{if } v^{-} \text{ exists}\\
-\max(0, v - \beta) & \text{otherwise}
-\end{cases}$$ {#eq-lower_bound}
+If no neighbor exists, use axis limits with buffer $\beta$ (default 0.05):
 
-$$U(v) = 
-\begin{cases}
-\frac{v + v^{+}}{2} & \text{if } v^{+} \text{ exists}\\
-\min(1, v + \beta) & \text{otherwise}
-\end{cases}$$ {#eq-upper_bound}
+- $L(v) = \max(0, v - \beta)$ if $v^-$ doesn't exist
+- $U(v) = \min(1, v + \beta)$ if $v^+$ doesn't exist
 
-where $\beta$ is the density bandwidth parameter (default $\beta = 0.05$).
+The available space is:
 
-### Local Density Adjustment
+$$
+S(v) = U(v) - L(v)
+$$ {#eq-space}
 
-To prevent excessive spread in sparse regions, we compute local density using a kernel estimate:
+### Step 3: Compute Optimal Spacing
 
-$$\rho_j(v) = \frac{1}{n} \cdot |\{ i : |y_{ij} - v| < \beta \}|$$ {#eq-local_density}
+The core principle identical for categorical and numerical ties:
 
-The **density factor** scales the available space:
+$$
+\boxed{\Delta = \frac{S(v)}{k - 1}}
+$$ {#eq-spacing}
 
-$$\varphi(v) = 1 - 0.5 \cdot \rho_j(v)$$ {#eq-density_factor}
+This distributes $k$ observations evenly across the available space $S(v)$.
 
-### Final Available Space
+## Step 4: Order Observations Hierarchically
 
-The adjusted available space incorporates both boundary constraints and density adjustment:
+To minimize line crossings, tied observations are sorted by their positions on adjacent axes. For axis $j$, let $A_j$ be the adjacent axis (left or right depending on processing direction).
 
-$$S(v) = \max\left\{ (U(v) - L(v)) \cdot \varphi(v),\; \delta \cdot (|T_j(v)| - 1) \right\}$$ {#eq-available_space}
+For each observation $i \in T_j(v)$, the sorting key is:
 
-where $\delta$ is the minimum spacing parameter (default $\delta = 0.01$).
+$$
+\kappa_i = \tilde{y}_{i,A_j}
+$$ {#eq-sortkey}
 
-### Optimal Spacing Formula
+Observations are ordered so that $\kappa_{i_1} \leq \kappa_{i_2} \leq \cdots \leq \kappa_{i_k}$.
 
-The fundamental principle mirrors the `ggpcp` categorical approach: distribute observations evenly within the available space. For $k = |T_j(v)|$ tied observations, the **optimal inter-observation spacing** is:
+**Key insight**: This requires *sequential* axis processing—the adjusted positions from previously processed axes inform the ordering on the current axis.
 
-$$\Delta = \frac{S(v)}{k - 1}$$ {#eq-optimal_spacing}
+### Step 5: Assign Positions
 
+Given ordered observations $(i_1, i_2, \ldots, i_k)$:
+$$
+\tilde{y}_{i_m,j} = L(v) + (m - 1) \cdot \Delta, \quad m = 1, 2, \ldots, k
+$$ {#eq-assign}
 
-### Hierarchical Ordering for Crossing Minimization
+## Unified Framework
 
-#### Sorting Key Construction
+The algorithm treats numerical ties identically to categorical levels:
 
-For observation $i \in T_j(v)$, define the **sorting key** based on adjacent variables $\mathcal{A}_j = \{X_{a_1}, X_{a_2}, \ldots, X_{a_m}\}$:
+| Variable Type | Available Space | Spacing |
+|--------------|-----------------|---------|
+| Categorical | Box height $h_\ell$ for level $\ell$ | $\Delta = h_\ell / (n_\ell - 1)$ |
+| Numerical | Midpoint boundaries $S(v)$ | $\Delta = S(v) / (k - 1)$ |
 
-$$\kappa_i = ( y_{i,a_1}, y_{i,a_2}, \ldots, y_{i,a_m} )$$ {#eq-sorting_key}
+: Unified spacing principle {#tbl-unified}
 
-The tied observations are ordered lexicographically:
+Both apply the same formula: **spacing = available_space / (n − 1)**.
 
-$$\pi = \text{argsort}\left( \{ \kappa_i : i \in T_j(v) \} \right)$$ {#eq-ordering}
+## Algorithm Summary
 
-
-#### Position Assignment
-
-Positions are assigned symmetrically around the original tied value:
-
-$$\tilde{y}_{i_m, j} = s + (m - 1) \cdot \Delta$$ {#eq-position_assignment}
-
-where $s$ is the start position calculated from the center $c = \frac{L(v) + U(v)}{2}$.
-
-
-#### Unified Algorithm
-
-```{text}
-#| eval: false
-#| label: alg-unified
-#| caption: "Unified Tie-Breaking: pcp_arrange_unified"
-
+```{.pseudocode}
 Algorithm: Unified Tie-Breaking
-Input: pcp_data, method, sigma, epsilon, beta, delta
 
-For each axis j from 1 to p:
-    If x_j is categorical:
-        Apply categorical tie-breaking box allocation
+Input: Data D, variables X1...Xp, method {from-left, from-right}
+Output: Adjusted positions ỹij
 
-    Else if x_j is numerical:
-        Identify tie sets T_j(v)
-    
-        For each tie set:
-            Compute S(v) using density and neighbors
-            Compute hierarchical order pi based on adjacent axes
-            Assign new positions y_tilde using optimal spacing Delta
-Return adjusted pcp_data
+1. Scale all variables to [0,1]
+2. Set processing order based on method
+3. For each axis j in processing order:
+     a. Find tied values: V = {v : |Tj(v)| > 1}
+     b. For each v ∈ V:
+          i.   Compute S(v) from neighbor midpoints
+          ii.  Order Tj(v) by adjacent axis positions
+          iii. Δ ← S(v) / (k - 1)
+          iv.  Assign positions: ỹim, j = L(v) + (m-1)·Δ
+4. Return adjusted data
 ```
 
+
+## Parameters
+
+| Parameter | Symbol | Default | Description |
+|-----------|--------|---------|-------------|
+| Boundary buffer | $\beta$ | 0.05 | Fallback when no neighbor exists |
+| Minimum spacing | $\delta$ | 0.01 | Ensures minimum separation |
+| Tie tolerance | $\varepsilon$ | $10^{-10}$ | For floating-point comparison |
+
+: Algorithm parameters {#tbl-params}
 
 # Implementation and Evaluation Plan
 
