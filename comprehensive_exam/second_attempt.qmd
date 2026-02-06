@@ -369,9 +369,11 @@ where:
 
 --- 
 
+<!--
 \db{Updated the writing below here. As of Thursday, Jan. 22nd, 2026}
 
 \svp{Anything below this line needs a lot of work}
+-->
 
 A key visual difference emerges when connecting categorical to numerical variables. 
 @schonlau2024 observe:
@@ -381,6 +383,7 @@ A key visual difference emerges when connecting categorical to numerical variabl
 ![The visual proof of the perceptual trade-offs as describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
 
 When ggpcp connects categorical and numerical variables, the tie-breaking algorithms keep the triangular patterns clear (@fig-boxes). 
+
 <!-- I think you're missing the point here, and I don't think you should focus on the triangles! The point is that we can't distinguish the observations when the numerical stuff is there. In hammock plots the marginal density is more clear than in ggpcp, but there is no reason we couldn't get that fixed in ggpcp with some intelligent tie breaking that makes the vertical axis basically a rug plot, allowing you to visually estimate density. This would *also* ensure that we could resolve individual lines across the plot -- that is, fixing the ties fixes *both* issues. -->
 
 @schonlau2024 observes that concentration patterns—such as the flow from zero hospitalizations to low comorbidity values—are "far more obvious in the hammock plot than in the GPCP plot" precisely because hammock plots maintain constant-width boxes that make marginal densities apparent. 
@@ -427,7 +430,7 @@ By ordering observations within a tie group based on their values on adjacent ax
 This strategy ensures that observations with similar trajectories are positioned in close proximity, creating cohesive visual bands. 
 These bands facilitate the perception of distinct groups as they move together through high-dimensional space, reducing visual noise and highlighting underlying patterns.
 
-![Hierarchical sorting reduces line crossings, making patterns easier to perceive.](images/pcp_line_tracing_guide_images/figure-8.png){#fig-figure-8}
+![Comparison of parallel coordinate plots without (left) and with (right) numerical tie-breaking. When observations share the same numerical value, their lines overlap completely, hiding how many cases exist at that value. Spreading tied values within resolution-based boxes (blue) makes each observation visible while signaling that positions within the box are artifacts of tie-breaking. ](images/pcp_line_tracing_guide_images/numerical_tiebreaking_figure.png){#fig-figure-8}
 <!--
 ## Theoretical Framework: Perception-Driven Design
 
@@ -498,7 +501,7 @@ Equispaced lines require inferring frequency from density, which is a second-ord
 
 ## Gestalt Principles and Line Continuity
 
-The principle of **good continuation** states that the human visual system preferentially perceives smooth, continuous contours over interpretations requiring abrupt changes in direction. 
+The principle of good continuation states that the human visual system preferentially perceives smooth, continuous contours over interpretations requiring abrupt changes in direction. 
 This principle directly impacts the effectiveness of parallel coordinate plots for tracing individual observations.
 
 Equispaced lines maintain continuity by representing each observation as a continuous polyline extending from the leftmost to the rightmost axis. 
@@ -506,14 +509,20 @@ When observations share identical numerical values (ties), the equispacing mecha
 The ggpcp framework implements this through hierarchical sorting, which minimizes line crossings at axis intersections and leverages both the Gestalt principle of good continuation and the principle of common fate, wherein lines with similar values across multiple axes appear to move together through the display.
 
 Constant-width boxes represent observations as aggregated area segments rather than individual lines. 
-This encoding communicates aggregate quantities effectively and provides an immediate visual representation of bivariate contingency relationships. 
-However, tracing a single observation through a box requires viewers to mentally reconstruct the implied path, engaging conscious attention and working memory. 
-In this sense, the two approaches serve distinct analytical purposes: equispaced lines support individual-level tracing, while boxes support aggregate-level frequency comparison.
+This encoding communicates aggregate quantities effectively: the area of each segment is proportional to the number of observations sharing that combination of values across adjacent axes, making the joint frequencies of category pairs immediately visible. 
+In contrast, equispaced lines preserve individual observations as distinct visual elements. 
+When lines are continuous and uninterrupted, viewers can leverage preattentive processes such as the Gestalt principle of good continuation to trace a single case across all axes [@healey2012]. 
+The two approaches thus serve distinct purposes: lines support individual-level tracing through low-level perceptual grouping, while boxes support aggregate-level frequency comparison.
 
-This distinction becomes increasingly relevant as dataset size grows. 
-With many observations, equispaced lines may coalesce into ribbon-like bands, yet the continuity principle still applies—viewers can perceive flow patterns even when individual lines are indistinguishable. 
-Boxes, by contrast, maintain their aggregate interpretation but are not designed to preserve individual-level information. 
-Rather than viewing these as competing representations, they can be understood as complementary: the line-based approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the box-based approach is optimal when the task involves comparing category frequencies or understanding distributional patterns.
+This distinction becomes increasingly relevant as dataset size grows, and it is important to distinguish between two different uses of box-like visual elements in parallel coordinate displays. 
+Hammock plots use parallelograms to represent aggregated bivariate relationships: the area of each parallelogram encodes the joint frequency of category pairs across adjacent axes, replacing individual observations with area segments. 
+This approach scales well with large datasets because the visual representation remains stable regardless of sample size, but individual observations cannot be traced.
+
+GPCPs take a different approach: when multiple observations share the same categorical value, their vertical positions are spread out within a frame to avoid overplotting. 
+The frame signals that the precise positions within that region reflect tie-breaking rather than meaningful data variation, but the individual lines remain continuous and traceable across the full plot. 
+With many observations, these equispaced lines may coalesce into ribbon-like bands; however, the principle of good continuation still applies, allowing viewers to perceive flow patterns even when individual lines are indistinguishable.
+
+Rather than viewing these as competing representations, they can be understood as complementary: the GPCP approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the hammock approach is optimal when the task involves comparing category frequencies or understanding distributional patterns without regard to individual observations.
 
 # Mathematical Framework
 
@@ -525,6 +534,7 @@ However, when multiple observations share identical values on a given axis—a c
 
 This section presents a unified mathematical framework that extends the categorical tie-breaking approach established in generalized parallel coordinate plots [@vanderplas2023] to numerical variables, creating a single optimization framework that handles both variable types consistently.
 -->
+![The tie problem in parallel coordinate plots. When observations share values, lines overlap and create visual collisions that mask the underlying data distribution.](images/math_images/section1_original_ties.png){#fig-original-ties width=85%}
 
 ## Notation
 
@@ -537,6 +547,7 @@ Let $\mathcal{D}$ be a dataset with $n$ observations and $p$ variables displayed
 | $\tilde{y}_{ij}$ | Adjusted value after tie-breaking |
 | $T_j(v)$ | Set of observations tied at value $v$ on axis $j$ |
 | $k$ | Number of tied observations: $k = |T_j(v)|$ |
+| $\delta_j$ | Resolution of axis $j$: minimum distance between distinct values |
 
 : Core notation {#tbl-notation}
 
@@ -550,54 +561,65 @@ $$ {#eq-scaling}
 
 ## The Tie-Breaking Algorithm
 
-### Step 1: Identify Ties
+### Step 1: Compute Axis Resolution
+
+To preserve density information and maintain consistent spacing, we first compute the global resolution of axis $j$—the smallest difference between any two distinct values:
+
+$$
+\delta_j = \min\{|y_1 - y_2| : y_1 \neq y_2, \; y_1, y_2 \in Y_j\}
+$$ {#eq-resolution}
+
+where $Y_j$ is the set of unique values on axis $j$. 
+
+Using a consistent jitter range across all values ensures that the visual representation preserves both the density of observations at each value and the gaps between distinct values. 
+An approach that computed jitter ranges individually for each tied value would risk collapsing visually meaningful gaps, destroying distance information in the display.
+
+### Step 2: Identify Ties
 
 A value $v$ on axis $j$ is a tie if multiple observations share it:
 
 $$
-T_j(v) = \{i : y_{ij} = v\}, \quad \text{where } |T_j(v)| > 1
+T_j(v) = \{i : y_{ij} = v\}, \quad |T_j(v)| > 1
 $$ {#eq-ties}
 
-### Step 2: Compute Available Space
+### Step 3: Compute Available Space
 
-For a tied value $v$, find the nearest distinct neighbors above ($v^+$) and below ($v^-$):
-
-$$
-v^- = \max\{y : y < v, y \in Y_j\}, \quad v^+ = \min\{y : y > v, y \in Y_j\}
-$$ {#eq-neighbors}
-
-where $Y_j$ is the set of unique values on axis $j$.
-
-The boundaries for spreading are midpoints to neighbors:
+Tied observations at value $v$ are spread within an interval defined by the axis resolution:
 
 $$
-L(v) = \frac{v + v^-}{2}, \quad U(v) = \frac{v + v^+}{2}
+L(v) = v - \frac{\delta_j}{2}, \quad U(v) = v + \frac{\delta_j}{2}
 $$ {#eq-bounds}
 
-If no neighbor exists, use axis limits with buffer $\beta$ (default 0.05):
+If $v$ is at the axis boundary, apply a buffer $\beta$ (default 0.05):
 
-- $L(v) = \max(0, v - \beta)$ if $v^-$ doesn't exist
-- $U(v) = \min(1, v + \beta)$ if $v^+$ doesn't exist
+- $L(v) = \max(0, v - \delta_j/2)$ if $v - \delta_j/2 < 0$
+- $U(v) = \min(1, v + \delta_j/2)$ if $v + \delta_j/2 > 1$
 
 The available space is:
 
 $$
 S(v) = U(v) - L(v)
 $$ {#eq-space}
+<!--
+![Computing available space. The algorithm uses the global axis resolution to define a consistent jitter interval around each tied value, preserving the relative spacing between distinct values.](images/math_images/section7_compute_available_space.png){#fig-available-space width=90%}
+-->
+### Step 4: Compute Optimal Spacing
 
-### Step 3: Compute Optimal Spacing
-
-The core principle identical for categorical and numerical ties:
+The core principle is identical for categorical and numerical ties:
 
 $$
 \boxed{\Delta = \frac{S(v)}{k - 1}}
 $$ {#eq-spacing}
 
 This distributes $k$ observations evenly across the available space $S(v)$.
+<!--
+![The even tie spread algorithm. Original tied values (left) are spread evenly within the computed width (right), with width determined by the global minimum gap between unique values.](images/math_images/section3_even_tie_spread.png){#fig-even-spread width=90%}
+-->
 
-## Step 4: Order Observations Hierarchically
+### Step 5: Order Observations Hierarchically
 
-To minimize line crossings, tied observations are sorted by their positions on adjacent axes. For axis $j$, let $A_j$ be the adjacent axis (left or right depending on processing direction).
+To minimize line crossings, tied observations are sorted by their positions on adjacent axes. 
+For axis $j$, let $A_j$ be the adjacent axis (left or right depending on processing direction).
 
 For each observation $i \in T_j(v)$, the sorting key is:
 
@@ -607,14 +629,37 @@ $$ {#eq-sortkey}
 
 Observations are ordered so that $\kappa_{i_1} \leq \kappa_{i_2} \leq \cdots \leq \kappa_{i_k}$.
 
+<!--
+![Hierarchical ordering minimizes line crossings. By sorting tied observations based on their positions in adjacent axes, lines that would otherwise cross are kept parallel, supporting the Gestalt principle of "common fate."](images/math_images/section8_hierarchical_ordering.png){#fig-hierarchical width=90%}
+-->
+
 **Key insight**: This requires *sequential* axis processing—the adjusted positions from previously processed axes inform the ordering on the current axis.
 
-### Step 5: Assign Positions
+### Step 6: Assign Positions
 
 Given ordered observations $(i_1, i_2, \ldots, i_k)$:
+
 $$
 \tilde{y}_{i_m,j} = L(v) + (m - 1) \cdot \Delta, \quad m = 1, 2, \ldots, k
 $$ {#eq-assign}
+
+<!--
+![Position assignment. Observations are distributed evenly within the available space, with positions calculated as offsets from the lower bound.](images/math_images/section9_assign_spread_positions.png){#fig-assign-positions width=90%}
+-->
+
+### Position Functions
+
+Two variants of position functions distribute observations within the available space:
+
+<!--
+![Position functions for even spacing. `position_even()` excludes edges (observations never touch boundaries), while `position_even_edges()` includes edges (first and last observations at boundaries).](images/math_images/section2_position_functions.png){#fig-position-functions width=85%}
+-->
+
+The edge-inclusive version places observations at:
+
+$$
+\text{positions} = L(v) + \frac{i-1}{k-1} \cdot S(v), \quad i = 1, \ldots, k
+$$
 
 ## Unified Framework
 
@@ -623,32 +668,59 @@ The algorithm treats numerical ties identically to categorical levels:
 | Variable Type | Available Space | Spacing |
 |--------------|-----------------|---------|
 | Categorical | Box height $h_\ell$ for level $\ell$ | $\Delta = h_\ell / (n_\ell - 1)$ |
-| Numerical | Midpoint boundaries $S(v)$ | $\Delta = S(v) / (k - 1)$ |
+| Numerical | Resolution-based interval $S(v) = \delta_j$ | $\Delta = S(v) / (k - 1)$ |
 
 : Unified spacing principle {#tbl-unified}
 
 Both apply the same formula: **spacing = available_space / (n − 1)**.
+<!--
+![The unified framework processes both categorical and numerical variables with consistent logic. Categorical variables receive proportional box allocation; numerical ties receive density-based spacing. Both use the same core spacing equation.](images/math_images/section10_unified_framework.png){#fig-unified width=95%}
+-->
+
+## Visual Results
+
+### Uniform Spacing Applied
+
+After applying the tie-breaking algorithm, observations that previously overlapped are now visually distinguishable:
+
+![Parallel coordinate plot after applying uniform spacing. Gray boxes indicate regions where tied values have been spread, making individual observations traceable.](images/math_images/section4_uniform_spacing_pcp.png){#fig-uniform-spacing width=90%} 
+
+#### Annotated Tie Regions
+
+Tie regions can be annotated with boxes showing the original value and the spread region:
+
+![Annotated tie regions with labels. Gray boxes highlight where ties occurred, with labels showing the original tied value. This is particularly useful for integer data where ties are frequent.](images/math_images/section6_annotated_ties.png){#fig-annotated width=90%}
+
+### Tie Box Detection
+
+The `get_tie_box()` function identifies and bounds tie regions for visualization:
+
+![The tie box detection process. (1) Identify duplicated values, (2) scale and group contiguous spreads, (3) generate bounding box coordinates for annotation.](images/math_images/section5_get_tie_box.png){#fig-tie-box width=90%}
 
 ## Algorithm Summary
 
-```{.pseudocode}
-Algorithm: Unified Tie-Breaking
+**Algorithm: Unified Tie-Breaking**
 
-Input: Data D, variables X1...Xp, method {from-left, from-right}
-Output: Adjusted positions ỹij
+Input: Data $D$, variables $X_1...X_p$, method $\in$ {from-left, from-right, from-both}
+Output: Adjusted positions $ỹ_{ij}$
 
-1. Scale all variables to [0,1]
-2. Set processing order based on method
-3. For each axis j in processing order:
-     a. Find tied values: V = {v : |Tj(v)| > 1}
-     b. For each v ∈ V:
-          i.   Compute S(v) from neighbor midpoints
-          ii.  Order Tj(v) by adjacent axis positions
-          iii. Δ ← S(v) / (k - 1)
-          iv.  Assign positions: ỹim, j = L(v) + (m-1)·Δ
-4. Return adjusted data
-```
+1. Scale all variables to $[0,1]$
+2. For each axis j, compute resolution: $\delta_i = min|y_1 - y_2|$ for distinct $y_1, y_2 \in Y_j$
+3. Set processing order based on method:
 
+- from-left: process axes $1, 2,  \ldots ,p$; reference left neighbor
+- from-right: process axes $p, p-1,  \ldots ,1$; reference right neighbor
+- from-both: process outward from center axis; reference previously processed neighbor
+
+4. For each axis j in processing order:
+     a. Identify tied values: $V = {v : |T_j(v)| > 1}$
+     b. For each $v \in V$:
+          i.   Set available space: $S(v) = \delta_j$
+          ii.  Compute bounds: $L(v) = v -\frac{\delta_i}{2}2, U(v) = v + \frac{\delta_i}{2}$
+          iii. Order $T_{i}(v)$ by positions on adjacent axis
+          iv.  Compute spacing: $\Delta = \frac{S(v)}{(k - 1)}$
+          v.   Assign positions: $ỹ_{i_{m},j} = L(v) + (m - 1)*\Delta \: for \: m = 1,...,k$
+5. Return adjusted data
 
 ## Parameters
 
@@ -664,49 +736,46 @@ Output: Adjusted positions ỹij
 
 ## Phase 1: Algorithm Development (Weeks 1-4)
 
-**Deliverable:** Functional R package extension with comprehensive documentation
+Deliverable: Functional R package extension with comprehensive documentation
+Tasks:
 
-**Tasks:**
+1. Extend `pcp_arrange()` to detect and handle numerical ties
+2. Implement `optimize_spacing_numerical()` or `tie_spacing()` function with perceptually-motivated parameters
+3. Handle edge cases while preserving perceptual properties:
 
-1.  Extend `pcp_arrange()` to detect and handle numerical ties
-2.  Implement `optimize_spacing_numerical()` or `tie_spacing()` function with perceptually-motivated parameters
-3.  Handle edge cases while preserving perceptual properties:
+- Single unique value (centered position)
+- Extreme skew (adaptive buffer sizing)
+- Missing values (explicit separation region)
 
-    -   Single unique value (centered position)
-    -   Extreme skew (adaptive buffer sizing)
-    -   Missing values (explicit separation region)
-4.  Integration testing with existing ggpcp workflow
+4. Integration testing with existing ggpcp workflow
 
 **Code Structure (Simplified):**
 
 ```{r}
+#| eval: false
+#
 optimize_spacing_numerical <- function(values, space = 0.05) {
   # 1. Identify unique values and their count
   unique_vals <- sort(unique(values))
   m <- length(unique_vals)
   
   # 2. Generate frequency table
-  # Ensure it matches the sorted order of unique_vals
   freq <- as.numeric(table(values)[as.character(unique_vals)])
   
   # 3. Total available space
-  # We subtract the sum of all gaps (space * (m - 1)) from the total 1.0 coordinate range
   total_gap_space <- space * (m - 1)
   available_width <- 1 - total_gap_space
   
   # 4. Proportional allocation
-  # Divide the available width based on the relative frequency of each value
   widths <- (freq / sum(freq)) * available_width
   
   # 5. Calculate Positions
-  # We calculate the starting point of each 'block' and then find the midpoint
   pos_midpoints <- numeric(m)
   current_pos <- 0
   
   for (i in 1:m) {
     # The midpoint is the current position plus half the width of the current block
     pos_midpoints[i] <- current_pos + (widths[i] / 2)
-    
     # Advance the current position by the width of the block plus the inter-block space
     current_pos <- current_pos + widths[i] + space
   }
@@ -719,25 +788,33 @@ optimize_spacing_numerical <- function(values, space = 0.05) {
 
 ## Phase 2: Perceptual Validation Studies (Weeks 5–7)
 
-**Study 1: Frequency Perception**
+Study 1: Frequency Perception
 
-- **Duration:** Weeks 5–7
-- **Participants:** n = 60 (30 per condition)
-- **Design:** Between-subjects
+- Duration: Weeks 5–7
+- Participants: n = 128 (64 per condition)
+- Design: Between-subjects comparison of GPCP vs. hammock plot representations
 
-**Procedure:**
+Sample Size Justification:
+
+A power analysis was conducted using G*Power 3.1 [@faul2007] to determine the minimum sample size required to detect a meaningful difference between visualization conditions. 
+Based on prior graphical perception studies—including Heer and Bostock's [-@heer2010] crowdsourced replication of Cleveland and McGill [-@cleveland1984], which used approximately 50 participants per condition, and Hofmann and Vendettuoli's [-@hofmann2013] common angle plot study with 46 participants, we anticipated a medium effect size (Cohen's d = 0.5). For a two-tailed independent samples t-test with α = 0.05 and power = 0.80, the required sample size is n = 64 per group (total N = 128). 
+This sample size also provides 80% power to detect effects as small as d = 0.50, which represents a practically meaningful difference in task accuracy between visualization types [@brysbaert2019]. 
+To account for potential exclusions due to failed attention checks or incomplete responses (estimated at 10–15% based on crowdsourcing norms), we will recruit n = 75 per condition.
+
+Procedure:
 
 1. Magnitude estimation (12 trials): "What percentage have value X?"
 2. Ordinal comparison (12 trials): "Which value is more frequent?"
 3. Ratio judgment (12 trials): "A is how many times B?"
 4. Confidence ratings (7-point scale) for each response
 
-**Analysis:**
+Analysis:
 
 - Absolute percentage error for magnitude estimation
 - Accuracy rates for ordinal and ratio tasks
 - Bias analysis: systematic over/under-estimation
 - Confidence calibration: accuracy vs. subjective confidence
+- Effect sizes reported as Cohen's d with 95% confidence intervals
 
 ## Phase 3: Comparative Benchmarking (Weeks 6–10)
 
@@ -757,42 +834,23 @@ optimize_spacing_numerical <- function(values, space = 0.05) {
 
 **Deliverables:**
 
-1. **R Package Update:**
-   - CRAN submission with full documentation
-   - Vignette: "Handling Numerical Ties in Parallel Coordinate Plots"
-   - Unit tests achieving > 95% coverage
+1. R Package Update:
 
-2. **Academic Paper:**
-   - Target: IEEE Transactions on Visualization and Computer Graphics
-   - Submission deadline: April 2026 (IEEE VIS)
+- CRAN submission with full documentation
+- Vignette: "Handling Numerical Ties in Parallel Coordinate Plots"
+- Unit tests achieving > 95% coverage
 
-3. **Supplementary Materials:**
-   - Open Science Framework repository
-   - All experimental stimuli and data
-   - Reproducibility package
+2. Academic Paper:
+
+- Target: IEEE Transactions on Visualization and Computer Graphics
+- Submission deadline: May 2026 (IEEE VIS)
 
 
-# Expected Contributions
+3. Supplementary Materials:
 
-## Theoretical Contributions
-
-**Unified Tie-Breaking Theory:** Formalization of equispaced optimization for both categorical and numerical variables, with key perceptual properties (separability, continuity, space efficiency)
-
-## Practical Contributions
-
-1. **Production Software:** Open-source R package extension immediately usable by practicing data scientists and researchers
-2. **Evidence-Based Guidelines:** Design recommendations grounded in empirical evidence and perceptual theory:
-   - When to use equispaced lines vs. constant-width boxes
-   - How to set spacing parameters for optimal perceptual clarity
-   - Task-specific visualization selection criteria
-3. **Benchmark Suite:** Reusable experimental framework and stimuli for evaluating future parallel coordinate plot innovations
-
-
-## Methodological Contributions
-
-1. **Theory-Driven Evaluation:** Demonstrates how established perceptual theory (Gestalt principles) can generate specific, testable hypothesis
-2. **Multi-Method Approach:** Integrates behavioral experiments with computational benchmarking to triangulate findings
-3. **Reproducible Research:** Complete open science package enabling replication and extension by other researchers
+- Open Science Framework repository with pre-registration
+- All experimental stimuli and data
+- Reproducibility package with power analysis scripts
 
 
 # Limitations and Future Directions
@@ -812,16 +870,28 @@ optimize_spacing_numerical <- function(values, space = 0.05) {
 
 # Conclusion
 
-This thorough examination proposal tackles a key issue in information visualization by basing design choices on how people see things. 
-The suggested equispaced line method builds on ggpcp's well-known categorical tie-breaking algorithm for numerical variables. 
-This creates a single framework that keeps the visual flow going, uses preattentive processing, and follows Gestalt principles of good continuation and common fate.
-Equispaced lines provide distinct perceptual trade-offs relative to hammock plots' constant-width boxes: they enhance individual observation traceability and facilitate smoother visual flow, possibly at the expense of explicit frequency encoding. 
+This proposal addresses a fundamental challenge in information visualization: grounding design decisions in perceptual science rather than convention or intuition. 
+The proposed equispaced line method extends ggpcp's established categorical tie-breaking algorithm to numerical variables, creating a unified framework that preserves visual continuity and leverages preattentive processing through the Gestalt principles of good continuation and common fate.
 
-This research advances theory by illustrating how Gestalt principles and perceptual processing models formulate testable hypotheses regarding visualization effectiveness; it enhances practice by providing open-source software and evidence-based design guidelines; and it enriches methodology by showcasing theory-driven, multi-method evaluation.
-To be effective, visualization must be based on how people perceive things, especially how they use Gestalt principles of proximity, similarity, continuity, and common fate to organize and make sense of visual features.
-This study rigorously examines the principle by inquiring not merely "which visualization appears superior?" but rather "which visualization more effectively corresponds with perceptual organization principles for particular analytical tasks?" 
+It is important to distinguish between two different uses of box-like visual elements in parallel coordinate displays. 
+Hammock plots use parallelograms to represent aggregated bivariate relationships, where the area of each segment encodes the joint frequency of category pairs across adjacent axes. 
+This approach scales well with large datasets but does not permit tracing of individual observations. 
+GPCPs take a different approach: when multiple observations share the same value, their vertical positions are spread within a frame defined by the global resolution of the axis—the smallest difference between any two distinct values. 
+The frame signals that positions within it reflect tie-breaking rather than meaningful data variation, but individual lines remain continuous and traceable. 
+Using a consistent jitter range across all values ensures that the visual representation preserves both the density of observations at each value and the gaps between distinct values; an individualized approach would risk destroying this distance information.
 
-The answer, like most questions about visualization, is complicated and depends on the situation. But now it will be based on real-world data and perceptual theory.
+Rather than viewing these as competing representations, they can be understood as complementary. 
+The GPCP approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the hammock approach is optimal when the task involves comparing category frequencies or understanding distributional patterns without regard to individual observations. 
+With many observations, equispaced lines may coalesce into ribbon-like bands; however, the principle of good continuation still applies, allowing viewers to perceive flow patterns even when individual lines are indistinguishable.
+
+This research contributes to theory by demonstrating how Gestalt principles and models of preattentive processing generate testable hypotheses about visualization effectiveness. 
+It contributes to practice by providing open-source software and evidence-based design guidelines. 
+And it contributes to methodology by illustrating theory-driven, multi-method evaluation—computational benchmarking to verify visual quality before perceptual testing, followed by appropriately powered user studies grounded in the graphical perception literature.
+
+Effective visualization must be rooted in how people actually perceive: how they use principles of proximity, similarity, continuity, and common fate to organize and interpret visual features. 
+This study takes that principle seriously by asking not merely "which visualization looks better?" but "which visualization aligns more effectively with perceptual organization principles for specific analytical tasks?" 
+The answer, as with most questions in visualization, will depend on context. 
+But it will now rest on empirical evidence and perceptual theory rather than assumption.
 
 # Appendix
 
