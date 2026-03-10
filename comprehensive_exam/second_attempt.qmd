@@ -58,7 +58,6 @@ theme_set(theme_bw(base_size = 11))
 
 # Introduction and Motivation
 
-<!-- This proposal outlines a systematic approach to visually distinguish tied numerical values in multidimensional datasets by employing parallel coordinate plots (PCPs).  -->
 Parallel coordinate plots (PCPs), first popularized by Alfred Inselberg, are a powerful technique for investigating patterns across multiple attributes (variables) simultaneously [@inselberg2009].
 PCPs assign each dimension of an $n$-dimensional dataset to a vertical axis. Each vertical axis is then positioned along one dimension,  arranged in parallel [@wegman1990]. 
 Observations are drawn as polylines connecting a single point along the sequence of dimensional axes, providing a different perspective on hard-to-visualize multidimensional data that can be used to identify clusters, outliers, and other facets of a dataset. 
@@ -69,7 +68,7 @@ This masks information about the joint distribution between variables as well as
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
 
 PCPs, which were canoncially used to show continuous random variables, have always had this issue, and the use of PCPs for categorical data only emphasized the problem.
-Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013]
+Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
 
 Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. Because only bivariate relationships are shown, it is not possible to mentally reconstruct the full joint distribution using a hammock plot.
 
@@ -295,11 +294,6 @@ pcp_data %>%
 ```
 
 
-<!-- Ideally, show the same things you've done in the 5 figures, but with a real pcp, made with real data. De-emphasize lines that you're not looking at. Show the bifurcation in the "path" when you hit a numerical tie. 
-
-The description here is not bad but a bit simple. What we want to do is use these to lead into the problem with ties... but the stark transition between the plots is not great. Find a single plot. Use that for all of the pictures. Create it by messing with the PDF in Inkscape, which will give you much more control and allow you to save as both PDF and SVG (better for HTML slides). -->
-
-
 - Step 1: Identify the Parallel Axes (@fig-figure-1).    
 Begin by identifying each vertical axis in the plot. Each axis represents one variable from the dataset. The axes are typically arranged from left to right, and the order may be determined by the data analyst to highlight specific relationships or minimize visual clutter.
 
@@ -315,9 +309,6 @@ At each axis intersection, the vertical position of the line indicates the obser
 - Step 5: Continue Across All Axes (@fig-figure-5).    
 Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis.  By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables.  The vertical positions along each axis represent scaled values that can be interpreted as quantiles when the data are appropriately transformed. This enables identification of unique characteristics, cluster membership, or outlier status.
 
-- Step 6: Numerical Ties -- a fork in the road.    
-Describe why this happens and what the problem is, showing a different line on the same chart. 
-
 ![Numerical ties cause lines to converge at a single point.](images/pcp_line_tracing_guide_images/figure-6.png){#fig-figure-6 width="90%"}
 
 - Step 6: Ties in Numbers — A Fork in the Road (@fig-figure-6).
@@ -330,22 +321,9 @@ The observer cannot tell if the original observation follows the upper branch or
 This lack of clarity is not just an aesthetic problem; it also makes it harder to do the main analytical job of the parallel coordinate plot, which is to show patterns that would be hard to see in tabular data by following individual observations through high-dimensional space.
 
 
-
-<!-- When multiple observations have the same value for a variable, their lines converge to a single point on that axis.  -->
-<!-- This convergence creates visual clutter -->
-<!-- XXX No, it doesn't create clutter.  The lines are just there, we aren't adding additional complexity, really XXX -->
-<!-- and breaks the continuity needed for individual observation tracking. -->
-<!-- XXX Yes, this is the problem. They also somewhat reduce the effectiveness of marginal density estimation. XXX -->
-
 ## Addressing Numerical Ties
 
 ![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties.](images/minimal_adjustment_full.png){#fig-working-theory}
-
-<!-- 
-XXX I do not like this sketch. The goal is to maintain as much distance between numerical values as possible WHILE breaking the ties, so that the numerical scaling is approximately correct and the ties are broken. What you've done is equivalent to converting numerical variables to categorical, breaking the numerical meaning. Think of e.g. having 1980, 1980, 2000, and 2002. If you convert to a factor, the difference between 20 and 2 years is the same (Fox news style). Instead, if you have 1979.9, 1980.1, and 2000, and 2002, you approximately keep the numerical values and you can distinguish the tied values. Your sketch should represent that. XXX
-
-This section is where things go off the rails. I don't like the way you're introducing it -- hammock plots need to come earlier, and I've largely put them there with a brief pro/con description.  -->
-
 
 The ggpcp package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
 The approach spaces observations evenly within categorical levels:
@@ -355,7 +333,7 @@ The approach spaces observations evenly within categorical levels:
 The algorithm achieves this through hierarchical sorting implemented in `pcp_arrange(data, method, space)`, where the `space` parameter specifies the proportion of the y-axis used for spacing between categorical levels. 
 This optimization can be formalized as:
 
-![Spacing parameters for Categorical Axis](images/spacing_diagram.png){#fig-spacing}
+![Spacing parameters for Categorical Axis](images/spacing_diagram.png){#fig-spacing width="60%"}
 
 $$d_i = \frac{S_i - S_i^- - S_i^+}{n_i - 1}$$
 
@@ -367,13 +345,6 @@ where:
 -   $n_i$ is the number of observations in category $i$
 -   $d_i$ is the optimal spacing distance between consecutive observations
 
---- 
-
-<!--
-\db{Updated the writing below here. As of Thursday, Jan. 22nd, 2026}
-
-\svp{Anything below this line needs a lot of work}
--->
 
 A key visual difference emerges when connecting categorical to numerical variables. 
 @schonlau2024 observe:
@@ -382,16 +353,16 @@ A key visual difference emerges when connecting categorical to numerical variabl
 
 ![The visual proof of the perceptual trade-offs as describe regarding how data transitions between axes.](images/boxes_v_triangles.png){#fig-boxes}
 
-When ggpcp connects categorical and numerical variables, the tie-breaking algorithms keep the triangular patterns clear (@fig-boxes). 
+Whether the transition takes a triangular or rectangular form is perhaps less important than what it communicates about the data itself. 
+The more interesting question is whether the visualization preserves density information while still allowing viewers to follow individual observations. 
+When observations flow from a categorical box toward numerical values, tie-breaking on the numerical axis shapes how clearly we can perceive the underlying distribution (@fig-boxes).
 
-<!-- I think you're missing the point here, and I don't think you should focus on the triangles! The point is that we can't distinguish the observations when the numerical stuff is there. In hammock plots the marginal density is more clear than in ggpcp, but there is no reason we couldn't get that fixed in ggpcp with some intelligent tie breaking that makes the vertical axis basically a rug plot, allowing you to visually estimate density. This would *also* ensure that we could resolve individual lines across the plot -- that is, fixing the ties fixes *both* issues. -->
-
-@schonlau2024 observes that concentration patterns—such as the flow from zero hospitalizations to low comorbidity values—are "far more obvious in the hammock plot than in the GPCP plot" precisely because hammock plots maintain constant-width boxes that make marginal densities apparent. 
-The triangular narrowing that occurs in GPCPs when categorical variables meet numerical ones obscures these density patterns and makes it difficult to distinguish individual observations.
-The `ggpcp` package can address both limitations through intelligent tie resolution. 
-The `space` parameter controls vertical spacing, while the `method` parameter determines systematic ordering of tied values. 
-When implemented effectively, these parameters transform the vertical axis into something functionally equivalent to a rug plot, allowing users to visually estimate density while simultaneously preserving the ability to trace individual observation paths across the plot. 
-This dual benefit—clear marginal density representation and resolvable individual lines—emerges from the same underlying solution.
+The `ggpcp` package tackles this challenge through its tie resolution parameters. 
+The `space` parameter controls vertical spacing between tied values, and the `method` parameter governs how those values are ordered. 
+Used well, these parameters spread observations along the numerical axis much like a rug plot would, giving readers a sense of density while keeping individual paths traceable.
+This represents a different set of trade-offs than hammock plots, which use constant-width parallelograms to show marginal densities directly. 
+Rather than foregrounding aggregate density, `ggpcp` keeps individual observation lines intact and relies on thoughtful spacing to convey distributional structure. 
+The result is a visualization that supports both seeing the forest and examining particular trees.
 
 This observation suggests an opportunity to incorporate conventions from both GPCPs and hammock plots to improve the utility of generalized parallel coordinate visualizations. 
 Rather than treating these as competing approaches with distinct perceptual trade-offs, thoughtful tie-breaking implementation can combine the strengths of each method.
@@ -413,14 +384,21 @@ The following section details the design and implementation of this approach.
 
 ## The Problem: Overlapping Lines
 
+When multiple observations share the same value on a numerical axis, their polylines converge to a single point on that axis, producing perfectly overlapping line segments on either side. 
+This convergence creates two compounding problems: individual observation traceability is lost, because the viewer cannot distinguish which incoming line corresponds to which outgoing path, and marginal density information is obscured, because a cluster of ten tied observations is visually indistinguishable from a single one. 
+The problem is particularly acute for integer-valued or coarsely-measured variables, where ties are structurally common rather than incidental (@fig-figure-6).
 
-## The Solution: Tie Spreading
+The `tie_spread` algorithm resolves tied observations by distributing them evenly within a proportionally allocated vertical band on the axis.
+Each unique value $v_i$ receives space proportional to its frequency:
 
-The `tie_spread` algorithm splits up tied observations by evenly spreading them out over a small range around their original value. 
-This range is set by default to balance the need for effective tie-breaking with spatial perception. 
-This makes sure that separated observations stay visually grouped near their shared value while still being different enough to trace individual paths through the plot.
+$$S_i = \frac{n_i}{\sum_k n_k}\bigl(1 - \text{space} \cdot (m - 1)\bigr)$$
 
-![Tie spreading maintains visual separation while preserving approximate positions.](images/pcp_line_tracing_guide_images/figure-7.png){#fig-figure-7 width="90%"}
+where $n_i$ is the number of observations tied at $v_i$, $m$ is the number of distinct values on the axis, and `space` is the proportion of the axis reserved for gaps between value bands.
+Observations are then spread evenly from the lower to the upper boundary of their allocated band, with small buffer margins at the edges.
+This directly mirrors the categorical tie-breaking approach already implemented in `ggpcp`, extending it to numerical variables and thereby creating a unified visual grammar across both variable types (@fig-figure-7).
+Values with more tied observations occupy a taller band, implicitly encoding marginal frequency in the vertical extent of each region—an analog to the light gray boxes used for categorical levels.
+
+![Proportional band allocation for numerical ties. Each unique value receives a vertical band proportional to its frequency ($S_i \propto n_i$), with observations spread evenly from the lower to the upper boundary of their allocated band. Small gaps between bands (the `space` parameter) visually separate distinct values, and band height encodes marginal frequency. This design mirrors the categorical tie-breaking approach in `ggpcp`, ensuring consistent visual grammar across variable types.](images/pcp_line_tracing_guide_images/figure-7-corrected.png){#fig-figure-7 width="75%"}
 
 ## Hierarchical Sorting for Minimal Crossings
 
@@ -430,74 +408,8 @@ By ordering observations within a tie group based on their values on adjacent ax
 This strategy ensures that observations with similar trajectories are positioned in close proximity, creating cohesive visual bands. 
 These bands facilitate the perception of distinct groups as they move together through high-dimensional space, reducing visual noise and highlighting underlying patterns.
 
-![Comparison of parallel coordinate plots without (left) and with (right) numerical tie-breaking. When observations share the same numerical value, their lines overlap completely, hiding how many cases exist at that value. Spreading tied values within resolution-based boxes (blue) makes each observation visible while signaling that positions within the box are artifacts of tie-breaking. ](images/pcp_line_tracing_guide_images/numerical_tiebreaking_figure.png){#fig-figure-8}
-<!--
-## Theoretical Framework: Perception-Driven Design
+![Comparison of parallel coordinate plots without (left) and with (right) numerical tie-breaking. When observations share the same numerical value, their lines overlap completely, hiding how many cases exist at that value. Spreading tied values within resolution-based boxes (blue) makes each observation visible while signaling that positions within the box are artifacts of tie-breaking. ](images/pcp_line_tracing_guide_images/pcp_tiebreaking_updated.png){#fig-figure-8}
 
-Effective data visualizations must be grounded in how people actually see and process information. 
-This theoretical framework draws on research from cognitive psychology and visual perception to explain how viewers interpret visual displays. 
-The framework covers four key areas that trace the path from seeing a visualization to understanding its meaning. 
-**Stage 1** explores how Gestalt principles help viewers group visual elements into meaningful patterns. 
-**Stage 2** examines how visual working memory and attention allow people to hold and manipulate information while analyzing a visualization. 
-**Preattentive processing** describes how certain visual features can be detected quickly and automatically, enabling rapid visual search before focused attention is required. 
-Finally, **external cognition and computational offloading** addresses how visualizations act as external aids that extend our mental capabilities by shifting some cognitive work from our minds to the visual display itself. 
-These four components provide a foundation for understanding how design choices affect visualization effectiveness.
-
-
-### Stage 1: Pattern Perception and Gestalt Principles
-
-The first stage involves active pattern perception processes that segment the visual scene into coherent regions. 
-The Gestalt laws of perceptual organization, articulated by German psychologists in 1912, remain fundamental principles for visualization design:
-
--   **Proximity:** Objects near each other are perceived as belonging together
--   **Similarity:** Objects sharing visual properties (color, shape, size) are grouped perceptually 
--   **Connectedness:** Objects connected by lines are seen as related\
--   **Continuity:** The visual system prefers interpretations with smooth, continuous paths 
--   **Symmetry:** Symmetric patterns are more easily perceived and remembered 
--   **Closure:** Incomplete shapes are perceptually completed 
--   **Common Fate:** Objects moving together are perceived as a group 
--   **Relative Size:** Smaller elements are perceived as figures against larger backgrounds
-
-
-@vanderplas2023 explicitly invoke these principles in their design rationale for ggpcp:
-
-> "By reducing the number of line crossings at non-axis points simplifies the plot, reducing the overall cognitive load required to 'untangle' (literally and metaphorically) the individual observations and leveraging the Gestalt principle of common fate." (p. 2)
-
-The principle of **good continuation** is particularly relevant to parallel coordinate plots: can viewers smoothly follow individual lines through numerical ties, or do visual discontinuities disrupt the perceptual flow?
-
-### Stage 2: Visual Working Memory and Attention
-
-The second stage involves conscious attention and visual working memory, which holds only a limited number of objects (typically 3-4) for active processing. 
-
-This three-stage model has direct implications for evaluating tie-breaking strategies:
-
-**Equispaced Lines:**
-
--   Leverage preattentive orientation and position
--   Support continuous line following (good continuation)
--   Implicitly encode frequency through density (requires stage 1 processing)
-
-**Constant-Width Boxes:**
-
--   Leverage preattentive size and area
--   Explicitly encode frequency (reduced cognitive load)
--   May disrupt line continuity (challenges good continuation)
-
-
-## Preattentive Processing and Visual Search
-
-A key distinction between the two approaches concerns the nature of visual search required for different analytical tasks. Ware distinguishes between:
-
--   **Parallel Search (Preattentive):** Target pops out immediately, search time independent of number of distractors 
--   **Serial Search (Attentive):** Search time increases linearly with number of items, requiring conscious attention
-
-For tracing individual observations through equispaced lines, the task may benefit from preattentive processing of orientation and position. 
-Each observation maintains a consistent visual identity as a continuous line with specific orientation. 
-In contrast, tracing through constant-width boxes requires conscious attention to reconstruct the path, as the area-based encoding does not support preattentive line following.
-
-However, for frequency estimation tasks, constant-width boxes may have an advantage. 
-Equispaced lines require inferring frequency from density, which is a second-order visual property requiring pattern perception (stage 1).
--->
 
 ## Gestalt Principles and Line Continuity
 
@@ -526,14 +438,6 @@ Rather than viewing these as competing representations, they can be understood a
 
 # Mathematical Framework
 
-<!--
-### Introduction and Problem Statement
-
-Parallel coordinate plots (PCPs) provide a powerful visualization technique for multivariate data, where each observation is represented as a polyline connecting values across parallel vertical axes. 
-However, when multiple observations share identical values on a given axis—a condition termed *tied values*—the corresponding line segments overlap, creating visual occlusion that impedes pattern recognition and individual observation tracking.
-
-This section presents a unified mathematical framework that extends the categorical tie-breaking approach established in generalized parallel coordinate plots [@vanderplas2023] to numerical variables, creating a single optimization framework that handles both variable types consistently.
--->
 ![The tie problem in parallel coordinate plots. When observations share values, lines overlap and create visual collisions that mask the underlying data distribution.](images/math_images/section1_original_ties.png){#fig-original-ties width=85%}
 
 ## Notation
@@ -600,9 +504,8 @@ The available space is:
 $$
 S(v) = U(v) - L(v)
 $$ {#eq-space}
-<!--
-![Computing available space. The algorithm uses the global axis resolution to define a consistent jitter interval around each tied value, preserving the relative spacing between distinct values.](images/math_images/section7_compute_available_space.png){#fig-available-space width=90%}
--->
+
+
 ### Step 4: Compute Optimal Spacing
 
 The core principle is identical for categorical and numerical ties:
@@ -612,9 +515,6 @@ $$
 $$ {#eq-spacing}
 
 This distributes $k$ observations evenly across the available space $S(v)$.
-<!--
-![The even tie spread algorithm. Original tied values (left) are spread evenly within the computed width (right), with width determined by the global minimum gap between unique values.](images/math_images/section3_even_tie_spread.png){#fig-even-spread width=90%}
--->
 
 ### Step 5: Order Observations Hierarchically
 
@@ -629,10 +529,6 @@ $$ {#eq-sortkey}
 
 Observations are ordered so that $\kappa_{i_1} \leq \kappa_{i_2} \leq \cdots \leq \kappa_{i_k}$.
 
-<!--
-![Hierarchical ordering minimizes line crossings. By sorting tied observations based on their positions in adjacent axes, lines that would otherwise cross are kept parallel, supporting the Gestalt principle of "common fate."](images/math_images/section8_hierarchical_ordering.png){#fig-hierarchical width=90%}
--->
-
 **Key insight**: This requires *sequential* axis processing—the adjusted positions from previously processed axes inform the ordering on the current axis.
 
 ### Step 6: Assign Positions
@@ -643,17 +539,10 @@ $$
 \tilde{y}_{i_m,j} = L(v) + (m - 1) \cdot \Delta, \quad m = 1, 2, \ldots, k
 $$ {#eq-assign}
 
-<!--
-![Position assignment. Observations are distributed evenly within the available space, with positions calculated as offsets from the lower bound.](images/math_images/section9_assign_spread_positions.png){#fig-assign-positions width=90%}
--->
 
 ### Position Functions
 
 Two variants of position functions distribute observations within the available space:
-
-<!--
-![Position functions for even spacing. `position_even()` excludes edges (observations never touch boundaries), while `position_even_edges()` includes edges (first and last observations at boundaries).](images/math_images/section2_position_functions.png){#fig-position-functions width=85%}
--->
 
 The edge-inclusive version places observations at:
 
@@ -673,9 +562,7 @@ The algorithm treats numerical ties identically to categorical levels:
 : Unified spacing principle {#tbl-unified}
 
 Both apply the same formula: **spacing = available_space / (n − 1)**.
-<!--
-![The unified framework processes both categorical and numerical variables with consistent logic. Categorical variables receive proportional box allocation; numerical ties receive density-based spacing. Both use the same core spacing equation.](images/math_images/section10_unified_framework.png){#fig-unified width=95%}
--->
+
 
 ## Visual Results
 
@@ -683,25 +570,28 @@ Both apply the same formula: **spacing = available_space / (n − 1)**.
 
 After applying the tie-breaking algorithm, observations that previously overlapped are now visually distinguishable:
 
-![Parallel coordinate plot after applying uniform spacing. Gray boxes indicate regions where tied values have been spread, making individual observations traceable.](images/math_images/section4_uniform_spacing_pcp.png){#fig-uniform-spacing width=90%} 
+![Parallel coordinate plot after applying uniform spacing. Gray boxes indicate regions where tied values have been spread, making individual observations traceable.](images/math_images/pcp_annotated_ties_no_labels.png){#fig-uniform-spacing width=90%} 
 
 #### Annotated Tie Regions
 
 Tie regions can be annotated with boxes showing the original value and the spread region:
 
-![Annotated tie regions with labels. Gray boxes highlight where ties occurred, with labels showing the original tied value. This is particularly useful for integer data where ties are frequent.](images/math_images/section6_annotated_ties.png){#fig-annotated width=90%}
+
+![Annotated tie regions with labels. Gray boxes highlight where ties occurred, with labels showing the original tied value. This is particularly useful for integer data where ties are frequent.](images/math_images/pcp_annotated_ties.png){#fig-annotated width=90%}
+
 
 ### Tie Box Detection
 
 The `get_tie_box()` function identifies and bounds tie regions for visualization:
 
-![The tie box detection process. (1) Identify duplicated values, (2) scale and group contiguous spreads, (3) generate bounding box coordinates for annotation.](images/math_images/section5_get_tie_box.png){#fig-tie-box width=90%}
+![The tie box detection process. (1) Identify duplicated values, (2) scale and group contiguous spreads, (3) generate bounding box coordinates for annotation.](images/math_images/get_tie_box_figure.png){#fig-tie-box width=90%}
 
 ## Algorithm Summary
 
 **Algorithm: Unified Tie-Breaking**
 
 Input: Data $D$, variables $X_1...X_p$, method $\in$ {from-left, from-right, from-both}
+
 Output: Adjusted positions $ỹ_{ij}$
 
 1. Scale all variables to $[0,1]$
@@ -716,7 +606,7 @@ Output: Adjusted positions $ỹ_{ij}$
      a. Identify tied values: $V = {v : |T_j(v)| > 1}$
      b. For each $v \in V$:
           i.   Set available space: $S(v) = \delta_j$
-          ii.  Compute bounds: $L(v) = v -\frac{\delta_i}{2}2, U(v) = v + \frac{\delta_i}{2}$
+          ii.  Compute bounds: $L(v) = v -\frac{\delta_i}{2}, U(v) = v + \frac{\delta_i}{2}$
           iii. Order $T_{i}(v)$ by positions on adjacent axis
           iv.  Compute spacing: $\Delta = \frac{S(v)}{(k - 1)}$
           v.   Assign positions: $ỹ_{i_{m},j} = L(v) + (m - 1)*\Delta \: for \: m = 1,...,k$
@@ -754,35 +644,41 @@ Tasks:
 ```{r}
 #| eval: false
 #
-optimize_spacing_numerical <- function(values, space = 0.05) {
-  # 1. Identify unique values and their count
+optimize_spacing_numerical <- function(values, space = 0.05, buffer = 0.02) {
+  # 1. Identify unique values and their counts
   unique_vals <- sort(unique(values))
-  m <- length(unique_vals)
-  
-  # 2. Generate frequency table
-  freq <- as.numeric(table(values)[as.character(unique_vals)])
-  
-  # 3. Total available space
-  total_gap_space <- space * (m - 1)
-  available_width <- 1 - total_gap_space
-  
-  # 4. Proportional allocation
-  widths <- (freq / sum(freq)) * available_width
-  
-  # 5. Calculate Positions
-  pos_midpoints <- numeric(m)
+  m           <- length(unique_vals)
+  freq        <- as.numeric(table(values)[as.character(unique_vals)])
+
+  # 2. Proportional band widths: S_i = (n_i / N) * (1 - space * (m - 1))
+  available_width <- 1 - space * (m - 1)
+  widths          <- (freq / sum(freq)) * available_width
+
+  # 3. Assign one position per observation within each band
+  #    y_{i,j} = start_i + buffer*S_i + ((j-1) / (n_i-1)) * S_i*(1 - 2*buffer)
+  positions   <- numeric(length(values))
   current_pos <- 0
-  
-  for (i in 1:m) {
-    # The midpoint is the current position plus half the width of the current block
-    pos_midpoints[i] <- current_pos + (widths[i] / 2)
-    # Advance the current position by the width of the block plus the inter-block space
-    current_pos <- current_pos + widths[i] + space
+
+  for (i in seq_along(unique_vals)) {
+    val <- unique_vals[i]
+    idx <- which(values == val)
+    n_i <- length(idx)
+    Si  <- widths[i]
+
+    if (n_i == 1) {
+      # Single observation: place at band midpoint
+      positions[idx] <- current_pos + Si / 2
+    } else {
+      # Evenly distribute within band, leaving buffer margins at each edge
+      usable <- Si * (1 - 2 * buffer)
+      lo      <- current_pos + Si * buffer
+      positions[idx] <- lo + seq(0, usable, length.out = n_i)
+    }
+
+    current_pos <- current_pos + Si + space
   }
-  
-  # Return a named vector for easy lookup
-  names(pos_midpoints) <- unique_vals
-  return(pos_midpoints)
+
+  return(positions)   # one position per observation, in input order
 }
 ```
 
@@ -797,9 +693,9 @@ Study 1: Frequency Perception
 Sample Size Justification:
 
 A power analysis was conducted using G*Power 3.1 [@faul2007] to determine the minimum sample size required to detect a meaningful difference between visualization conditions. 
-Based on prior graphical perception studies—including Heer and Bostock's [-@heer2010] crowdsourced replication of Cleveland and McGill [-@cleveland1984], which used approximately 50 participants per condition, and Hofmann and Vendettuoli's [-@hofmann2013] common angle plot study with 46 participants, we anticipated a medium effect size (Cohen's d = 0.5). For a two-tailed independent samples t-test with α = 0.05 and power = 0.80, the required sample size is n = 64 per group (total N = 128). 
-This sample size also provides 80% power to detect effects as small as d = 0.50, which represents a practically meaningful difference in task accuracy between visualization types [@brysbaert2019]. 
-To account for potential exclusions due to failed attention checks or incomplete responses (estimated at 10–15% based on crowdsourcing norms), we will recruit n = 75 per condition.
+Based on prior graphical perception studies—including Heer and Bostock's [-@heer2010] crowdsourced replication of Cleveland and McGill [-@cleveland1984], which used approximately 50 participants per condition, and Hofmann and Vendettuoli's [-@hofmann2013] common angle plot study with 46 participants, we anticipated a medium effect size (Cohen's $d = 0.5$). For a two-tailed independent samples t-test with $\alpha = 0.05$ and $power = 0.80$, the required sample size is $n = 64$ per group (total $N = 128$). 
+This sample size also provides 80% power to detect effects as small as $d = 0.50$, which represents a practically meaningful difference in task accuracy between visualization types [@brysbaert2019]. 
+To account for potential exclusions due to failed attention checks or incomplete responses (estimated at 10–15% based on crowdsourcing norms), we will recruit $n = 75$ per condition.
 
 Procedure:
 
@@ -870,15 +766,16 @@ Analysis:
 
 # Conclusion
 
-This proposal addresses a fundamental challenge in information visualization: grounding design decisions in perceptual science rather than convention or intuition. 
-The proposed equispaced line method extends ggpcp's established categorical tie-breaking algorithm to numerical variables, creating a unified framework that preserves visual continuity and leverages preattentive processing through the Gestalt principles of good continuation and common fate.
+Leveraging tie-breaking and sorting for numerical variables addresses a known issue with GPCPs while maximizing the numerical scale information available to the reader. 
+The proposed equispaced line method extends ggpcp's established categorical tie-breaking algorithm to numerical variables, creating a unified framework for handling ties across variable types. 
+Implementing numerical tie-breaking preserves the Gestalt continuity of a single observation across parallel axes and allows the viewer to more easily recreate the joint density across multiple axes, relative to the standard numerical axis approach.
 
-It is important to distinguish between two different uses of box-like visual elements in parallel coordinate displays. 
+It is worth distinguishing between two uses of box-like visual elements in parallel coordinate displays. 
 Hammock plots use parallelograms to represent aggregated bivariate relationships, where the area of each segment encodes the joint frequency of category pairs across adjacent axes. 
 This approach scales well with large datasets but does not permit tracing of individual observations. 
 GPCPs take a different approach: when multiple observations share the same value, their vertical positions are spread within a frame defined by the global resolution of the axis—the smallest difference between any two distinct values. 
-The frame signals that positions within it reflect tie-breaking rather than meaningful data variation, but individual lines remain continuous and traceable. 
-Using a consistent jitter range across all values ensures that the visual representation preserves both the density of observations at each value and the gaps between distinct values; an individualized approach would risk destroying this distance information.
+This frame signals to the reader that positions within it reflect tie-breaking rather than meaningful data variation, while individual lines remain continuous and traceable. 
+A consistent jitter range across all values ensures that the visual representation preserves both the density of observations at each value and the gaps between distinct values; an individualized approach would risk obscuring this distance information.
 
 Rather than viewing these as competing representations, they can be understood as complementary. 
 The GPCP approach is optimal when the analytical task involves following specific cases or detecting outliers, whereas the hammock approach is optimal when the task involves comparing category frequencies or understanding distributional patterns without regard to individual observations. 
