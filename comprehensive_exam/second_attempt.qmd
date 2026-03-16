@@ -323,12 +323,18 @@ This lack of clarity is not just an aesthetic problem; it also makes it harder t
 
 ## Addressing Numerical Ties
 
-![Comparison of standard parallel coordinate plot representation and the Even Tie Spreading Algorithm for resolving numerical ties.](images/minimal_adjustment_full.png){#fig-working-theory}
+![Comparison of a standard PCP with overlapping ties (left) and the proposed tie-breaking algorithm with `from-right` hierarchical sorting (right). Tied observations on Year B are spread within a resolution-based interval and subsequently ordered by their values on the adjacent Value axis, ensuring that lines within the tie band do not cross one another. Remaining crossings are necessary crossings induced by the data structure rather than artifacts of tie-breaking.](images/minimal_adjustment_full.png){#fig-working-theory width="65%"}
 
-The ggpcp package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
+The `ggpcp` package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
 The approach spaces observations evenly within categorical levels:
 
 > "All observations are spaced out evenly. This results in a natural visualization of the marginal frequencies along each axis (additionally enhanced by the light gray boxes grouping observations in the same category) that is not as prominent in the previous three panels. The ordering of the observations within the level is such that a minimal number of line crossings occurs between the axes." (p. 11)
+
+Spreading observations evenly within the tie band is a necessary first step, but it is not sufficient on its own. 
+Without further intervention, the order in which tied observations are assigned their spread positions is arbitrary, and lines departing the band toward different positions on the neighboring axis will cross each other — producing the visual "knots" that make individual tracing impossible. 
+The `from-right` processing mode resolves this directly: each tied observation is ranked by its position on the right neighbor axis ($\kappa_i = \tilde{y}_{i, A_j}$, Step 5), and spread positions are assigned in the same rank order from lowest to highest. 
+The result is a monotone mapping — the observation placed lowest in the tie band arrives at the lowest position on the next axis — so no lines cross within the band. 
+The right panel of @fig-working-theory illustrates this outcome: the lines depart the tie region without knotting, and only the crossings that are structurally required by the data remain visible.
 
 The algorithm achieves this through hierarchical sorting implemented in `pcp_arrange(data, method, space)`, where the `space` parameter specifies the proportion of the y-axis used for spacing between categorical levels. 
 This optimization can be formalized as:
@@ -398,17 +404,24 @@ Observations are then spread evenly from the lower to the upper boundary of thei
 This directly mirrors the categorical tie-breaking approach already implemented in `ggpcp`, extending it to numerical variables and thereby creating a unified visual grammar across both variable types (@fig-figure-7).
 Values with more tied observations occupy a taller band, implicitly encoding marginal frequency in the vertical extent of each region—an analog to the light gray boxes used for categorical levels.
 
-![Proportional band allocation for numerical ties. Each unique value receives a vertical band proportional to its frequency ($S_i \propto n_i$), with observations spread evenly from the lower to the upper boundary of their allocated band. Small gaps between bands (the `space` parameter) visually separate distinct values, and band height encodes marginal frequency. This design mirrors the categorical tie-breaking approach in `ggpcp`, ensuring consistent visual grammar across variable types.](images/pcp_line_tracing_guide_images/figure-7-corrected.png){#fig-figure-7 width="75%"}
+![Proportional band allocation for numerical ties. Each unique value receives a vertical band proportional to its frequency ($S_i \propto n_i$), with observations spread evenly from the lower to the upper boundary of their allocated band. Small gaps between bands (the `space` parameter) visually separate distinct values, and band height encodes marginal frequency. This design mirrors the categorical tie-breaking approach in `ggpcp`, ensuring consistent visual grammar across variable types.](images/pcp_line_tracing_guide_images/figure-7-corrected.png){#fig-figure-7 width="65%"}
 
 ## Hierarchical Sorting for Minimal Crossings
 
-Beyond simply spreading tied values, the ggpcp package implements hierarchical sorting to minimize line crossings as in categorical tie breaking.
+Spreading tied values evenly across a resolution-based interval is a necessary first step, but it is not, by itself, sufficient to eliminate visual knots. 
+When the order of assignment within the tie band is arbitrary, lines departing toward different positions on the neighboring axis will cross inside the band, reproducing the very confusion the spreading was meant to resolve. 
+The `ggpcp` package resolves this through hierarchical sorting that mirrors the approach already used for categorical variables.
+
+For the `from-right` processing mode — the mode directly applicable to @fig-working-theory — each tied observation $i \in T_j(v)$ is ranked by its adjusted position on the right neighbor axis, $\kappa_i = \tilde{y}_{i, A_j}$ (see @eq-sortkey). 
+Positions within the tie band are then assigned in the same rank order, from lowest to highest. 
+This monotone rank-matching guarantees that no two lines cross within the tie band: the observation that arrives lowest on the right axis is placed lowest in the band, the next-lowest observation is placed next, and so on. 
+Any crossings that remain after sorting are *necessary* crossings — those induced by the data structure itself rather than by the mechanics of tie-breaking.
 
 By ordering observations within a tie group based on their values on adjacent axes, the package leverages the Gestalt principle of common fate. 
 This strategy ensures that observations with similar trajectories are positioned in close proximity, creating cohesive visual bands. 
 These bands facilitate the perception of distinct groups as they move together through high-dimensional space, reducing visual noise and highlighting underlying patterns.
 
-![Comparison of parallel coordinate plots without (left) and with (right) numerical tie-breaking. When observations share the same numerical value, their lines overlap completely, hiding how many cases exist at that value. Spreading tied values within resolution-based boxes (blue) makes each observation visible while signaling that positions within the box are artifacts of tie-breaking. ](images/pcp_line_tracing_guide_images/pcp_tiebreaking_updated.png){#fig-figure-8}
+![Comparison of parallel coordinate plots without (left) and with (right) numerical tie-breaking using `from-right` hierarchical sorting. When observations share the same numerical value, their lines overlap completely (left), hiding how many cases exist at that value. Spreading tied values within resolution-based boxes (blue) and sorting by the right neighbor axis (right) makes each observation visible, eliminates crossings within the tie band, and signals that positions within the box are artifacts of tie-breaking rather than meaningful data variation.](images/pcp_line_tracing_guide_images/pcp_tiebreaking_updated.png){#fig-figure-8 width="75%"}
 
 
 ## Gestalt Principles and Line Continuity
@@ -518,8 +531,8 @@ This distributes $k$ observations evenly across the available space $S(v)$.
 
 ### Step 5: Order Observations Hierarchically
 
-To minimize line crossings, tied observations are sorted by their positions on adjacent axes. 
-For axis $j$, let $A_j$ be the adjacent axis (left or right depending on processing direction).
+To minimize line crossings, tied observations are sorted by their positions on the adjacent axis before spread positions are assigned. 
+For axis $j$, let $A_j$ be the adjacent axis — the left neighbor under `from-left` processing, or the right neighbor under `from-right` processing.
 
 For each observation $i \in T_j(v)$, the sorting key is:
 
@@ -529,7 +542,13 @@ $$ {#eq-sortkey}
 
 Observations are ordered so that $\kappa_{i_1} \leq \kappa_{i_2} \leq \cdots \leq \kappa_{i_k}$.
 
-**Key insight**: This requires *sequential* axis processing—the adjusted positions from previously processed axes inform the ordering on the current axis.
+This ordering is the step that resolves the visual "knots" illustrated in @fig-working-theory. 
+Spreading alone distributes tied points across the interval $[L(v),\, U(v)]$, but without a consistent rank-matching to the neighbor axis, lines departing the band will cross inside it. 
+Sorting by $\kappa_i$ before assigning positions in @eq-assign creates a monotone mapping: the observation placed at rank $m$ in the tie band is exactly the observation ranked $m$-th on the neighbor axis. 
+Under `from-right` processing, this means the lowest position in the band connects to the lowest position on the right axis, eliminating within-band crossings entirely. 
+Any crossings that remain after this step are necessary crossings induced by the data structure itself.
+
+**Key insight**: This requires *sequential* axis processing — the adjusted positions from previously processed axes inform the ordering on the current axis.
 
 ### Step 6: Assign Positions
 
@@ -607,7 +626,7 @@ Output: Adjusted positions $ỹ_{ij}$
      b. For each $v \in V$:
           i.   Set available space: $S(v) = \delta_j$
           ii.  Compute bounds: $L(v) = v -\frac{\delta_i}{2}, U(v) = v + \frac{\delta_i}{2}$
-          iii. Order $T_{i}(v)$ by positions on adjacent axis
+          iii. Order $T_{i}(v)$ by $\kappa_i = \tilde{y}_{i, A_j}$ (positions on adjacent axis; right neighbor under `from-right`, left neighbor under `from-left`)
           iv.  Compute spacing: $\Delta = \frac{S(v)}{(k - 1)}$
           v.   Assign positions: $ỹ_{i_{m},j} = L(v) + (m - 1)*\Delta \: for \: m = 1,...,k$
 5. Return adjusted data
