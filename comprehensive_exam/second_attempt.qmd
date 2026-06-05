@@ -57,14 +57,14 @@ theme_set(theme_bw(base_size = 11))
 # Introduction and Motivation
 
 Parallel coordinate plots (PCPs) are a powerful technique for investigating patterns across multiple attributes (variables) simultaneously [@inselberg2009].
-PCPs assign each dimension of an $n$-dimensional dataset to a vertical axis, arranged in parallel [@wegman1990]. 
-Observations are drawn as polylines connecting single points along each dimensional axes in sequence a PCPs provide perspective on hard-to-visualize multidimensional data that can be used to identify clusters, outliers, and other facets of a dataset. 
+PCPs assign each dimension of an $n$-dimensional dataset to a vertical axis, with the axes arranged in parallel [@wegman1990]. 
+Observations are drawn as polylines connecting a single point along each dimensional axis in sequence, providing a perspective on hard-to-visualize multidimensional data that can be used to identify clusters, outliers, and other facets of a dataset. 
 
 
-When multiple observations share the same value in a given dimension, their polylines perfectly overlap, at a changepoint, creating "visual collisions," masking information about the joint distribution between variables as well as obscuring the density along a single axis. 
+When multiple observations share the same value in a given dimension, their polylines perfectly overlap at that changepoint, creating "visual collisions" that mask information about the joint distribution between variables and obscure the density along a single axis. 
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
 
-PCPs were canoncially used to show continuous random variables, but generalizations to  for categorical data only exacerbated the problem.
+PCPs were canonically used to show continuous random variables, but their generalization to categorical data only exacerbated the problem.
 Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
 
 Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. 
@@ -84,8 +84,9 @@ An immediate consequence of the second objective is that the viewer can, at leas
 We will extend the method used in `ggpcp` to represent categorical data to continuous variables, modifying it to maintain the approximate scaling of the continuous variable, with slight local distortions when tied values occur.
 In addition, we will develop a consistent visual representation to provide visual cues which indicate the presence of a local distortion due to tied values, while preserving the visual representation of singular values on the parallel axis.
 
-This combination of the advantage of Hammock plots --  maintaining the marginal density information -- and generalized PCPs, which preserve individual observations and provide the ability to reconstruct the full joint distribution, will enhance GPCPs. 
-Real-world data sets frequently have both categorical and numerical data, and duplicated values in either type of variable. Our extension to GPCPs will facilitate the visual representation of these data sets. 
+This combination of the advantage of Hammock plots, maintaining the marginal density information,and generalized PCPs, which preserve individual observations and provide the ability to reconstruct the full joint distribution, will enhance GPCPs. 
+Real-world data sets frequently have both categorical and numerical data, and duplicated values in either type of variable. 
+Our extension to GPCPs will facilitate the visual representation of these data sets. 
 
 ## Related Work {#sec-related-work}
 
@@ -97,16 +98,20 @@ Alpha-blending, as used by Miller and Wegman [-@wegman1990], allows the density 
 More recent approaches include density-based rendering [@heinrich2013] and edge bundling [@mcdonnell2008], both of which trade individual traceability for aggregate clarity.
 
 **Categorical extensions.** 
-The categorical parallel axis plot literature developed largely independently of classical PCPs. Parallel Sets [@kosara2006] replaced individual polylines with ribbons whose widths encode bivariate frequencies, enabling unambiguous density reading at the cost of individual tracing. 
+The categorical parallel axis plot literature developed largely independently of classical PCPs. 
+Parallel Sets [@kosara2006] replaced individual polylines with ribbons whose widths encode bivariate frequencies, enabling unambiguous density reading at the cost of individual tracing. 
 Alluvial diagrams [@brunson2020] and Sankey diagrams adopt a similar ribbon-based representation. 
 Common angle plots [@hofmann2013] addressed a further perceptual distortion specific to variable-width ribbons: the Müller-Lyer family of line-width illusions causes ribbon widths evaluated along the vertical to appear systematically different from their orthogonal widths. 
-By constraining ribbons to a constant angle, common angle plots recover perceptually accurate frequency judgments. Hammock plots [@schonlau2003; @schonlau2024] occupy a different position: they accommodate both categorical and continuous variables via constant-width parallelograms, but restrict inference to bivariate relationships between adjacent axes.
+By constraining ribbons to a constant angle, common angle plots recover perceptually accurate frequency judgments. 
+Hammock plots [@schonlau2003; @schonlau2024] occupy a different position: they accommodate both categorical and continuous variables via constant-width parallelograms, but restrict inference to bivariate relationships between adjacent axes.
 
 **Perceptual bounds on vertical displacement.** 
-A separate thread of the perceptual literature is directly relevant to the question of how much spread the tie-breaking algorithm may safely introduce. 
+A separate and longstanding thread of the perceptual literature is potentially relevant to the question of how much spread the tie-breaking algorithm may safely introduce, though it is not intrinsic to the algorithm itself. 
 The sine illusion, formalized by @day1991 and analyzed in the context of statistical graphics by @vanderplas2015, establishes that the vertical extent of a line segment is not perceived neutrally: when segments of equal length are arrayed along a curve, those at extrema appear systematically longer than those at intermediate positions. 
 The illusion belongs to the Müller-Lyer family that also underwrites the line-width illusion treated by @hofmann2013 in their development of common angle plots. 
-We draw on this literature in @sec-math-step3 to bound the band-width parameter $\sigma$: the same mechanism that distorts perceived line length on a sine wave bounds how much within-band displacement a viewer can sustain before the displacement registers as variance in the underlying data.
+This is a concern that long predates the present work and arose independently of any tie-breaking method: common angle plots engaged with it as early as 2013 [@hofmann2013], well before the generalized-PCP machinery this proposal builds on. 
+We therefore do not treat it as a design constraint on the band-width parameter $\sigma$ at this stage. 
+Whether the sine illusion meaningfully affects within-band displacement here is an open empirical question, there are reasons to expect that continuous, traceable lines may largely avoid it, and we will need empirical tests (@sec-tolerance) before any perceptual bound on $\sigma$ can be justified.
 
 **Axis and category ordering.** 
 A well-studied property of PCPs is that axis order strongly affects both the number of line crossings and the interpretability of patterns [@vanderplas2023]. 
@@ -116,7 +121,7 @@ These considerations interact directly with the hierarchical sorting approach de
 
 **Computational quality metrics.** 
 Dennig et al. [-@dennig2021] formalized a suite of screen-space quality metrics for Parallel Sets—including ribbon overlap, crossing angle, orthogonality, and ribbon width variance—collectively termed ParSetgnostics. 
-These metrics provide an empirical basis for comparing and optimizing parallel axis layouts without requiring user studies, and form the basis for the computational benchmarking component of our evaluation plan (@sec-benchmarking).
+These metrics provide an empirical basis for comparing and optimizing parallel axis layouts without requiring user studies, and are candidate measures for the computational benchmarking component of our evaluation plan (@sec-benchmarking).
 
 ## Categorical Variables and Ties in `ggpcp`
 
@@ -349,21 +354,20 @@ At each axis intersection, the vertical position of the line indicates the obser
 - Step 5: Continue Across All Axes (@fig-figure-5).    
 Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis.  By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables.  The vertical positions along each axis represent scaled values that can be interpreted as quantiles when the data are appropriately transformed. This enables identification of unique characteristics, cluster membership, or outlier status.
 
-![Numerical ties cause lines to converge at a single point. Line identity at the tie can only be recovered when lines arrive with sufficiently distinct colors; here the blue line is distinguishable by opacity, but the cyan and red lines are not cleanly separable, and the values each observation takes on Variables B and C are not uniquely determined from the plot alone. A revised version of this figure will use 2–3 categorically distinct colors to make this failure mode explicit.](images/pcp_line_tracing_guide_images/figure-6-corrected.png){#fig-figure-6 width="90%"}
+![Numerical ties cause lines to converge at a single point, so individual tracking becomes impossible unless color is used to distinguish unique observations, as in this example. Even then, identity is recoverable only when lines arrive with sufficiently distinct colors: here the blue line is distinguishable by opacity, but the cyan and red lines are not cleanly separable, and the values each observation takes on Variables B and C are not uniquely determined from the plot alone.](images/pcp_line_tracing_guide_images/figure-6-corrected.png){#fig-figure-6 width="90%"}
 
 - Step 6: Ties in Numbers — A Fork in the Road (@fig-figure-6).
 
 What was once a single point now becomes the starting point for two separate line segments that go in different directions. 
 The Gestalt principle of good continuation doesn't work anymore when two or more lines come from the same point on an axis. 
-In this configuration, color is the only channel that can provide separate line identity across the tie — and even then, only when the palette is carefully chosen. 
+In this configuration, color is the only channel that can provide separate line identity across the tie and even then, only when the palette is carefully chosen. 
 The visual continuity that made tracing easy in earlier steps breaks down exactly where it is needed most. 
 The observer cannot tell if the original observation follows the upper branch or the lower branch of the fork unless there are more visual cues, like color coding, clear labels, or a systematic tie-breaking arrangement. 
-This lack of clarity is not just an aesthetic problem; it also makes it harder to do the main analytical job of the parallel coordinate plot, which is to show patterns that would be hard to see in tabular data by following individual observations through high-dimensional space.
+This lack of clarity is not just an aesthetic problem; it also makes it harder for the user to identify patterns that would be difficult to see in tabular data by following individual observations through high-dimensional space.
+This ability to trace individual observations is one of the central reasons parallel coordinate plots are useful.
 
 
 ## Addressing Numerical Ties
-
-<!--![Comparison of a standard PCP with overlapping ties (left) and the proposed tie-breaking algorithm with `from-right` hierarchical sorting (right). Tied observations on Year B are spread within a resolution-based interval and subsequently ordered by their values on the adjacent Value axis, ensuring that lines within the tie band do not cross one another. Remaining crossings are necessary crossings induced by the data structure rather than artifacts of tie-breaking.](images/minimal_adjustment_full.png){#fig-working-theory width="65%"}-->
 
 
 ```{r}
@@ -530,18 +534,22 @@ p_before + p_after
 Two implementation details in @fig-working-theory deserve explicit comment because both are load-bearing for the Gestalt argument that motivates the spreading. 
 First, each tie band must be strictly narrower than the gap to its nearest neighbor: if the band around $v = 2000$ extended up to meet the band around $v = 2001$, the two values would visually fuse, defeating the separation the spread was meant to make visible. 
 The band width in the figure is therefore set to a fraction of the axis resolution $\delta_j$, leaving a deliberate gap between adjacent bands. 
-Second, the reader must be able to see that gap — not merely that it exists in the coordinate system. 
-This is a Gestalt-of-proximity requirement: if ties at adjacent values are rendered without visible separation, the grouping cue that "observations within a band share a value" competes with the unintended cue that "bands adjacent to one another belong to the same group." 
+Second, the reader must be able to *see* that gap, not merely have it exist in the coordinate system. 
+This is a Gestalt-of-proximity requirement: the gap must lie above the just-noticeable-difference (JND) threshold and so cannot be shrunk to an infinitesimally small size. 
+If ties at adjacent values are rendered without a perceptible gap, the grouping cue that "observations within a band share a value" competes with the unintended cue that "bands adjacent to one another belong to the same group." 
 The mathematical formalization of this separation requirement appears in Step 3 of the algorithm (@sec-math-step3).
 
 
-The `ggpcp` package implements a sophisticated tie-breaking algorithm for categorical variables that maintains individual observation traceability. 
-The approach spaces observations evenly within categorical levels:
+The `ggpcp` package implements a tie-breaking algorithm for categorical variables that maintains individual observation traceability by spacing observations evenly within each categorical level:
 
 > "All observations are spaced out evenly. This results in a natural visualization of the marginal frequencies along each axis (additionally enhanced by the light gray boxes grouping observations in the same category) that is not as prominent in the previous three panels. The ordering of the observations within the level is such that a minimal number of line crossings occurs between the axes." (p. 11)
 
-Even spacing alone, however, is not sufficient: without a principled ordering within each tie band, lines departing toward different positions on the neighboring axis will cross inside the band, reproducing the very confusion the spreading was meant to resolve.
-The hierarchical sorting approach that resolves this is described in detail in @sec-sorting; the spacing formula used for categorical levels is:
+This even spacing along the axis is what produces the horizontal-segment appearance within a level and lets the box height read as the marginal proportion at that axis point.
+The sorting is described as *hierarchical* not as a stylistic choice but out of necessity: the levels must be processed in order for the arrangement to reduce line crossings across the plot as a whole.
+`ggpcp` does permit lines to break and cross within an otherwise horizontal segment, but this is not recommended, precisely because it undercuts the marginal-proportion reading that the horizontal arrangement is meant to support.
+
+Even spacing alone, however, is not sufficient: without a principled ordering within each tie band, lines departing toward different positions on the neighboring axis will cross *inside* the band.
+The hierarchical sorting that resolves this is the subject of @sec-sorting; the spacing formula used for categorical levels is:
 
 
 ![Spacing parameters for a categorical axis. Each level $i$ is allocated total height $S_i$, with margins $S_i^+$ above and $S_i^-$ below reserved for inter-level separation. The remaining vertical extent is divided into $n_i - 1$ intervals to seat $n_i$ observations at uniform spacing $d_i$. The parameter-key panel on the right indicates how each quantity is determined: $S_i$ is set by the level's frequency proportion under a user-chosen total budget, $S_i^\pm$ are user-controlled via the `space` argument, $n_i$ is the level frequency, and $d_i$ is derived from the formula at the bottom. The numerical analog of this figure (@fig-figure-7) shares the same layout, color encoding, and formula structure; the differences are confined to how each parameter is set.](images/pcp_line_tracing_guide_images/spacing_categorical.png){#fig-spacing width="90%"}
@@ -557,16 +565,8 @@ where:
 -   $d_i$ is the optimal spacing distance between consecutive observations
 
 The spacing formula above is the categorical workhorse: each level $i$ is allocated total height $S_i$, lower and upper margins $S_i^-$ and $S_i^+$ are subtracted to enforce inter-level separation, and the remaining vertical extent is divided into $n_i - 1$ intervals to seat $n_i$ observations.
-The proposed numerical framework adopts the same five quantities — total allocated space, separation above and below, count, and inter-observation spacing — and the same formula structure, but redefines what determines each parameter.
-Where the categorical algorithm assigns $S_i$ in proportion to the level frequency under a user-chosen total budget, the numerical algorithm anchors $S(v) = \delta_j$ to the global axis resolution, so the per-value allocation is the same for every $v$.
-The categorical $S_i^-$ and $S_i^+$ are user-controlled through the `space` argument; their numerical analogs are derived from the separation parameter $\sigma$ and fixed at $(1 - \sigma) \cdot \delta_j / 2$.
-The count $n_i$ becomes the count of observations tied at value $v$, and the spacing formula
-$$\Delta(v) = \frac{S(v) - S^+(v) - S^-(v)}{n(v) - 1}$$
-is structurally identical to its categorical counterpart $d_i = (S_i - S_i^+ - S_i^-) / (n_i - 1)$.
-
-@fig-figure-7 displays these quantities using the same parameter-key conventions as @fig-spacing.
-The intent is for the reader to be able to lay the two figures side by side and read the algorithm as a single procedure with type-specific instantiations of the same five parameters, rather than as two separate algorithms that happen to share an idea.
-The differences — where $S_i$ is set by frequency and $S(v)$ is set by resolution; where $S_i^\pm$ is user-controlled and $S^\pm(v)$ is derived from $\sigma$ — are the substance of the innovation, and they are visible in the figures only if the notation is shared.
+The proposed numerical framework adopts the same five quantities and the same formula structure, redefining only what determines each parameter; the full mapping is given in @sec-unified (@tbl-unified).
+@fig-figure-7 displays the numerical version using the same parameter-key conventions as @fig-spacing, so the two figures can be laid side by side and read as a single procedure with type-specific instantiations rather than as two separate algorithms that happen to share an idea.
 
 
 A key visual difference emerges when connecting categorical to numerical variables. 
@@ -600,7 +600,9 @@ Do viewers make more accurate frequency judgments—for magnitude estimation, or
 **RQ3 (Individual traceability).** 
 Does numerical tie-breaking in GPCPs improve viewers' ability to follow a single observation across all axes, relative to a standard PCP without tie-breaking, without sacrificing the density information conveyed by the marginal axis representation?
 
-RQ1 is addressed computationally through the algorithm development and visual inspection phases (Phase 1 and 3, @sec-eval). RQ2 and RQ3 are addressed through the perceptual validation study (Phase 2). We pre-specify directional hypotheses for RQ2 and RQ3: we anticipate that GPCP with tie-breaking will produce lower absolute percentage error on magnitude estimation tasks (RQ2) and higher tracing accuracy (RQ3) than the respective baselines, with effect sizes consistent with a medium Cohen's $d$ based on prior graphical perception literature.
+RQ1 is addressed computationally through the algorithm development and visual inspection phases (Phase 1 and 3, @sec-eval). 
+RQ2 and RQ3 are addressed through the perceptual validation study (Phase 2). 
+We pre-specify directional hypotheses for RQ2 and RQ3: we anticipate that GPCP with tie-breaking will produce lower absolute percentage error on magnitude estimation tasks (RQ2) and higher tracing accuracy (RQ3) than the respective baselines, with effect sizes consistent with a medium Cohen's $d$ based on prior graphical perception literature.
 
 # An Approach to Numerical Ties
 
@@ -616,21 +618,23 @@ The following section details the design and implementation of this approach.
 
 ## The Problem: Overlapping Lines
 
-When multiple observations share the same value on a numerical axis, their polylines converge to a single point on that axis, producing perfectly overlapping line segments on either side. 
-This convergence creates two compounding problems: individual observation traceability is lost, because the viewer cannot distinguish which incoming line corresponds to which outgoing path, and marginal density information is obscured, because a cluster of ten tied observations is visually indistinguishable from a single one. 
-The problem is particularly acute for integer-valued or coarsely-measured variables, where ties are structurally common rather than incidental (@fig-figure-6).
+When multiple observations share the same value on a numerical axis, their polylines converge to a single point, and the two failures noted in the introduction recur in their most acute form: individual traceability is lost, and marginal density is obscured (@fig-figure-6). 
+The problem is especially severe for integer-valued or coarsely-measured variables, where ties are structurally common rather than incidental.
 
-The `tie_spread` algorithm resolves tied observations by distributing them evenly within a vertical allocation anchored to the axis resolution $\delta_j$ — the smallest distance between any two distinct values on the axis.
-Each unique value $v$ on the axis receives an allocation of total height
-$$S(v) = \delta_j,$$
-with margins $S^+(v) = S^-(v) = (1 - \sigma) \cdot \delta_j / 2$ reserved at the top and bottom of the allocation to preserve a perceptible gap between adjacent value bands.
-The remaining interior of height $\sigma \cdot \delta_j$ is the dot-placement region: tied observations at value $v$ are spread evenly from the lower to the upper boundary of this interior at uniform spacing $\Delta(v) = (S(v) - S^+(v) - S^-(v)) / (n(v) - 1)$.
-This directly mirrors the categorical tie-breaking approach already implemented in `ggpcp`, extending it to numerical variables with the same five quantities ($S$, $S^+$, $S^-$, $n$, and inter-observation spacing) and the same formula structure (@fig-figure-7).
-The two frameworks differ only in what determines each parameter: where the categorical algorithm allocates space proportional to level frequency, the numerical algorithm allocates the same $\delta_j$ to every value. Marginal density on a numerical axis is therefore encoded by the *dot density within each band* rather than by the *vertical extent of each band* — a design choice that preserves the natural numerical ordering on the axis and avoids the perceptual distortion that would arise from variable-height bands at fixed numerical positions.
+The `tie_spread` algorithm resolves this by distributing tied observations within a vertical allocation anchored to the axis resolution $\delta_j$ — the smallest distance between any two distinct values on the axis — rather than within a frequency-proportional band. 
+Every value receives the same allocation, with equal margins reserved above and below so that a perceptible gap is preserved between adjacent value bands and the tied observations are spread evenly across the interior. 
+@fig-figure-7 gives the parameters; the formal construction is set out in @sec-math-step3, and its correspondence to the categorical algorithm already in `ggpcp` is tabulated in @sec-unified. 
+The consequential design choice is what the allocation encodes: marginal density on a numerical axis is carried by the *dot density within each band* rather than by the *vertical extent of each band*. 
+This preserves the natural numerical ordering on the axis and avoids the perceptual distortion that variable-height bands at fixed numerical positions would introduce.
 
-![Spacing parameters for a numerical axis, displayed in the same layout as @fig-spacing so the two frameworks read as a single procedure with type-specific instantiations. Each unique value $v$ receives a vertical allocation of height $S(v) = \delta_j$, with margins $S^+(v)$ above and $S^-(v)$ below — both fixed at $(1 - \sigma) \cdot \delta_j / 2$ — that preserve the inter-band gap. The remaining inner region of height $\sigma \cdot \delta_j$ is divided into $n(v) - 1$ intervals to seat $n(v)$ tied observations at uniform spacing $\Delta(v)$. The mapping to @fig-spacing is direct: $S_i \leftrightarrow S(v)$, $S_i^\pm \leftrightarrow S^\pm(v)$, $n_i \leftrightarrow n(v)$, $d_i \leftrightarrow \Delta(v)$, and the spacing formula at the bottom is structurally identical. The innovation, visible in the parameter-key annotations, is in how each quantity is determined: $S(v)$ is anchored to the global axis resolution rather than to frequency, and $S^\pm(v)$ are derived from the separation parameter $\sigma$ rather than user-controlled.](images/pcp_line_tracing_guide_images/spacing_numerical.png){#fig-figure-7 width="90%"}
+![Spacing parameters for a numerical axis, displayed in the same layout as @fig-spacing so the two frameworks read as a single procedure with type-specific instantiations. Each unique value $v$ receives a vertical allocation of height $S(v) = \delta_j$, with margins $S^+(v)$ above and $S^-(v)$ below — both fixed at $(1 - \sigma) \cdot \delta_j / 2$ — that preserve the inter-band gap. The remaining inner region of height $\sigma \cdot \delta_j$ is divided into $n(v) - 1$ intervals to seat $n(v)$ tied observations at uniform spacing $\Delta(v)$. The mapping to @fig-spacing is direct: $S_i \leftrightarrow S(v)$, $S_i^\pm \leftrightarrow S^\pm(v)$, $n_i \leftrightarrow n(v)$, $d_i \leftrightarrow \Delta(v)$, and the spacing formula at the bottom is structurally identical. The innovation, visible in the parameter-key annotations, is in how each quantity is determined: $S(v)$ is anchored to the global axis resolution rather than to frequency, and $S^\pm(v)$ are derived from the separation parameter $\sigma$ rather than user-controlled by default.](images/pcp_line_tracing_guide_images/spacing_numerical.png){#fig-figure-7 width="90%"}
 
-@fig-numerical-in-context shows the parameter spec of @fig-figure-7 applied to a small parallel coordinate plot. Variable B carries three tied groups at $v \in \{0.8, 0.5, 0.2\}$, with $n(v) = 5, 3, 2$ observations respectively. All three bands have the same vertical allocation $S(v) = \delta_j$, regardless of $n$ — the algorithm encodes marginal density through dot density within the band, not through band height. The figure illustrates `from-right` processing — the complement of the `from-left` mode used in @fig-working-theory — so that observations within each band are placed in the order determined by their values on Variable C, the right neighbor. The polylines emerging from the band onto Variable C therefore carry no avoidable crossings; the within-band rank is the visible signature of the hierarchical sorting introduced in @sec-sorting. Together the two figures illustrate that the algorithm is symmetric: the same construction applies under either processing direction, with the role of the reference axis swapped.
+@fig-numerical-in-context shows the parameter spec of @fig-figure-7 applied to a small parallel coordinate plot. Variable B carries three tied groups at $v \in \{0.8, 0.5, 0.2\}$, with $n(v) = 5, 3, 2$ observations respectively. 
+All three bands have the same vertical allocation $S(v) = \delta_j$, regardless of $n$, the algorithm encodes marginal density through dot density within the band, not through band height. 
+The figure illustrates `from-right` processing, the complement of the `from-left` mode used in @fig-working-theory, so that observations within each band are placed in the order determined by their values on Variable C, the right neighbor. 
+The polylines emerging from the band onto Variable C therefore carry no avoidable crossings; the within-band rank is the visible signature of the hierarchical sorting introduced in @sec-sorting. 
+Together the two figures illustrate that the algorithm is symmetric: the same construction applies under either processing direction, with the role of the reference axis swapped.
+
 
 ![The algorithm of @fig-figure-7 applied to a small parallel coordinate plot. Three tied groups on Variable B, with $n(v) = 5, 3, 2$, are spread within bands of identical vertical allocation $S(v) = \delta_j = 0.30$. The top band carries the parameter-reference annotations ($S(v)$, $\Delta(v)$, the yellow $S^\pm(v)$ margin strips); the mid and bot bands are shown as plain inner regions to keep the visual uncluttered. The solid horizontal line and "v = $\cdot$" label at each band's center mark the actual tied value, against which the within-band spread is the algorithm's displacement of each tied observation. Within each band, the from-right ordering rule places the observation with the highest value on Variable C at the top of the band and the lowest at the bottom, so that polylines emerging from the band onto Variable C run in monotone order. Polylines are drawn as straight segments between axes; distinct colors per observation allow individual polylines to be traced through the tied region — the legibility property the algorithm is designed to preserve.](images/pcp_line_tracing_guide_images/spacing_polyline.png){#fig-numerical-in-context width="100%"}
 
@@ -640,19 +644,22 @@ Spreading tied values evenly across a resolution-based interval is a necessary f
 When the order of assignment within the tie band is arbitrary, lines departing toward different positions on the neighboring axis will cross inside the band, reproducing the very confusion the spreading was meant to resolve. 
 The `ggpcp` package resolves this through hierarchical sorting that mirrors the approach already used for categorical variables.
 
-For the `from-right` processing mode — the mode directly applicable to @fig-working-theory — each tied observation $i \in T_j(v)$ is ranked by its adjusted position on the right neighbor axis, $\kappa_i = \tilde{y}_{i, A_j}$ (see @eq-sortkey). 
+For the `from-right` processing mode, the mode directly applicable to @fig-working-theory, each tied observation $i \in T_j(v)$ is ranked by its adjusted position on the right neighbor axis, $\kappa_i = \tilde{y}_{i, A_j}$ (see @eq-sortkey). 
 Positions within the tie band are then assigned in the same rank order, from lowest to highest. 
 This monotone rank-matching guarantees that no two lines cross within the tie band: the observation that arrives lowest on the right axis is placed lowest in the band, the next-lowest observation is placed next, and so on. 
 Any crossings that remain after sorting are *necessary* crossings — those induced by the data structure itself rather than by the mechanics of tie-breaking.
 
-By ordering observations within a tie group based on their values on adjacent axes, the package leverages the Gestalt principle of common fate. 
-This strategy ensures that observations with similar trajectories are positioned in close proximity, creating cohesive visual bands. 
-These bands facilitate the perception of distinct groups as they move together through high-dimensional space, reducing visual noise and highlighting underlying patterns.
+By ordering observations within a tie group according to their values on adjacent axes, `ggpcp` produces locally parallel bundles of lines. 
+Observations with similar trajectories are positioned in close proximity, so distinct groups are perceived as coherent bands moving together through high-dimensional space, an instance of the Gestalt principle of common fate.^[Common fate is usually defined in terms of motion, so applying it to a static display is a slight stretch; we think it is defensible here, because the eye reads the parallel bundle as moving together across axes. The Gestalt cue of *similarity* offers an alternative framing of the same effect that does not depend on attributing motion, and may meet less resistance.] 
+This reduces visual noise and highlights underlying patterns.
 
 **Interaction with axis ordering.** 
-The effectiveness of hierarchical sorting is not independent of axis order. @vanderplas2023 note that the order of factor levels is an important determinant of residual line crossings: some crossings are attributable to the data structure itself and cannot be eliminated by within-category sorting, while others arise from an unfavorable factor ordering and can be removed by reordering levels. 
-The `ggpcp` package allows users to reorder factor levels via `mutate` before variable selection, and to reverse axes to reduce negatively correlated crossings. Our tie-breaking extension inherits this dependency: for numerical axes, the minimum number of necessary crossings is a function of both the scaled data values and the sequence in which axes are processed. 
-Users should therefore consider axis ordering as a precondition for optimal tie-breaking, particularly when integer-valued variables with many ties are adjacent to continuous variables with high variance.
+The effectiveness of hierarchical sorting is closely intertwined with axis order and direction. 
+@vanderplas2023 note that the order of factor levels is an important determinant of residual line crossings: some crossings are attributable to the data structure itself and cannot be eliminated by within-category sorting, while others arise from an unfavorable factor ordering and can be removed by reordering levels.
+Factor-level ordering is, helpfully, not an issue for numerical variables — there are no levels to reorder. 
+Our tie-breaking extension therefore inherits a narrower dependency: for numerical axes, the minimum number of necessary crossings is a function of the scaled data values and the sequence (and direction) in which axes are processed. 
+Users should therefore consider axis ordering as a precondition for optimal tie-breaking, particularly when integer-valued variables with many ties are adjacent to continuous variables with high variance. 
+(`ggpcp` allows users to reorder factor levels via `mutate` before variable selection and to reverse axes to reduce negatively correlated crossings; the latter remains relevant for numerical axes.)
 
 ![Comparison of parallel coordinate plots without (left) and with (right) numerical tie-breaking using `from-right` hierarchical sorting. When observations share the same numerical value, their lines overlap completely (left), hiding how many cases exist at that value. Spreading tied values within resolution-based boxes (blue) and sorting by the right neighbor axis (right) makes each observation visible, eliminates crossings within the tie band, and signals that positions within the box are artifacts of tie-breaking rather than meaningful data variation.](images/pcp_line_tracing_guide_images/pcp_tiebreaking_updated.png){#fig-figure-8 width="75%"}
 
@@ -668,14 +675,16 @@ Constant-width boxes represent observations as aggregated area segments rather t
 This encoding communicates aggregate quantities effectively: the area of each segment is proportional to the number of observations sharing that combination of values across adjacent axes, making the joint frequencies of category pairs immediately visible. 
 In contrast, equispaced lines preserve individual observations as distinct visual elements. 
 When lines are continuous and uninterrupted, viewers can leverage preattentive processes such as the Gestalt principle of good continuation to trace a single case across all axes [@healey2012]. 
-The two approaches thus serve distinct purposes: lines support individual-level tracing through low-level perceptual grouping, while boxes support aggregate-level frequency comparison. The conditions under which each is optimal are taken up in the Conclusion.
+The two approaches thus serve distinct purposes: lines support individual-level tracing through low-level perceptual grouping, while boxes support aggregate-level frequency comparison. 
+The conditions under which each is optimal are taken up in the Conclusion.
 
 ## Visual Cue Design {#sec-visual-cues}
 
-The introduction committed to developing "a consistent visual representation to provide visual cues which indicate the presence of a local distortion due to tied values." This section specifies the design rationale for those cues, building on the perceptual principles outlined in the preceding section.
+The introduction committed to developing "a consistent visual representation to provide visual cues which indicate the presence of a local distortion due to tied values." 
+This section specifies the design rationale for those cues, building on the perceptual principles outlined in the preceding section.
 
-When tied values on a numerical axis are spread within a resolution-based interval, the positions of observations within that interval are artifacts of tie-breaking rather than reflections of meaningful data variation. 
-A viewer who is unaware of this may misread the spread as genuine within-group variance. 
+When tied values on a numerical axis are spread within a resolution-based interval, each line is displaced from its true value to a within-band position; that displacement is an artifact of tie-breaking rather than a reflection of meaningful data variation. 
+A viewer who is unaware of this may misread the displacement as genuine within-group variance. 
 The visual cue must therefore accomplish two things simultaneously: it must make the presence of a tie region legible without disrupting the tracing of individual lines through the region.
 
 The design adopted here uses a light gray bounding box, anchored at the lower and upper bounds of the resolution interval $[L(v), U(v)]$, as illustrated in @fig-uniform-spacing and @fig-annotated. 
@@ -683,12 +692,15 @@ This choice follows directly from the categorical tie-breaking convention alread
 Extending the same visual element to numerical tie regions creates a unified grammar: a gray box in any axis region signals "these positions are spread for legibility, not because the underlying values differ." 
 This consistency reduces the cognitive overhead required to interpret mixed categorical-numerical plots.
 
-Three alternative cue designs were considered and set aside. A color change on tied lines would require an additional channel already commonly used for group membership. 
-A texture fill would introduce ambiguity on screen at small box heights. A dashed axis segment at the tied value would mark the location but not the extent of the spread, making it difficult to recover the original value. 
+Three alternative cue designs were considered and set aside. 
+A color change on tied lines would require an additional channel already commonly used for group membership. 
+A texture fill would introduce ambiguity on screen at small box heights. 
+A dashed axis segment at the tied value would mark the location but not the extent of the spread, making it difficult to recover the original value. 
 The gray box avoids all three problems: it marks both the location (the center of the box corresponds to the tied value) and the extent (the box height reflects $\delta_j$, the global axis resolution), and it does not consume an encoding channel needed elsewhere.
 
-The `get_tie_box()` function implements this detection and rendering pipeline in three steps: identifying values that appear more than once on a given axis, grouping contiguous spreads at numerical precision, and generating bounding box coordinates for `geom_rect` rendering. 
-An optional label argument displays the original tied value at the center of each box, which is particularly informative for integer-valued variables where many values may be tied at round numbers.
+The detection-and-rendering of these boxes can be expressed as a short pipeline that consumes the output of the tie-breaking step: identify values that appear more than once on a given axis, group contiguous spreads at numerical precision, and generate bounding-box coordinates for `geom_rect` rendering. 
+An optional `label` argument displays the original tied value at the center of each box, which is particularly informative for integer-valued variables where many values may be tied at round numbers. 
+(Whether this box geom is best implemented as a standalone layer or as a `ggproto` extension inheriting from the existing categorical box geom is taken up in Phase 1; see @sec-impl.)
 
 
 # Mathematical Framework
@@ -796,9 +808,8 @@ $$
 d_i = \frac{S_i - S_i^+ - S_i^-}{n_i - 1}
 $$
 
-The two formulas are structurally identical; the innovation is in what determines $S$ and $S^\pm$. For categorical levels, $S_i$ is set by frequency proportion under a user-chosen total budget. 
-For numerical values, $S(v) = \delta_j$ is set by the global axis resolution and is the same for every value $v$, while $S^\pm(v)$ is derived from $\sigma$. 
-The unified spacing principle — *spacing equals usable space divided by* $n - 1$ — applies in both cases.
+The two formulas are structurally identical; only what determines $S$ and $S^\pm$ differs, frequency and the user budget for categorical levels, the axis resolution $\delta_j$ and the separation parameter $\sigma$ for numerical values. 
+The full correspondence is tabulated in @sec-unified.
 
 ### How Much Spread Is Too Much? {#sec-tolerance}
 
@@ -809,12 +820,12 @@ This is the central empirical question raised by the proposal and is not resolve
 Two competing pressures define the admissible range of $\sigma$.
 From below, $\sigma$ must be large enough that adjacent observations within the band are perceptually distinguishable; as $\sigma \to 0$ the band collapses to a point and the spread no longer accomplishes its purpose.
 From above, $\sigma$ must be small enough that the band does not encroach on the gap between adjacent values.
-The hard upper limit $\sigma \leq 1$ enforces the latter mathematically; in practice, the perceptually defensible upper limit is strictly smaller, because the reader must *see* the gap, not merely that it exists in the coordinate system.
+The hard upper limit $\sigma \leq 1$ enforces the latter mathematically, but equality is itself inadmissible: at $\sigma = 1$ the margins $(1-\sigma)\,\delta_j/2$ vanish, so the band leaves no gap and its values smear into the adjacent ones. In practice the perceptually defensible upper limit is strictly smaller still, because the reader must *see* the gap, not merely have it exist in the coordinate system.
 
 Where in the interval $(0, 1)$ does $\sigma$ belong?
 The value $\sigma = 0.9$ adopted elsewhere in this proposal is a working default rather than a derived optimum.
-We propose to treat $\sigma$ as an empirical parameter and to determine its admissible range using the same machinery that has been used to bound related perceptual distortions in parallel-axis displays: the sine illusion work of @vanderplas2015, the line-width illusion analysis of @hofmann2013, and the broader Müller-Lyer literature on which both papers draw.
-The sine illusion in particular establishes that vertical displacement is not perceived neutrally; line segments of equal length appear unequal when arrayed along a curve, with the distortion quantifiable as a function of local slope.
+We propose to treat $\sigma$ as an empirical parameter and to determine its admissible range using the machinery that has been used to study related perceptual displacement in parallel-axis displays: the sine illusion work of @vanderplas2015.
+The sine illusion establishes that vertical displacement is not perceived neutrally; line segments of equal length appear unequal when arrayed along a curve, with the distortion quantifiable as a function of local slope.
 The same perceptual mechanism that produces the sine illusion bounds how much within-band displacement a viewer can sustain before reading the displacement as real variance.
 
 We therefore frame the tolerance question as a research question in its own right: given a target task, frequency estimation, individual tracing, or outlier detection, what is the largest $\sigma$ for which task performance is statistically indistinguishable from performance at $\sigma = 0$?
@@ -827,10 +838,10 @@ A consequence of the hierarchical sorting in Step 5 is that an observation's pos
 Under `from-right` processing, the observation placed at the lowest position in the band is the one with the lowest adjusted value on the right-neighbor axis; the observation placed at the highest position is the one with the highest.
 Within-band rank therefore carries information about the right-neighbor axis, and the deviation of any observation from the band centroid is a direct visual encoding of how far that observation lies from the median of its tie group on the next axis.
 
-This makes the band a low-cost outlier-detection device.
-An observation that sits at the extreme of a tie band, and continues to extreme positions on neighboring axes, is a candidate outlier whose status can be confirmed by tracing the polyline.
-An observation that sits near the centroid of its band and connects to centroid positions elsewhere is, by construction, near the joint mode of the data.
-We do not propose a formal outlier statistic in this proposal, but we note that the rank-and-deviation structure produced by the algorithm is a natural object for one, and we expect this to be a productive direction for follow-on work.
+Whether this rank-and-deviation structure could support outlier detection is a more speculative question.
+Intuitively, an observation that sits at the extreme of a tie band and continues to extreme positions on neighboring axes is a candidate outlier, while one that sits near its band centroid and connects to centroid positions elsewhere is, by construction, near the joint mode of the data.
+We do not develop this further here: substantiating it would require grounding in the multivariate outlier-detection literature, with worked examples, which is beyond the scope of this proposal.
+We note only that the rank-and-deviation structure produced by the algorithm is a natural object for such follow-on work.
 
 ### Step 5: Order Observations Hierarchically
 
@@ -862,7 +873,7 @@ $$
 $$ {#eq-assign}
 
 
-## Unified Framework
+## Unified Framework {#sec-unified}
 
 The algorithm treats numerical values and categorical levels identically at the formula level: the same spacing equation governs both, and the same five quantities ($S$, $S^+$, $S^-$, $n$, and the inter-observation spacing) are present in both cases. 
 What differs is how each quantity is determined.
@@ -880,26 +891,14 @@ What differs is how each quantity is determined.
 The shared formula is **spacing = (allocation − margins) / (n − 1)**. 
 The innovation in extending the categorical procedure to numerical variables lies entirely in the right-hand column: anchoring the per-value allocation to the axis resolution and deriving the margins from a single perceptual parameter $\sigma$, rather than from frequencies and user input.
 
-
 ## Visual Results
 
-### Uniform Spacing Applied
-
-After applying the tie-breaking algorithm, observations that previously overlapped are now visually distinguishable:
+After applying the tie-breaking algorithm, observations that previously overlapped become visually distinguishable (@fig-uniform-spacing). 
+Tie regions can additionally be annotated with boxes showing the original value and the spread region (@fig-annotated), and the `get_tie_box()` rendering pipeline is illustrated in @fig-tie-box.
 
 ![Parallel coordinate plot after applying uniform spacing. Gray boxes indicate regions where tied values have been spread, making individual observations traceable.](images/math_images/pcp_annotated_ties_no_labels.png){#fig-uniform-spacing width=90%} 
 
-#### Annotated Tie Regions
-
-Tie regions can be annotated with boxes showing the original value and the spread region:
-
-
 ![Annotated tie regions with labels. Gray boxes highlight where ties occurred, with labels showing the original tied value. This is particularly useful for integer data where ties are frequent.](images/math_images/pcp_annotated_ties.png){#fig-annotated width=90%}
-
-
-### Tie Box Detection
-
-The `get_tie_box()` function identifies and bounds tie regions for visualization:
 
 ![The tie box detection process. (1) Identify duplicated values, (2) scale and group contiguous spreads, (3) generate bounding box coordinates for annotation.](images/math_images/spacing_tie_box.png){#fig-tie-box width=90%}
 
@@ -956,7 +955,7 @@ Tasks:
 - Extreme skew (adaptive buffer sizing)
 - Missing values (explicit separation region)
 
-4. Integration testing with existing ggpcp workflow
+4. Decide whether the tie-box geom is a standalone layer or a `ggproto` extension inheriting from the existing categorical box geom, and integration-test against the existing `ggpcp` workflow
 
 **Code Structure (Simplified):**
 
@@ -972,7 +971,7 @@ tie_spacing_numerical <- function(values, sigma = 0.9, beta = 0.05) {
   unique_vals <- sort(unique(values))
   m           <- length(unique_vals)
   if (m < 2) {
-    # Single unique value: centre at the value itself
+    # Single unique value: center at the value itself
     return(rep(unique_vals[1], length(values)))
   }
   delta_j <- min(diff(unique_vals))   # smallest gap between distinct values
@@ -1020,7 +1019,6 @@ For RQ3, we require that tracing accuracy in GPCP with tie-breaking exceeds that
 Outcomes that do not meet these thresholds will be interpreted as evidence that the algorithm achieves legibility parity but does not strictly surpass the comparison conditions.
 
 **Study 1b: Determining the admissible $\sigma$.**
-
 A precondition for interpreting Studies 1 and 2 is that the band-width parameter $\sigma$ is set at a value that does not itself bias frequency or tracing judgments.
 We add a parameter-sweep study, $n = 60$ (between-subjects, 12 participants per $\sigma$ level), to determine the largest $\sigma$ for which task performance is statistically indistinguishable from $\sigma = 0$.
 
@@ -1033,7 +1031,7 @@ We pre-register this as a non-inferiority criterion with margin equal to half th
 
 *Connection to sine-illusion bounds.* 
 Where our empirically determined $\sigma$ falls relative to the displacement bounds estimated by @vanderplas2015 is itself informative.
-Agreement strengthens the perceptual argument for the spread approach; disagreement points to a context-specific factor — axis density, line continuity, or the categorical-numerical interaction — that warrants further investigation beyond the scope of this proposal.
+Agreement strengthens the perceptual argument for the spread approach; disagreement points to a context-specific factor, axis density, line continuity, or the categorical-numerical interaction, that warrants further investigation beyond the scope of this proposal.
 
 Study 1: Frequency Perception
 
@@ -1068,7 +1066,8 @@ Analysis:
 
 **Visual Clutter and Information Density.** 
 Visual clutter constitutes a fundamental limitation on visualization effectiveness, occurring when too many visual elements compete for attention and overwhelm the viewer's capacity to extract meaningful patterns. 
-The two approaches manage clutter through fundamentally different mechanisms. For equispaced lines, clutter increases with the number of observations, but hierarchical sorting minimizes line crossings and thereby reduces visual complexity. 
+The two approaches manage clutter through fundamentally different mechanisms. 
+For equispaced lines, clutter increases with the number of observations, but hierarchical sorting minimizes line crossings and thereby reduces visual complexity. 
 The approach exhibits graceful degradation: as density increases, individual lines transition perceptually into ribbons and eventually into filled areas, yet individual observations remain theoretically accessible for highlighting or interactive selection. 
 For constant-width boxes, clutter depends primarily on the number of unique value combinations rather than on raw observation counts. 
 Aggregation inherently reduces clutter, though at the cost of individual-level accessibility.
