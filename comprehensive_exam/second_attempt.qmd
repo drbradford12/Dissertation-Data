@@ -65,7 +65,7 @@ When multiple observations share the same value in a given dimension, their poly
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
 
 PCPs were canonically used to show continuous random variables, but their generalization to categorical data only exacerbated the problem.
-Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed (largely independently!) as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
+Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
 
 Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. 
 It is the parallelogram construction that creates the bivariate limitation.
@@ -340,19 +340,28 @@ pcp_data %>%
 
 
 - Step 1: Identify the Parallel Axes (@fig-figure-1).    
-Begin by identifying each vertical axis in the plot. Each axis represents one variable from the dataset. The axes are typically arranged from left to right, and the order may be determined by the data analyst to highlight specific relationships or minimize visual clutter.
+Begin by identifying each vertical axis in the plot. 
+Each axis represents one variable from the dataset. 
+The axes are typically arranged from left to right, and the order may be determined by the data analyst to highlight specific relationships or minimize visual clutter.
 
 - Step 2: Locate the Starting Point (@fig-figure-2).    
-Find the observation of interest on the leftmost axis. The vertical position indicates the scaled value of that observation for the first variable. If you are examining a highlighted or color-coded observation, look for its distinctive marker at this starting position.
+Find the observation of interest on the leftmost axis. 
+The vertical position indicates the scaled value of that observation for the first variable. 
+If you are examining a highlighted or color-coded observation, look for its distinctive marker at this starting position.
 
 - Step 3: Follow the Line Segment (@fig-figure-3).    
-Trace the line segment from the starting point to its intersection with the next axis. The human visual system naturally follows smooth, continuous paths due to the Gestalt principle of good continuation, which allows viewers to perceive connected line segments as a single, piecewise continuous line, making it easier to track observations across multiple parallel axes.
+Trace the line segment from the starting point to its intersection with the next axis. 
+The human visual system naturally follows smooth, continuous paths due to the Gestalt principle of good continuation, which allows viewers to perceive connected line segments as a single, piecewise continuous line, making it easier to track observations across multiple parallel axes.
 
 - Step 4: Read Values at Intersections (@fig-figure-4).    
-At each axis intersection, the vertical position of the line indicates the observation's value for that variable. Read these values to understand how the observation changes (typically, relative to the other observations) across different dimensions of the data. The slope of line segments between axes provides information about the relationship between consecutive variables for that specific observation.
+At each axis intersection, the vertical position of the line indicates the observation's value for that variable. Read these values to understand how the observation changes (typically, relative to the other observations) across different dimensions of the data. 
+The slope of line segments between axes provides information about the relationship between consecutive variables for that specific observation.
 
 - Step 5: Continue Across All Axes (@fig-figure-5).    
-Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis.  By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables.  The vertical positions along each axis represent scaled values that can be interpreted as quantiles when the data are appropriately transformed. This enables identification of unique characteristics, cluster membership, or outlier status.
+Repeat the tracing process for each consecutive pair of axes until reaching the rightmost axis. 
+By following the complete path, you obtain a comprehensive view of how that particular observation behaves across all measured variables. 
+The vertical positions along each axis represent scaled values that can be interpreted as quantiles when the data are appropriately transformed. 
+This enables identification of unique characteristics, cluster membership, or outlier status.
 
 ![Numerical ties cause lines to converge at a single point, so individual tracking becomes impossible unless color is used to distinguish unique observations, as in this example. Even then, identity is recoverable only when lines arrive with sufficiently distinct colors: here the blue line is distinguishable by opacity, but the cyan and red lines are not cleanly separable, and the values each observation takes on Variables B and C are not uniquely determined from the plot alone.](images/pcp_line_tracing_guide_images/figure-6-corrected.png){#fig-figure-6 width="90%"}
 
@@ -592,7 +601,7 @@ The preceding review of categorical tie-breaking, together with the related work
 The preceding review motivates three formal research questions that structure the remainder of this proposal.
 
 **RQ1 (Algorithm correctness).** 
-Does the `tie_spread` algorithm distribute tied observations within resolution-based intervals in a way that (a) preserves marginal frequency information on the vertical axis and (b) eliminates within-band line crossings through hierarchical sorting?
+Does the `tie_spread` algorithm distribute tied observations within resolution-based intervals in a way that (a) preserves marginal frequency information through within-band dot density and (b) eliminates within-band line crossings through hierarchical sorting?
 
 **RQ2 (Frequency perception).** 
 Do viewers make more accurate frequency judgments—for magnitude estimation, ordinal comparison, and ratio tasks—when examining a GPCP with numerical tie-breaking than when examining an equivalent hammock plot?
@@ -600,7 +609,7 @@ Do viewers make more accurate frequency judgments—for magnitude estimation, or
 **RQ3 (Individual traceability).** 
 Does numerical tie-breaking in GPCPs improve viewers' ability to follow a single observation across all axes, relative to a standard PCP without tie-breaking, without sacrificing the density information conveyed by the marginal axis representation?
 
-RQ1 is addressed computationally through the algorithm development and visual inspection phases (Phase 1 and 3, @sec-eval). 
+RQ1 is addressed computationally through the algorithm development and visual inspection phases (Phase 1 and Phase 3, @sec-phase1 and @sec-benchmarking). 
 RQ2 and RQ3 are addressed through the perceptual validation study (Phase 2). 
 We pre-specify directional hypotheses for RQ2 and RQ3: we anticipate that GPCP with tie-breaking will produce lower absolute percentage error on magnitude estimation tasks (RQ2) and higher tracing accuracy (RQ3) than the respective baselines, with effect sizes consistent with a medium Cohen's $d$ based on prior graphical perception literature.
 
@@ -647,7 +656,7 @@ The `ggpcp` package resolves this through hierarchical sorting that mirrors the 
 For the `from-right` processing mode, the mode directly applicable to @fig-working-theory, each tied observation $i \in T_j(v)$ is ranked by its adjusted position on the right neighbor axis, $\kappa_i = \tilde{y}_{i, A_j}$ (see @eq-sortkey). 
 Positions within the tie band are then assigned in the same rank order, from lowest to highest. 
 This monotone rank-matching guarantees that no two lines cross within the tie band: the observation that arrives lowest on the right axis is placed lowest in the band, the next-lowest observation is placed next, and so on. 
-Any crossings that remain after sorting are *necessary* crossings — those induced by the data structure itself rather than by the mechanics of tie-breaking.
+Any crossings that remain after sorting are *necessary* crossings, those induced by the data structure itself rather than by the mechanics of tie-breaking.
 
 By ordering observations within a tie group according to their values on adjacent axes, `ggpcp` produces locally parallel bundles of lines. 
 Observations with similar trajectories are positioned in close proximity, so distinct groups are perceived as coherent bands moving together through high-dimensional space, an instance of the Gestalt principle of common fate.^[Common fate is usually defined in terms of motion, so applying it to a static display is a slight stretch; we think it is defensible here, because the eye reads the parallel bundle as moving together across axes. The Gestalt cue of *similarity* offers an alternative framing of the same effect that does not depend on attributing motion, and may meet less resistance.] 
@@ -656,7 +665,7 @@ This reduces visual noise and highlights underlying patterns.
 **Interaction with axis ordering.** 
 The effectiveness of hierarchical sorting is closely intertwined with axis order and direction. 
 @vanderplas2023 note that the order of factor levels is an important determinant of residual line crossings: some crossings are attributable to the data structure itself and cannot be eliminated by within-category sorting, while others arise from an unfavorable factor ordering and can be removed by reordering levels.
-Factor-level ordering is, helpfully, not an issue for numerical variables — there are no levels to reorder. 
+Factor-level ordering is, helpfully, not an issue for numerical variables, there are no levels to reorder. 
 Our tie-breaking extension therefore inherits a narrower dependency: for numerical axes, the minimum number of necessary crossings is a function of the scaled data values and the sequence (and direction) in which axes are processed. 
 Users should therefore consider axis ordering as a precondition for optimal tie-breaking, particularly when integer-valued variables with many ties are adjacent to continuous variables with high variance. 
 (`ggpcp` allows users to reorder factor levels via `mutate` before variable selection and to reverse axes to reduce negatively correlated crossings; the latter remains relevant for numerical axes.)
@@ -676,7 +685,7 @@ This encoding communicates aggregate quantities effectively: the area of each se
 In contrast, equispaced lines preserve individual observations as distinct visual elements. 
 When lines are continuous and uninterrupted, viewers can leverage preattentive processes such as the Gestalt principle of good continuation to trace a single case across all axes [@healey2012]. 
 The two approaches thus serve distinct purposes: lines support individual-level tracing through low-level perceptual grouping, while boxes support aggregate-level frequency comparison. 
-The conditions under which each is optimal are taken up in the Conclusion.
+The conditions under which each is optimal are taken up in the conclusion.
 
 ## Visual Cue Design {#sec-visual-cues}
 
@@ -942,7 +951,7 @@ Output: Adjusted positions $ỹ_{ij}$
 
 # Implementation and Evaluation Plan {#sec-impl}
 
-## Phase 1: Algorithm Development (Weeks 1-4)
+## Phase 1: Algorithm Development (Weeks 1-4) {#sec-phase1}
 
 Deliverable: Functional R package extension with comprehensive documentation
 Tasks:
@@ -1033,7 +1042,7 @@ We pre-register this as a non-inferiority criterion with margin equal to half th
 Where our empirically determined $\sigma$ falls relative to the displacement bounds estimated by @vanderplas2015 is itself informative.
 Agreement strengthens the perceptual argument for the spread approach; disagreement points to a context-specific factor, axis density, line continuity, or the categorical-numerical interaction, that warrants further investigation beyond the scope of this proposal.
 
-Study 1: Frequency Perception
+**Study 1: Frequency Perception (RQ2).**
 
 - Duration: Weeks 5–7
 - Participants: n = 128 (64 per condition)
@@ -1061,6 +1070,32 @@ Analysis:
 - Bias analysis: systematic over/under-estimation
 - Confidence calibration: accuracy vs. subjective confidence
 - Effect sizes reported as Cohen's $d$ with 95% confidence intervals
+
+**Study 2: Individual Traceability (RQ3).**
+This study tests whether numerical tie-breaking improves the ability to follow a single observation across all axes, relative to a standard PCP without tie-breaking, and whether any gain comes at the expense of density perception. All stimuli are static plots.
+
+- Duration: Weeks 5–7 (run concurrently with Study 1)
+- Participants: n = 128 (64 per condition)
+- Design: Between-subjects comparison of a GPCP with numerical tie-breaking against a standard PCP without tie-breaking, on identical underlying data and axis order so that the tie-breaking is the only manipulated factor.
+
+Sample Size Justification:
+
+The power analysis from Study 1 applies unchanged (G\*Power 3.1 [@faul2007]; medium effect, Cohen's $d = 0.5$; two-tailed $\alpha = 0.05$; $power = 0.80$; $n = 64$ per group). Under an expected baseline tracing accuracy of roughly 60–70% in the standard PCP, the pre-specified 15-percentage-point improvement (Success Criteria) corresponds to a medium effect detectable at this sample size; we again recruit $n = 75$ per condition to absorb 10–15% exclusions.
+
+Procedure:
+
+1. Single-line tracing (12 trials): one observation is highlighted on the leftmost axis, and the participant identifies which endpoint it reaches on the rightmost axis (forced choice among candidate endpoints).
+2. Tie-crossing tracing (12 trials): the highlighted observation is routed through at least one numerical tie — the condition in which tie-breaking is expected to matter most.
+3. Density-preservation check (8 trials): a short frequency-readout battery ("which value on axis $X$ is most common?") confirms that tie-breaking does not degrade density perception relative to the standard PCP, operationalizing the "without sacrificing the density information" clause of RQ3.
+4. Confidence ratings (7-point scale) and per-trial completion time.
+
+Analysis:
+
+- Tracing accuracy (proportion correct), reported overall and restricted to the tie-crossing trials where the two conditions are expected to diverge
+- Completion time per trial
+- Density-check accuracy, compared across conditions to verify no loss relative to the standard PCP
+- Effect sizes as Cohen's $d$ (or proportion differences) with 95% confidence intervals
+- Pre-registered criterion: tracing accuracy under the GPCP with tie-breaking exceeds the standard PCP by at least 15 percentage points (Success Criteria)
 
 ## Phase 3: Comparative Benchmarking (Weeks 6–10) {#sec-benchmarking}
 
