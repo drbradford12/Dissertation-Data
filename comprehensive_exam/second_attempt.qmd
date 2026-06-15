@@ -64,40 +64,45 @@ Observations are drawn as polylines connecting a single point along each dimensi
 When multiple observations share the same value in a given dimension, their polylines perfectly overlap at that changepoint, creating "visual collisions" that mask information about the joint distribution between variables and obscure the density along a single axis. 
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
 
-PCPs were canonically used to show continuous random variables, but their generalization to categorical data only exacerbated the problem.
-Categorical parallel axis plot solutions, such as Sankey^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.] and Alluvial diagrams, Categorical PCPs [@pilhöfer2013], and Parallel Sets [@kosara2006] plots all developed as methods for using parallel axes to represent categorical, bivariate frequency information. Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
-
-Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes, obviating the need for tie-breaking and preserving the density information. 
-It is the parallelogram construction that creates the bivariate limitation.
-Because only bivariate relationships are shown, it is not possible to mentally reconstruct the full joint distribution using a hammock plot.
+PCPs were canonically used to show continuous random variables, but their generalization to categorical data only exacerbated the problem [of ties]{.svp}.
+[The most straightforward treatment of categorial random variables, which is taken by Categorical PCPs [@pilhöfer2013], is to assign each level a numeric value; this results in ties at any non-unique value for each variable.]{.svp}
+[However, alternate treatments developed separately out of categorical data visualization research, including Parallel Sets [@kosara2006] and Alluvial diagrams, and the conceptually similar Sankey diagrams^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.].]{.svp}
+Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
+Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes.
+[Parallel Sets and Hammock plots preserve the marginal and bivariate frequency information, but do not allow reconstruction of the full multivariate density, because individual observations are not shown; because of the ties, CPCPs also do not allow for reconstruction of the full multivariate density, as it is impossible to distinguish a single observation as it passes through a cluster of observations on a categorical axis.]{.svp}
 
 The development of generalized PCPs (via the software implementation `ggpcp` [@vanderplas2023]) represents a major step forward in representing the full joint distribution of the data while showing individual observations. 
 One innovation in the `ggpcp` package is the handling of ties in continuous variables: ties are broken and the observations are spread out within the box representing the marginal frequency of each value of the categorical variable. 
 Sorting methods are implemented to distribute the tied values in a way that reduces the overall complexity of the plot, as random line-crossings can make PCPs difficult to read and interpret.
 
-This project aims to extend the treatment of categorical variables in generalized PCPs, implementing a solution for the treatment of continuous variables which has the following properties:
+This project aims to extend the treatment of categorical variables in generalized PCPs [by implementing a solution tie-breaking in continuous variables. The solution will have]{.svp} the following properties:
 
 - marginal density information (approximately) faithfully represented on the vertical axis
-- individual lines can be visually distinguished, at least for data where the number of observations does not induce overplotting.
+- individual lines which can be visually distinguished, at least for data where the number of observations does not lead to overplotting
+- [observations will be sorted hierarchically within the tied treatment in order to minimize extraneous line-crossings that lead to perceptual complexity]{.svp}
 
-An immediate consequence of the second objective is that the viewer can, at least in theory, reconstruct the full joint distribution between variables from the plot. 
+An immediate consequence of the second objective is that the viewer [will be able to]{.svp} (at least in theory) reconstruct the full joint distribution between variables from the plot. 
 We will extend the method used in `ggpcp` to represent categorical data to continuous variables, modifying it to maintain the approximate scaling of the continuous variable, with slight local distortions when tied values occur.
 In addition, we will develop a consistent visual representation to provide visual cues which indicate the presence of a local distortion due to tied values, while preserving the visual representation of singular values on the parallel axis.
 
-This combination of the advantage of Hammock plots, maintaining the marginal density information,and generalized PCPs, which preserve individual observations and provide the ability to reconstruct the full joint distribution, will enhance GPCPs. 
+This combination of the advantage of Hammock plots, maintaining the marginal density information, and generalized PCPs, which preserve individual observations and provide the ability to reconstruct the full joint distribution, will enhance GPCPs. 
 Real-world data sets frequently have both categorical and numerical data, and duplicated values in either type of variable. 
-Our extension to GPCPs will facilitate the visual representation of these data sets. 
+Our extension of GPCPs [will extend the ability to visually represent, examine, and assess]{.svp}  these data sets. 
 
 ## Related Work {#sec-related-work}
 
-The parallel coordinate plot literature has developed several threads directly relevant to the tie-breaking problem addressed here. 
+The parallel coordinate plot literature has developed [over several independent avenues of investigation in different communities within statistics and computer science]{.svp}
+[Here, we review several historical attempts to address overplotting and the treatment of categorical variables.]{.svp}
 
-**Overplotting and density.** 
-Early responses to visual overplotting in PCPs focused on transparency and kernel density estimation rather than positional adjustment. 
+### Overplotting and density
+Early responses to visual overplotting in PCPs [used]{.svp} transparency and kernel density estimation rather than positional adjustment. 
 Alpha-blending, as used by Miller and Wegman [-@wegman1990], allows the density of overlapping lines to become visible through saturation, but sacrifices the ability to trace individual observations. 
 More recent approaches include density-based rendering [@heinrich2013] and edge bundling [@mcdonnell2008], both of which trade individual traceability for aggregate clarity.
 
-**Categorical extensions.** 
+### Categorical extensions
+
+XXX You need to show examples of each plot and link them in to these paragraphs XXX
+
 The categorical parallel axis plot literature developed largely independently of classical PCPs. 
 Parallel Sets [@kosara2006] replaced individual polylines with ribbons whose widths encode bivariate frequencies, enabling unambiguous density reading at the cost of individual tracing. 
 Alluvial diagrams [@brunson2020] and Sankey diagrams adopt a similar ribbon-based representation. 
@@ -105,7 +110,8 @@ Common angle plots [@hofmann2013] addressed a further perceptual distortion spec
 By constraining ribbons to a constant angle, common angle plots recover perceptually accurate frequency judgments. 
 Hammock plots [@schonlau2003; @schonlau2024] occupy a different position: they accommodate both categorical and continuous variables via constant-width parallelograms, but restrict inference to bivariate relationships between adjacent axes.
 
-**Perceptual bounds on vertical displacement.** 
+### Perceptual bounds on vertical displacement
+
 A separate and longstanding thread of the perceptual literature is potentially relevant to the question of how much spread the tie-breaking algorithm may safely introduce, though it is not intrinsic to the algorithm itself. 
 The sine illusion, formalized by @day1991 and analyzed in the context of statistical graphics by @vanderplas2015, establishes that the vertical extent of a line segment is not perceived neutrally: when segments of equal length are arrayed along a curve, those at extrema appear systematically longer than those at intermediate positions. 
 The illusion belongs to the Müller-Lyer family that also underwrites the line-width illusion treated by @hofmann2013 in their development of common angle plots. 
@@ -119,8 +125,10 @@ Minimizing line crossings through reordering is NP-hard in general [@murt2003], 
 Within a fixed axis ordering, the order of factor levels and the plotting order of individual observations interact with tie-breaking: factor levels ordered to minimize crossings produce fewer extraneous crossings for any given tie-resolution strategy, while the `overplot` parameter in `ggpcp` controls which observations are rendered on top when lines overlap [@vanderplas2023]. 
 These considerations interact directly with the hierarchical sorting approach developed in this proposal and are discussed further in @sec-sorting.
 
+XXX You haven't mentioned hierarchical sorting in your lead-in to the proposal yet. I added it above.  XXX
+
 **Computational quality metrics.** 
-Dennig et al. [-@dennig2021] formalized a suite of screen-space quality metrics for Parallel Sets—including ribbon overlap, crossing angle, orthogonality, and ribbon width variance—collectively termed ParSetgnostics. 
+Dennig et al. [-@dennig2021] formalized a suite of screen-space quality metrics for Parallel Sets, including ribbon overlap, crossing angle, orthogonality, and ribbon width variance; the suite is collectively named ParSetgnostics. 
 These metrics provide an empirical basis for comparing and optimizing parallel axis layouts without requiring user studies, and are candidate measures for the computational benchmarking component of our evaluation plan (@sec-benchmarking).
 
 ## Categorical Variables and Ties in `ggpcp`
