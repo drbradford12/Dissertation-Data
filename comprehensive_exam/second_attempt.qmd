@@ -65,7 +65,7 @@ When multiple observations share the same value in a given dimension, their poly
 The treatment of ties is an aspect not generally addressed in the original parallel coordinate plots of Inselberg [-@inselberg1985] and Wegman [-@wegman1990]. 
 
 PCPs were canonically used to show continuous random variables, but their generalization to categorical data only exacerbated the problem [of ties]{.svp}.
-[The most straightforward treatment of categorial random variables, which is taken by Categorical PCPs [@pilhöfer2013], is to assign each level a numeric value; this results in ties at any non-unique value for each variable.]{.svp}
+[The most straightforward treatment of categorial random variables, which is taken by Categorical PCPs [@pilhöfer2013], is to assign each level a numeric value; this results in ties at any non-unique value for each variable; an example is @fig-categorical-fix(a).]{.svp}
 [However, alternate treatments developed separately out of categorical data visualization research, including Parallel Sets [@kosara2006] and Alluvial diagrams, and the conceptually similar Sankey diagrams^[Sankey diagrams do not always have parallel axes, but they are visually similar and frequently use parallel axis constructions.].]{.svp}
 Variations on these plots, such as common angle plots [@hofmann2013], address perceptual distortions that arise when line widths are evaluated along the vertical rather than the orthogonal direction, offering an alternative encoding that more faithfully communicates categorical association strengths.
 Hammock plots [@schonlau2003], another type of PCP that accommodates categorical and continuous variables, shows multiple bivariate relationships using parallelograms drawn between axes.
@@ -119,15 +119,19 @@ This is a concern that long predates the present work and arose independently of
 We therefore do not treat it as a design constraint on the band-width parameter $\sigma$ at this stage. 
 Whether the sine illusion meaningfully affects within-band displacement here is an open empirical question, there are reasons to expect that continuous, traceable lines may largely avoid it, and we will need empirical tests (@sec-tolerance) before any perceptual bound on $\sigma$ can be justified.
 
-**Axis and category ordering.** 
+### Axis and category ordering
+
 A well-studied property of PCPs is that axis order strongly affects both the number of line crossings and the interpretability of patterns [@vanderplas2023]. 
 Minimizing line crossings through reordering is NP-hard in general [@murt2003], but heuristics based on correlation structure and sum of ranking differences provide tractable approximations [@ipkovich2021]. 
-Within a fixed axis ordering, the order of factor levels and the plotting order of individual observations interact with tie-breaking: factor levels ordered to minimize crossings produce fewer extraneous crossings for any given tie-resolution strategy, while the `overplot` parameter in `ggpcp` controls which observations are rendered on top when lines overlap [@vanderplas2023]. 
-These considerations interact directly with the hierarchical sorting approach developed in this proposal and are discussed further in @sec-sorting.
+Within a fixed axis ordering, the order of factor levels and the plotting order of individual observations interact with tie-breaking: factor levels ordered to minimize crossings produce fewer extraneous crossings for any given tie-resolution strategy.
+[Rendering order also matters:]{.svp} the `overplot` parameter in `ggpcp` controls which observations are rendered on top when lines overlap [@vanderplas2023]. 
+These considerations interact directly with the hierarchical sorting approach from `ggpcp` [which has been extended in this proposal.]{.svp} 
+[This approach is]{.svp} discussed further in @sec-sorting.
 
 XXX You haven't mentioned hierarchical sorting in your lead-in to the proposal yet. I added it above.  XXX
 
-**Computational quality metrics.** 
+### Computational quality metrics
+
 Dennig et al. [-@dennig2021] formalized a suite of screen-space quality metrics for Parallel Sets, including ribbon overlap, crossing angle, orthogonality, and ribbon width variance; the suite is collectively named ParSetgnostics. 
 These metrics provide an empirical basis for comparing and optimizing parallel axis layouts without requiring user studies, and are candidate measures for the computational benchmarking component of our evaluation plan (@sec-benchmarking).
 
@@ -158,7 +162,8 @@ pcp_data <- mtcars %>%
 #| label: fig-categorical-fix
 #| message: false
 #| echo: false
-#| output-location: column
+#| fig-subcap: ['Standard PCP, no tie breaking', 'GPCP, tie breaking, no sorting', 'GPCP, categorical ties, sorted from left', 'GPCP, categorical ties, sorted from right']
+#| layout-ncol: 2
 #| fig-cap: "Comparison of tie-breaking methods for categorical variables in parallel coordinate plots using mtcars data. Standard PCP (top-left) shows overlapping lines without tie-breaking. GPCP with tie-breaking but no sorting (top-right) spreads observations evenly within categories. GPCP with sorting from left (bottom-left) and from right (bottom-right) apply hierarchical sorting to minimize line crossings, with light gray boxes indicating category groupings."
 
 library(ggpcp)
@@ -178,7 +183,7 @@ ggplot(aes_pcp()) +
   geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
   geom_pcp_labels() +
   theme_pcp() +
-  labs(title = "Standard PCP", subtitle = "No Tie Breaking") + 
+  # labs(title = "Standard PCP", subtitle = "No Tie Breaking") + 
   guides(color="none")
 
 
@@ -191,7 +196,7 @@ p2 <- pcp_data %>%
   geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
   geom_pcp_labels() +
   theme_pcp() +
-  labs(title = "GPCP: Cat. Ties + Sorting", subtitle = "Sort from left") + 
+  # labs(title = "GPCP: Cat. Ties + Sorting", subtitle = "Sort from left") + 
   guides(color="none")
 
 
@@ -202,7 +207,7 @@ p3 <- pcp_data %>%
   geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
   geom_pcp_labels() +
   theme_pcp() +
-  labs(title = "GPCP: Cat. Ties + Sorting", subtitle = "Sort from right") + 
+  # labs(title = "GPCP: Cat. Ties + Sorting", subtitle = "Sort from right") + 
   guides(color="none")
 
 pcp_data2 <- mtcars %>%
@@ -224,22 +229,26 @@ p1 <-  pcp_data2 %>%
   geom_pcp_boxes(boxwidth = 0.1, fill = "white", alpha = 0.5) +
   geom_pcp_labels() +
   theme_pcp() +
-  labs(title = "GPCP: Tie Breaking", subtitle = "No sorting") + 
+  # labs(title = "GPCP: Tie Breaking", subtitle = "No sorting") + 
   guides(color="none")
 
-p0 + p1 + p2 + p3
+p0
+p1 
+p2
+p3
 ```
 
 
 The ability to follow individual observations is key to being able to reconstruct the full joint distribution across parallel axes. 
 `ggpcp` creates equally spaced points within each category that span the portion of the vertical axis dedicated to the category (preserving the marginal frequency information, which is optionally emphasized with `geom_pcp_boxes`). 
-The top left plot in @fig-categorical-fix shows the PCP without this categorical tie-breaking approach. 
-However, `ggpcp` goes one step further by using hierarchical sorting (from the left, right, or both) to minimize unnecessary line crossings induced by the treatment of tied categorical variables. 
-The absence of the hierarchical sorting approach is emphasized in the top right plot in @fig-categorical-fix, while the bottom left and right plots show sorting from the left and right respectively. 
-This hierarchical sorting approach serves as a form of "external cognition," reducing the cognitive load required to "untangle" and group crossed lines. 
-The sorting also ensures that only necessary crossings^[A crossing is necessary if it is induced by the order of x-axis variables and scaled values, rather than by the treatment of categorical variables.] occur, minimizing visual clutter.
+@fig-categorical-fix(a) shows a PCP without this categorical tie-breaking approach [while @fig-categorical-fix(b) shows a PCP with tie-breaking but without sorting]{.svp}. 
+`ggpcp` goes one step further by using hierarchical sorting (from the left, right, or both) to minimize unnecessary line crossings induced by the treatment of tied categorical variables. 
+The [importance]{.svp} of hierarchical sorting [to the overall visual effect of the tie-breaking treatment of categorical variables]{.svp}  is emphasized [through the contrast between] @fig-categorical-fix(b) and @fig-categorical-fix(c) and @fig-categorical-fix(d), which]{.svp} show sorting from the left and right respectively. 
+We define a **necessary line crossing** as an intersection between lines from different observations which is induced by the order of x-axis variables and scaled values, rather than by the treatment of categorical or numerical tie-breaking algorithms. 
+Hierchical sorting minimizes the number of necessary line crossings, minimizing visual clutter.
+The hierarchical sorting serves as a form of "external cognition," reducing the cognitive load required to "untangle" and [mentally]{.svp} group crossed lines. 
 
-It is worthwhile to examine how a viewer would follow a line across the plot in detail, using a generalized PCP with both numeric and categorical variables to illustrate the challenges introduced when numerical ties are present.
+[Having addressed categorical ties as implemented in `ggpcp`,]{.svp} it is worthwhile to examine how a viewer would follow a line across a generalized PCP with both numeric and categorical variables to illustrate the [additional]{.svp} challenges introduced when numerical ties are present.
 
 ::: {layout="[[30,-5,30,-5,30],[30,-5,30]]" .pcp-trace-grid}
 
@@ -381,7 +390,7 @@ In this configuration, color is the only channel that can provide separate line 
 The visual continuity that made tracing easy in earlier steps breaks down exactly where it is needed most. 
 The observer cannot tell if the original observation follows the upper branch or the lower branch of the fork unless there are more visual cues, like color coding, clear labels, or a systematic tie-breaking arrangement. 
 This lack of clarity is not just an aesthetic problem; it also makes it harder for the user to identify patterns that would be difficult to see in tabular data by following individual observations through high-dimensional space.
-This ability to trace individual observations is one of the central reasons parallel coordinate plots are useful.
+This ability to trace individual observations is one of the central reasons [the improvements to PCPs in `ggpcp` are so effective]{.svp}.
 
 
 ## Addressing Numerical Ties
@@ -548,30 +557,27 @@ p_after  <- make_pcp(long_after,  "After: From-Left Sorting", tie_boxes)
 p_before + p_after
 ```
 
-Two implementation details in @fig-working-theory deserve explicit comment because both are load-bearing for the Gestalt argument that motivates the spreading. 
-First, each tie band must be strictly narrower than the gap to its nearest neighbor: if the band around $v = 2000$ extended up to meet the band around $v = 2001$, the two values would visually fuse, defeating the separation the spread was meant to make visible. 
-The band width in the figure is therefore set to a fraction of the axis resolution $\delta_j$, leaving a deliberate gap between adjacent bands. 
+Two implementation details in @fig-working-theory deserve explicit comment because both are load-bearing for the Gestalt argument that motivates the [development of a similar tie-breaking approach for numerical axes.]{.svp} 
+First, each tie band must be narrower than the gap to its nearest neighbor: if the band around $v = 2000$ extended up to meet the band around $v = 2001$, the two values would visually fuse, defeating the separation the spread was meant to make visible. 
+The band width in the figure is therefore set to a fraction of the [variable]{.svp} resolution $\delta_j$, leaving a deliberate gap between adjacent bands. 
 Second, the reader must be able to *see* that gap, not merely have it exist in the coordinate system. 
 This is a Gestalt-of-proximity requirement: the gap must lie above the just-noticeable-difference (JND) threshold and so cannot be shrunk to an infinitesimally small size. 
 If ties at adjacent values are rendered without a perceptible gap, the grouping cue that "observations within a band share a value" competes with the unintended cue that "bands adjacent to one another belong to the same group." 
 The mathematical formalization of this separation requirement appears in Step 3 of the algorithm (@sec-math-step3).
+[In practice, this restriction will be handled primarily through a warning printed by the software whenever the resolution becomes too small.]{.svp}
 
 
 The `ggpcp` package implements a tie-breaking algorithm for categorical variables that maintains individual observation traceability by spacing observations evenly within each categorical level:
 
 > "All observations are spaced out evenly. This results in a natural visualization of the marginal frequencies along each axis (additionally enhanced by the light gray boxes grouping observations in the same category) that is not as prominent in the previous three panels. The ordering of the observations within the level is such that a minimal number of line crossings occurs between the axes." (p. 11)
 
-This even spacing along the axis is what produces the horizontal-segment appearance within a level and lets the box height read as the marginal proportion at that axis point.
-The sorting is described as *hierarchical* not as a stylistic choice but out of necessity: the levels must be processed in order for the arrangement to reduce line crossings across the plot as a whole.
-`ggpcp` does permit lines to break and cross within an otherwise horizontal segment, but this is not recommended, precisely because it undercuts the marginal-proportion reading that the horizontal arrangement is meant to support.
+This even spacing [within an axis category]{.svp} allows the box height [to function as a representation of]{.svp} the marginal proportion [of the category relative to the whole]{.svp}.
+The sorting is hierarchical not as a stylistic choice but out of necessity: the levels must be processed in order for the arrangement to reduce line crossings across the plot as a whole.
+Without hierarchical sorting from the axis out to neighboring axes, lines departing toward different positions on the neighboring axis could cross *inside* the band.
 
-Even spacing alone, however, is not sufficient: without a principled ordering within each tie band, lines departing toward different positions on the neighboring axis will cross *inside* the band.
-The hierarchical sorting that resolves this is the subject of @sec-sorting; the spacing formula used for categorical levels is:
+This hierarchical sorting approach is the subject of @sec-sorting; the spacing formula used for categorical levels is
 
-
-![Spacing parameters for a categorical axis. Each level $i$ is allocated total height $S_i$, with margins $S_i^+$ above and $S_i^-$ below reserved for inter-level separation. The remaining vertical extent is divided into $n_i - 1$ intervals to seat $n_i$ observations at uniform spacing $d_i$. The parameter-key panel on the right indicates how each quantity is determined: $S_i$ is set by the level's frequency proportion under a user-chosen total budget, $S_i^\pm$ are user-controlled via the `space` argument, $n_i$ is the level frequency, and $d_i$ is derived from the formula at the bottom. The numerical analog of this figure (@fig-figure-7) shares the same layout, color encoding, and formula structure; the differences are confined to how each parameter is set.](images/pcp_line_tracing_guide_images/spacing_categorical.png){#fig-spacing width="90%"}
-
-$$d_i = \frac{S_i - S_i^- - S_i^+}{n_i - 1}$$
+$$d_i = \frac{S_i - S_i^- - S_i^+}{n_i - 1},$$
 
 where:
 
@@ -579,12 +585,16 @@ where:
 -   $S_i^-$ is the spacing below category $i$
 -   $S_i^+$ is the spacing above category $i$
 -   $n_i$ is the number of observations in category $i$
--   $d_i$ is the optimal spacing distance between consecutive observations
+-   $d_i$ is the optimal spacing distance between consecutive observations.
+
+![Spacing parameters for a categorical axis. Each level $i$ is allocated total height $S_i$, with margins $S_i^+$ above and $S_i^-$ below reserved for inter-level separation. The remaining vertical extent is divided into $n_i - 1$ intervals to seat $n_i$ observations at uniform spacing $d_i$. The parameter-key panel on the right indicates how each quantity is determined: $S_i$ is set by the level's frequency proportion under a user-chosen total budget, $S_i^\pm$ are user-controlled via the `space` argument, $n_i$ is the level frequency, and $d_i$ is derived from the formula at the bottom. The numerical analog of this figure (@fig-figure-7) shares the same layout, color encoding, and formula structure; the differences are confined to how each parameter is set.](images/pcp_line_tracing_guide_images/spacing_categorical.png){#fig-spacing width="90%"}
 
 The spacing formula above is the categorical workhorse: each level $i$ is allocated total height $S_i$, lower and upper margins $S_i^-$ and $S_i^+$ are subtracted to enforce inter-level separation, and the remaining vertical extent is divided into $n_i - 1$ intervals to seat $n_i$ observations.
 The proposed numerical framework adopts the same five quantities and the same formula structure, redefining only what determines each parameter; the full mapping is given in @sec-unified (@tbl-unified).
 @fig-figure-7 displays the numerical version using the same parameter-key conventions as @fig-spacing, so the two figures can be laid side by side and read as a single procedure with type-specific instantiations rather than as two separate algorithms that happen to share an idea.
 
+
+XXX Ok, quoting from that paper without recreating the figures it references is a big problem. I think you should leave this bit out, personally -- and I've mentioned that before. XXX
 
 A key visual difference emerges when connecting categorical to numerical variables. 
 @schonlau2024 observe:
@@ -602,7 +612,7 @@ This represents a different set of trade-offs than hammock plots, which use cons
 Rather than foregrounding aggregate density, `ggpcp` keeps individual observation lines intact and relies on thoughtful spacing to convey distributional structure. 
 The result is a visualization that supports both seeing the forest and examining particular trees.
 
-The preceding review of categorical tie-breaking, together with the related work in @sec-related-work, sets the stage for a formal specification of the research questions this proposal addresses.
+The preceding review of categorical tie-breaking, together with the related work in @sec-related-work, sets the stage for a formal specification of the [approach to numerical ties in this proposal]{.svp}.
 
 ## Research Questions {#sec-rq}
 
